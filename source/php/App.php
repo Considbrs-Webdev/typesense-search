@@ -17,5 +17,7 @@ class App {
         new ACF\Fields();
         new Admin\Settings();
         new Admin\SettingsAjax();
+        new Admin\MetaBox();
+        new Indexing\IndexingHooks();
     }
 }

@@ -55,8 +55,10 @@ class Collection
                 ['name' => 'excerpt',   'type' => 'string',  'optional' => true],
                 ['name' => 'url',       'type' => 'string',  'index'    => false],
                 ['name' => 'post_type', 'type' => 'string',  'facet'    => true],
+                ['name' => 'post_type_name', 'type' => 'string',  'facet'    => true],
                 ['name' => 'date',      'type' => 'int64',   'optional' => true],
                 ['name' => 'thumbnail', 'type' => 'string',  'optional' => true, 'index' => false],
+                ['name' => 'extra_terms', 'type' => 'string',  'optional' => true],
                 // Catch-all: any extra field sent during indexing is auto-typed
                 // and added to the schema on first use.
                 ['name' => '.*',        'type' => 'auto'],
