@@ -105,7 +105,7 @@ function buildElements(
     } else {
       const select = document.createElement("wa-select");
       select.setAttribute("multiple", "");
-      select.setAttribute("size", "large");
+      select.setAttribute("size", "medium");
       select.setAttribute("label", facet.label);
       select.setAttribute("placeholder", facet.placeholder);
       select.setAttribute("with-clear", "");

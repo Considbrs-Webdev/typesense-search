@@ -2,7 +2,7 @@ import "@awesome.me/webawesome/dist/components/icon/icon";
 import "@awesome.me/webawesome/dist/components/input/input";
 
 import { createClient } from "./client";
-import { runSearch } from "./search";
+import { createSearchRunner } from "./search";
 import { getHitTemplates } from "./templates";
 import { getUrlState, updateUrlState } from "./url-state";
 import { setupFacets, programmaticUpdates } from "./facets";
@@ -58,21 +58,21 @@ function init(): void {
 
   // ── Search ───────────────────────────────────────────────────────────────
 
+  const search = createSearchRunner(
+    client,
+    config,
+    resultsEl,
+    templates,
+    paginationEl,
+    facets.fields,
+    (page) => {
+      updateUrlState({ page });
+      container.scrollIntoView({ behavior: "smooth", block: "start" });
+    },
+  );
+
   const triggerSearch = (): void => {
-    const state = getUrlState();
-    runSearch(
-      client,
-      config,
-      state,
-      resultsEl,
-      templates,
-      paginationEl,
-      facets.fields,
-      (page) => {
-        updateUrlState({ page });
-        container.scrollIntoView({ behavior: "smooth", block: "start" });
-      },
-    ).then(facets.render);
+    search(getUrlState()).then(facets.render);
   };
 
   // ── URL → UI sync ────────────────────────────────────────────────────────
@@ -136,4 +136,3 @@ function init(): void {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-

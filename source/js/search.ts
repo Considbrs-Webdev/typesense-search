@@ -4,7 +4,13 @@
 
 import { Client as TypesenseClient } from "typesense";
 import type { SearchResponse } from "typesense";
-import type { HitDocument, SearchHit, FacetCount, FacetData, TypesenseSearchConfig } from "./types";
+import type {
+  HitDocument,
+  SearchHit,
+  FacetCount,
+  FacetData,
+  TypesenseSearchConfig,
+} from "./types";
 import type { UrlState } from "./url-state";
 import { renderHit } from "./templates";
 import { renderPagination } from "./pagination";
@@ -37,6 +43,28 @@ function extractFacetCounts(
     value: String(c.value),
     count: c.count,
   }));
+}
+
+export function createSearchRunner(
+  client: TypesenseClient,
+  config: TypesenseSearchConfig,
+  resultsEl: HTMLElement,
+  templates: Map<string, string>,
+  paginationEl: HTMLElement | null,
+  facetFields: string[],
+  onPageChange: (page: number) => void,
+): (state: UrlState) => Promise<FacetData | null> {
+  return (state: UrlState) =>
+    runSearch(
+      client,
+      config,
+      state,
+      resultsEl,
+      templates,
+      paginationEl,
+      facetFields,
+      onPageChange,
+    );
 }
 
 export async function runSearch(

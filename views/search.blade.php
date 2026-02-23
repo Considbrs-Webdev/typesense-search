@@ -33,7 +33,7 @@
 
                             </div>
 
-                            <wa-select size="large" label="{{ $lang->sort }}" value="relevance" data-js-sort>
+                            <wa-select size="medium" label="{{ $lang->sort }}" value="relevance" data-js-sort>
                                 <wa-option value="relevance">{{ $lang->relevance }}</wa-option>
                                 <wa-option value="dateDesc">{{ $lang->dateDesc }}</wa-option>
                                 <wa-option value="dateAsc">{{ $lang->dateAsc }}</wa-option>
