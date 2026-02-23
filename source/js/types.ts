@@ -2,10 +2,18 @@
 // Shared types
 // ---------------------------------------------------------------------------
 
+export interface FacetConfig {
+  field: string;
+  label: string;
+  placeholder: string;
+  display_as: "dropdown" | "button_group";
+}
+
 export interface TypesenseSearchConfig {
   host: string;
   collection: string;
   searchKey: string;
+  facets?: FacetConfig[];
 }
 
 declare global {
@@ -27,7 +35,5 @@ export interface FacetCount {
   count: number;
 }
 
-export interface FacetData {
-  top_most_parent: FacetCount[];
-  type_name: FacetCount[];
-}
+/** Dynamic map of facet field → counts array returned by runSearch. */
+export type FacetData = Record<string, FacetCount[]>;

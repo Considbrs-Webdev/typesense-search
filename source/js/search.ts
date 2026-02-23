@@ -46,6 +46,7 @@ export async function runSearch(
   resultsEl: HTMLElement,
   templates: Map<string, string>,
   paginationEl: HTMLElement | null,
+  facetFields: string[],
   onPageChange: (page: number) => void,
 ): Promise<FacetData | null> {
   const q = state.query.trim() || "*";
@@ -67,20 +68,7 @@ export async function runSearch(
     const filterBy = buildFilterBy(state.facetFilters);
     const sortBy = buildSortBy(state.sort);
 
-    // Filters for each individual facet dimension (used for disjunctive queries).
-    const filterByTopMostParent = buildFilterBy({
-      top_most_parent: state.facetFilters.top_most_parent ?? [],
-    });
-    const filterByTypeName = buildFilterBy({
-      type_name: state.facetFilters.type_name ?? [],
-    });
-
-    // Run main search + two disjunctive facet queries in parallel.
-    // • top_most_parent options → filtered by type_name only (no top_most_parent filter)
-    // • type_name options        → filtered by top_most_parent only (no type_name filter)
-    // When there is no real query and no active facets we skip the main search
-    // (results stay empty) but still fetch facets using q:* so the selects are
-    // populated on page load.
+    // Main search promise.
     const mainSearchPromise = shouldSearch
       ? (client
           .collections(collection)
@@ -96,34 +84,31 @@ export async function runSearch(
           }) as Promise<SearchResponse<HitDocument>>)
       : Promise.resolve(null);
 
-    const [response, topMostParentRes, typeNameRes] = await Promise.all([
-      mainSearchPromise,
+    // For each facet field, run a disjunctive query:
+    // Filter by all OTHER active facets (not this field) so the available
+    // options for this facet are never constrained by its own selection.
+    const facetPromises = facetFields.map((field) => {
+      const otherFilters = Object.fromEntries(
+        Object.entries(state.facetFilters).filter(([k]) => k !== field),
+      );
+      const filterByOthers = buildFilterBy(otherFilters);
 
-      client
+      return client
         .collections(collection)
         .documents()
         .search({
           q,
           query_by: "title,excerpt,content",
           per_page: 0,
-          facet_by: "top_most_parent",
+          facet_by: field,
           max_facet_values: 200,
-          ...(filterByTypeName ? { filter_by: filterByTypeName } : {}),
-        }) as Promise<SearchResponse<HitDocument>>,
+          ...(filterByOthers ? { filter_by: filterByOthers } : {}),
+        }) as Promise<SearchResponse<HitDocument>>;
+    });
 
-      client
-        .collections(collection)
-        .documents()
-        .search({
-          q,
-          query_by: "title,excerpt,content",
-          per_page: 0,
-          facet_by: "type_name",
-          max_facet_values: 100,
-          ...(filterByTopMostParent
-            ? { filter_by: filterByTopMostParent }
-            : {}),
-        }) as Promise<SearchResponse<HitDocument>>,
+    const [response, ...facetResponses] = await Promise.all([
+      mainSearchPromise,
+      ...facetPromises,
     ]);
 
     if (shouldSearch && response) {
@@ -149,10 +134,13 @@ export async function runSearch(
       }
     }
 
-    return {
-      top_most_parent: extractFacetCounts(topMostParentRes, "top_most_parent"),
-      type_name: extractFacetCounts(typeNameRes, "type_name"),
-    };
+    // Build the result map: field → FacetCount[]
+    const facetData: FacetData = {};
+    facetFields.forEach((field, i) => {
+      facetData[field] = extractFacetCounts(facetResponses[i], field);
+    });
+
+    return facetData;
   } catch (err) {
     console.error("[TypesenseSearch] Search error:", err);
     resultsEl.innerHTML = `<p class="ts-search-error">Search failed. Please try again.</p>`;
