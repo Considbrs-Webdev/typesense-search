@@ -50,7 +50,6 @@ function renderDropdown(
 
 /**
  * Re-populate a `<wa-button-group>` with one toggle button per facet option.
- * Selected values use variant="brand"; others use variant="neutral".
  */
 function renderButtonGroup(
   groupEl: Element,
@@ -67,7 +66,7 @@ function renderButtonGroup(
     .map(({ value, count }) => {
       const active = selectedSet.has(value);
       return `<wa-button
-        variant="${active ? "brand" : "neutral"}"
+        class="${active ? "active" : "not-active"}"
         data-facet-value="${escapeAttr(value)}"
         aria-pressed="${active}"
       >${escapeText(value)}${count > 0 ? ` (${count})` : ""}</wa-button>`;
@@ -79,43 +78,49 @@ function renderButtonGroup(
 // Element builder
 // ---------------------------------------------------------------------------
 
+/**
+ * Create the widget element (`<wa-select>` or `<wa-button-group>`) for a
+ * single facet, append it to `parentEl`, and return the widget element.
+ */
+function buildFacetElement(parentEl: HTMLElement, facet: FacetConfig): Element {
+  if (facet.display_as === "button_group") {
+    const wrapper = document.createElement("div");
+    wrapper.className = "wa-stack ts-facet-button-group";
+
+    const label = document.createElement("span");
+    label.className = "ts-facet-label";
+    label.textContent = facet.label;
+
+    const group = document.createElement("wa-button-group");
+    group.setAttribute("label", facet.label);
+    group.setAttribute("data-facet-field", facet.field);
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(group);
+    parentEl.appendChild(wrapper);
+    return group;
+  } else {
+    const select = document.createElement("wa-select");
+    select.setAttribute("multiple", "");
+    select.setAttribute("size", "medium");
+    select.setAttribute("label", facet.label);
+    select.setAttribute("placeholder", facet.placeholder);
+    select.setAttribute("with-clear", "");
+    select.setAttribute("data-facet-field", facet.field);
+
+    parentEl.appendChild(select);
+    return select;
+  }
+}
+
 function buildElements(
   containerEl: HTMLElement,
   facetCfg: FacetConfig[],
 ): Map<string, Element> {
   const map = new Map<string, Element>();
-
   facetCfg.forEach((facet) => {
-    if (facet.display_as === "button_group") {
-      const wrapper = document.createElement("div");
-      wrapper.className = "ts-facet-button-group";
-
-      const label = document.createElement("span");
-      label.className = "ts-facet-label";
-      label.textContent = facet.label;
-
-      const group = document.createElement("wa-button-group");
-      group.setAttribute("label", facet.label);
-      group.setAttribute("data-facet-field", facet.field);
-
-      wrapper.appendChild(label);
-      wrapper.appendChild(group);
-      containerEl.appendChild(wrapper);
-      map.set(facet.field, group);
-    } else {
-      const select = document.createElement("wa-select");
-      select.setAttribute("multiple", "");
-      select.setAttribute("size", "medium");
-      select.setAttribute("label", facet.label);
-      select.setAttribute("placeholder", facet.placeholder);
-      select.setAttribute("with-clear", "");
-      select.setAttribute("data-facet-field", facet.field);
-
-      containerEl.appendChild(select);
-      map.set(facet.field, select);
-    }
+    map.set(facet.field, buildFacetElement(containerEl, facet));
   });
-
   return map;
 }
 
@@ -135,16 +140,38 @@ export interface FacetController {
 }
 
 /**
- * Build the facet UI inside `containerEl`, wire up events, and return a
- * controller that the main search loop can call to keep everything in sync.
+ * Locate facet elements and return a controller the main search loop can
+ * call to keep everything in sync.
+ *
+ * Resolution order:
+ * 1. `[data-js-search-page-container] [data-js-facets-container]` — if that
+ *    element exists, new facet widgets are built inside it (original behaviour).
+ * 2. Otherwise, existing DOM elements matched by
+ *    `[data-js-facet-type="<field>"]` are wired up directly.
  */
-export function setupFacets(
-  containerEl: HTMLElement | null,
-  facetCfg: FacetConfig[],
-): FacetController {
-  const elMap = containerEl
-    ? buildElements(containerEl, facetCfg)
-    : new Map<string, Element>();
+export function setupFacets(facetCfg: FacetConfig[]): FacetController {
+  const searchContainer = document.querySelector<HTMLElement>(
+    "[data-js-search-page-container]",
+  );
+  const containerEl =
+    searchContainer?.querySelector<HTMLElement>("[data-js-facets-container]") ??
+    null;
+
+  let elMap: Map<string, Element>;
+
+  if (containerEl) {
+    elMap = buildElements(containerEl, facetCfg);
+  } else {
+    elMap = new Map<string, Element>();
+    facetCfg.forEach((facet) => {
+      const container = document.querySelector<HTMLElement>(
+        `[data-js-facet-type="${facet.field}"]`,
+      );
+      if (container) {
+        elMap.set(facet.field, buildFacetElement(container, facet));
+      }
+    });
+  }
 
   const fields = facetCfg.map((f) => f.field);
 

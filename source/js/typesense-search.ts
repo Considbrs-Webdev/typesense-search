@@ -51,10 +51,7 @@ function init(): void {
   const templates = getHitTemplates(container);
   if (!client) return;
 
-  const facets = setupFacets(
-    container.querySelector<HTMLElement>("[data-js-facets-container]"),
-    config.facets ?? [],
-  );
+  const facets = setupFacets(config.facets ?? []);
 
   // ── Search ───────────────────────────────────────────────────────────────
 

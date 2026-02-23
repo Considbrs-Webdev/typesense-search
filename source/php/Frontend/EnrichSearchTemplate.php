@@ -33,6 +33,7 @@ class EnrichSearchTemplate
 		$existingLang = (array)($data['lang'] ?? []);
 		$lang = array_merge($existingLang, [
 			'search' => __("Search", 'typesense-search'),
+			'searchPlaceholder' => __("Search term here..", 'typesense-search'),
 			'searchResults' => __("Search Results", 'typesense-search'),
 			'department' => __("Department", 'typesense-search'),
 			'departmentPlaceholder' => __("Choose department", 'typesense-search'),

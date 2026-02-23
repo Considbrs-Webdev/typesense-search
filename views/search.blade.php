@@ -20,38 +20,40 @@
 
                 <form class="ts-search" method="get" action="{{ $homeUrl ?? '/' }}">
 
-                    <div class="wa-stack wa-gap-xl">
-                        <div>
-                            <wa-input size="large" placeholder="{{ $lang->search }}.." size="small" with-clear
-                                data-js-search-page-search-input name="s">
-                                <wa-icon name="search" slot="start"></wa-icon>
-                            </wa-input>
-                        </div>
-
-                        <div class="wa-split">
-                            <div class="wa-cluster" data-js-facets-container>
-
+                    <div class="wa-stack">
+                        <div class="wa-stack wa-gap-xl ts-main-filter">
+                            <div>
+                                <wa-input size="large" placeholder="{{ $lang->searchPlaceholder }}" size="small" with-clear
+                                    data-js-search-page-search-input name="s">
+                                    <wa-icon name="search" slot="start"></wa-icon>
+                                </wa-input>
                             </div>
 
-                            <wa-select size="medium" label="{{ $lang->sort }}" value="relevance" data-js-sort>
-                                <wa-option value="relevance">{{ $lang->relevance }}</wa-option>
-                                <wa-option value="dateDesc">{{ $lang->dateDesc }}</wa-option>
-                                <wa-option value="dateAsc">{{ $lang->dateAsc }}</wa-option>
-                            </wa-select>
-                        </div>
+                            <div class="wa-split">
+                                <div class="wa-cluster" data-js-facets-container>
 
-                        <div class="wa-stack" data-js-search-results-container>
-                            <div class="search-meta">
-                                <h2>{{ $lang->searchResults }}</h2>
-                                <span data-js-search-results-count data-lang-singular="%d träff" data-lang-plural="%d träffar"></span>
+                                </div>
+
+                                <wa-select size="medium" label="{{ $lang->sort }}" value="relevance" data-js-sort>
+                                    <wa-option value="relevance">{{ $lang->relevance }}</wa-option>
+                                    <wa-option value="dateDesc">{{ $lang->dateDesc }}</wa-option>
+                                    <wa-option value="dateAsc">{{ $lang->dateAsc }}</wa-option>
+                                </wa-select>
                             </div>
-                            <div class="ts-search-results wa-stack" data-js-search-results>
 
+                            <div class="wa-stack" data-js-search-results-container>
+                                <div class="search-meta">
+                                    <h2>{{ $lang->searchResults }}</h2>
+                                    <span data-js-search-results-count data-lang-singular="%d träff"
+                                        data-lang-plural="%d träffar"></span>
+                                </div>
+                                <div class="ts-search-results wa-stack" data-js-search-results>
+
+                                </div>
                             </div>
                         </div>
 
-                        <div class="ts-pagination" data-js-search-pagination>
-                        </div>
+                        <div class="ts-pagination" data-js-search-pagination></div>
                     </div>
 
                 </form>
