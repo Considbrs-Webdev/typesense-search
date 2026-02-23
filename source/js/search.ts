@@ -4,7 +4,7 @@
 
 import { Client as TypesenseClient } from "typesense";
 import type { SearchResponse } from "typesense";
-import type { HitDocument, SearchHit } from "./types";
+import type { HitDocument, SearchHit, FacetCount, FacetData } from "./types";
 import type { UrlState } from "./url-state";
 import { renderHit } from "./templates";
 import { renderPagination } from "./pagination";
@@ -21,7 +21,22 @@ function buildFilterBy(facetFilters: Record<string, string[]>): string {
 
 function buildSortBy(sort: string): string | undefined {
   if (!sort || sort === "relevance") return undefined;
-  return sort;
+  if (sort === "dateDesc") return "post_date:desc";
+  if (sort === "dateAsc") return "post_date:asc";
+  return undefined;
+}
+
+function extractFacetCounts(
+  response: SearchResponse<HitDocument>,
+  field: string,
+): FacetCount[] {
+  const facetResult = response.facet_counts?.find(
+    (f) => f.field_name === field,
+  );
+  return (facetResult?.counts ?? []).map((c) => ({
+    value: String(c.value),
+    count: c.count,
+  }));
 }
 
 export async function runSearch(
@@ -32,51 +47,109 @@ export async function runSearch(
   templates: Map<string, string>,
   paginationEl: HTMLElement | null,
   onPageChange: (page: number) => void,
-): Promise<void> {
-  if (!state.query.trim()) {
+): Promise<FacetData | null> {
+  const q = state.query.trim() || "*";
+  const hasQuery = !!state.query.trim();
+
+  // Always clear results when there is no real query.
+  if (!hasQuery) {
     resultsEl.innerHTML = "";
-    return;
+    if (paginationEl) paginationEl.innerHTML = "";
   }
 
   try {
     const filterBy = buildFilterBy(state.facetFilters);
     const sortBy = buildSortBy(state.sort);
 
-    const response = (await client
-      .collections(collection)
-      .documents()
-      .search({
-        q: state.query,
-        query_by: "title,excerpt,content",
-        highlight_full_fields: "title,excerpt,content",
-        per_page: 20,
-        page: state.page,
-        ...(filterBy ? { filter_by: filterBy } : {}),
-        ...(sortBy ? { sort_by: sortBy } : {}),
-      })) as SearchResponse<HitDocument>;
+    // Filters for each individual facet dimension (used for disjunctive queries).
+    const filterByTopMostParent = buildFilterBy({
+      top_most_parent: state.facetFilters.top_most_parent ?? [],
+    });
+    const filterByTypeName = buildFilterBy({
+      type_name: state.facetFilters.type_name ?? [],
+    });
 
-    const hits = (response.hits ?? []) as SearchHit[];
+    // Run main search + two disjunctive facet queries in parallel.
+    // • top_most_parent options → filtered by type_name only (no top_most_parent filter)
+    // • type_name options        → filtered by top_most_parent only (no type_name filter)
+    // When there is no real query we skip the main search (results stay empty)
+    // but still fetch facets using q:* so the selects are populated on page load.
+    const mainSearchPromise = hasQuery
+      ? (client
+          .collections(collection)
+          .documents()
+          .search({
+            q,
+            query_by: "title,excerpt,content",
+            highlight_full_fields: "title,excerpt,content",
+            per_page: 20,
+            page: state.page,
+            ...(filterBy ? { filter_by: filterBy } : {}),
+            ...(sortBy ? { sort_by: sortBy } : {}),
+          }) as Promise<SearchResponse<HitDocument>>)
+      : Promise.resolve(null);
 
-    if (hits.length === 0) {
-      resultsEl.innerHTML = `<p class="ts-no-results">No results found.</p>`;
-      if (paginationEl) paginationEl.innerHTML = "";
-      return;
+    const [response, topMostParentRes, typeNameRes] = await Promise.all([
+      mainSearchPromise,
+
+      client
+        .collections(collection)
+        .documents()
+        .search({
+          q,
+          query_by: "title,excerpt,content",
+          per_page: 0,
+          facet_by: "top_most_parent",
+          max_facet_values: 200,
+          ...(filterByTypeName ? { filter_by: filterByTypeName } : {}),
+        }) as Promise<SearchResponse<HitDocument>>,
+
+      client
+        .collections(collection)
+        .documents()
+        .search({
+          q,
+          query_by: "title,excerpt,content",
+          per_page: 0,
+          facet_by: "type_name",
+          max_facet_values: 100,
+          ...(filterByTopMostParent
+            ? { filter_by: filterByTopMostParent }
+            : {}),
+        }) as Promise<SearchResponse<HitDocument>>,
+    ]);
+
+    if (hasQuery && response) {
+      const hits = (response.hits ?? []) as SearchHit[];
+
+      if (hits.length === 0) {
+        resultsEl.innerHTML = `<p class="ts-no-results">No results found.</p>`;
+        if (paginationEl) paginationEl.innerHTML = "";
+      } else {
+        resultsEl.innerHTML = hits
+          .map((hit) => renderHit(hit, templates))
+          .join("");
+
+        if (paginationEl) {
+          renderPagination(
+            paginationEl,
+            response.found ?? 0,
+            response.request_params?.per_page ?? 20,
+            state.page,
+            onPageChange,
+          );
+        }
+      }
     }
 
-    resultsEl.innerHTML = hits.map((hit) => renderHit(hit, templates)).join("");
-
-    if (paginationEl) {
-      renderPagination(
-        paginationEl,
-        response.found ?? 0,
-        response.request_params?.per_page ?? 20,
-        state.page,
-        onPageChange,
-      );
-    }
+    return {
+      top_most_parent: extractFacetCounts(topMostParentRes, "top_most_parent"),
+      type_name: extractFacetCounts(typeNameRes, "type_name"),
+    };
   } catch (err) {
     console.error("[TypesenseSearch] Search error:", err);
     resultsEl.innerHTML = `<p class="ts-search-error">Search failed. Please try again.</p>`;
     if (paginationEl) paginationEl.innerHTML = "";
+    return null;
   }
 }

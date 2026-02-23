@@ -50,7 +50,9 @@ export function updateUrlState(
 
   const params = new URLSearchParams();
 
-  if (merged.query) params.set("s", merged.query);
+  // Always keep "s" so WordPress recognises this as a search page,
+  // even when the query is empty.
+  params.set("s", merged.query);
 
   if (merged.page > 1) params.set(PAGE_KEY, String(merged.page));
 
@@ -70,4 +72,8 @@ export function updateUrlState(
   } else {
     window.history.replaceState({}, "", newUrl);
   }
+
+  // Notify listeners that the URL state has changed (replaceState/pushState
+  // do not fire "popstate", so we use a custom event).
+  window.dispatchEvent(new CustomEvent("urlstatechange"));
 }
