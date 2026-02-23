@@ -7,7 +7,7 @@
         <div class="o-grid">
             <div class="o-grid-12">
                 <h1 class="ts-search__heading">
-                    {{ $lang->searchResults }}
+                    {{ $lang->search }}
                 </h1>
             </div>
         </div>
@@ -40,8 +40,14 @@
                             </wa-select>
                         </div>
 
-                        <div class="ts-search-results wa-stack" data-js-search-results>
+                        <div class="wa-stack" data-js-search-results-container>
+                            <div class="search-meta">
+                                <h2>{{ $lang->searchResults }}</h2>
+                                <span data-js-search-results-count data-lang-singular="%d träff" data-lang-plural="%d träffar"></span>
+                            </div>
+                            <div class="ts-search-results wa-stack" data-js-search-results>
 
+                            </div>
                         </div>
 
                         <div class="ts-pagination" data-js-search-pagination>

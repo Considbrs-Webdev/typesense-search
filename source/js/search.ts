@@ -62,6 +62,16 @@ export async function runSearch(
   if (!shouldSearch) {
     resultsEl.innerHTML = "";
     if (paginationEl) paginationEl.innerHTML = "";
+    const resultsContainer = resultsEl.closest<HTMLElement>(
+      "[data-js-search-results-container]",
+    );
+    if (resultsContainer) {
+      resultsContainer.style.display = "none";
+      const countEl = resultsContainer.querySelector<HTMLElement>(
+        "[data-js-search-results-count]",
+      );
+      if (countEl) countEl.textContent = "";
+    }
   }
 
   try {
@@ -114,8 +124,18 @@ export async function runSearch(
     if (shouldSearch && response) {
       const hits = (response.hits ?? []) as SearchHit[];
 
+      const resultsContainer = resultsEl.closest<HTMLElement>(
+        "[data-js-search-results-container]",
+      );
+
       if (hits.length === 0) {
-        resultsEl.innerHTML = `<p class="ts-no-results">No results found.</p>`;
+        if (resultsContainer) {
+          resultsContainer.style.display = "none";
+          const countEl = resultsContainer.querySelector<HTMLElement>(
+            "[data-js-search-results-count]",
+          );
+          if (countEl) countEl.textContent = "";
+        }
         if (paginationEl) paginationEl.innerHTML = "";
       } else {
         resultsEl.innerHTML = hits
@@ -130,6 +150,22 @@ export async function runSearch(
             state.page,
             onPageChange,
           );
+        }
+
+        if (resultsContainer) {
+          resultsContainer.style.display = "";
+          const countEl = resultsContainer.querySelector<HTMLElement>(
+            "[data-js-search-results-count]",
+          );
+          if (countEl) {
+            const found = response.found ?? hits.length;
+            const singular =
+              countEl.getAttribute("data-lang-singular") ?? "%d result";
+            const plural =
+              countEl.getAttribute("data-lang-plural") ?? "%d results";
+            const template = found === 1 ? singular : plural;
+            countEl.textContent = template.replace("%d", String(found));
+          }
         }
       }
     }

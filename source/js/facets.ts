@@ -4,6 +4,7 @@ import "@awesome.me/webawesome/dist/components/select/select";
 import "@awesome.me/webawesome/dist/components/option/option";
 
 import { getUrlState, updateUrlState } from "./url-state";
+import { escapeAttr, escapeText } from "./html";
 import type { FacetConfig, FacetCount, FacetData } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -12,22 +13,6 @@ import type { FacetConfig, FacetCount, FacetData } from "./types";
 // ---------------------------------------------------------------------------
 
 export const programmaticUpdates = new WeakSet<Element>();
-
-// ---------------------------------------------------------------------------
-// Private helpers
-// ---------------------------------------------------------------------------
-
-function escapeAttr(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-function escapeText(str: string): string {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
 
 // ---------------------------------------------------------------------------
 // Renderers
