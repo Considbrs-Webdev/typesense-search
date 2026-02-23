@@ -29,16 +29,8 @@
                         </div>
 
                         <div class="wa-split">
-                            <div class="wa-cluster">
-                                <wa-select size="large" label="{{ $lang->department }}"
-                                    placeholder="{{ $lang->departmentPlaceholder }}" multiple with-clear
-                                    data-js-filter-department>
-                                </wa-select>
+                            <div class="wa-cluster" data-js-facets-container>
 
-                                <wa-select size="large" label="{{ $lang->type }}"
-                                    placeholder="{{ $lang->typePlaceholder }}" multiple with-clear
-                                    data-js-filter-type>
-                                </wa-select>
                             </div>
 
                             <wa-select size="large" label="{{ $lang->sort }}" value="relevance" data-js-sort>
