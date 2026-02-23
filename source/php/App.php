@@ -14,13 +14,14 @@ class App {
     public function __construct() {
         new Config();
         new Templates();
+        new Frontend\Assets();
         new ACF\Fields();
         new Admin\Settings();
         new Admin\SettingsAjax();
         new Admin\MetaBox();
         new Indexing\IndexingHooks();
 
-        if (defined('WP_CLI') && WP_CLI) {
+        if (defined('WP_CLI') && constant('WP_CLI') === true) {
             \WP_CLI::add_command('typesense', CLI\IndexCommand::class);
         }
     }

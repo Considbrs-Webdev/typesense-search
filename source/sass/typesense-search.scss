@@ -1,147 +1,268 @@
-.service-info-badge {
-  --badge-min-size: 1.25em;
-  --badge-padding: 0.5em;
-  --badge-margin-left: 0.5em;
-  --badge-font-size: 0.75em;
-  --badge-font-weight: var(--font-weight-button, 700);
-  --badge-line-height: 1;
-  --badge-color: var(--color-white, #fff);
-  --badge-background-color: var(--color-danger, #d73740);
+// ─── Accessibility utility ────────────────────────────────────────────────────
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--badge-min-size);
-  min-height: var(--badge-min-size);
-  padding: var(--badge-padding);
-  margin-left: var(--badge-margin-left);
-  font-size: var(--badge-font-size);
-  font-weight: var(--badge-font-weight);
-  line-height: var(--badge-line-height);
-  color: var(--badge-color);
-  background-color: var(--badge-background-color);
-  border-radius: 50%;
-  aspect-ratio: 1;
-  vertical-align: middle;
+.u-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.s-post-type-service-info-archive .c-link:has(.c-icon) {
-  position: relative;
+// ─── Search page interface ────────────────────────────────────────────────────
+//
+// All colours, radii, spacing and typography are driven by CSS custom
+// properties that fall back to the site-wide design tokens.  Override any
+// `--ts-search-*` variable at `:root` or on a parent element to retheme the
+// widget without touching this file.
+//
+// Example override:
+//   .my-context { --ts-search-accent: #cc0000; }
 
-  .service-info-badge {
-    position: absolute;
-    top: 50%;
-    left: 5px;
-    z-index: 10;
-  }
-}
+.ts-search {
+  // ── Tokens (override these) ────────────────────────────────────────────────
 
-/* Nav button (tabs menu): ensure proper layout for icon + text + badge */
-.c-nav__button:has(.service-info-badge),
-.c-button.c-nav__button:has(.service-info-badge) {
-  .c-button__label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-  }
-
-  .service-info-badge {
-    position: absolute;
-    top: 45%;
-    left: 3px;
-    z-index: 2001;
-  }
-}
-
-.mod-service-info {
-  --archive-link-gap: calc(var(--base, 1em) * 2);
-  --list-gap: var(--base, 1rem);
-  --item-background-color: var(--color-background-card, #f5f5f5);
-  --item-background-color-hover: color-mix(
-    in srgb,
-    var(--item-background-color),
-    10% black
+  --ts-search-accent: var(--color-primary, #2b512b);
+  --ts-search-accent-text: var(--c-button-primary-color-contrasting, #ffffff);
+  --ts-search-input-bg: var(--color-background, #ffffff);
+  --ts-search-input-border: var(--color-border-outline, rgba(0, 0, 0, 0.1));
+  --ts-search-input-border-focus: var(--color-primary, #2b512b);
+  --ts-search-input-radius: var(--radius-sm, 8px);
+  --ts-search-input-text: var(--color-base, #000000);
+  --ts-search-input-placeholder: var(--text-secondary, rgba(0, 0, 0, 0.55));
+  --ts-search-submit-radius: var(--radius-sm, 8px);
+  --ts-search-chip-radius: 999px;
+  --ts-search-chip-bg: transparent;
+  --ts-search-chip-bg-active: var(--color-primary, #2b512b);
+  --ts-search-chip-border: var(--color-primary, #2b512b);
+  --ts-search-chip-text: var(--color-primary, #2b512b);
+  --ts-search-chip-text-active: var(
+    --c-button-primary-color-contrasting,
+    #ffffff
   );
-  --item-border-radius: var(--radius-sm, 5px);
-  --item-padding: var(--base, 1rem);
-  --icon-container-size: 4rem;
-  --icon-size: 2rem;
-  --icon-text-color: var(--color-base, #000);
-  --icon-text-color-hover: var(--color-base, #000);
-  --icon-background-color: var(--color-background, #fff);
-  --icon-border-radius: var(--radius-sm, 5px);
-  --date-font-size: 0.875rem;
-  --date-color: #666;
-  --title-font-size: 1.125rem;
-  --title-font-weight: 600;
-  --transition-style: background-color 0.2s ease;
+  --ts-search-label-text: var(--text-secondary, rgba(0, 0, 0, 0.6));
+  --ts-search-sort-radius: var(--radius-xs, 5px);
+  --ts-search-sort-bg: var(--color-background, #ffffff);
+  --ts-search-sort-border: var(--color-border-outline, rgba(0, 0, 0, 0.1));
+  --ts-search-sort-text: var(--color-base, #000000);
+  --ts-search-font: var(--font-family-base, "Work Sans", sans-serif);
+  --ts-search-font-heading: var(--font-family-heading, var(--ts-search-font));
+  --ts-search-font-size: 1rem;
+  --ts-search-font-size-sm: 0.8125rem;
+  --ts-search-font-weight-ui: var(--font-weight-button, 700);
+  --ts-search-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
 
-  display: flex;
-  flex-direction: column;
-  gap: var(--archive-link-gap);
-  max-width: var(--container-width-content, calc(var(--base, 8px) * 76));
+  // ── Heading ────────────────────────────────────────────────────────────────
 
-  &__list {
-    list-style: none;
-    padding: 0;
+  &__heading {
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--list-gap);
+    font-family: var(--ts-search-font-heading);
+    font-size: var(--h1-font-size, 2.5rem);
+    font-weight: var(--h1-font-weight, 700);
+    line-height: var(--h1-line-height, 1.3);
+    letter-spacing: var(--letter-spacing-heading, 0);
   }
 
-  &__item {
-    & + & {
-      margin-top: 0;
+  // ── Search bar ─────────────────────────────────────────────────────────────
+
+  &__bar {
+    display: flex;
+    align-items: stretch;
+    background: var(--ts-search-input-bg);
+    border: 1.5px solid var(--ts-search-input-border);
+    border-radius: var(--ts-search-input-radius);
+    box-shadow: var(--ts-search-shadow);
+    transition: border-color 0.15s ease;
+    overflow: hidden;
+
+    &:focus-within {
+      border-color: var(--ts-search-input-border-focus);
     }
   }
 
-  &__link,
-  &__wrapper {
-    align-items: flex-start;
-    background-color: var(--item-background-color);
-    border-radius: var(--item-border-radius);
-    color: var(--item-text-color);
-    display: flex;
-    gap: 1rem;
-    padding: var(--item-padding);
-    text-decoration: none;
-    transition: var(--transition-style);
-
-    &:is(a):hover {
-      background-color: var(--item-background-color-hover);
-      color: var(--item-text-color-hover);
-    }
-  }
-
-  &__icon {
-    flex-shrink: 0;
-    width: var(--icon-container-size);
-    height: var(--icon-container-size);
-    background-color: var(--icon-background-color);
-    border-radius: var(--icon-border-radius);
-    color: var(--icon-color);
+  &__input-wrap {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: var(--icon-size);
-  }
-
-  &__content {
-    color: var(--item-text-color);
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
   }
 
-  &__dates {
-    font-size: var(--date-font-size);
-    color: var(--date-color);
-    margin-bottom: 0.5rem;
+  &__input-icon {
+    position: absolute;
+    left: 1rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: var(--ts-search-input-placeholder);
+    pointer-events: none;
+    flex-shrink: 0;
   }
 
-  &__title {
-    margin: 0;
-    font-size: var(--title-font-size);
-    font-weight: var(--title-font-weight);
+  &__input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 3rem;
+    font-family: var(--ts-search-font);
+    font-size: var(--ts-search-font-size);
+    color: var(--ts-search-input-text);
+    background: transparent;
+    border: none;
+    outline: none;
+    min-width: 0;
+
+    &::placeholder {
+      color: var(--ts-search-input-placeholder);
+    }
+
+    // Remove native iOS/WebKit clear & decoration
+    &::-webkit-search-cancel-button,
+    &::-webkit-search-decoration {
+      display: none;
+    }
+
+    // Prevent iOS auto-zoom on focus
+    @media (max-width: 640px) {
+      font-size: max(1rem, var(--ts-search-font-size));
+    }
+  }
+
+  &__submit {
+    flex-shrink: 0;
+    padding: 0 1.75rem;
+    font-family: var(--ts-search-font);
+    font-size: var(--ts-search-font-size);
+    font-weight: var(--ts-search-font-weight-ui);
+    color: var(--ts-search-accent-text);
+    background: var(--ts-search-accent);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: filter 0.15s ease;
+
+    &:hover {
+      filter: brightness(1.12);
+    }
+    &:active {
+      filter: brightness(0.9);
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--ts-search-accent);
+      outline-offset: -3px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 0 1.125rem;
+    }
+  }
+
+  // ── Filters ────────────────────────────────────────────────────────────────
+
+  &__filter-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__filter-label {
+    font-family: var(--ts-search-font);
+    font-size: var(--ts-search-font-size-sm);
+    font-weight: var(--ts-search-font-weight-ui);
+    color: var(--ts-search-label-text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  &__chip {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.875rem;
+    font-family: var(--ts-search-font);
+    font-size: var(--ts-search-font-size-sm);
+    font-weight: var(--ts-search-font-weight-ui);
+    color: var(--ts-search-chip-text);
+    background: var(--ts-search-chip-bg);
+    border: 1.5px solid var(--ts-search-chip-border);
+    border-radius: var(--ts-search-chip-radius);
+    cursor: pointer;
+    transition:
+      background 0.12s ease,
+      color 0.12s ease,
+      border-color 0.12s ease;
+    line-height: 1.4;
+
+    &:hover:not(.ts-search__chip--active) {
+      background: color-mix(
+        in srgb,
+        var(--ts-search-chip-border) 12%,
+        transparent
+      );
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--ts-search-accent);
+      outline-offset: 2px;
+    }
+
+    &--active {
+      background: var(--ts-search-chip-bg-active);
+      border-color: var(--ts-search-chip-bg-active);
+      color: var(--ts-search-chip-text-active);
+    }
+  }
+
+  // ── Sort ───────────────────────────────────────────────────────────────────
+
+  &__sort {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.625rem;
+  }
+
+  &__sort-label {
+    font-family: var(--ts-search-font);
+    font-size: var(--ts-search-font-size-sm);
+    font-weight: var(--ts-search-font-weight-ui);
+    color: var(--ts-search-label-text);
+    white-space: nowrap;
+  }
+
+  &__sort-select {
+    appearance: none;
+    padding: 0.45rem 2.25rem 0.45rem 0.75rem;
+    font-family: var(--ts-search-font);
+    font-size: var(--ts-search-font-size-sm);
+    color: var(--ts-search-sort-text);
+    background:
+      // Chevron icon as inline SVG
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23555' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")
+        no-repeat right 0.5rem center / 1.1em,
+      var(--ts-search-sort-bg);
+    border: 1.5px solid var(--ts-search-sort-border);
+    border-radius: var(--ts-search-sort-radius);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+
+    &:focus-visible {
+      outline: 3px solid var(--ts-search-accent);
+      outline-offset: 2px;
+      border-color: var(--ts-search-accent);
+    }
   }
 }
