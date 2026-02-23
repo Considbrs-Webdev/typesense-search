@@ -27,6 +27,7 @@ class Settings
     private const TABS = [
         'connection' => 'Typesense Connection',
         'content'    => 'Content',
+        'statistics' => 'Statistics',
     ];
 
     public function __construct()
@@ -116,6 +117,10 @@ class Settings
                 'actionCreateCol'   => SettingsAjax::AJAX_ACTION_CREATE_COL,
                 'nonceGenKey'       => wp_create_nonce(SettingsAjax::AJAX_ACTION_GEN_KEY),
                 'actionGenKey'      => SettingsAjax::AJAX_ACTION_GEN_KEY,
+                'nonceGetStats'     => wp_create_nonce(SettingsAjax::AJAX_ACTION_GET_STATS),
+                'actionGetStats'    => SettingsAjax::AJAX_ACTION_GET_STATS,
+                'nonceClearType'    => wp_create_nonce(SettingsAjax::AJAX_ACTION_CLEAR_POST_TYPE),
+                'actionClearType'   => SettingsAjax::AJAX_ACTION_CLEAR_POST_TYPE,
             ]);
         }
     }

@@ -194,4 +194,227 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ── Statistics tab ────────────────────────────────────────────────────────
+
+    const statsPanel       = document.getElementById('ts-tab-statistics');
+    const statsRefreshBtn  = document.getElementById('ts-stats-refresh');
+
+    // Palette for pie slices — cycles if more post types than colours
+    const PIE_COLORS = [
+        '#2271b1', '#00a32a', '#d63638', '#f0b849', '#8e44ad',
+        '#16a085', '#e67e22', '#2980b9', '#27ae60', '#c0392b',
+    ];
+
+    /**
+     * Draw a pure-SVG donut chart into the given container element.
+     * @param {HTMLElement} container
+     * @param {Array<{label:string, count:number, color:string}>} segments
+     * @param {number} total
+     */
+    function drawDonutChart(container, segments, total) {
+        const size   = 180;
+        const cx     = size / 2;
+        const cy     = size / 2;
+        const rOuter = 70;
+        const rInner = 42;
+
+        let paths = '';
+
+        if (total === 0) {
+            // Empty state: grey ring
+            paths = `<path d="M ${cx} ${cy - rOuter} A ${rOuter} ${rOuter} 0 1 1 ${cx - 0.001} ${cy - rOuter} Z" fill="#e0e0e0"/>`;
+        } else {
+            let startAngle = -Math.PI / 2;
+
+            segments.forEach((seg) => {
+                const fraction  = seg.count / total;
+                const angle     = fraction * 2 * Math.PI;
+                const endAngle  = startAngle + angle;
+                const largeArc  = angle > Math.PI ? 1 : 0;
+
+                const x1  = cx + rOuter * Math.cos(startAngle);
+                const y1  = cy + rOuter * Math.sin(startAngle);
+                const x2  = cx + rOuter * Math.cos(endAngle);
+                const y2  = cy + rOuter * Math.sin(endAngle);
+                const ix1 = cx + rInner * Math.cos(endAngle);
+                const iy1 = cy + rInner * Math.sin(endAngle);
+                const ix2 = cx + rInner * Math.cos(startAngle);
+                const iy2 = cy + rInner * Math.sin(startAngle);
+
+                const d = [
+                    `M ${x1.toFixed(3)} ${y1.toFixed(3)}`,
+                    `A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2.toFixed(3)} ${y2.toFixed(3)}`,
+                    `L ${ix1.toFixed(3)} ${iy1.toFixed(3)}`,
+                    `A ${rInner} ${rInner} 0 ${largeArc} 0 ${ix2.toFixed(3)} ${iy2.toFixed(3)}`,
+                    'Z',
+                ].join(' ');
+
+                paths += `<path d="${d}" fill="${seg.color}" stroke="#fff" stroke-width="2"/>`;
+                startAngle = endAngle;
+            });
+        }
+
+        container.innerHTML = `
+            <svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pie chart showing document distribution">
+                ${paths}
+                <circle cx="${cx}" cy="${cy}" r="${rInner}" fill="#fff"/>
+                <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="22" font-weight="700" fill="#1d2327" font-family="sans-serif">${total.toLocaleString()}</text>
+                <text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="#646970" font-family="sans-serif">documents</text>
+            </svg>`;
+    }
+
+    /**
+     * Render the per-type breakdown list.
+     */
+    function renderBreakdownList(listEl, facets, total) {
+        listEl.innerHTML = '';
+
+        facets.forEach((facet, i) => {
+            const color   = PIE_COLORS[i % PIE_COLORS.length];
+            const pct     = total > 0 ? ((facet.count / total) * 100).toFixed(1) : '0.0';
+
+            const li = document.createElement('li');
+            li.className = 'ts-stats-row';
+            li.dataset.postType = facet.slug;
+
+            li.innerHTML = `
+                <span class="ts-stats-row__swatch" style="background:${color}" aria-hidden="true"></span>
+                <span class="ts-stats-row__label">${escHtml(facet.label)}<span class="ts-stats-row__slug">${escHtml(facet.slug)}</span></span>
+                <span class="ts-stats-row__count">${facet.count.toLocaleString()}</span>
+                <span class="ts-stats-row__pct">${pct}%</span>
+                <button type="button" class="button button-small ts-stats-row__clear" data-post-type="${escAttr(facet.slug)}" data-label="${escAttr(facet.label)}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                    Clear
+                </button>
+                <span class="ts-stats-row__feedback" hidden></span>`;
+
+            listEl.appendChild(li);
+        });
+
+        // Bind clear buttons
+        listEl.querySelectorAll('.ts-stats-row__clear').forEach((btn) => {
+            btn.addEventListener('click', () => handleClearPostType(btn));
+        });
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function escAttr(str) {
+        return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    /**
+     * Handle a "Clear" button click for a specific post type.
+     */
+    async function handleClearPostType(btn) {
+        const postType = btn.dataset.postType;
+        const label    = btn.dataset.label || postType;
+        const row      = btn.closest('.ts-stats-row');
+        const feedback = row?.querySelector('.ts-stats-row__feedback');
+
+        if (!confirm(`Remove all "${label}" documents from the Typesense index? This cannot be undone.`)) {
+            return;
+        }
+
+        btn.disabled = true;
+        if (feedback) { feedback.hidden = true; }
+
+        let data;
+        try {
+            data = await ajaxPost({
+                action:    tsSettings.actionClearType,
+                nonce:     tsSettings.nonceClearType,
+                post_type: postType,
+            });
+        } catch (err) {
+            data = { success: false, data: { message: 'Request failed: ' + err.message } };
+        }
+
+        if (data.success) {
+            // Reload the stats to reflect the change
+            await loadStats();
+        } else {
+            btn.disabled = false;
+            if (feedback) {
+                feedback.textContent = data?.data?.message ?? 'Error.';
+                feedback.className   = 'ts-stats-row__feedback is-error';
+                feedback.hidden      = false;
+            }
+        }
+    }
+
+    /**
+     * Fetch stats from the server and render them.
+     */
+    async function loadStats() {
+        if (!statsPanel) return;
+
+        const loadingEl  = document.getElementById('ts-stats-loading');
+        const errorEl    = document.getElementById('ts-stats-error');
+        const errorMsgEl = document.getElementById('ts-stats-error-message');
+        const contentEl  = document.getElementById('ts-stats-content');
+        const totalEl    = document.getElementById('ts-stats-total');
+        const typesEl    = document.getElementById('ts-stats-types');
+        const colEl      = document.getElementById('ts-stats-collection');
+        const pieEl      = document.getElementById('ts-pie-chart');
+        const listEl     = document.getElementById('ts-stats-list');
+
+        // Show loading
+        if (loadingEl)  loadingEl.hidden  = false;
+        if (errorEl)    errorEl.hidden    = true;
+        if (contentEl)  contentEl.hidden  = true;
+        if (statsRefreshBtn) setButtonLoading(statsRefreshBtn, true);
+
+        let data;
+        try {
+            data = await ajaxPost({
+                action: tsSettings.actionGetStats,
+                nonce:  tsSettings.nonceGetStats,
+            });
+        } catch (err) {
+            data = { success: false, data: { message: 'Request failed: ' + err.message } };
+        } finally {
+            if (loadingEl)       loadingEl.hidden = true;
+            if (statsRefreshBtn) setButtonLoading(statsRefreshBtn, false);
+        }
+
+        if (!data.success) {
+            if (errorEl)    errorEl.hidden  = false;
+            if (errorMsgEl) errorMsgEl.textContent = data?.data?.message ?? 'Unknown error.';
+            return;
+        }
+
+        const { total, facets, collectionName } = data.data;
+
+        // Build colour-enriched facets
+        const coloredFacets = (facets || []).map((f, i) => ({
+            ...f,
+            color: PIE_COLORS[i % PIE_COLORS.length],
+        }));
+
+        // Populate KPIs
+        if (totalEl)  totalEl.textContent  = (total || 0).toLocaleString();
+        if (typesEl)  typesEl.textContent  = coloredFacets.length;
+        if (colEl)    colEl.textContent    = collectionName || '—';
+
+        // Draw chart
+        if (pieEl) drawDonutChart(pieEl, coloredFacets, total || 0);
+
+        // Draw list
+        if (listEl) renderBreakdownList(listEl, coloredFacets, total || 0);
+
+        if (contentEl) contentEl.hidden = false;
+    }
+
+    // Auto-load stats when on the statistics tab
+    if (statsPanel) {
+        loadStats();
+    }
+
+    // Refresh button
+    if (statsRefreshBtn) {
+        statsRefreshBtn.addEventListener('click', loadStats);
+    }
+
 });

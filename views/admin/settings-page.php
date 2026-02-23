@@ -35,6 +35,8 @@ $pageUrl = admin_url('options-general.php?page=' . Settings::PAGE_SLUG);
                class="nav-tab <?php echo $activeTab === $slug ? 'nav-tab-active' : ''; ?>">
                 <?php if ($slug === 'connection') : ?>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+                <?php elseif ($slug === 'statistics') : ?>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 <?php else : ?>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 <?php endif; ?>
@@ -294,6 +296,79 @@ $pageUrl = admin_url('options-general.php?page=' . Settings::PAGE_SLUG);
 
             <?php submit_button(__('Save settings', 'typesense-search'), 'primary ts-settings__submit'); ?>
         </form>
+    </div>
+
+    <?php endif; ?>
+
+    <!-- ── STATISTICS TAB ───────────────────────────────────────────── -->
+    <?php if ($activeTab === 'statistics') : ?>
+
+    <div class="ts-settings__panel" id="ts-tab-statistics">
+
+        <div class="ts-settings__card ts-stats-card">
+            <div class="ts-settings__card-header">
+                <h2><?php esc_html_e('Index overview', 'typesense-search'); ?></h2>
+                <p><?php esc_html_e('Live snapshot of what is currently stored in your Typesense collection. Use the clear buttons to remove all documents of a specific post type from the index.', 'typesense-search'); ?></p>
+            </div>
+
+            <!-- Loading state -->
+            <div id="ts-stats-loading" class="ts-stats-loading">
+                <svg class="ts-stats-loading__spinner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <span><?php esc_html_e('Loading statistics…', 'typesense-search'); ?></span>
+            </div>
+
+            <!-- Error state -->
+            <div id="ts-stats-error" class="ts-stats-error" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="ts-stats-error-message"></span>
+            </div>
+
+            <!-- Stats content -->
+            <div id="ts-stats-content" hidden>
+
+                <!-- Summary row -->
+                <div class="ts-stats-summary">
+                    <div class="ts-stats-kpi">
+                        <span class="ts-stats-kpi__value" id="ts-stats-total">—</span>
+                        <span class="ts-stats-kpi__label"><?php esc_html_e('total documents', 'typesense-search'); ?></span>
+                    </div>
+                    <div class="ts-stats-kpi">
+                        <span class="ts-stats-kpi__value" id="ts-stats-types">—</span>
+                        <span class="ts-stats-kpi__label"><?php esc_html_e('post types indexed', 'typesense-search'); ?></span>
+                    </div>
+                    <div class="ts-stats-kpi">
+                        <span class="ts-stats-kpi__value ts-stats-kpi__value--sm" id="ts-stats-collection">—</span>
+                        <span class="ts-stats-kpi__label"><?php esc_html_e('collection', 'typesense-search'); ?></span>
+                    </div>
+                </div>
+
+                <!-- Chart + breakdown -->
+                <div class="ts-stats-body">
+
+                    <!-- Donut pie chart -->
+                    <div class="ts-stats-chart" aria-hidden="true">
+                        <div id="ts-pie-chart" class="ts-pie-chart"></div>
+                    </div>
+
+                    <!-- Per-type breakdown table -->
+                    <div class="ts-stats-breakdown">
+                        <ul id="ts-stats-list" class="ts-stats-list"></ul>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Refresh button -->
+        <div class="ts-stats-footer">
+            <button type="button" id="ts-stats-refresh" class="button button-secondary ts-connection-test__button">
+                <svg class="ts-connection-test__spinner" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <svg class="ts-connection-test__icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+                <?php esc_html_e('Refresh', 'typesense-search'); ?>
+            </button>
+        </div>
+
     </div>
 
     <?php endif; ?>

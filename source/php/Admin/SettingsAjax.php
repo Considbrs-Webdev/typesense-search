@@ -19,15 +19,19 @@ use TypesenseSearch\Typesense\Collection;
  */
 class SettingsAjax
 {
-    public const AJAX_ACTION_TEST       = 'typesense_test_connection';
-    public const AJAX_ACTION_CREATE_COL = 'typesense_create_collection';
-    public const AJAX_ACTION_GEN_KEY    = 'typesense_generate_search_key';
+    public const AJAX_ACTION_TEST           = 'typesense_test_connection';
+    public const AJAX_ACTION_CREATE_COL     = 'typesense_create_collection';
+    public const AJAX_ACTION_GEN_KEY        = 'typesense_generate_search_key';
+    public const AJAX_ACTION_GET_STATS      = 'typesense_get_stats';
+    public const AJAX_ACTION_CLEAR_POST_TYPE = 'typesense_clear_post_type';
 
     public function __construct()
     {
-        add_action('wp_ajax_' . self::AJAX_ACTION_TEST,       [$this, 'handle']);
-        add_action('wp_ajax_' . self::AJAX_ACTION_CREATE_COL, [$this, 'handleCreateCollection']);
-        add_action('wp_ajax_' . self::AJAX_ACTION_GEN_KEY,    [$this, 'handleGenerateSearchKey']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_TEST,            [$this, 'handle']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_CREATE_COL,       [$this, 'handleCreateCollection']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_GEN_KEY,          [$this, 'handleGenerateSearchKey']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_GET_STATS,        [$this, 'handleGetStats']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_CLEAR_POST_TYPE,  [$this, 'handleClearPostType']);
     }
 
     // ── Shared helpers ────────────────────────────────────────────────────────
@@ -202,6 +206,128 @@ class SettingsAjax
         wp_send_json_success([
             'message' => __('Search key generated. It has been filled in below — save settings to keep it.', 'typesense-search'),
             'key'     => $key,
+        ]);
+    }
+
+    // ── 4. Get collection statistics ─────────────────────────────────────────
+
+    public function handleGetStats(): void
+    {
+        check_ajax_referer(self::AJAX_ACTION_GET_STATS, 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Unauthorized.', 'typesense-search')], 403);
+            return;
+        }
+
+        $remote         = (string) get_option(Settings::OPTION_REMOTE, '');
+        $adminKey       = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
+        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+
+        if (empty($remote) || empty($adminKey) || empty($collectionName)) {
+            wp_send_json_error(['message' => __('Connection settings are incomplete. Please configure the connection first.', 'typesense-search')]);
+            return;
+        }
+
+        try {
+            $client = ClientFactory::build($remote, $adminKey);
+
+            $result = $client->collections[$collectionName]->documents->search([
+                'q'                => '*',
+                'query_by'         => 'title',
+                'facet_by'         => 'post_type',
+                'max_facet_values' => 100,
+                'per_page'         => 0,
+            ]);
+
+            $total  = $result['found'] ?? 0;
+            $facets = [];
+
+            foreach ($result['facet_counts'] ?? [] as $facetGroup) {
+                if (($facetGroup['field_name'] ?? '') === 'post_type') {
+                    foreach ($facetGroup['counts'] ?? [] as $item) {
+                        $slug = $item['value'];
+                        // Try to resolve a human-readable label from WP
+                        $postTypeObj = get_post_type_object($slug);
+                        $facets[] = [
+                            'slug'  => $slug,
+                            'label' => $postTypeObj ? $postTypeObj->label : $slug,
+                            'count' => (int) $item['count'],
+                        ];
+                    }
+                }
+            }
+
+        } catch (\Exception $e) {
+            wp_send_json_error([
+                'message' => sprintf(
+                    /* translators: %s: error message */
+                    __('Could not load statistics: %s', 'typesense-search'),
+                    $e->getMessage()
+                ),
+            ]);
+            return;
+        }
+
+        wp_send_json_success([
+            'total'          => $total,
+            'collectionName' => $collectionName,
+            'facets'         => $facets,
+        ]);
+    }
+
+    // ── 5. Clear post type from index ────────────────────────────────────────
+
+    public function handleClearPostType(): void
+    {
+        check_ajax_referer(self::AJAX_ACTION_CLEAR_POST_TYPE, 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Unauthorized.', 'typesense-search')], 403);
+            return;
+        }
+
+        $postType = sanitize_key(wp_unslash($_POST['post_type'] ?? ''));
+
+        if (empty($postType)) {
+            wp_send_json_error(['message' => __('Post type is required.', 'typesense-search')]);
+            return;
+        }
+
+        $remote         = (string) get_option(Settings::OPTION_REMOTE, '');
+        $adminKey       = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
+        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+
+        if (empty($remote) || empty($adminKey) || empty($collectionName)) {
+            wp_send_json_error(['message' => __('Connection settings are incomplete.', 'typesense-search')]);
+            return;
+        }
+
+        try {
+            $client = ClientFactory::build($remote, $adminKey);
+            $result = $client->collections[$collectionName]->documents->delete([
+                'filter_by' => 'post_type:=' . $postType,
+            ]);
+        } catch (\Exception $e) {
+            wp_send_json_error([
+                'message' => sprintf(
+                    /* translators: %s: error message */
+                    __('Could not clear post type: %s', 'typesense-search'),
+                    $e->getMessage()
+                ),
+            ]);
+            return;
+        }
+
+        wp_send_json_success([
+            'message' => sprintf(
+                /* translators: 1: number of deleted docs, 2: post type slug */
+                __('Removed %1$d documents of type "%2$s" from the index.', 'typesense-search'),
+                $result['num_deleted'] ?? 0,
+                $postType
+            ),
+            'deleted'  => $result['num_deleted'] ?? 0,
+            'postType' => $postType,
         ]);
     }
 }
