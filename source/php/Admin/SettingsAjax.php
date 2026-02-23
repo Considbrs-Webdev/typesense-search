@@ -19,19 +19,21 @@ use TypesenseSearch\Typesense\Collection;
  */
 class SettingsAjax
 {
-    public const AJAX_ACTION_TEST           = 'typesense_test_connection';
-    public const AJAX_ACTION_CREATE_COL     = 'typesense_create_collection';
-    public const AJAX_ACTION_GEN_KEY        = 'typesense_generate_search_key';
-    public const AJAX_ACTION_GET_STATS      = 'typesense_get_stats';
-    public const AJAX_ACTION_CLEAR_POST_TYPE = 'typesense_clear_post_type';
+    public const AJAX_ACTION_TEST             = 'typesense_test_connection';
+    public const AJAX_ACTION_CREATE_COL       = 'typesense_create_collection';
+    public const AJAX_ACTION_GEN_KEY          = 'typesense_generate_search_key';
+    public const AJAX_ACTION_GET_STATS        = 'typesense_get_stats';
+    public const AJAX_ACTION_CLEAR_POST_TYPE  = 'typesense_clear_post_type';
+    public const AJAX_ACTION_GET_FACET_FIELDS = 'typesense_get_facet_fields';
 
     public function __construct()
     {
-        add_action('wp_ajax_' . self::AJAX_ACTION_TEST,            [$this, 'handle']);
-        add_action('wp_ajax_' . self::AJAX_ACTION_CREATE_COL,       [$this, 'handleCreateCollection']);
-        add_action('wp_ajax_' . self::AJAX_ACTION_GEN_KEY,          [$this, 'handleGenerateSearchKey']);
-        add_action('wp_ajax_' . self::AJAX_ACTION_GET_STATS,        [$this, 'handleGetStats']);
-        add_action('wp_ajax_' . self::AJAX_ACTION_CLEAR_POST_TYPE,  [$this, 'handleClearPostType']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_TEST,              [$this, 'handle']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_CREATE_COL,         [$this, 'handleCreateCollection']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_GEN_KEY,            [$this, 'handleGenerateSearchKey']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_GET_STATS,          [$this, 'handleGetStats']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_CLEAR_POST_TYPE,    [$this, 'handleClearPostType']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_GET_FACET_FIELDS,   [$this, 'handleGetFacetFields']);
     }
 
     // ── Shared helpers ────────────────────────────────────────────────────────
@@ -329,5 +331,52 @@ class SettingsAjax
             'deleted'  => $result['num_deleted'] ?? 0,
             'postType' => $postType,
         ]);
+    }
+
+    // ── 6. Get facetable fields ───────────────────────────────────────────────
+
+    public function handleGetFacetFields(): void
+    {
+        check_ajax_referer(self::AJAX_ACTION_GET_FACET_FIELDS, 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Unauthorized.', 'typesense-search')], 403);
+            return;
+        }
+
+        $remote         = (string) get_option(Settings::OPTION_REMOTE, '');
+        $adminKey       = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
+        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+
+        if (empty($remote) || empty($adminKey) || empty($collectionName)) {
+            wp_send_json_error(['message' => __('Connection settings are incomplete. Please configure the connection first.', 'typesense-search')]);
+            return;
+        }
+
+        try {
+            $client     = ClientFactory::build($remote, $adminKey);
+            $collection = $client->collections[$collectionName]->retrieve();
+
+            $facetableFields = [];
+            foreach ($collection['fields'] ?? [] as $field) {
+                if (!empty($field['facet']) && ($field['name'] ?? '') !== '.*') {
+                    $facetableFields[] = [
+                        'name' => $field['name'],
+                        'type' => $field['type'] ?? 'string',
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            wp_send_json_error([
+                'message' => sprintf(
+                    /* translators: %s: error message */
+                    __('Could not fetch collection schema: %s', 'typesense-search'),
+                    $e->getMessage()
+                ),
+            ]);
+            return;
+        }
+
+        wp_send_json_success(['fields' => $facetableFields]);
     }
 }

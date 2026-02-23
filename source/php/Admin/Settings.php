@@ -17,16 +17,19 @@ class Settings
 
     public const OPTION_GROUP_CONNECTION = 'typesense_search_connection';
     public const OPTION_GROUP_CONTENT    = 'typesense_search_content';
+    public const OPTION_GROUP_FACETS     = 'typesense_search_facetting';
 
     public const OPTION_REMOTE     = 'typesense_search_remote';
     public const OPTION_INDEX_NAME = 'typesense_search_index_name';
     public const OPTION_ADMIN_KEY  = 'typesense_search_admin_key';
     public const OPTION_SEARCH_KEY = 'typesense_search_search_key';
     public const OPTION_POST_TYPES = 'typesense_search_post_types';
+    public const OPTION_FACETS     = 'typesense_search_facets';
 
     private const TABS = [
         'connection' => 'Typesense Connection',
         'content'    => 'Content',
+        'facetting'  => 'Facetting',
         'statistics' => 'Statistics',
     ];
 
@@ -74,6 +77,12 @@ class Settings
             'sanitize_callback' => [$this, 'sanitizePostTypes'],
             'default'           => [],
         ]);
+
+        register_setting(self::OPTION_GROUP_FACETS, self::OPTION_FACETS, [
+            'type'              => 'array',
+            'sanitize_callback' => [$this, 'sanitizeFacets'],
+            'default'           => [],
+        ]);
     }
 
     /**
@@ -110,17 +119,19 @@ class Settings
             );
 
             wp_localize_script('typesense-search-admin', 'tsSettings', [
-                'ajaxUrl'           => admin_url('admin-ajax.php'),
-                'nonce'             => wp_create_nonce(SettingsAjax::AJAX_ACTION_TEST),
-                'action'            => SettingsAjax::AJAX_ACTION_TEST,
-                'nonceCreateCol'    => wp_create_nonce(SettingsAjax::AJAX_ACTION_CREATE_COL),
-                'actionCreateCol'   => SettingsAjax::AJAX_ACTION_CREATE_COL,
-                'nonceGenKey'       => wp_create_nonce(SettingsAjax::AJAX_ACTION_GEN_KEY),
-                'actionGenKey'      => SettingsAjax::AJAX_ACTION_GEN_KEY,
-                'nonceGetStats'     => wp_create_nonce(SettingsAjax::AJAX_ACTION_GET_STATS),
-                'actionGetStats'    => SettingsAjax::AJAX_ACTION_GET_STATS,
-                'nonceClearType'    => wp_create_nonce(SettingsAjax::AJAX_ACTION_CLEAR_POST_TYPE),
-                'actionClearType'   => SettingsAjax::AJAX_ACTION_CLEAR_POST_TYPE,
+                'ajaxUrl'              => admin_url('admin-ajax.php'),
+                'nonce'                => wp_create_nonce(SettingsAjax::AJAX_ACTION_TEST),
+                'action'               => SettingsAjax::AJAX_ACTION_TEST,
+                'nonceCreateCol'       => wp_create_nonce(SettingsAjax::AJAX_ACTION_CREATE_COL),
+                'actionCreateCol'      => SettingsAjax::AJAX_ACTION_CREATE_COL,
+                'nonceGenKey'          => wp_create_nonce(SettingsAjax::AJAX_ACTION_GEN_KEY),
+                'actionGenKey'         => SettingsAjax::AJAX_ACTION_GEN_KEY,
+                'nonceGetStats'        => wp_create_nonce(SettingsAjax::AJAX_ACTION_GET_STATS),
+                'actionGetStats'       => SettingsAjax::AJAX_ACTION_GET_STATS,
+                'nonceClearType'       => wp_create_nonce(SettingsAjax::AJAX_ACTION_CLEAR_POST_TYPE),
+                'actionClearType'      => SettingsAjax::AJAX_ACTION_CLEAR_POST_TYPE,
+                'nonceGetFacetFields'  => wp_create_nonce(SettingsAjax::AJAX_ACTION_GET_FACET_FIELDS),
+                'actionGetFacetFields' => SettingsAjax::AJAX_ACTION_GET_FACET_FIELDS,
             ]);
         }
     }
@@ -141,6 +152,7 @@ class Settings
         $tabs             = self::TABS;
         $postTypes        = self::getIndexablePostTypes();
         $enabledPostTypes = (array) get_option(self::OPTION_POST_TYPES, []);
+        $facets           = (array) get_option(self::OPTION_FACETS, []);
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';
     }
@@ -155,6 +167,35 @@ class Settings
         }
 
         return array_map('sanitize_key', $value);
+    }
+
+    /**
+     * Sanitize the facets array before saving.
+     * Each facet must have a non-empty 'field' key.
+     */
+    public function sanitizeFacets(mixed $value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($value as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $field = sanitize_key($item['field'] ?? '');
+            if (empty($field)) {
+                continue;
+            }
+            $result[] = [
+                'field'       => $field,
+                'label'       => sanitize_text_field($item['label'] ?? ''),
+                'placeholder' => sanitize_text_field($item['placeholder'] ?? ''),
+            ];
+        }
+
+        return $result;
     }
 
     /**

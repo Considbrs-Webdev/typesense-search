@@ -417,4 +417,206 @@ document.addEventListener('DOMContentLoaded', () => {
         statsRefreshBtn.addEventListener('click', loadStats);
     }
 
+    // ── Facetting tab ─────────────────────────────────────────────────────────
+
+    const facettingPanel = document.getElementById('ts-tab-facetting');
+
+    if (facettingPanel) {
+        const facetList    = document.getElementById('ts-facet-list');
+        const addFacetBtn  = document.getElementById('ts-add-facet');
+        const facetNotice  = document.getElementById('ts-facet-notice');
+        const facetEmpty   = document.getElementById('ts-facet-empty');
+
+        let cachedFacetFields = null;  // null = not yet fetched, [] = fetched (may be empty)
+        let facetRowCounter   = facetList ? facetList.querySelectorAll('.ts-facet-row').length : 0;
+
+        function showFacetNotice(message, isError = false) {
+            if (!facetNotice) return;
+            const msgEl = facetNotice.querySelector('.ts-facet-notice__message');
+            if (msgEl) msgEl.textContent = message;
+            facetNotice.className = 'ts-facet-notice ' + (isError ? 'is-error' : 'is-info');
+            facetNotice.hidden = false;
+        }
+
+        function hideFacetNotice() {
+            if (facetNotice) facetNotice.hidden = true;
+        }
+
+        function updateEmptyState() {
+            if (!facetEmpty || !facetList) return;
+            facetEmpty.hidden = facetList.querySelectorAll('.ts-facet-row').length > 0;
+        }
+
+        /**
+         * Populate a <select> element with the cached facet fields.
+         * Restores the previously selected value via data-saved-value.
+         */
+        function populateSelect(select, fields) {
+            const savedValue = select.dataset.savedValue || '';
+            select.innerHTML = '';
+
+            if (fields.length === 0) {
+                const opt = document.createElement('option');
+                opt.value    = '';
+                opt.textContent = '— No facetable fields found —';
+                opt.disabled = true;
+                opt.selected = true;
+                select.appendChild(opt);
+                return;
+            }
+
+            fields.forEach((field) => {
+                const opt = document.createElement('option');
+                opt.value       = field.name;
+                opt.textContent = field.name;
+                if (field.name === savedValue) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            // Ensure something is selected
+            if (!select.value && fields.length > 0) {
+                select.value = fields[0].name;
+            }
+        }
+
+        /**
+         * Fetch facetable fields from the server.
+         * Returns the fields array on success, null on failure.
+         */
+        async function fetchFacetFields() {
+            if (cachedFacetFields !== null) return cachedFacetFields;
+
+            let data;
+            try {
+                data = await ajaxPost({
+                    action: tsSettings.actionGetFacetFields,
+                    nonce:  tsSettings.nonceGetFacetFields,
+                });
+            } catch (err) {
+                data = { success: false, data: { message: 'Request failed: ' + err.message } };
+            }
+
+            if (!data.success) {
+                showFacetNotice(data?.data?.message ?? 'Could not load facetable fields.', true);
+                return null;
+            }
+
+            cachedFacetFields = data.data.fields || [];
+            hideFacetNotice();
+            return cachedFacetFields;
+        }
+
+        /**
+         * Enable all existing select dropdowns in the facet list.
+         */
+        async function hydrateExistingRows() {
+            const selects = facetList ? facetList.querySelectorAll('.ts-facet-row__select') : [];
+            if (selects.length === 0) return;
+
+            // Show spinners on all rows while loading
+            facetList.querySelectorAll('.ts-facet-row__spinner').forEach((s) => { s.style.display = 'block'; });
+
+            const fields = await fetchFacetFields();
+
+            // Hide all spinners
+            facetList.querySelectorAll('.ts-facet-row__spinner').forEach((s) => { s.style.display = ''; });
+
+            if (!fields) return;  // error already shown
+
+            selects.forEach((select) => {
+                populateSelect(select, fields);
+                select.disabled = false;
+            });
+        }
+
+        /**
+         * Build and append a new facet row to the list.
+         */
+        function appendFacetRow(fields) {
+            const index = facetRowCounter++;
+
+            const row = document.createElement('div');
+            row.className    = 'ts-facet-row';
+            row.dataset.index = index;
+
+            const optionHtml = fields.map((f) => `<option value="${escAttr(f.name)}">${escHtml(f.name)}</option>`).join('');
+            const optName    = `typesense_search_facets[${index}]`;
+
+            row.innerHTML = `
+                <div class="ts-facet-row__field">
+                    <label class="ts-facet-row__label">Field</label>
+                    <div class="ts-facet-row__select-wrap">
+                        <select name="${escAttr(optName)}[field]" class="ts-facet-row__select">
+                            ${optionHtml}
+                        </select>
+                    </div>
+                </div>
+                <div class="ts-facet-row__field">
+                    <label class="ts-facet-row__label">Label</label>
+                    <input
+                        type="text"
+                        name="${escAttr(optName)}[label]"
+                        value=""
+                        placeholder="e.g. Category"
+                        class="regular-text ts-facet-row__input"
+                    />
+                </div>
+                <div class="ts-facet-row__field">
+                    <label class="ts-facet-row__label">Placeholder</label>
+                    <input
+                        type="text"
+                        name="${escAttr(optName)}[placeholder]"
+                        value=""
+                        placeholder="e.g. All categories"
+                        class="regular-text ts-facet-row__input"
+                    />
+                </div>
+                <button type="button" class="button ts-facet-row__remove" aria-label="Remove facet">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Remove
+                </button>`;
+
+            row.querySelector('.ts-facet-row__remove').addEventListener('click', () => {
+                row.remove();
+                updateEmptyState();
+            });
+
+            facetList.appendChild(row);
+            updateEmptyState();
+        }
+
+        // Bind remove buttons on existing PHP-rendered rows
+        if (facetList) {
+            facetList.querySelectorAll('.ts-facet-row__remove').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.ts-facet-row').remove();
+                    updateEmptyState();
+                });
+            });
+        }
+
+        // Add facet button
+        if (addFacetBtn) {
+            addFacetBtn.addEventListener('click', async () => {
+                setButtonLoading(addFacetBtn, true);
+
+                const fields = await fetchFacetFields();
+
+                setButtonLoading(addFacetBtn, false);
+
+                if (!fields) return;  // error already shown
+
+                if (fields.length === 0) {
+                    showFacetNotice('No facetable fields found in the collection schema. Make sure the collection exists and has fields with facet: true.', true);
+                    return;
+                }
+
+                appendFacetRow(fields);
+            });
+        }
+
+        // Auto-hydrate existing rows on page load
+        hydrateExistingRows();
+    }
+
 });
