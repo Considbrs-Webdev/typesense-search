@@ -19,5 +19,9 @@ class App {
         new Admin\SettingsAjax();
         new Admin\MetaBox();
         new Indexing\IndexingHooks();
+
+        if (defined('WP_CLI') && WP_CLI) {
+            \WP_CLI::add_command('typesense', CLI\IndexCommand::class);
+        }
     }
 }

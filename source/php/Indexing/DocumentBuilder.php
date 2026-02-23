@@ -55,18 +55,18 @@ class DocumentBuilder
         }
 
         $document = [
-            // Typesense requires `id` to be a string
-            'id'           => (string) $post->ID,
-            'title'        => (string) $post->post_title,
-            'content'      => wp_strip_all_tags((string) apply_filters('the_content', $post->post_content)),
-            'excerpt'      => wp_strip_all_tags((string) get_the_excerpt($post)),
-            'url'          => (string) get_permalink($post),
-            'post_type'    => (string) $post->post_type,
-            'date'         => (int) strtotime((string) $post->post_date_gmt),
-            'thumbnail'    => $thumbnail,
+            'id'             => (string) $post->ID,
+            'title'          => (string) $post->post_title,
+            'content'        => wp_strip_all_tags((string) apply_filters('the_content', $post->post_content)),
+            'excerpt'        => wp_strip_all_tags((string) get_the_excerpt($post)),
+            'url'            => (string) get_permalink($post),
+            'post_type'      => (string) $post->post_type,
+            'post_type_name' => (string) get_post_type_object($post->post_type)->label,
+            'date'           => (int) strtotime((string) $post->post_date_gmt),
+            'thumbnail'      => $thumbnail,
             // Extra search terms entered via the meta box — stored as a plain
             // string so Typesense can tokenise and match against them.
-            'extra_terms'  => (string) get_post_meta($post->ID, MetaBox::META_EXTRA_TERMS, true),
+            'extra_terms'    => (string) get_post_meta($post->ID, MetaBox::META_EXTRA_TERMS, true),
         ];
 
         /**
