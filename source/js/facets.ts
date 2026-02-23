@@ -191,10 +191,15 @@ export function setupFacets(facetCfg: FacetConfig[]): FacetController {
       const counts = facetData[facet.field] ?? [];
       const selected = facetFilters[facet.field] ?? [];
 
+      const hasOptions = counts.length > 0 || selected.length > 0;
+
       if (facet.display_as === "button_group") {
         renderButtonGroup(el, counts, selected);
+        const wrapper = el.closest<HTMLElement>(".ts-facet-button-group");
+        (wrapper ?? (el as HTMLElement)).hidden = !hasOptions;
       } else {
         renderDropdown(el, counts, selected);
+        el.toggleAttribute("disabled", !hasOptions);
       }
     });
   }
