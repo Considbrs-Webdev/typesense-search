@@ -14,17 +14,17 @@
     </section>
 
     {{-- Search interface --}}
-    <section class="o-container u-margin__top--4 u-margin__bottom--8" data-js-search-page-container>
+    <section class="o-container u-margin__top--2 u-margin__bottom--8" data-js-search-page-container>
         <div class="o-grid">
             <div class="o-grid-12">
 
                 <form class="ts-search" method="get" action="{{ $homeUrl ?? '/' }}">
 
-                    <div class="wa-stack">
+                    <div class="wa-stack wa-gap-xl">
                         <div class="wa-stack wa-gap-xl ts-main-filter">
                             <div>
-                                <wa-input size="large" placeholder="{{ $lang->searchPlaceholder }}" size="small" with-clear
-                                    data-js-search-page-search-input name="s">
+                                <wa-input size="large" placeholder="{{ $lang->searchPlaceholder }}" size="small"
+                                    with-clear data-js-search-page-search-input name="s">
                                     <wa-icon name="search" slot="start"></wa-icon>
                                 </wa-input>
                             </div>
@@ -40,16 +40,16 @@
                                     <wa-option value="dateAsc">{{ $lang->dateAsc }}</wa-option>
                                 </wa-select>
                             </div>
+                        </div>
 
-                            <div class="wa-stack" data-js-search-results-container>
-                                <div class="search-meta">
-                                    <h2>{{ $lang->searchResults }}</h2>
-                                    <span data-js-search-results-count data-lang-singular="%d träff"
-                                        data-lang-plural="%d träffar"></span>
-                                </div>
-                                <div class="ts-search-results wa-stack" data-js-search-results>
+                        <div class="wa-stack" data-js-search-results-container>
+                            <div class="search-meta">
+                                <h2>{{ $lang->searchResults }}</h2>
+                                <span data-js-search-results-count data-lang-singular="%d träff"
+                                    data-lang-plural="%d träffar"></span>
+                            </div>
+                            <div class="ts-search-results wa-stack" data-js-search-results>
 
-                                </div>
                             </div>
                         </div>
 

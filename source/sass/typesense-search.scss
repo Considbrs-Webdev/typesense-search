@@ -5,6 +5,10 @@
 // Look and feel for the main filter area (search input and facet controls)
 // ---------------------------------------------------------------------------
 .ts-main-filter {
+  background: color-mix(in srgb, var(--color-primary, black) 15%, white);
+  border-radius: var(--radius-m, 0.5rem);
+  padding: 2.5rem 2rem;
+
   wa-select,
   wa-input {
     --wa-color-surface-border: var(--color-primary, black);
