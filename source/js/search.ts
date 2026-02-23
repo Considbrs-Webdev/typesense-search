@@ -4,7 +4,7 @@
 
 import { Client as TypesenseClient } from "typesense";
 import type { SearchResponse } from "typesense";
-import type { HitDocument, SearchHit, FacetCount, FacetData } from "./types";
+import type { HitDocument, SearchHit, FacetCount, FacetData, TypesenseSearchConfig } from "./types";
 import type { UrlState } from "./url-state";
 import { renderHit } from "./templates";
 import { renderPagination } from "./pagination";
@@ -41,7 +41,7 @@ function extractFacetCounts(
 
 export async function runSearch(
   client: TypesenseClient,
-  collection: string,
+  config: TypesenseSearchConfig,
   state: UrlState,
   resultsEl: HTMLElement,
   templates: Map<string, string>,
@@ -81,13 +81,13 @@ export async function runSearch(
     // Main search promise.
     const mainSearchPromise = shouldSearch
       ? (client
-          .collections(collection)
+          .collections(config.collection)
           .documents()
           .search({
             q,
             query_by: "title,excerpt,content",
             highlight_full_fields: "title,excerpt,content",
-            per_page: 20,
+            per_page: config.hitsPerPage,
             page: state.page,
             ...(filterBy ? { filter_by: filterBy } : {}),
             ...(sortBy ? { sort_by: sortBy } : {}),
@@ -104,7 +104,7 @@ export async function runSearch(
       const filterByOthers = buildFilterBy(otherFilters);
 
       return client
-        .collections(collection)
+        .collections(config.collection)
         .documents()
         .search({
           q,

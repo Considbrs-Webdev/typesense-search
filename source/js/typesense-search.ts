@@ -28,8 +28,8 @@ function resolveResultsEl(container: HTMLElement): HTMLElement {
 // ---------------------------------------------------------------------------
 
 function init(): void {
-  const cfg = window.typesenseConfig;
-  if (!cfg?.host || !cfg?.collection || !cfg?.searchKey) return;
+  const config = window.typesenseConfig;
+  if (!config?.host || !config?.collection || !config?.searchKey) return;
 
   const container = document.querySelector<HTMLElement>(
     "[data-js-search-page-container]",
@@ -47,13 +47,13 @@ function init(): void {
 
   if (!inputEl) return;
 
-  const client = createClient(cfg);
+  const client = createClient(config);
   const templates = getHitTemplates(container);
   if (!client) return;
 
   const facets = setupFacets(
     container.querySelector<HTMLElement>("[data-js-facets-container]"),
-    cfg.facets ?? [],
+    config.facets ?? [],
   );
 
   // ── Search ───────────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ function init(): void {
     const state = getUrlState();
     runSearch(
       client,
-      cfg.collection,
+      config,
       state,
       resultsEl,
       templates,

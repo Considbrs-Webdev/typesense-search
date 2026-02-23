@@ -25,10 +25,11 @@ class Settings
     public const OPTION_SEARCH_KEY = 'typesense_search_search_key';
     public const OPTION_POST_TYPES = 'typesense_search_post_types';
     public const OPTION_FACETS     = 'typesense_search_facets';
+    public const OPTION_HITS_PER_PAGE = 'typesense_search_hits_per_page';
 
     private const TABS = [
         'connection' => 'Typesense Connection',
-        'content'    => 'Content',
+        'content'    => 'Settings',
         'facetting'  => 'Facetting',
         'statistics' => 'Statistics',
     ];
@@ -76,6 +77,12 @@ class Settings
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitizePostTypes'],
             'default'           => [],
+        ]);
+
+        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_HITS_PER_PAGE, [
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 10,
         ]);
 
         register_setting(self::OPTION_GROUP_FACETS, self::OPTION_FACETS, [
@@ -153,6 +160,7 @@ class Settings
         $postTypes        = self::getIndexablePostTypes();
         $enabledPostTypes = (array) get_option(self::OPTION_POST_TYPES, []);
         $facets           = (array) get_option(self::OPTION_FACETS, []);
+        $hitsPerPage      = (int) get_option(self::OPTION_HITS_PER_PAGE, 10);
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';
     }

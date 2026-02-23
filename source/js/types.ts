@@ -13,6 +13,7 @@ export interface TypesenseSearchConfig {
   host: string;
   collection: string;
   searchKey: string;
+  hitsPerPage: number;
   facets?: FacetConfig[];
 }
 

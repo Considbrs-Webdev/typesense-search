@@ -29,11 +29,13 @@ class TypesenseConfig
 		$host       = get_option(Settings::OPTION_REMOTE, '');
 		$collection = get_option(Settings::OPTION_INDEX_NAME, '');
 		$searchKey  = get_option(Settings::OPTION_SEARCH_KEY, '');
+		$hitsPerPage = (int) get_option(Settings::OPTION_HITS_PER_PAGE, 10);
 
 		$config = [
 			'host'       => esc_url_raw($host),
 			'collection' => sanitize_text_field($collection),
 			'searchKey'  => sanitize_text_field($searchKey),
+			'hitsPerPage' => $hitsPerPage,
 		];
 
 		// Include configured facets (field, label, placeholder, display_as)
