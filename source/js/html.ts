@@ -1,0 +1,78 @@
+// ---------------------------------------------------------------------------
+// HTML utilities and placeholder definitions
+// ---------------------------------------------------------------------------
+
+import type { HitDocument, HighlightField } from "./types";
+
+export type PlaceholderResult = string | { value: string; highlighted: true };
+export type PlaceholderFn = (
+  doc: HitDocument,
+  highlight?: Record<string, HighlightField>,
+) => PlaceholderResult;
+
+export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
+  SEARCH_HIT_HEADING: (d, h) => {
+    const snippet = h?.title?.snippet;
+    if (snippet) return { value: snippet, highlighted: true };
+    return String(d.title ?? "");
+  },
+  SEARCH_HIT_SUBHEADING: (d) =>
+    String(d.post_type_name ?? d.post_date_formatted ?? ""),
+  SEARCH_HIT_EXCERPT: (d, h) => {
+    const snippet = h?.excerpt?.snippet ?? h?.content?.snippet;
+    if (snippet) return { value: snippet, highlighted: true };
+    return String(d.excerpt ?? "");
+  },
+  SEARCH_HIT_LINK: (d) => String(d.permalink ?? "#"),
+  SEARCH_HIT_IMAGE_URL: (d) => String(d.thumbnail ?? ""),
+  SEARCH_HIT_IMAGE_ALT: (d) => String(d.thumbnail_alt ?? ""),
+  SEARCH_HIT_ARIA_LABEL: (d) => `Read more: ${d.title ?? ""}`,
+  SEARCH_HIT_DATE: (d) => String(d.post_date_formatted ?? ""),
+  SEARCH_HIT_META: (d) => {
+    const type = String(d.post_type_name ?? "");
+    const date = String(d.post_date_formatted ?? "");
+    return [type, date].filter(Boolean).join(" · ");
+  },
+};
+
+export function escapeHtml(str: string): string {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+export function decodeHtmlEntities(str: string): string {
+  const ta = document.createElement("textarea");
+  ta.innerHTML = str;
+  return ta.value;
+}
+
+export function escapeHtmlPreservingMarks(str: string): string {
+  const decoded = decodeHtmlEntities(str);
+  const MARK_S = "\u0000\u0001MS\u0001\u0000";
+  const MARK_E = "\u0000\u0001ME\u0001\u0000";
+  const withPlaceholders = decoded
+    .replace(/<mark>/gi, MARK_S)
+    .replace(/<\/mark>/gi, MARK_E);
+  const escaped = escapeHtml(withPlaceholders);
+  return escaped
+    .replace(new RegExp(MARK_S, "g"), "<mark>")
+    .replace(new RegExp(MARK_E, "g"), "</mark>");
+}
+
+export function replacePlaceholders(
+  html: string,
+  doc: HitDocument,
+  highlight?: Record<string, HighlightField>,
+): string {
+  let result = html;
+  for (const [key, fn] of Object.entries(PLACEHOLDERS)) {
+    const out = fn(doc, highlight);
+    const value =
+      typeof out === "object" && out.highlighted
+        ? escapeHtmlPreservingMarks(out.value)
+        : escapeHtml(decodeHtmlEntities(String(out)));
+    result = result.replaceAll(`{${key}}`, value);
+  }
+  return result;
+}

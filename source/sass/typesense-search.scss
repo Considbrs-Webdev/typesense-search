@@ -1,1 +1,50 @@
 @use "@awesome.me/webawesome/dist/styles/webawesome.css";
+
+// ---------------------------------------------------------------------------
+// Pagination
+// ---------------------------------------------------------------------------
+
+.ts-pagination {
+  display: flex;
+  justify-content: center;
+  margin-block: var(--wa-space-l, 1.5rem);
+}
+
+.ts-pagination__compact,
+.ts-pagination__full {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-2xs, 0.25rem);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ts-pagination__page-label {
+  font-size: var(--wa-font-size-s, 0.875rem);
+  padding-inline: var(--wa-space-xs, 0.5rem);
+  white-space: nowrap;
+}
+
+.ts-pagination__ellipsis {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--wa-space-2xs, 0.25rem);
+  color: var(--wa-color-neutral-500, #6b7280);
+  font-size: var(--wa-font-size-s, 0.875rem);
+  user-select: none;
+}
+
+// Mobile: show compact, hide full numbered list
+.ts-pagination__full {
+  display: none;
+}
+
+@media (min-width: 36em) {
+  .ts-pagination__compact {
+    display: none;
+  }
+
+  .ts-pagination__full {
+    display: flex;
+  }
+}

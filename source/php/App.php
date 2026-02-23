@@ -15,6 +15,8 @@ class App {
         new Config();
         new Templates();
         new Frontend\Assets();
+        new Frontend\EnrichSearchTemplate();
+        new Frontend\TypesenseConfig();
         new ACF\Fields();
         new Admin\Settings();
         new Admin\SettingsAjax();

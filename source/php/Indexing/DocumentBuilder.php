@@ -60,14 +60,26 @@ class DocumentBuilder
             'content'        => wp_strip_all_tags((string) apply_filters('the_content', $post->post_content)),
             'excerpt'        => wp_strip_all_tags((string) get_the_excerpt($post)),
             'url'            => (string) get_permalink($post),
-            'post_type'      => (string) $post->post_type,
-            'post_type_name' => (string) get_post_type_object($post->post_type)->label,
+            'type'      => (string) $post->post_type,
+            'type_name' => (string) get_post_type_object($post->post_type)->label,
             'date'           => (int) strtotime((string) $post->post_date_gmt),
             'thumbnail'      => $thumbnail,
             // Extra search terms entered via the meta box — stored as a plain
             // string so Typesense can tokenise and match against them.
             'extra_terms'    => (string) get_post_meta($post->ID, MetaBox::META_EXTRA_TERMS, true),
         ];
+
+        // For pages, also index the top-most parent page as a facet to allow
+        if ($post->post_type === 'page') {
+            $ancestors = get_post_ancestors($post);
+            if (!empty($ancestors)) {
+                $topMostParentId = (int) end($ancestors);
+                $topMostParentPost = get_post($topMostParentId);
+                if ($topMostParentPost) {
+                    $document['top_most_parent'] = (string) $topMostParentPost->post_title;
+                }
+            }
+        }
 
         /**
          * Filters the document array before it is sent to Typesense.
