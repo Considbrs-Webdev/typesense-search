@@ -11,11 +11,11 @@
 </template>
 
 <template data-pagination-tmpl="page">
-    <wa-button size="small" class="ts-pagination__page"></wa-button>
+    <wa-button size="small" appearance="outlined" class="ts-pagination__page"></wa-button>
 </template>
 
 <template data-pagination-tmpl="page-active">
-    <wa-button size="small" appearance="outlined" class="ts-pagination__page ts-pagination__page--active"
+    <wa-button size="small" appearance="filled" class="ts-pagination__page ts-pagination__page--active"
         disabled></wa-button>
 </template>
 

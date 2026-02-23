@@ -35,13 +35,6 @@
   }
 }
 
-.ts-pagination {
-  wa-button {
-    --wa-color-neutral-fill-loud: var(--color-primary, black);
-    --wa-color-neutral-on-loud: var(--text-base, white);
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Pagination
 // ---------------------------------------------------------------------------
@@ -50,6 +43,17 @@
   display: flex;
   justify-content: center;
   margin-block: var(--wa-space-l, 1.5rem);
+
+  wa-button {
+    --wa-color-neutral-fill-normal: var(--color-primary, black);
+    --wa-color-neutral-on-normal: var(--text-base, white);
+    --wa-color-neutral-fill-loud: var(--color-primary, black);
+    --wa-color-neutral-on-loud: var(--text-base, white);
+
+    &:disabled {
+      opacity: 1;
+    }
+  }
 }
 
 .ts-pagination__compact,

@@ -142,11 +142,10 @@ export function renderPagination(
   nav.appendChild(compact);
   nav.appendChild(full);
 
-  el.innerHTML = "";
-  el.appendChild(nav);
-
-  // Single delegated click listener on the container.
-  el.addEventListener("click", (e) => {
+  // Single delegated click listener on the nav element (not the outer
+  // container) so it is discarded along with the nav on each re-render and
+  // does not accumulate across renderPagination calls.
+  nav.addEventListener("click", (e) => {
     const btn = (e.target as Element).closest<HTMLElement>("[data-page]");
     if (!btn || btn.hasAttribute("disabled")) return;
     const page = parseInt(btn.dataset.page ?? "", 10);
@@ -154,4 +153,7 @@ export function renderPagination(
       onPageChange(page);
     }
   });
+
+  el.innerHTML = "";
+  el.appendChild(nav);
 }
