@@ -1,0 +1,40 @@
+# Copyright (C) 2026 Consid Borås AB
+# This file is distributed under the MIT.
+msgid ""
+msgstr ""
+"Project-Id-Version: Typesense Search 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-02-23T07:56:25+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: typesense-search\n"
+
+#. Plugin Name of the plugin
+#: typesense-search.php
+msgid "Typesense Search"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: typesense-search.php
+msgid "https://github.com/considbrs-webdev/typesense-search"
+msgstr ""
+
+#. Description of the plugin
+#: typesense-search.php
+msgid "A Typesense Search Plugin for WordPress and Municipio."
+msgstr ""
+
+#. Author of the plugin
+#: typesense-search.php
+msgid "Consid Borås AB"
+msgstr ""
+
+#. Author URI of the plugin
+#: typesense-search.php
+msgid "https://github.com/considbrs-webdev"
+msgstr ""

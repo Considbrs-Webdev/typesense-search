@@ -1,0 +1,38 @@
+{
+    "name": "@considbrs-webdev/typesense-search",
+    "version": "1.0.0",
+    "description": "Typesense Search Plugin for WordPress and Municipio",
+    "main": "",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/considbrs-webdev/typesense-search"
+    },
+    "author": "Consid Borås AB",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/considbrs-webdev/typesense-search/issues"
+    },
+    "homepage": "https://github.com/considbrs-webdev/typesense-search",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "build:dev": "vite build --mode development",
+        "watch": "vite build --watch --mode development",
+        "make-pot": "wp i18n make-pot . languages/typesense-search.pot --include=\"source/php,typesense-search.php\" --domain=typesense-search"
+    },
+    "browserslist": [
+        "> 1%",
+        "not dead"
+    ],
+    "devDependencies": {
+        "sass-embedded": "1.97.1",
+        "vite": "7.3.0",
+        "vite-config-factory": "1.0.1"
+    },
+    "browser": {
+        "child_process": false
+    },
+    "dependencies": {
+        "typesense": "github:typesense/typesense-js"
+    }
+}
