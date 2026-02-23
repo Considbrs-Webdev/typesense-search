@@ -16,6 +16,6 @@ class App {
         new Templates();
         new ACF\Fields();
         new Admin\Settings();
-        new Admin\ConnectionTest();
+        new Admin\SettingsAjax();
     }
 }

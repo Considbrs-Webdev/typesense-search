@@ -2,26 +2,26 @@
 
 namespace TypesenseSearch\Admin;
 
-use Typesense\Exceptions\ObjectNotFound;
 use Typesense\Exceptions\RequestUnauthorized;
+use TypesenseSearch\Typesense\ApiKey;
 use TypesenseSearch\Typesense\ClientFactory;
+use TypesenseSearch\Typesense\Collection;
 
 /**
- * Class ConnectionTest
+ * Class SettingsAjax
  *
- * Handles AJAX actions for verifying the Typesense connection, creating the
- * configured collection, and generating a scoped search-only API key.
+ * Handles the admin-ajax.php endpoints that back the Typesense settings page:
+ *   1. Test the server connection and check whether the collection exists.
+ *   2. Create the collection (delegated to Collection).
+ *   3. Generate a scoped search-only API key (delegated to ApiKey).
  *
  * @package TypesenseSearch\Admin
  */
-class ConnectionTest
+class SettingsAjax
 {
     public const AJAX_ACTION_TEST       = 'typesense_test_connection';
     public const AJAX_ACTION_CREATE_COL = 'typesense_create_collection';
     public const AJAX_ACTION_GEN_KEY    = 'typesense_generate_search_key';
-
-    /** Keep BC alias used by Settings.php */
-    public const AJAX_ACTION = self::AJAX_ACTION_TEST;
 
     public function __construct()
     {
@@ -35,7 +35,7 @@ class ConnectionTest
     /**
      * Validate shared POST fields and return them, or send a JSON error and terminate.
      *
-     * @return array{remote: string, admin_key: string}
+     * @return array{remote: string, adminKey: string}
      */
     private function requireConnectionFields(string $nonce): array
     {
@@ -122,18 +122,11 @@ class ConnectionTest
         $collectionExists = false;
 
         if (!empty($collectionName)) {
-            try {
-                $client->collections[$collectionName]->retrieve();
-                $collectionExists = true;
-            } catch (ObjectNotFound $e) {
-                $collectionExists = false;
-            } catch (\Exception $e) {
-                // Ignore unexpected errors — treat as unknown
-            }
+            $collectionExists = Collection::exists($client, $collectionName);
         }
 
         wp_send_json_success([
-            'message'          => __('Connected successfully. Server is healthy, the Admin API key is valid and the collection exists.', 'typesense-search'),
+            'message'          => __('Connected successfully. Server is healthy and the Admin API key is valid.', 'typesense-search'),
             'collectionExists' => $collectionExists,
             'collectionName'   => $collectionName,
         ]);
@@ -156,19 +149,7 @@ class ConnectionTest
 
         try {
             $client = ClientFactory::build($remote, $adminKey);
-            $client->collections->create([
-                'name'   => $collectionName,
-                'fields' => [
-                    ['name' => 'id',        'type' => 'string'],
-                    ['name' => 'title',     'type' => 'string'],
-                    ['name' => 'content',   'type' => 'string'],
-                    ['name' => 'excerpt',   'type' => 'string',  'optional' => true],
-                    ['name' => 'url',       'type' => 'string',  'index'    => false],
-                    ['name' => 'post_type', 'type' => 'string',  'facet'    => true],
-                    ['name' => 'date',      'type' => 'int64',   'optional' => true],
-                    ['name' => 'thumbnail', 'type' => 'string',  'optional' => true, 'index' => false],
-                ],
-            ]);
+            Collection::create($client, $collectionName);
         } catch (\Exception $e) {
             wp_send_json_error([
                 'message' => sprintf(
@@ -206,11 +187,7 @@ class ConnectionTest
 
         try {
             $client = ClientFactory::build($remote, $adminKey);
-            $result = $client->keys->create([
-                'description' => 'Search-only key for collection: ' . $collectionName,
-                'actions'     => ['documents:search'],
-                'collections' => [$collectionName],
-            ]);
+            $key    = ApiKey::generateSearchKey($client, $collectionName);
         } catch (\Exception $e) {
             wp_send_json_error([
                 'message' => sprintf(
@@ -222,18 +199,9 @@ class ConnectionTest
             return;
         }
 
-        if (empty($result['value'])) {
-            wp_send_json_error([
-                'message' => __('Key was created but no value was returned. Please check your Typesense dashboard.', 'typesense-search'),
-            ]);
-            return;
-        }
-
         wp_send_json_success([
             'message' => __('Search key generated. It has been filled in below — save settings to keep it.', 'typesense-search'),
-            'key'     => $result['value'],
+            'key'     => $key,
         ]);
     }
 }
-
-

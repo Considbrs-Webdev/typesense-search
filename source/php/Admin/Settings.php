@@ -110,12 +110,12 @@ class Settings
 
             wp_localize_script('typesense-search-admin', 'tsSettings', [
                 'ajaxUrl'           => admin_url('admin-ajax.php'),
-                'nonce'             => wp_create_nonce(ConnectionTest::AJAX_ACTION_TEST),
-                'action'            => ConnectionTest::AJAX_ACTION_TEST,
-                'nonceCreateCol'    => wp_create_nonce(ConnectionTest::AJAX_ACTION_CREATE_COL),
-                'actionCreateCol'   => ConnectionTest::AJAX_ACTION_CREATE_COL,
-                'nonceGenKey'       => wp_create_nonce(ConnectionTest::AJAX_ACTION_GEN_KEY),
-                'actionGenKey'      => ConnectionTest::AJAX_ACTION_GEN_KEY,
+                'nonce'             => wp_create_nonce(SettingsAjax::AJAX_ACTION_TEST),
+                'action'            => SettingsAjax::AJAX_ACTION_TEST,
+                'nonceCreateCol'    => wp_create_nonce(SettingsAjax::AJAX_ACTION_CREATE_COL),
+                'actionCreateCol'   => SettingsAjax::AJAX_ACTION_CREATE_COL,
+                'nonceGenKey'       => wp_create_nonce(SettingsAjax::AJAX_ACTION_GEN_KEY),
+                'actionGenKey'      => SettingsAjax::AJAX_ACTION_GEN_KEY,
             ]);
         }
     }
