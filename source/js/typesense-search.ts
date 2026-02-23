@@ -72,7 +72,7 @@ function init(): void {
     debounceTimer = setTimeout(() => {
       updateUrlState({ query: value, page: 1 });
       triggerSearch();
-    }, 250);
+    }, 50);
   };
 
   // Listen to value changes from the WebAwesome `wa-input` element.

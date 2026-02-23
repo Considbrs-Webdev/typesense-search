@@ -8,6 +8,6 @@ class Config {
     }
 
     public function loadTextdomain() {
-        load_plugin_textdomain('typesense-search', false, plugin_basename(dirname(__FILE__)) . '/languages');
+        load_plugin_textdomain('typesense-search', false, './typesense-search/languages');
     }
 }

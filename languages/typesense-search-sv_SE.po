@@ -4,21 +4,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2026-02-23T14:52:07+00:00\n"
+"PO-Revision-Date: 2026-02-23 16:01+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-23T14:52:07+00:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.11.0\n"
+"X-Generator: Poedit 3.8\n"
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
-#: typesense-search.php
-#: source/php/Admin/MetaBox.php:41
-#: source/php/Admin/Settings.php:46
-#: source/php/Admin/Settings.php:47
+#: typesense-search.php source/php/Admin/MetaBox.php:41
+#: source/php/Admin/Settings.php:46 source/php/Admin/Settings.php:47
 msgid "Typesense Search"
 msgstr ""
 
@@ -55,11 +54,12 @@ msgid "Keywords, synonyms or alternate phrasings…"
 msgstr ""
 
 #: source/php/Admin/MetaBox.php:90
-msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
+msgid ""
+"Additional words or phrases that should match this post in search, even if "
+"they do not appear in the content."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:49
-#: source/php/Admin/SettingsAjax.php:219
+#: source/php/Admin/SettingsAjax.php:49 source/php/Admin/SettingsAjax.php:219
 #: source/php/Admin/SettingsAjax.php:286
 msgid "Unauthorized."
 msgstr ""
@@ -91,7 +91,8 @@ msgid "Server is reachable, but key validation failed: %s"
 msgstr ""
 
 #: source/php/Admin/SettingsAjax.php:133
-msgid "Connected successfully. Server is healthy and the Admin API key is valid."
+msgid ""
+"Connected successfully. Server is healthy and the Admin API key is valid."
 msgstr ""
 
 #: source/php/Admin/SettingsAjax.php:149
@@ -118,11 +119,13 @@ msgid "Could not generate search key: %s"
 msgstr ""
 
 #: source/php/Admin/SettingsAjax.php:207
-msgid "Search key generated. It has been filled in below — save settings to keep it."
+msgid ""
+"Search key generated. It has been filled in below — save settings to keep it."
 msgstr ""
 
 #: source/php/Admin/SettingsAjax.php:228
-msgid "Connection settings are incomplete. Please configure the connection first."
+msgid ""
+"Connection settings are incomplete. Please configure the connection first."
 msgstr ""
 
 #. translators: %s: error message
@@ -150,11 +153,11 @@ msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:35
 msgid "Search"
-msgstr ""
+msgstr "Sök"
 
 #: source/php/Frontend/EnrichSearchTemplate.php:36
 msgid "Search Results"
-msgstr ""
+msgstr "Sökresultat"
 
 #: source/php/Frontend/EnrichSearchTemplate.php:37
 msgid "Department"
@@ -174,20 +177,22 @@ msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:41
 msgid "Sort"
-msgstr ""
+msgstr "Sortera"
 
 #: source/php/Frontend/EnrichSearchTemplate.php:42
 msgid "Relevance"
-msgstr ""
+msgstr "Relevans"
 
 #: source/php/Frontend/EnrichSearchTemplate.php:43
 msgid "Date Ascending"
-msgstr ""
+msgstr "Äldst först"
 
 #: source/php/Frontend/EnrichSearchTemplate.php:44
 msgid "Date Descending"
-msgstr ""
+msgstr "Nyast först"
 
 #: source/php/Typesense/ApiKey.php:39
-msgid "Key was created but no value was returned. Please check your Typesense dashboard."
+msgid ""
+"Key was created but no value was returned. Please check your Typesense "
+"dashboard."
 msgstr ""
