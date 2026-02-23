@@ -239,6 +239,7 @@ function init(): void {
 
   // Facet selects.
   const onFacetChange = (field: string, selectEl: Element): void => {
+    console.log("Facet change", field, (selectEl as any).value);
     if (programmaticUpdates.has(selectEl)) return;
     const raw = (selectEl as any).value;
     const values: string[] = Array.isArray(raw)
@@ -263,7 +264,7 @@ function init(): void {
   };
 
   if (departmentEl) {
-    departmentEl.addEventListener("wa-change", () =>
+    departmentEl.addEventListener("change", () =>
       onFacetChange("top_most_parent", departmentEl),
     );
     departmentEl.addEventListener("wa-clear", () =>
@@ -272,7 +273,7 @@ function init(): void {
   }
 
   if (typeEl) {
-    typeEl.addEventListener("wa-change", () =>
+    typeEl.addEventListener("change", () =>
       onFacetChange("type_name", typeEl),
     );
     typeEl.addEventListener("wa-clear", () =>
@@ -282,7 +283,7 @@ function init(): void {
 
   // Sort select.
   if (sortEl) {
-    sortEl.addEventListener("wa-change", () => {
+    sortEl.addEventListener("change", () => {
       if (programmaticUpdates.has(sortEl)) return;
       const raw = (sortEl as any).value;
       const sort = raw ? String(raw) : "relevance";

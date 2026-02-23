@@ -57,11 +57,7 @@ class EnrichSearchTemplate
 		if (is_dir($templatesDir)) {
 			foreach (glob($templatesDir . '/*.blade.php') as $file) {
 				$name = basename($file, '.blade.php');
-				$content = file_get_contents($file);
-				if ($content === false) {
-					$content = '';
-				}
-				$templates[$name] = $content;
+				$templates[] = $name;
 			}
 		}
 

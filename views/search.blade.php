@@ -62,8 +62,8 @@
 
                 {{-- Render compiled hit templates for JS consumption --}}
                 @if (!empty($hitTemplates))
-                    @foreach ($hitTemplates as $name => $template)
-                        {!! $template !!}
+                    @foreach ($hitTemplates as $template)
+                        @include("templates.hits.{$template}")
                     @endforeach
                 @endif
 

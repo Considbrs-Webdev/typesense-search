@@ -21,8 +21,8 @@ function buildFilterBy(facetFilters: Record<string, string[]>): string {
 
 function buildSortBy(sort: string): string | undefined {
   if (!sort || sort === "relevance") return undefined;
-  if (sort === "dateDesc") return "post_date:desc";
-  if (sort === "dateAsc") return "post_date:asc";
+  if (sort === "dateDesc") return "date:desc";
+  if (sort === "dateAsc") return "date:asc";
   return undefined;
 }
 
@@ -50,9 +50,15 @@ export async function runSearch(
 ): Promise<FacetData | null> {
   const q = state.query.trim() || "*";
   const hasQuery = !!state.query.trim();
+  const hasFacets = Object.values(state.facetFilters).some(
+    (values) => values.length > 0,
+  );
+  // Run (and render) the main search when there is either a text query or
+  // at least one active facet filter.
+  const shouldSearch = hasQuery || hasFacets;
 
-  // Always clear results when there is no real query.
-  if (!hasQuery) {
+  // Clear results only when there is truly nothing to search for.
+  if (!shouldSearch) {
     resultsEl.innerHTML = "";
     if (paginationEl) paginationEl.innerHTML = "";
   }
@@ -72,9 +78,10 @@ export async function runSearch(
     // Run main search + two disjunctive facet queries in parallel.
     // • top_most_parent options → filtered by type_name only (no top_most_parent filter)
     // • type_name options        → filtered by top_most_parent only (no type_name filter)
-    // When there is no real query we skip the main search (results stay empty)
-    // but still fetch facets using q:* so the selects are populated on page load.
-    const mainSearchPromise = hasQuery
+    // When there is no real query and no active facets we skip the main search
+    // (results stay empty) but still fetch facets using q:* so the selects are
+    // populated on page load.
+    const mainSearchPromise = shouldSearch
       ? (client
           .collections(collection)
           .documents()
@@ -119,7 +126,7 @@ export async function runSearch(
         }) as Promise<SearchResponse<HitDocument>>,
     ]);
 
-    if (hasQuery && response) {
+    if (shouldSearch && response) {
       const hits = (response.hits ?? []) as SearchHit[];
 
       if (hits.length === 0) {

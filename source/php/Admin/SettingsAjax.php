@@ -235,7 +235,7 @@ class SettingsAjax
             $result = $client->collections[$collectionName]->documents->search([
                 'q'                => '*',
                 'query_by'         => 'title',
-                'facet_by'         => 'post_type',
+                'facet_by'         => 'type',
                 'max_facet_values' => 100,
                 'per_page'         => 0,
             ]);
@@ -244,7 +244,7 @@ class SettingsAjax
             $facets = [];
 
             foreach ($result['facet_counts'] ?? [] as $facetGroup) {
-                if (($facetGroup['field_name'] ?? '') === 'post_type') {
+                if (($facetGroup['field_name'] ?? '') === 'type') {
                     foreach ($facetGroup['counts'] ?? [] as $item) {
                         $slug = $item['value'];
                         // Try to resolve a human-readable label from WP
