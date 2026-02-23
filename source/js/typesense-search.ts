@@ -99,7 +99,7 @@ function init(): void {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(
       () => updateUrlState({ query: value, page: 1 }),
-      300,
+      100,
     );
   };
   inputEl.addEventListener("input", () =>
