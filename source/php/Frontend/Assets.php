@@ -7,7 +7,7 @@ use TypesenseSearch\Helper\CacheBust;
 /**
  * Class Assets
  *
- * Enqueues frontend styles for the search page.
+ * Enqueues frontend styles and scripts for the search page.
  *
  * @package TypesenseSearch\Frontend
  */
@@ -16,6 +16,32 @@ class Assets
     public function __construct()
     {
         add_action('wp_enqueue_scripts', [$this, 'enqueueStyles']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueueScripts']);
+    }
+
+    /**
+     * Enqueue the compiled search script on search pages.
+     */
+    public function enqueueScripts(): void
+    {
+        if (!is_search()) {
+            return;
+        }
+
+        $jsFile = CacheBust::name('js/typesense-search.js') ?: 'js/typesense-search.js';
+        $jsPath = TYPESENSESEARCH_PATH . 'assets/dist/' . $jsFile;
+
+        if (!file_exists($jsPath)) {
+            return;
+        }
+
+        wp_enqueue_script(
+            'typesense-search',
+            TYPESENSESEARCH_URL . '/assets/dist/' . $jsFile,
+            [],
+            null,
+            true
+        );
     }
 
     /**
