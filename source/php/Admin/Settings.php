@@ -188,10 +188,16 @@ class Settings
             if (empty($field)) {
                 continue;
             }
+            $display = sanitize_text_field($item['display_as'] ?? 'dropdown');
+            if (!in_array($display, ['dropdown', 'button_group'], true)) {
+                $display = 'dropdown';
+            }
+
             $result[] = [
                 'field'       => $field,
                 'label'       => sanitize_text_field($item['label'] ?? ''),
                 'placeholder' => sanitize_text_field($item['placeholder'] ?? ''),
+                'display_as'  => $display,
             ];
         }
 

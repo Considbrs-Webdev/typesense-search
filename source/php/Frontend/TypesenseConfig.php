@@ -36,6 +36,34 @@ class TypesenseConfig
 			'searchKey'  => sanitize_text_field($searchKey),
 		];
 
+		// Include configured facets (field, label, placeholder, display_as)
+		$rawFacets = (array) get_option(\TypesenseSearch\Admin\Settings::OPTION_FACETS, []);
+		$facets = [];
+		foreach ($rawFacets as $f) {
+			if (!is_array($f)) {
+				continue;
+			}
+			$field = sanitize_text_field($f['field'] ?? '');
+			if (empty($field)) {
+				continue;
+			}
+			$display = sanitize_text_field($f['display_as'] ?? 'dropdown');
+			if (!in_array($display, ['dropdown', 'button_group'], true)) {
+				$display = 'dropdown';
+			}
+
+			$facets[] = [
+				'field'       => $field,
+				'label'       => sanitize_text_field($f['label'] ?? ''),
+				'placeholder' => sanitize_text_field($f['placeholder'] ?? ''),
+				'display_as'  => $display,
+			];
+		}
+
+		if (!empty($facets)) {
+			$config['facets'] = $facets;
+		}
+
 		wp_localize_script('typesense-search', 'typesenseConfig', $config);
 	}
 }

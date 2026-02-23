@@ -26,7 +26,7 @@ $ts-thumb-size: 18px;
 // ── Page shell ────────────────────────────────────────────────────────────────
 
 .ts-settings {
-  max-width: 780px;
+  max-width: 800px;
 
   &__title {
     display: flex;
@@ -737,7 +737,7 @@ $ts-thumb-size: 18px;
 
 .ts-facet-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
   align-items: end;
   gap: 12px;
   padding: 16px 24px;
@@ -795,6 +795,34 @@ $ts-thumb-size: 18px;
     }
   }
 
+  &__display {
+    // Match the main select appearance
+    font-size: 13px !important;
+    height: 36px !important;
+    padding: 0 10px !important;
+    border-color: $ts-border !important;
+    border-radius: $ts-radius !important;
+    width: 100%;
+    max-width: 100%;
+    background-color: #fff;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+
+    &:focus {
+      border-color: $ts-blue !important;
+      box-shadow: 0 0 0 1px $ts-blue !important;
+      outline: none !important;
+    }
+
+    &:disabled {
+      background-color: $ts-bg;
+      color: $ts-muted;
+      cursor: not-allowed;
+    }
+  }
+
   &__spinner {
     display: none;
     position: absolute;
@@ -827,15 +855,17 @@ $ts-thumb-size: 18px;
   &__remove {
     display: inline-flex !important;
     align-items: center;
-    gap: 4px;
-    font-size: 12px !important;
+    justify-content: center;
+    gap: 0;
+    width: 36px;
     height: 36px !important;
-    padding: 0 10px !important;
+    padding: 0 !important;
     white-space: nowrap;
     flex-shrink: 0;
     color: #d63638 !important;
     border-color: color.adjust(#f5c2c4, $lightness: -5%) !important;
     background: #fcf0f1 !important;
+    border-radius: $ts-radius;
 
     svg {
       flex-shrink: 0;

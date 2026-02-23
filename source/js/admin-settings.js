@@ -477,6 +477,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!select.value && fields.length > 0) {
                 select.value = fields[0].name;
             }
+            // Update disabled options across all selects to avoid duplicates
+            updateDisabledOptions();
         }
 
         /**
@@ -526,7 +528,18 @@ document.addEventListener('DOMContentLoaded', () => {
             selects.forEach((select) => {
                 populateSelect(select, fields);
                 select.disabled = false;
+                select.addEventListener('change', updateDisabledOptions);
             });
+
+            // Enable/display_as selects and set saved values
+            facetList.querySelectorAll('.ts-facet-row__display').forEach((d) => {
+                const saved = d.dataset.savedDisplay || 'dropdown';
+                d.value = saved;
+                d.disabled = false;
+            });
+
+            // After all selects are hydrated, ensure duplicate options are disabled
+            updateDisabledOptions();
         }
 
         /**
@@ -538,8 +551,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = document.createElement('div');
             row.className    = 'ts-facet-row';
             row.dataset.index = index;
+            // Determine already chosen fields so new row doesn't pick a duplicate
+            const existingSelects = Array.from(facetList.querySelectorAll('.ts-facet-row__select'));
+            const chosen = existingSelects.map((s) => s.value).filter(Boolean);
 
-            const optionHtml = fields.map((f) => `<option value="${escAttr(f.name)}">${escHtml(f.name)}</option>`).join('');
+            // Pick the first available field that's not already chosen
+            const initialField = (fields.find((f) => !chosen.includes(f.name)) || fields[0]).name;
+
+            const optionHtml = fields.map((f) => {
+                const sel = f.name === initialField ? ' selected' : '';
+                return `<option value="${escAttr(f.name)}"${sel}>${escHtml(f.name)}</option>`;
+            }).join('');
             const optName    = `typesense_search_facets[${index}]`;
 
             row.innerHTML = `
@@ -571,9 +593,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         class="regular-text ts-facet-row__input"
                     />
                 </div>
-                <button type="button" class="button ts-facet-row__remove" aria-label="Remove facet">
+                <div class="ts-facet-row__field">
+                    <label class="ts-facet-row__label">Display as</label>
+                    <select name="${escAttr(optName)}[display_as]" class="ts-facet-row__display">
+                        <option value="dropdown" selected>Dropdown</option>
+                        <option value="button_group">Button group</option>
+                    </select>
+                </div>
+                <button type="button" class="button ts-facet-row__remove" title="Remove facet" aria-label="Remove facet">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    Remove
                 </button>`;
 
             row.querySelector('.ts-facet-row__remove').addEventListener('click', () => {
@@ -582,7 +610,33 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             facetList.appendChild(row);
+            // wire up newly added select
+            const sel = row.querySelector('.ts-facet-row__select');
+            if (sel) {
+                sel.addEventListener('change', updateDisabledOptions);
+            }
+            // Recompute disabled options so the newly appended row can't duplicate
+            updateDisabledOptions();
             updateEmptyState();
+        }
+
+        /**
+         * Disable options that are already selected in other rows so the same
+         * facet field cannot be chosen twice.
+         */
+        function updateDisabledOptions() {
+            if (!facetList) return;
+            const selects = Array.from(facetList.querySelectorAll('.ts-facet-row__select'));
+            const chosen = selects.map((s) => s.value).filter(Boolean);
+
+            selects.forEach((s) => {
+                const current = s.value;
+                Array.from(s.options).forEach((opt) => {
+                    // never disable the option that is currently selected for this select
+                    if (!opt.value) return (opt.disabled = false);
+                    opt.disabled = (opt.value !== current) && chosen.includes(opt.value);
+                });
+            });
         }
 
         // Bind remove buttons on existing PHP-rendered rows
@@ -611,12 +665,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                // If all available fields are already chosen, show notice and don't add
+                const existingSelects = Array.from(facetList.querySelectorAll('.ts-facet-row__select'));
+                const chosen = existingSelects.map((s) => s.value).filter(Boolean);
+                if (chosen.length >= fields.length) {
+                    showFacetNotice('All facetable fields have already been added as facets.', true);
+                    return;
+                }
+
                 appendFacetRow(fields);
             });
         }
 
         // Auto-hydrate existing rows on page load
         hydrateExistingRows();
+        // Ensure options are updated even if no explicit change is made by the user
+        // (hydrateExistingRows will call updateDisabledOptions when complete)
     }
 
 });

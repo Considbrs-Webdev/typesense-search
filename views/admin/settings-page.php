@@ -360,13 +360,25 @@ $pageUrl = admin_url('options-general.php?page=' . Settings::PAGE_SLUG);
                                     class="regular-text ts-facet-row__input"
                                 />
                             </div>
+                                <div class="ts-facet-row__field">
+                                    <label class="ts-facet-row__label"><?php esc_html_e('Display as', 'typesense-search'); ?></label>
+                                    <select
+                                        name="<?php echo esc_attr(Settings::OPTION_FACETS); ?>[<?php echo esc_attr($index); ?>][display_as]"
+                                        class="ts-facet-row__display"
+                                        data-saved-display="<?php echo esc_attr($facet['display_as'] ?? 'dropdown'); ?>"
+                                        disabled
+                                    >
+                                        <option value="dropdown" <?php selected(($facet['display_as'] ?? 'dropdown'), 'dropdown'); ?>><?php esc_html_e('Dropdown', 'typesense-search'); ?></option>
+                                        <option value="button_group" <?php selected(($facet['display_as'] ?? 'dropdown'), 'button_group'); ?>><?php esc_html_e('Button group', 'typesense-search'); ?></option>
+                                    </select>
+                                </div>
                             <button
                                 type="button"
                                 class="button ts-facet-row__remove"
+                                title="<?php esc_attr_e('Remove facet', 'typesense-search'); ?>"
                                 aria-label="<?php esc_attr_e('Remove facet', 'typesense-search'); ?>"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                <?php esc_html_e('Remove', 'typesense-search'); ?>
                             </button>
                         </div>
                         <?php endforeach; ?>
