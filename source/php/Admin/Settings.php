@@ -27,12 +27,15 @@ class Settings
     public const OPTION_FACETS     = 'typesense_search_facets';
     public const OPTION_HITS_PER_PAGE = 'typesense_search_hits_per_page';
 
-    private const TABS = [
-        'connection' => 'Typesense Connection',
-        'content'    => 'Settings',
-        'facetting'  => 'Facetting',
-        'statistics' => 'Statistics',
-    ];
+    private static function getTabs(): array
+    {
+        return [
+            'connection' => __('Typesense Connection', 'typesense-search'),
+            'content'    => __('Settings', 'typesense-search'),
+            'facetting'  => __('Facetting', 'typesense-search'),
+            'statistics' => __('Statistics', 'typesense-search'),
+        ];
+    }
 
     public function __construct()
     {
@@ -152,11 +155,11 @@ class Settings
             return;
         }
 
-        $activeTab = isset($_GET['tab']) && array_key_exists($_GET['tab'], self::TABS)  // phpcs:ignore WordPress.Security.NonceVerification
+        $activeTab = isset($_GET['tab']) && array_key_exists($_GET['tab'], self::getTabs())  // phpcs:ignore WordPress.Security.NonceVerification
             ? sanitize_key($_GET['tab'])  // phpcs:ignore WordPress.Security.NonceVerification
             : 'connection';
 
-        $tabs             = self::TABS;
+        $tabs             = self::getTabs();
         $postTypes        = self::getIndexablePostTypes();
         $enabledPostTypes = (array) get_option(self::OPTION_POST_TYPES, []);
         $facets           = (array) get_option(self::OPTION_FACETS, []);

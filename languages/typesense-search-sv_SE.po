@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-02-24T07:02:15+00:00\n"
-"PO-Revision-Date: 2026-02-24 08:03+0100\n"
+"POT-Creation-Date: 2026-02-24T07:09:36+00:00\n"
+"PO-Revision-Date: 2026-02-24 08:10+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -17,7 +17,7 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: typesense-search.php source/php/Admin/MetaBox.php:41
-#: source/php/Admin/Settings.php:50 source/php/Admin/Settings.php:51
+#: source/php/Admin/Settings.php:53 source/php/Admin/Settings.php:54
 #: views/admin/settings-page.php:23
 msgid "Typesense Search"
 msgstr "Typesense-sök"
@@ -61,6 +61,22 @@ msgid ""
 msgstr ""
 "Ytterligare ord eller fraser som ska matcha detta inlägg i sökningen, även "
 "om de inte förekommer i innehållet."
+
+#: source/php/Admin/Settings.php:33
+msgid "Typesense Connection"
+msgstr "Anslutning"
+
+#: source/php/Admin/Settings.php:34
+msgid "Settings"
+msgstr "Inställningar"
+
+#: source/php/Admin/Settings.php:35
+msgid "Facetting"
+msgstr "Facettering"
+
+#: source/php/Admin/Settings.php:36
+msgid "Statistics"
+msgstr "Statistik"
 
 #: source/php/Admin/SettingsAjax.php:51 source/php/Admin/SettingsAjax.php:221
 #: source/php/Admin/SettingsAjax.php:288 source/php/Admin/SettingsAjax.php:343
@@ -319,6 +335,14 @@ msgstr ""
 #: views/admin/settings-tabs/connection.php:182
 msgid "Generate search key"
 msgstr "Generera söknyckel"
+
+#: views/admin/settings-tabs/connection.php:196
+#: views/admin/settings-tabs/content.php:88
+#: views/admin/settings-tabs/facetting.php:105
+#, fuzzy
+#| msgid "General settings"
+msgid "Save settings"
+msgstr "Allmänna inställningar"
 
 #: views/admin/settings-tabs/content.php:15
 msgid "General settings"

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-24T07:02:15+00:00\n"
+"POT-Creation-Date: 2026-02-24T07:09:36+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -17,8 +17,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #: typesense-search.php
 #: source/php/Admin/MetaBox.php:41
-#: source/php/Admin/Settings.php:50
-#: source/php/Admin/Settings.php:51
+#: source/php/Admin/Settings.php:53
+#: source/php/Admin/Settings.php:54
 #: views/admin/settings-page.php:23
 msgid "Typesense Search"
 msgstr ""
@@ -57,6 +57,22 @@ msgstr ""
 
 #: source/php/Admin/MetaBox.php:90
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
+msgstr ""
+
+#: source/php/Admin/Settings.php:33
+msgid "Typesense Connection"
+msgstr ""
+
+#: source/php/Admin/Settings.php:34
+msgid "Settings"
+msgstr ""
+
+#: source/php/Admin/Settings.php:35
+msgid "Facetting"
+msgstr ""
+
+#: source/php/Admin/Settings.php:36
+msgid "Statistics"
 msgstr ""
 
 #: source/php/Admin/SettingsAjax.php:51
