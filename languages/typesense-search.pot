@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-24T07:09:36+00:00\n"
+"POT-Creation-Date: 2026-02-24T13:36:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -17,8 +17,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #: typesense-search.php
 #: source/php/Admin/MetaBox.php:41
-#: source/php/Admin/Settings.php:53
 #: source/php/Admin/Settings.php:54
+#: source/php/Admin/Settings.php:55
 #: views/admin/settings-page.php:23
 msgid "Typesense Search"
 msgstr ""
@@ -59,19 +59,19 @@ msgstr ""
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
-#: source/php/Admin/Settings.php:33
+#: source/php/Admin/Settings.php:34
 msgid "Typesense Connection"
 msgstr ""
 
-#: source/php/Admin/Settings.php:34
+#: source/php/Admin/Settings.php:35
 msgid "Settings"
 msgstr ""
 
-#: source/php/Admin/Settings.php:35
+#: source/php/Admin/Settings.php:36
 msgid "Facetting"
 msgstr ""
 
-#: source/php/Admin/Settings.php:36
+#: source/php/Admin/Settings.php:37
 msgid "Statistics"
 msgstr ""
 
@@ -229,72 +229,80 @@ msgid "The full URL to your Typesense server, including protocol and port if nee
 msgstr ""
 
 #: views/admin/settings-tabs/connection.php:47
-msgid "Collection name"
+msgid "Frontend host (optional)"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:62
-msgid "The name of the Typesense collection where content will be indexed. Use lowercase letters, numbers, and hyphens only."
+#: views/admin/settings-tabs/connection.php:61
+msgid "Optional host used by browsers to reach Typesense. Useful when you expose Typesense through a proxy or different public host than the server-side host."
 msgstr ""
 
 #: views/admin/settings-tabs/connection.php:69
+msgid "Collection name"
+msgstr ""
+
+#: views/admin/settings-tabs/connection.php:84
+msgid "The name of the Typesense collection where content will be indexed. Use lowercase letters, numbers, and hyphens only."
+msgstr ""
+
+#: views/admin/settings-tabs/connection.php:91
 msgid "Connection"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:75
+#: views/admin/settings-tabs/connection.php:97
 msgid "Test connection and check collection"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:79
+#: views/admin/settings-tabs/connection.php:101
 msgid "Verify that the host is reachable, the Admin API key is accepted and the collection exists."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:90
-#: views/admin/settings-tabs/connection.php:96
+#: views/admin/settings-tabs/connection.php:112
+#: views/admin/settings-tabs/connection.php:118
 msgid "Create collection"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:105
+#: views/admin/settings-tabs/connection.php:127
 msgid "The collection does not yet exist in Typesense."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:106
+#: views/admin/settings-tabs/connection.php:128
 msgid "Click the button to create it before indexing."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:116
+#: views/admin/settings-tabs/connection.php:138
 msgid "API Keys"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:117
+#: views/admin/settings-tabs/connection.php:139
 msgid "Keep your admin key secret — it grants full access to your cluster. The search key is safe to expose in your front-end JavaScript."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:125
+#: views/admin/settings-tabs/connection.php:147
 msgid "Admin API key"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:140
-#: views/admin/settings-tabs/connection.php:169
+#: views/admin/settings-tabs/connection.php:162
+#: views/admin/settings-tabs/connection.php:191
 msgid "Toggle key visibility"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:146
+#: views/admin/settings-tabs/connection.php:168
 msgid "Used server-side for indexing operations. Never expose this key publicly."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:154
+#: views/admin/settings-tabs/connection.php:176
 msgid "Search API key"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:175
+#: views/admin/settings-tabs/connection.php:197
 msgid "A search-only API key used in your front-end JavaScript. This key has read-only access and is safe to include in public code."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:182
+#: views/admin/settings-tabs/connection.php:204
 msgid "Generate search key"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:196
+#: views/admin/settings-tabs/connection.php:218
 #: views/admin/settings-tabs/content.php:88
 #: views/admin/settings-tabs/facetting.php:105
 msgid "Save settings"

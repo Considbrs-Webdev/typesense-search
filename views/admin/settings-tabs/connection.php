@@ -41,6 +41,28 @@ if ($activeTab !== 'connection') {
                     </div>
                 </div>
 
+                <!-- Frontend host (optional) -->
+                <div class="ts-field">
+                    <label for="ts-frontend" class="ts-field__label">
+                        <?php esc_html_e('Frontend host (optional)', 'typesense-search'); ?>
+                    </label>
+                    <div class="ts-field__body">
+                        <input
+                            type="url"
+                            id="ts-frontend"
+                            name="<?php echo esc_attr(Settings::OPTION_FRONTEND_HOST); ?>"
+                            value="<?php echo esc_attr(get_option(Settings::OPTION_FRONTEND_HOST)); ?>"
+                            placeholder="https://search.example.com"
+                            class="regular-text ts-field__input"
+                            spellcheck="false"
+                            autocomplete="off"
+                        />
+                        <p class="ts-field__description">
+                            <?php esc_html_e('Optional host used by browsers to reach Typesense. Useful when you expose Typesense through a proxy or different public host than the server-side host.', 'typesense-search'); ?>
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Index / Collection name -->
                 <div class="ts-field">
                     <label for="ts-index-name" class="ts-field__label">

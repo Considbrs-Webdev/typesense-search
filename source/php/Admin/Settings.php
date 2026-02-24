@@ -23,6 +23,7 @@ class Settings
     public const OPTION_INDEX_NAME = 'typesense_search_index_name';
     public const OPTION_ADMIN_KEY  = 'typesense_search_admin_key';
     public const OPTION_SEARCH_KEY = 'typesense_search_search_key';
+    public const OPTION_FRONTEND_HOST = 'typesense_search_frontend_host';
     public const OPTION_POST_TYPES = 'typesense_search_post_types';
     public const OPTION_FACETS     = 'typesense_search_facets';
     public const OPTION_HITS_PER_PAGE = 'typesense_search_hits_per_page';
@@ -68,6 +69,7 @@ class Settings
             self::OPTION_INDEX_NAME,
             self::OPTION_ADMIN_KEY,
             self::OPTION_SEARCH_KEY,
+            self::OPTION_FRONTEND_HOST,
         ] as $option) {
             register_setting(self::OPTION_GROUP_CONNECTION, $option, [
                 'type'              => 'string',
