@@ -5,6 +5,15 @@
 import { Client as TypesenseClient } from "typesense";
 import type { TypesenseSearchConfig } from "./types";
 
+/**
+ * Normalize path for Typesense node config.
+ * Removes trailing slash to avoid double slashes when endpoint is appended.
+ */
+function normalizePath(pathname: string): string {
+  const path = pathname.replace(/\/+$/, "");
+  return path === "" || path === "/" ? "" : path;
+}
+
 export function createClient(
   cfg: TypesenseSearchConfig,
 ): TypesenseClient | null {
@@ -17,9 +26,10 @@ export function createClient(
       : protocol === "https"
         ? 443
         : 80;
+    const path = normalizePath(url.pathname);
 
     return new TypesenseClient({
-      nodes: [{ host, port, protocol }],
+      nodes: [{ host, port, protocol, path }],
       apiKey: cfg.searchKey,
       connectionTimeoutSeconds: 5,
     });
