@@ -17,8 +17,16 @@ use TypesenseSearch\Indexing\DocumentBuilder;
  */
 class PageAdapter
 {
+    /**
+     * Cached front page ID to avoid repeated calls to get_option() during
+     * large indexing runs.
+     *
+     * @var int
+     */
+    private int $frontPageId = 0;
     public function __construct()
     {
+        $this->frontPageId = (int) get_option('page_on_front');
         add_filter(
             sprintf(DocumentBuilder::FILTER_BUILD_POST_TYPE, 'page'),
             [$this, 'addTopMostParent'],
@@ -37,6 +45,11 @@ class PageAdapter
     public function addTopMostParent(array $document, \WP_Post $post): array
     {
         $ancestors = get_post_ancestors($post);
+
+        // Do not add a `top_most_parent` for the site's front page.
+        if ($this->frontPageId && isset($post->ID) && (int) $post->ID === $this->frontPageId) {
+            return $document;
+        }
 
         // Use the top-most ancestor if available, otherwise fall back to the
         // page itself.

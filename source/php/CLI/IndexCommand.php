@@ -366,7 +366,7 @@ class IndexCommand
                 $label    = isset($enabledObjects[$postType])
                     ? sprintf('%s (%s)', $enabledObjects[$postType]->label, $postType)
                     : $postType;
-                $filterBy = sprintf('post_type:=%s', $postType);
+                $filterBy = sprintf('type:=%s', $postType);
             } else {
                 $label    = 'all post types';
                 $filterBy = 'id:!= 0'; // WP post IDs are always > 0
