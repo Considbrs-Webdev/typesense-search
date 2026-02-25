@@ -68,9 +68,10 @@
                 @include('templates.pagination')
 
                 {{-- Render compiled hit templates for JS consumption --}}
-                @if (!empty($hitTemplates))
-                    @foreach ($hitTemplates as $template)
-                        @include("templates.hits.{$template}")
+                @if (!empty($hitTemplates) && !empty($hitTemplateViews))
+                    @foreach ($hitTemplates as $templateKey)
+                        @php $viewPath = $hitTemplateViews[$templateKey] ?? "templates.hits.{$templateKey}"; @endphp
+                        @include($viewPath)
                     @endforeach
                 @endif
 

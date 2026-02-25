@@ -54,19 +54,21 @@ class DocumentBuilder
             $thumbnail = (string) get_the_post_thumbnail_url($post->ID, 'medium');
         }
 
+        $dateTimestamp = (int) strtotime((string) $post->post_date_gmt);
         $document = [
-            'id'             => (string) $post->ID,
-            'title'          => (string) $post->post_title,
-            'content'        => wp_strip_all_tags((string) apply_filters('the_content', $post->post_content)),
-            'excerpt'        => wp_strip_all_tags((string) get_the_excerpt($post)),
-            'url'            => (string) get_permalink($post),
-            'type'      => (string) $post->post_type,
-            'type_name' => (string) get_post_type_object($post->post_type)->label,
-            'date'           => (int) strtotime((string) $post->post_date_gmt),
-            'thumbnail'      => $thumbnail,
+            'id'                   => (string) $post->ID,
+            'title'                => (string) $post->post_title,
+            'content'              => wp_strip_all_tags((string) apply_filters('the_content', $post->post_content)),
+            'excerpt'              => wp_strip_all_tags((string) get_the_excerpt($post)),
+            'url'                  => (string) get_permalink($post),
+            'type'                 => (string) $post->post_type,
+            'type_name'            => (string) get_post_type_object($post->post_type)->label,
+            'date'                 => $dateTimestamp,
+            'post_date_formatted'   => $dateTimestamp > 0 ? (string) date_i18n(get_option('date_format'), $dateTimestamp) : '',
+            'thumbnail'            => $thumbnail,
             // Extra search terms entered via the meta box — stored as a plain
             // string so Typesense can tokenise and match against them.
-            'extra_terms'    => (string) get_post_meta($post->ID, MetaBox::META_EXTRA_TERMS, true),
+            'extra_terms'          => (string) get_post_meta($post->ID, MetaBox::META_EXTRA_TERMS, true),
         ];
 
         /**

@@ -71,6 +71,22 @@ class TypesenseConfig
 			$config['facets'] = $facets;
 		}
 
+		/**
+		 * Filters the post_type → template_key mapping for hit template selection.
+		 *
+		 * @param array<string, string> $mapping Map of post_type => template_key.
+		 */
+		$templateMapping = (array) apply_filters('Municipio/TypesenseSearch/postTypeToTemplate', []);
+		$config['templateMapping'] = array_map('sanitize_text_field', $templateMapping);
+
+		/**
+		 * Filters the placeholder key → document field path mapping for dynamic placeholders.
+		 *
+		 * @param array<string, string> $mappings Map of placeholder_key => field_path (e.g. SEARCH_HIT_DATE_OVERLAY => date_overlay).
+		 */
+		$placeholderMappings = (array) apply_filters('Municipio/TypesenseSearch/placeholderMappings', []);
+		$config['placeholderMappings'] = array_map('sanitize_text_field', $placeholderMappings);
+
 		wp_localize_script('typesense-search', 'typesenseConfig', $config);
 	}
 }

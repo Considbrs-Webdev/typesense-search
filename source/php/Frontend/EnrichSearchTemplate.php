@@ -48,19 +48,33 @@ class EnrichSearchTemplate
 		// Home URL used by the search form
 		$data['homeUrl'] = $data['homeUrl'] ?? home_url('/');
 
-		// Load templates from views/templates
-		$pluginRoot = dirname(__DIR__, 3);
-		$templatesDir = $pluginRoot . '/views/templates/hits';
-		$templates = [];
+		// Built-in template keys (match data-js-search-hit-template-{key} convention)
+		$templates = ['default', 'image', 'noimage'];
 
-		if (is_dir($templatesDir)) {
-			foreach (glob($templatesDir . '/*.blade.php') as $file) {
-				$name = basename($file, '.blade.php');
-				$templates[] = $name;
-			}
+		/**
+		 * Filters the list of hit template keys.
+		 *
+		 * @param string[] $templates Template keys (e.g. 'default', 'image', 'simpleview-event').
+		 */
+		$data['hitTemplates'] = (array) apply_filters('Municipio/TypesenseSearch/hitTemplates', $templates);
+
+		// Resolve view path for each template
+		$builtInViews = [
+			'default' => 'templates.hits.hit-default',
+			'image'   => 'templates.hits.hit-image',
+			'noimage' => 'templates.hits.hit-noimage',
+		];
+		$data['hitTemplateViews'] = [];
+		foreach ($data['hitTemplates'] as $key) {
+			$defaultView = $builtInViews[$key] ?? 'templates.hits.' . $key;
+			/**
+			 * Filters the view path for a hit template.
+			 *
+			 * @param string $view  Resolved view path (e.g. 'templates.hits.hit-default').
+			 * @param string $key  Template key (e.g. 'default', 'simpleview-event').
+			 */
+			$data['hitTemplateViews'][$key] = (string) apply_filters('Municipio/TypesenseSearch/hitTemplateView', $defaultView, $key);
 		}
-
-		$data['hitTemplates'] = $templates;
 
 		return $data;
 	}

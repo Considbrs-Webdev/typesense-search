@@ -308,7 +308,7 @@ class SettingsAjax
         try {
             $client = ClientFactory::build($remote, $adminKey);
             $result = $client->collections[$collectionName]->documents->delete([
-                'filter_by' => 'post_type:=' . $postType,
+                'filter_by' => 'type:=' . $postType,
             ]);
         } catch (\Exception $e) {
             wp_send_json_error([
