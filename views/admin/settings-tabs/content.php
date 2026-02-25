@@ -36,6 +36,99 @@ if ($activeTab !== 'content') {
                         </p>
                     </div>
                 </div>
+                <?php if (Settings::isModularityAvailable()) : ?>
+                <div class="ts-field">
+                    <div class="ts-field__label">
+                        <?php esc_html_e('Index Modularity content', 'typesense-search'); ?>
+                    </div>
+                    <div class="ts-field__body">
+                        <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_INDEX_MODULARITY); ?>" value="0" />
+
+                        <label for="ts-index-modularity" class="ts-toggle">
+                            <input
+                                type="checkbox"
+                                id="ts-index-modularity"
+                                name="<?php echo esc_attr(Settings::OPTION_INDEX_MODULARITY); ?>"
+                                value="1"
+                                <?php checked(1, (int) get_option(Settings::OPTION_INDEX_MODULARITY, 0)); ?>
+                                class="ts-toggle__input"
+                            />
+                            <span class="ts-toggle__track" aria-hidden="true">
+                                <span class="ts-toggle__thumb"></span>
+                            </span>
+                            <span class="ts-toggle__status">
+                                <span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span>
+                                <span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span>
+                            </span>
+                        </label>
+
+                        <p class="ts-field__description">
+                            <?php esc_html_e('When enabled, content that is added via Modularity modules will be included in the Typesense index. If disabled, content placed in module slots like sidebars will not be indexed for search.', 'typesense-search'); ?>
+                        </p>
+                    </div>
+                </div>
+                <?php endif; ?>
+                <div class="ts-field">
+                    <div class="ts-field__label">
+                        <?php esc_html_e('Debounce search', 'typesense-search'); ?>
+                    </div>
+                    <div class="ts-field__body">
+                        <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_DEBOUNCE); ?>" value="0" />
+
+                        <label for="ts-debounce" class="ts-toggle">
+                            <input
+                                type="checkbox"
+                                id="ts-debounce"
+                                name="<?php echo esc_attr(Settings::OPTION_DEBOUNCE); ?>"
+                                value="1"
+                                <?php checked(1, (int) get_option(Settings::OPTION_DEBOUNCE, 1)); ?>
+                                class="ts-toggle__input"
+                            />
+                            <span class="ts-toggle__track" aria-hidden="true">
+                                <span class="ts-toggle__thumb"></span>
+                            </span>
+                            <span class="ts-toggle__status">
+                                <span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span>
+                                <span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span>
+                            </span>
+                        </label>
+
+                        <p class="ts-field__description">
+                            <?php esc_html_e('When enabled, search results are fetched only after the user pauses typing (debounced). When disabled, results appear immediately on every keystroke.', 'typesense-search'); ?>
+                        </p>
+                    </div>
+                </div>
+                <div class="ts-field" id="ts-debounce-delay-field"<?php echo (int) get_option(Settings::OPTION_DEBOUNCE, 1) ? '' : ' hidden'; ?>>
+                    <label for="ts-debounce-delay" class="ts-field__label">
+                        <?php esc_html_e('Debounce delay (ms)', 'typesense-search'); ?>
+                    </label>
+                    <div class="ts-field__body">
+                        <input
+                            type="number"
+                            id="ts-debounce-delay"
+                            name="<?php echo esc_attr(Settings::OPTION_DEBOUNCE_DELAY); ?>"
+                            value="<?php echo esc_attr(get_option(Settings::OPTION_DEBOUNCE_DELAY, 300)); ?>"
+                            class="small-text ts-field__input"
+                            step="50"
+                            min="50"
+                            max="2000"
+                        />
+                        <p class="ts-field__description">
+                            <?php esc_html_e('How long to wait after the user stops typing before firing the search request.', 'typesense-search'); ?>
+                        </p>
+                    </div>
+                </div>
+                <script>
+                (function () {
+                    var toggle = document.getElementById('ts-debounce');
+                    var delayField = document.getElementById('ts-debounce-delay-field');
+                    if (toggle && delayField) {
+                        toggle.addEventListener('change', function () {
+                            delayField.hidden = !this.checked;
+                        });
+                    }
+                }());
+                </script>
             </div>
         </div>
 

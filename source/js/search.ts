@@ -93,6 +93,10 @@ export async function runSearch(
     const resultsContainer = resultsEl.closest<HTMLElement>(
       "[data-js-search-results-container]",
     );
+    const noHitsContainer =
+      resultsContainer?.parentElement?.querySelector<HTMLElement>(
+        "[data-js-no-hits-container]",
+      );
     if (resultsContainer) {
       resultsContainer.style.display = "none";
       const countEl = resultsContainer.querySelector<HTMLElement>(
@@ -100,6 +104,7 @@ export async function runSearch(
       );
       if (countEl) countEl.textContent = "";
     }
+    if (noHitsContainer) noHitsContainer.style.display = "none";
   }
 
   try {
@@ -155,8 +160,13 @@ export async function runSearch(
       const resultsContainer = resultsEl.closest<HTMLElement>(
         "[data-js-search-results-container]",
       );
+      const noHitsContainer =
+        resultsContainer?.parentElement?.querySelector<HTMLElement>(
+          "[data-js-no-hits-container]",
+        );
 
       if (hits.length === 0) {
+        resultsEl.innerHTML = "";
         if (resultsContainer) {
           resultsContainer.style.display = "none";
           const countEl = resultsContainer.querySelector<HTMLElement>(
@@ -164,6 +174,7 @@ export async function runSearch(
           );
           if (countEl) countEl.textContent = "";
         }
+        if (noHitsContainer) noHitsContainer.style.display = "";
         if (paginationEl) paginationEl.innerHTML = "";
       } else {
         resultsEl.innerHTML = hits
@@ -180,6 +191,7 @@ export async function runSearch(
           );
         }
 
+        if (noHitsContainer) noHitsContainer.style.display = "none";
         if (resultsContainer) {
           resultsContainer.style.display = "";
           const countEl = resultsContainer.querySelector<HTMLElement>(
@@ -188,9 +200,13 @@ export async function runSearch(
           if (countEl) {
             const found = response.found ?? hits.length;
             const singular =
-              countEl.getAttribute("data-lang-singular") ?? "%d result";
+              countEl.getAttribute("data-lang-singular") ??
+              window.typesenseI18n?.resultSingular ??
+              "%d result";
             const plural =
-              countEl.getAttribute("data-lang-plural") ?? "%d results";
+              countEl.getAttribute("data-lang-plural") ??
+              window.typesenseI18n?.resultPlural ??
+              "%d results";
             const template = found === 1 ? singular : plural;
             countEl.textContent = template.replace("%d", String(found));
           }
@@ -207,7 +223,9 @@ export async function runSearch(
     return facetData;
   } catch (err) {
     console.error("[TypesenseSearch] Search error:", err);
-    resultsEl.innerHTML = `<p class="ts-search-error">Search failed. Please try again.</p>`;
+    const errorMsg =
+      window.typesenseI18n?.searchError ?? "Search failed. Please try again.";
+    resultsEl.innerHTML = `<p class="ts-search-error">${errorMsg}</p>`;
     if (paginationEl) paginationEl.innerHTML = "";
     return null;
   }

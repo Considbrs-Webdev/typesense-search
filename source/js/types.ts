@@ -15,11 +15,22 @@ export interface TypesenseSearchConfig {
   searchKey: string;
   hitsPerPage: number;
   facets?: FacetConfig[];
+  debounce?: boolean;
+  debounceDelay?: number;
+}
+
+export interface TypesenseI18n {
+  resultSingular: string;
+  resultPlural: string;
+  searchError: string;
+  readMore: string;
+  paginationLabel: string;
 }
 
 declare global {
   interface Window {
     typesenseConfig?: TypesenseSearchConfig;
+    typesenseI18n?: TypesenseI18n;
   }
 }
 

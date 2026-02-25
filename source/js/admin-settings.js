@@ -4,6 +4,9 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Strings passed from PHP via wp_localize_script('typesense-search-admin', 'tsAdminI18n', ...)
+    const i18n = window.tsAdminI18n ?? {};
+
     // ── Password visibility toggles ──────────────────────────────────────────
     document.querySelectorAll('.ts-field__toggle-visibility').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -40,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showResult(area, data) {
         const msgEl = area.querySelector('.ts-connection-result__message');
-        if (msgEl) msgEl.textContent = data?.data?.message ?? (data.success ? 'OK' : 'Unknown error.');
+        if (msgEl) msgEl.textContent = data?.data?.message ?? (data.success ? (i18n.ok ?? 'OK') : (i18n.unknownError ?? 'Unknown error.'));
         area.className = 'ts-connection-result ' + (data.success ? 'is-success' : 'is-error');
         area.hidden = false;
     }
@@ -72,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     collection_name: collectionName,
                 });
             } catch (err) {
-                data = { success: false, data: { message: 'Request failed: ' + err.message } };
+                data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
             } finally {
                 setButtonLoading(testBtn, false);
             }
@@ -109,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     collection_name: collectionName,
                 });
             } catch (err) {
-                data = { success: false, data: { message: 'Request failed: ' + err.message } };
+                data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
             } finally {
                 setButtonLoading(createColBtn, false);
             }
@@ -156,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     collection_name: collectionName,
                 });
             } catch (err) {
-                data = { success: false, data: { message: 'Request failed: ' + err.message } };
+                data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
             } finally {
                 setButtonLoading(genKeyBtn, false);
             }
@@ -255,11 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         container.innerHTML = `
-            <svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pie chart showing document distribution">
+            <svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escHtml(i18n.pieChartLabel ?? 'Pie chart showing document distribution')}">
                 ${paths}
                 <circle cx="${cx}" cy="${cy}" r="${rInner}" fill="#fff"/>
                 <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="22" font-weight="700" fill="#1d2327" font-family="sans-serif">${total.toLocaleString()}</text>
-                <text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="#646970" font-family="sans-serif">documents</text>
+                <text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="#646970" font-family="sans-serif">${escHtml(i18n.documentsLabel ?? 'documents')}</text>
             </svg>`;
     }
 
@@ -284,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="ts-stats-row__pct">${pct}%</span>
                 <button type="button" class="button button-small ts-stats-row__clear" data-post-type="${escAttr(facet.slug)}" data-label="${escAttr(facet.label)}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                    Clear
+                    ${escHtml(i18n.clearBtn ?? 'Clear')}
                 </button>
                 <span class="ts-stats-row__feedback" hidden></span>`;
 
@@ -313,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const row      = btn.closest('.ts-stats-row');
         const feedback = row?.querySelector('.ts-stats-row__feedback');
 
-        if (!confirm(`Remove all "${label}" documents from the Typesense index? This cannot be undone.`)) {
+        if (!confirm((i18n.confirmClearType ?? 'Remove all "%s" documents from the Typesense index? This cannot be undone.').replace('%s', label))) {
             return;
         }
 
@@ -328,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 post_type: postType,
             });
         } catch (err) {
-            data = { success: false, data: { message: 'Request failed: ' + err.message } };
+            data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
         }
 
         if (data.success) {
@@ -337,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             btn.disabled = false;
             if (feedback) {
-                feedback.textContent = data?.data?.message ?? 'Error.';
+                feedback.textContent = data?.data?.message ?? (i18n.error ?? 'Error.');
                 feedback.className   = 'ts-stats-row__feedback is-error';
                 feedback.hidden      = false;
             }
@@ -373,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 nonce:  tsSettings.nonceGetStats,
             });
         } catch (err) {
-            data = { success: false, data: { message: 'Request failed: ' + err.message } };
+            data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
         } finally {
             if (loadingEl)       loadingEl.hidden = true;
             if (statsRefreshBtn) setButtonLoading(statsRefreshBtn, false);
@@ -381,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!data.success) {
             if (errorEl)    errorEl.hidden  = false;
-            if (errorMsgEl) errorMsgEl.textContent = data?.data?.message ?? 'Unknown error.';
+            if (errorMsgEl) errorMsgEl.textContent = data?.data?.message ?? (i18n.unknownError ?? 'Unknown error.');
             return;
         }
 
@@ -458,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (fields.length === 0) {
                 const opt = document.createElement('option');
                 opt.value    = '';
-                opt.textContent = '— No facetable fields found —';
+                opt.textContent = i18n.noFacetableFields ?? '— No facetable fields found —';
                 opt.disabled = true;
                 opt.selected = true;
                 select.appendChild(opt);
@@ -495,11 +498,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     nonce:  tsSettings.nonceGetFacetFields,
                 });
             } catch (err) {
-                data = { success: false, data: { message: 'Request failed: ' + err.message } };
+                data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
             }
 
             if (!data.success) {
-                showFacetNotice(data?.data?.message ?? 'Could not load facetable fields.', true);
+                showFacetNotice(data?.data?.message ?? (i18n.couldNotLoadFields ?? 'Could not load facetable fields.'), true);
                 return null;
             }
 
@@ -566,7 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             row.innerHTML = `
                 <div class="ts-facet-row__field">
-                    <label class="ts-facet-row__label">Field</label>
+                    <label class="ts-facet-row__label">${escHtml(i18n.facetFieldLabel ?? 'Field')}</label>
                     <div class="ts-facet-row__select-wrap">
                         <select name="${escAttr(optName)}[field]" class="ts-facet-row__select">
                             ${optionHtml}
@@ -574,33 +577,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="ts-facet-row__field">
-                    <label class="ts-facet-row__label">Label</label>
+                    <label class="ts-facet-row__label">${escHtml(i18n.facetLabelLabel ?? 'Label')}</label>
                     <input
                         type="text"
                         name="${escAttr(optName)}[label]"
                         value=""
-                        placeholder="e.g. Category"
+                        placeholder="${escAttr(i18n.facetLabelPlaceholder ?? 'e.g. Category')}"
                         class="regular-text ts-facet-row__input"
                     />
                 </div>
                 <div class="ts-facet-row__field">
-                    <label class="ts-facet-row__label">Placeholder</label>
+                    <label class="ts-facet-row__label">${escHtml(i18n.facetPlaceholderLabel ?? 'Placeholder')}</label>
                     <input
                         type="text"
                         name="${escAttr(optName)}[placeholder]"
                         value=""
-                        placeholder="e.g. All categories"
+                        placeholder="${escAttr(i18n.facetPlaceholderPh ?? 'e.g. All categories')}"
                         class="regular-text ts-facet-row__input"
                     />
                 </div>
                 <div class="ts-facet-row__field">
-                    <label class="ts-facet-row__label">Display as</label>
+                    <label class="ts-facet-row__label">${escHtml(i18n.facetDisplayAsLabel ?? 'Display as')}</label>
                     <select name="${escAttr(optName)}[display_as]" class="ts-facet-row__display">
-                        <option value="dropdown" selected>Dropdown</option>
-                        <option value="button_group">Button group</option>
+                        <option value="dropdown" selected>${escHtml(i18n.facetOptDropdown ?? 'Dropdown')}</option>
+                        <option value="button_group">${escHtml(i18n.facetOptButtonGroup ?? 'Button group')}</option>
                     </select>
                 </div>
-                <button type="button" class="button ts-facet-row__remove" title="Remove facet" aria-label="Remove facet">
+                <button type="button" class="button ts-facet-row__remove" title="${escAttr(i18n.removeFacet ?? 'Remove facet')}" aria-label="${escAttr(i18n.removeFacet ?? 'Remove facet')}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>`;
 
@@ -661,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!fields) return;  // error already shown
 
                 if (fields.length === 0) {
-                    showFacetNotice('No facetable fields found in the collection schema. Make sure the collection exists and has fields with facet: true.', true);
+                    showFacetNotice(i18n.noFieldsInSchema ?? 'No facetable fields found in the collection schema. Make sure the collection exists and has fields with facet: true.', true);
                     return;
                 }
 
@@ -669,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const existingSelects = Array.from(facetList.querySelectorAll('.ts-facet-row__select'));
                 const chosen = existingSelects.map((s) => s.value).filter(Boolean);
                 if (chosen.length >= fields.length) {
-                    showFacetNotice('All facetable fields have already been added as facets.', true);
+                    showFacetNotice(i18n.allFieldsAdded ?? 'All facetable fields have already been added as facets.', true);
                     return;
                 }
 

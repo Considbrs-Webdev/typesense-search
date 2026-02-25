@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-24T13:36:32+00:00\n"
+"POT-Creation-Date: 2026-02-25T09:12:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -17,8 +17,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #: typesense-search.php
 #: source/php/Admin/MetaBox.php:41
-#: source/php/Admin/Settings.php:54
-#: source/php/Admin/Settings.php:55
+#: source/php/Admin/Settings.php:58
+#: source/php/Admin/Settings.php:59
 #: views/admin/settings-page.php:23
 msgid "Typesense Search"
 msgstr ""
@@ -59,19 +59,19 @@ msgstr ""
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
-#: source/php/Admin/Settings.php:34
+#: source/php/Admin/Settings.php:38
 msgid "Typesense Connection"
 msgstr ""
 
-#: source/php/Admin/Settings.php:35
+#: source/php/Admin/Settings.php:39
 msgid "Settings"
 msgstr ""
 
-#: source/php/Admin/Settings.php:36
+#: source/php/Admin/Settings.php:40
 msgid "Facetting"
 msgstr ""
 
-#: source/php/Admin/Settings.php:37
+#: source/php/Admin/Settings.php:41
 msgid "Statistics"
 msgstr ""
 
@@ -185,19 +185,141 @@ msgid "Search Results"
 msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:38
-msgid "Sort"
+msgid "No Results"
 msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:39
-msgid "Relevance"
+msgid "No results found for your search."
 msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:40
-msgid "Date Ascending"
+msgid "Sort"
 msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:41
+msgid "Relevance"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:42
+msgid "Date Ascending"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:43
 msgid "Date Descending"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:24
+msgid "%d result"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:25
+msgid "%d results"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:28
+msgid "Search failed. Please try again."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:31
+msgid "Read more: "
+msgstr ""
+
+#: source/php/Frontend/I18n.php:34
+msgid "Search result pages"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:47
+msgid "OK"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:48
+msgid "Unknown error."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:49
+msgid "Error."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:51
+msgid "Request failed: "
+msgstr ""
+
+#: source/php/Frontend/I18n.php:54
+msgid "Pie chart showing document distribution"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:55
+msgid "documents"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:59
+msgid "Remove all \"%s\" documents from the Typesense index? This cannot be undone."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:60
+msgid "Clear"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:63
+msgid "Could not load facetable fields."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:64
+msgid "— No facetable fields found —"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:65
+msgid "No facetable fields found in the collection schema. Make sure the collection exists and has fields with facet: true."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:66
+msgid "All facetable fields have already been added as facets."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:69
+#: views/admin/settings-tabs/facetting.php:30
+msgid "Field"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:70
+#: views/admin/settings-tabs/facetting.php:46
+msgid "Label"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:71
+#: views/admin/settings-tabs/facetting.php:51
+msgid "e.g. Category"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:72
+#: views/admin/settings-tabs/facetting.php:56
+msgid "Placeholder"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:73
+#: views/admin/settings-tabs/facetting.php:61
+msgid "e.g. All categories"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:74
+#: views/admin/settings-tabs/facetting.php:66
+msgid "Display as"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:75
+#: views/admin/settings-tabs/facetting.php:73
+msgid "Dropdown"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:76
+#: views/admin/settings-tabs/facetting.php:74
+msgid "Button group"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:77
+#: views/admin/settings-tabs/facetting.php:80
+#: views/admin/settings-tabs/facetting.php:81
+msgid "Remove facet"
 msgstr ""
 
 #: source/php/Typesense/ApiKey.php:39
@@ -303,7 +425,7 @@ msgid "Generate search key"
 msgstr ""
 
 #: views/admin/settings-tabs/connection.php:218
-#: views/admin/settings-tabs/content.php:88
+#: views/admin/settings-tabs/content.php:181
 #: views/admin/settings-tabs/facetting.php:105
 msgid "Save settings"
 msgstr ""
@@ -324,24 +446,52 @@ msgstr ""
 msgid "Number of search results to display per page."
 msgstr ""
 
-#: views/admin/settings-tabs/content.php:44
-msgid "Post types"
+#: views/admin/settings-tabs/content.php:42
+msgid "Index Modularity content"
 msgstr ""
 
-#: views/admin/settings-tabs/content.php:45
-msgid "Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:50
-msgid "No public post types found."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:76
+#: views/admin/settings-tabs/content.php:60
+#: views/admin/settings-tabs/content.php:91
+#: views/admin/settings-tabs/content.php:169
 msgid "On"
 msgstr ""
 
-#: views/admin/settings-tabs/content.php:77
+#: views/admin/settings-tabs/content.php:61
+#: views/admin/settings-tabs/content.php:92
+#: views/admin/settings-tabs/content.php:170
 msgid "Off"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:66
+msgid "When enabled, content that is added via Modularity modules will be included in the Typesense index. If disabled, content placed in module slots like sidebars will not be indexed for search."
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:73
+msgid "Debounce search"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:97
+msgid "When enabled, search results are fetched only after the user pauses typing (debounced). When disabled, results appear immediately on every keystroke."
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:103
+msgid "Debounce delay (ms)"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:117
+msgid "How long to wait after the user stops typing before firing the search request."
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:137
+msgid "Post types"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:138
+msgid "Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results."
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:143
+msgid "No public post types found."
 msgstr ""
 
 #: views/admin/settings-tabs/facetting.php:15
@@ -350,43 +500,6 @@ msgstr ""
 
 #: views/admin/settings-tabs/facetting.php:16
 msgid "Define which fields can be used to filter search results. Each facet maps a Typesense field to a human-readable label and an optional placeholder shown in the UI."
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:30
-msgid "Field"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:46
-msgid "Label"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:51
-msgid "e.g. Category"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:56
-msgid "Placeholder"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:61
-msgid "e.g. All categories"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:66
-msgid "Display as"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:73
-msgid "Dropdown"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:74
-msgid "Button group"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:80
-#: views/admin/settings-tabs/facetting.php:81
-msgid "Remove facet"
 msgstr ""
 
 #: views/admin/settings-tabs/facetting.php:92

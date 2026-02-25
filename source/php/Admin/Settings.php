@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Admin;
 
 use TypesenseSearch\Helper\CacheBust;
+use TypesenseSearch\Frontend\I18n;
 
 /**
  * Class Settings
@@ -27,6 +28,9 @@ class Settings
     public const OPTION_POST_TYPES = 'typesense_search_post_types';
     public const OPTION_FACETS     = 'typesense_search_facets';
     public const OPTION_HITS_PER_PAGE = 'typesense_search_hits_per_page';
+    public const OPTION_INDEX_MODULARITY = 'typesense_index_modularity_content';
+    public const OPTION_DEBOUNCE         = 'typesense_search_debounce';
+    public const OPTION_DEBOUNCE_DELAY    = 'typesense_search_debounce_delay';
 
     private static function getTabs(): array
     {
@@ -84,6 +88,24 @@ class Settings
             'default'           => [],
         ]);
 
+        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_INDEX_MODULARITY, [
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 0,
+        ]);
+
+        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_DEBOUNCE, [
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 1,
+        ]);
+
+        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_DEBOUNCE_DELAY, [
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 300,
+        ]);
+
         register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_HITS_PER_PAGE, [
             'type'              => 'integer',
             'sanitize_callback' => 'absint',
@@ -129,6 +151,8 @@ class Settings
                 null,
                 true
             );
+
+            wp_localize_script('typesense-search-admin', 'tsAdminI18n', I18n::adminStrings());
 
             wp_localize_script('typesense-search-admin', 'tsSettings', [
                 'ajaxUrl'              => admin_url('admin-ajax.php'),
@@ -238,5 +262,13 @@ class Settings
         $enabled = (array) get_option(self::OPTION_POST_TYPES, []);
 
         return in_array($postType, $enabled, true);
+    }
+
+    /**
+     * Check whether the Modularity plugin is available.
+     */
+    public static function isModularityAvailable(): bool
+    {
+        return class_exists('\\Modularity\\App');
     }
 }

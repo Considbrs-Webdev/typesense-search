@@ -26,7 +26,9 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
   SEARCH_HIT_LINK: (d) => String(d.permalink ?? "#"),
   SEARCH_HIT_IMAGE_URL: (d) => String(d.thumbnail ?? ""),
   SEARCH_HIT_IMAGE_ALT: (d) => String(d.thumbnail_alt ?? ""),
-  SEARCH_HIT_ARIA_LABEL: (d) => `Read more: ${d.title ?? ""}`,
+  SEARCH_HIT_ARIA_LABEL: (d) =>
+    `${window.typesenseI18n?.readMore ?? "Read more: "}${d.title ?? ""}`,
+
   SEARCH_HIT_DATE: (d) => String(d.post_date_formatted ?? ""),
   SEARCH_HIT_META: (d) => {
     const type = String(d.post_type_name ?? "");

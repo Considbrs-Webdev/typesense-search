@@ -69,23 +69,6 @@ class DocumentBuilder
             'extra_terms'    => (string) get_post_meta($post->ID, MetaBox::META_EXTRA_TERMS, true),
         ];
 
-        // For pages, also index the top-most parent page as a facet to allow
-        // filtering by top-level section. If the page has no ancestors we
-        // store the page itself as the top-most parent.
-        if ($post->post_type === 'page') {
-            $ancestors = get_post_ancestors($post);
-            
-            // Use the top-most ancestor if available, otherwise fall back to
-            // the page itself.
-            $topMostParentPost = !empty($ancestors)
-                ? get_post((int) end($ancestors))
-                : $post;
-
-            if ($topMostParentPost) {
-                $document['top_most_parent'] = (string) $topMostParentPost->post_title;
-            }
-        }
-
         /**
          * Filters the document array before it is sent to Typesense.
          *

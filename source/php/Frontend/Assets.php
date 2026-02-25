@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Frontend;
 
 use TypesenseSearch\Helper\CacheBust;
+use TypesenseSearch\Frontend\I18n;
 
 /**
  * Class Assets
@@ -41,6 +42,12 @@ class Assets
             [],
             null,
             true
+        );
+
+        wp_localize_script(
+            'typesense-search',
+            'typesenseI18n',
+            I18n::strings()
         );
     }
 

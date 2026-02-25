@@ -97,10 +97,14 @@ function init(): void {
   let debounceTimer: ReturnType<typeof setTimeout>;
   const onInput = (value: string): void => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(
-      () => updateUrlState({ query: value, page: 1 }),
-      100,
-    );
+    if (config.debounce) {
+      debounceTimer = setTimeout(
+        () => updateUrlState({ query: value, page: 1 }),
+        config.debounceDelay ?? 300,
+      );
+    } else {
+      updateUrlState({ query: value, page: 1 });
+    }
   };
   inputEl.addEventListener("input", () =>
     onInput((inputEl as any).value ?? ""),

@@ -35,6 +35,8 @@ class EnrichSearchTemplate
 			'search' => __("Search", 'typesense-search'),
 			'searchPlaceholder' => __("Search term here..", 'typesense-search'),
 			'searchResults' => __("Search Results", 'typesense-search'),
+			'noResults' => __("No Results", 'typesense-search'),
+			'noResultsMessage' => __("No results found for your search.", 'typesense-search'),
 			'sort' => __("Sort", 'typesense-search'),
 			'relevance' => __("Relevance", 'typesense-search'),
 			'dateAsc' => __("Date Ascending", 'typesense-search'),

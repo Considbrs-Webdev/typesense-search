@@ -30,13 +30,17 @@ class TypesenseConfig
 		$frontendHost = get_option(Settings::OPTION_FRONTEND_HOST, '');
 		$collection = get_option(Settings::OPTION_INDEX_NAME, '');
 		$searchKey  = get_option(Settings::OPTION_SEARCH_KEY, '');
-		$hitsPerPage = (int) get_option(Settings::OPTION_HITS_PER_PAGE, 10);
+		$hitsPerPage   = (int) get_option(Settings::OPTION_HITS_PER_PAGE, 10);
+		$debounce      = (bool) get_option(Settings::OPTION_DEBOUNCE, true);
+		$debounceDelay = (int) get_option(Settings::OPTION_DEBOUNCE_DELAY, 300);
 
 		$config = [
-			'host'       => esc_url_raw($frontendHost ?: $host),
-			'collection' => sanitize_text_field($collection),
-			'searchKey'  => sanitize_text_field($searchKey),
-			'hitsPerPage' => $hitsPerPage,
+			'host'          => esc_url_raw($frontendHost ?: $host),
+			'collection'    => sanitize_text_field($collection),
+			'searchKey'     => sanitize_text_field($searchKey),
+			'hitsPerPage'   => $hitsPerPage,
+			'debounce'      => $debounce,
+			'debounceDelay' => $debounceDelay,
 		];
 
 		// Include configured facets (field, label, placeholder, display_as)

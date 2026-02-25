@@ -138,7 +138,10 @@ export function renderPagination(
   // Assemble and mount.
   const nav = document.createElement("nav");
   nav.className = "ts-pagination";
-  nav.setAttribute("aria-label", "Search result pages");
+  nav.setAttribute(
+    "aria-label",
+    window.typesenseI18n?.paginationLabel ?? "Search result pages",
+  );
   nav.appendChild(compact);
   nav.appendChild(full);
 
