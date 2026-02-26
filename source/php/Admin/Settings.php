@@ -39,6 +39,7 @@ class Settings
             'content'    => __('Settings', 'typesense-search'),
             'facetting'  => __('Facetting', 'typesense-search'),
             'statistics' => __('Statistics', 'typesense-search'),
+            'status'     => __('Status', 'typesense-search'),
         ];
     }
 
@@ -168,6 +169,12 @@ class Settings
                 'actionClearType'      => SettingsAjax::AJAX_ACTION_CLEAR_POST_TYPE,
                 'nonceGetFacetFields'  => wp_create_nonce(SettingsAjax::AJAX_ACTION_GET_FACET_FIELDS),
                 'actionGetFacetFields' => SettingsAjax::AJAX_ACTION_GET_FACET_FIELDS,
+                'nonceCheckStatus'     => wp_create_nonce(SettingsAjax::AJAX_ACTION_CHECK_STATUS),
+                'actionCheckStatus'    => SettingsAjax::AJAX_ACTION_CHECK_STATUS,
+                'nonceFixSearchKey'    => wp_create_nonce(SettingsAjax::AJAX_ACTION_FIX_SEARCH_KEY),
+                'actionFixSearchKey'   => SettingsAjax::AJAX_ACTION_FIX_SEARCH_KEY,
+                'nonceStatusCreateCol' => wp_create_nonce(SettingsAjax::AJAX_ACTION_STATUS_CREATE_COL),
+                'actionStatusCreateCol'=> SettingsAjax::AJAX_ACTION_STATUS_CREATE_COL,
             ]);
         }
     }

@@ -118,7 +118,7 @@ export async function runSearch(
           .documents()
           .search({
             q,
-            query_by: "title,excerpt,content",
+            query_by: "title,excerpt,content,extra_terms",
             highlight_full_fields: "title,excerpt,content",
             per_page: config.hitsPerPage,
             page: state.page,

@@ -686,4 +686,177 @@ document.addEventListener('DOMContentLoaded', () => {
         // (hydrateExistingRows will call updateDisabledOptions when complete)
     }
 
+    // ── Status tab ────────────────────────────────────────────────────────────
+
+    const statusPanel = document.getElementById('ts-tab-status');
+
+    if (statusPanel) {
+
+        const statusLoading    = document.getElementById('ts-status-loading');
+        const statusResults    = document.getElementById('ts-status-results');
+        const statusRefreshBtn = document.getElementById('ts-status-refresh');
+        const fixWrap          = document.getElementById('ts-status-fix-wrap');
+        const fixKeyBtn        = document.getElementById('ts-status-fix-key');
+        const fixResult        = document.getElementById('ts-status-fix-result');
+        const regenHint        = document.getElementById('ts-status-regen-hint');
+        const createColWrap    = document.getElementById('ts-status-create-col-wrap');
+        const createColBtn     = document.getElementById('ts-status-create-col');
+        const createColResult  = document.getElementById('ts-status-create-col-result');
+
+        /**
+         * Icons used for ok / fail status items.
+         */
+        const ICON_OK   = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+        const ICON_FAIL = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+        /**
+         * Update a single status list item.
+         * @param {HTMLElement} item
+         * @param {boolean}     ok
+         * @param {string}      message
+         */
+        function setStatusItem(item, ok, message) {
+            if (!item) return;
+            const iconEl    = item.querySelector('.ts-status-item__icon');
+            const messageEl = item.querySelector('.ts-status-item__message');
+
+            item.classList.toggle('is-ok',   ok);
+            item.classList.toggle('is-fail', !ok);
+
+            if (iconEl)    iconEl.innerHTML = ok ? ICON_OK : ICON_FAIL;
+            if (messageEl) messageEl.textContent = message;
+        }
+
+        /**
+         * Fetch status from the server and render all three check rows.
+         */
+        async function loadStatus() {
+            if (statusLoading)   statusLoading.hidden   = false;
+            if (statusResults)   statusResults.hidden   = true;
+            if (fixWrap)         fixWrap.hidden          = true;
+            if (regenHint)       regenHint.hidden        = true;
+            if (fixResult)       fixResult.hidden        = true;
+            if (createColWrap)   createColWrap.hidden    = true;
+            if (createColResult) createColResult.hidden  = true;
+            if (statusRefreshBtn) setButtonLoading(statusRefreshBtn, true);
+
+            let data;
+            try {
+                data = await ajaxPost({
+                    action: tsSettings.actionCheckStatus,
+                    nonce:  tsSettings.nonceCheckStatus,
+                });
+            } catch (err) {
+                data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
+            } finally {
+                if (statusLoading)    statusLoading.hidden    = true;
+                if (statusRefreshBtn) setButtonLoading(statusRefreshBtn, false);
+            }
+
+            if (!data.success) {
+                // Unexpected failure — show generic error on all items
+                const msg = data?.data?.message ?? (i18n.unknownError ?? 'Unknown error.');
+                setStatusItem(document.getElementById('ts-status-connection'), false, msg);
+                setStatusItem(document.getElementById('ts-status-admin-key'),  false, '');
+                setStatusItem(document.getElementById('ts-status-collection'),  false, '');
+                setStatusItem(document.getElementById('ts-status-search-key'), false, '');
+                if (statusResults) statusResults.hidden = false;
+                return;
+            }
+
+            const { connection, adminKey, collection, searchKey, collectionCanFix, searchKeyCanFix } = data.data;
+
+            setStatusItem(document.getElementById('ts-status-connection'), connection.ok,  connection.message);
+            setStatusItem(document.getElementById('ts-status-admin-key'),  adminKey.ok,    adminKey.message);
+            setStatusItem(document.getElementById('ts-status-collection'),  collection.ok,  collection.message);
+            setStatusItem(document.getElementById('ts-status-search-key'), searchKey.ok,   searchKey.message);
+
+            // Show remediation UI for a missing collection
+            if (!collection.ok && collectionCanFix) {
+                if (createColWrap) createColWrap.hidden = false;
+            }
+
+            // Show remediation UI for a failing search key
+            if (!searchKey.ok && searchKey.message) {
+                if (searchKeyCanFix) {
+                    if (fixWrap) fixWrap.hidden = false;
+                } else {
+                    if (regenHint) regenHint.hidden = false;
+                }
+            }
+
+            if (statusResults) statusResults.hidden = false;
+        }
+
+        // ── Create collection button (status tab) ─────────────────────────────
+
+        if (createColBtn) {
+            createColBtn.addEventListener('click', async () => {
+                setButtonLoading(createColBtn, true);
+                if (createColResult) createColResult.hidden = true;
+
+                let data;
+                try {
+                    data = await ajaxPost({
+                        action: tsSettings.actionStatusCreateCol,
+                        nonce:  tsSettings.nonceStatusCreateCol,
+                    });
+                } catch (err) {
+                    data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
+                } finally {
+                    setButtonLoading(createColBtn, false);
+                }
+
+                if (createColResult) {
+                    createColResult.textContent = data?.data?.message ?? (data.success ? (i18n.ok ?? 'Done.') : (i18n.unknownError ?? 'Unknown error.'));
+                    createColResult.className   = 'ts-status-fix__result ' + (data.success ? 'is-success' : 'is-error');
+                    createColResult.hidden      = false;
+                }
+
+                if (data.success) {
+                    setTimeout(loadStatus, 800);
+                }
+            });
+        }
+
+        // ── Fix / regenerate search key button ────────────────────────────────
+
+        if (fixKeyBtn) {
+            fixKeyBtn.addEventListener('click', async () => {
+                setButtonLoading(fixKeyBtn, true);
+                if (fixResult) fixResult.hidden = true;
+
+                let data;
+                try {
+                    data = await ajaxPost({
+                        action: tsSettings.actionFixSearchKey,
+                        nonce:  tsSettings.nonceFixSearchKey,
+                    });
+                } catch (err) {
+                    data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
+                } finally {
+                    setButtonLoading(fixKeyBtn, false);
+                }
+
+                if (fixResult) {
+                    fixResult.textContent = data?.data?.message ?? (data.success ? (i18n.ok ?? 'Done.') : (i18n.unknownError ?? 'Unknown error.'));
+                    fixResult.className   = 'ts-status-fix__result ' + (data.success ? 'is-success' : 'is-error');
+                    fixResult.hidden      = false;
+                }
+
+                // Re-run all checks so the search-key row updates
+                if (data.success) {
+                    setTimeout(loadStatus, 800);
+                }
+            });
+        }
+
+        // Auto-load on tab open, bind refresh button
+        loadStatus();
+
+        if (statusRefreshBtn) {
+            statusRefreshBtn.addEventListener('click', loadStatus);
+        }
+    }
+
 });

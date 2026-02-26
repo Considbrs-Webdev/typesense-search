@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-02-25T09:12:17+00:00\n"
-"PO-Revision-Date: 2026-02-25 10:12+0100\n"
+"POT-Creation-Date: 2026-02-26T17:27:20+00:00\n"
+"PO-Revision-Date: 2026-02-26 18:37+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -17,7 +17,7 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: typesense-search.php source/php/Admin/MetaBox.php:41
-#: source/php/Admin/Settings.php:58 source/php/Admin/Settings.php:59
+#: source/php/Admin/Settings.php:59 source/php/Admin/Settings.php:60
 #: views/admin/settings-page.php:23
 msgid "Typesense Search"
 msgstr "Typesense-sök"
@@ -78,107 +78,209 @@ msgstr "Facettering"
 msgid "Statistics"
 msgstr "Statistik"
 
-#: source/php/Admin/SettingsAjax.php:51 source/php/Admin/SettingsAjax.php:221
-#: source/php/Admin/SettingsAjax.php:288 source/php/Admin/SettingsAjax.php:343
+#: source/php/Admin/Settings.php:42
+msgid "Status"
+msgstr "Status"
+
+#: source/php/Admin/SettingsAjax.php:57 source/php/Admin/SettingsAjax.php:227
+#: source/php/Admin/SettingsAjax.php:294 source/php/Admin/SettingsAjax.php:349
+#: source/php/Admin/SettingsAjax.php:407 source/php/Admin/SettingsAjax.php:566
+#: source/php/Admin/SettingsAjax.php:613
 msgid "Unauthorized."
 msgstr "Obehörig."
 
-#: source/php/Admin/SettingsAjax.php:60
+#: source/php/Admin/SettingsAjax.php:66
 msgid "Enter both a host URL and an Admin API key before testing."
 msgstr "Ange både en värd-URL och en Admin-API-nyckel innan du testar."
 
-#: source/php/Admin/SettingsAjax.php:68
+#: source/php/Admin/SettingsAjax.php:74
 msgid "The host value is not a valid URL."
 msgstr "Värdadressen är inte en giltig URL."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:90
+#: source/php/Admin/SettingsAjax.php:96 source/php/Admin/SettingsAjax.php:448
 msgid "Could not reach server: %s"
 msgstr "Kunde inte nå servern: %s"
 
-#: source/php/Admin/SettingsAjax.php:100
+#: source/php/Admin/SettingsAjax.php:106 source/php/Admin/SettingsAjax.php:441
 msgid "Server responded but reported an unhealthy status."
 msgstr "Servern svarade men rapporterade ett ohälsosamt status."
 
-#: source/php/Admin/SettingsAjax.php:111
+#: source/php/Admin/SettingsAjax.php:117
 msgid "Server is reachable, but the Admin API key was rejected."
 msgstr "Servern är nåbar, men Admin-API-nyckeln avvisades."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:119
+#: source/php/Admin/SettingsAjax.php:125
 msgid "Server is reachable, but key validation failed: %s"
 msgstr "Servern är nåbar, men validering av nyckeln misslyckades: %s"
 
-#: source/php/Admin/SettingsAjax.php:135
+#: source/php/Admin/SettingsAjax.php:141
 msgid ""
 "Connected successfully. Server is healthy and the Admin API key is valid."
 msgstr ""
 "Anslutningen lyckades. Servern är i gott skick och Admin-API-nyckeln är "
 "giltig."
 
-#: source/php/Admin/SettingsAjax.php:151
+#: source/php/Admin/SettingsAjax.php:157
 msgid "Collection name is required."
 msgstr "Ett samlingsnamn krävs."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:163
+#: source/php/Admin/SettingsAjax.php:169 source/php/Admin/SettingsAjax.php:635
 msgid "Could not create collection: %s"
 msgstr "Kunde inte skapa samling: %s"
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:173
+#: source/php/Admin/SettingsAjax.php:179 source/php/Admin/SettingsAjax.php:645
 msgid "Collection \"%s\" created successfully."
 msgstr "Samlingen \"%s\" skapades."
 
-#: source/php/Admin/SettingsAjax.php:189
+#: source/php/Admin/SettingsAjax.php:195
 msgid "Set a collection name before generating a search key."
 msgstr "Ange ett samlingsnamn innan du genererar en söknyckel."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:201
+#: source/php/Admin/SettingsAjax.php:207
 msgid "Could not generate search key: %s"
 msgstr "Kunde inte generera söknyckel: %s"
 
-#: source/php/Admin/SettingsAjax.php:209
+#: source/php/Admin/SettingsAjax.php:215
 msgid ""
 "Search key generated. It has been filled in below — save settings to keep it."
 msgstr ""
 "Söknyckel genererad. Den har fyllts i nedan — spara inställningarna för att "
 "behålla den."
 
-#: source/php/Admin/SettingsAjax.php:230 source/php/Admin/SettingsAjax.php:352
+#: source/php/Admin/SettingsAjax.php:236 source/php/Admin/SettingsAjax.php:358
 msgid ""
 "Connection settings are incomplete. Please configure the connection first."
 msgstr ""
 "Anslutningsinställningarna är ofullständiga. Konfigurera anslutningen först."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:267
+#: source/php/Admin/SettingsAjax.php:273
 msgid "Could not load statistics: %s"
 msgstr "Kunde inte läsa in statistik: %s"
 
-#: source/php/Admin/SettingsAjax.php:295
+#: source/php/Admin/SettingsAjax.php:301
 msgid "Post type is required."
 msgstr "Inläggstyp krävs."
 
-#: source/php/Admin/SettingsAjax.php:304
+#: source/php/Admin/SettingsAjax.php:310
 msgid "Connection settings are incomplete."
 msgstr "Anslutningsinställningarna är ofullständiga."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:317
+#: source/php/Admin/SettingsAjax.php:323
 msgid "Could not clear post type: %s"
 msgstr "Kunde inte rensa inläggstyp: %s"
 
 #. translators: 1: number of deleted docs, 2: post type slug
-#: source/php/Admin/SettingsAjax.php:327
+#: source/php/Admin/SettingsAjax.php:333
 msgid "Removed %1$d documents of type \"%2$s\" from the index."
 msgstr "Tog bort %1$d dokument av typen \"%2$s\" från indexet."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:373
+#: source/php/Admin/SettingsAjax.php:379
 msgid "Could not fetch collection schema: %s"
 msgstr "Kunde inte hämta samlingens schema: %s"
+
+#: source/php/Admin/SettingsAjax.php:428
+msgid "No host URL configured."
+msgstr "Ingen värd-URL konfigurerad."
+
+#: source/php/Admin/SettingsAjax.php:439
+msgid "Server is reachable and healthy."
+msgstr "Servern är nåbar och i gott skick."
+
+#: source/php/Admin/SettingsAjax.php:458
+msgid "No admin key configured."
+msgstr "Ingen admin-nyckel konfigurerad."
+
+#: source/php/Admin/SettingsAjax.php:464
+msgid "Admin key is valid."
+msgstr "Admin-nyckeln är giltig."
+
+#: source/php/Admin/SettingsAjax.php:466
+msgid "Admin key was rejected by the server."
+msgstr "Admin-nyckeln avvisades av servern."
+
+#. translators: %s: error message
+#: source/php/Admin/SettingsAjax.php:470
+msgid "Admin key check failed: %s"
+msgstr "Kontroll av admin-nyckel misslyckades: %s"
+
+#: source/php/Admin/SettingsAjax.php:479
+msgid "Cannot check — admin key is not valid."
+msgstr "Kan inte kontrollera — admin-nyckeln är inte giltig."
+
+#: source/php/Admin/SettingsAjax.php:481
+msgid "No collection name configured."
+msgstr "Inget samlingsnamn konfigurerat."
+
+#. translators: %s: collection name
+#: source/php/Admin/SettingsAjax.php:489
+msgid "Collection \"%s\" exists."
+msgstr "Samlingen \"%s\" finns."
+
+#. translators: %s: collection name
+#: source/php/Admin/SettingsAjax.php:495
+msgid "Collection \"%s\" does not exist."
+msgstr "Samlingen \"%s\" finns inte."
+
+#. translators: %s: error message
+#: source/php/Admin/SettingsAjax.php:503
+msgid "Collection check failed: %s"
+msgstr "Kontroll av samling misslyckades: %s"
+
+#: source/php/Admin/SettingsAjax.php:512
+msgid "No search key configured."
+msgstr "Ingen söknyckel konfigurerad."
+
+#: source/php/Admin/SettingsAjax.php:515
+msgid "No collection name configured — cannot test the search key."
+msgstr "Inget samlingsnamn konfigurerat — kan inte testa söknyckeln."
+
+#. translators: %s: collection name
+#: source/php/Admin/SettingsAjax.php:527
+msgid "Search key works against collection \"%s\"."
+msgstr "Söknyckeln fungerar mot samlingen \"%s\"."
+
+#. translators: %s: collection name
+#: source/php/Admin/SettingsAjax.php:533
+msgid "Search key does not have access to collection \"%s\"."
+msgstr "Söknyckeln har inte åtkomst till samlingen \"%s\"."
+
+#. translators: %s: error message
+#: source/php/Admin/SettingsAjax.php:541
+msgid "Search key check failed: %s"
+msgstr "Kontroll av söknyckel misslyckades: %s"
+
+#: source/php/Admin/SettingsAjax.php:576
+msgid ""
+"Host, admin key, and collection name must all be saved before a new search "
+"key can be created."
+msgstr ""
+"Värd, admin-nyckel och samlingsnamn måste vara sparade innan en ny söknyckel "
+"kan skapas."
+
+#. translators: %s: error message
+#: source/php/Admin/SettingsAjax.php:588
+msgid "Could not create search key: %s"
+msgstr "Kunde inte skapa söknyckel: %s"
+
+#: source/php/Admin/SettingsAjax.php:598
+msgid "New search key created and saved. The status checks should now pass."
+msgstr "Ny söknyckel skapad och sparad. Statuskontrollerna borde nu passera."
+
+#: source/php/Admin/SettingsAjax.php:623
+msgid ""
+"Host, admin key, and collection name must all be saved before the collection "
+"can be created."
+msgstr ""
+"Värd, admin-nyckel och samlingsnamn måste vara sparade innan samlingen kan "
+"skapas."
 
 #: source/php/Frontend/EnrichSearchTemplate.php:35
 msgid "Search"
@@ -413,6 +515,7 @@ msgstr ""
 
 #: views/admin/settings-tabs/connection.php:112
 #: views/admin/settings-tabs/connection.php:118
+#: views/admin/settings-tabs/status.php:48
 msgid "Create collection"
 msgstr "Skapa samling"
 
@@ -614,3 +717,69 @@ msgstr "samling"
 #: views/admin/settings-tabs/statistics.php:69
 msgid "Refresh"
 msgstr "Uppdatera"
+
+#: views/admin/settings-tabs/status.php:11
+msgid "Connection &amp; key status"
+msgstr "Anslutnings- och nyckelstatus"
+
+#: views/admin/settings-tabs/status.php:12
+msgid ""
+"Live checks against your saved Typesense settings. Use this to quickly "
+"diagnose connection or key problems."
+msgstr ""
+"Livekontroller mot dina sparade Typesense-inställningar. Använd detta för "
+"att snabbt diagnostisera anslutnings- eller nyckelproblem."
+
+#: views/admin/settings-tabs/status.php:18
+msgid "Running checks…"
+msgstr "Kör kontroller…"
+
+#: views/admin/settings-tabs/status.php:29
+msgid "Server connection"
+msgstr "Serveranslutning"
+
+#: views/admin/settings-tabs/status.php:38
+msgid "Collection"
+msgstr "Samling"
+
+#: views/admin/settings-tabs/status.php:44
+msgid ""
+"The collection does not exist yet. It can be created automatically using "
+"your saved admin key."
+msgstr ""
+"Samlingen finns inte ännu. Den kan skapas automatiskt med din sparade admin-"
+"nyckel."
+
+#: views/admin/settings-tabs/status.php:59
+msgid "Admin key"
+msgstr "Admin-nyckel"
+
+#: views/admin/settings-tabs/status.php:68
+msgid "Search key"
+msgstr "Söknyckel"
+
+#: views/admin/settings-tabs/status.php:74
+msgid ""
+"A new search key scoped to the configured collection will be created and "
+"saved automatically. If an existing key has the wrong collection scope, "
+"Typesense does not allow changing it — a fresh key will be created instead."
+msgstr ""
+"En ny söknyckel begränsad till den konfigurerade samlingen skapas och sparas "
+"automatiskt. Om en befintlig nyckel har fel samlingsomfång tillåter inte "
+"Typesense att ändra den — en ny nyckel skapas istället."
+
+#: views/admin/settings-tabs/status.php:78
+msgid "Create new search key for this collection"
+msgstr "Skapa ny söknyckel för den här samlingen"
+
+#: views/admin/settings-tabs/status.php:85
+msgid ""
+"Please go to the Connection tab, enter a valid admin key, and click "
+"\"Generate search key\" to create a new one."
+msgstr ""
+"Gå till fliken Anslutning, ange en giltig admin-nyckel och klicka på "
+"\"Generera söknyckel\" för att skapa en ny."
+
+#: views/admin/settings-tabs/status.php:97
+msgid "Re-run checks"
+msgstr "Kör om kontroller"

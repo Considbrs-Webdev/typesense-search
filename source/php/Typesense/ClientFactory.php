@@ -96,4 +96,47 @@ class ClientFactory
             return false;
         }
     }
+
+    /**
+     * Returns true when the server is reachable *and* the configured collection
+     * exists. Use this guard for features (such as custom view templates) that
+     * should only activate when Typesense is fully operational.
+     *
+     * The result is cached in a static variable for the lifetime of the current
+     * PHP request so repeated calls (e.g. a filter that fires multiple times)
+     * do not trigger additional network round-trips.
+     *
+     *   if (!ClientFactory::isReadyWithCollection()) return;
+     */
+    public static function isReadyWithCollection(): bool
+    {
+        static $cache = null;
+
+        if ($cache !== null) {
+            return $cache;
+        }
+
+        $client = self::fromOptions();
+
+        if ($client === null) {
+            return $cache = false;
+        }
+
+        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+
+        if (empty($collectionName)) {
+            return $cache = false;
+        }
+
+        try {
+            $health = $client->health->retrieve();
+            if (empty($health['ok'])) {
+                return $cache = false;
+            }
+            
+            return $cache = Collection::exists($client, $collectionName);
+        } catch (\Exception $e) {
+            return $cache = false;
+        }
+    }
 }

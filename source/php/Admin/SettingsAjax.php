@@ -25,6 +25,9 @@ class SettingsAjax
     public const AJAX_ACTION_GET_STATS        = 'typesense_get_stats';
     public const AJAX_ACTION_CLEAR_POST_TYPE  = 'typesense_clear_post_type';
     public const AJAX_ACTION_GET_FACET_FIELDS = 'typesense_get_facet_fields';
+    public const AJAX_ACTION_CHECK_STATUS       = 'typesense_check_status';
+    public const AJAX_ACTION_FIX_SEARCH_KEY      = 'typesense_fix_search_key';
+    public const AJAX_ACTION_STATUS_CREATE_COL   = 'typesense_status_create_collection';
 
     public function __construct()
     {
@@ -34,6 +37,9 @@ class SettingsAjax
         add_action('wp_ajax_' . self::AJAX_ACTION_GET_STATS,          [$this, 'handleGetStats']);
         add_action('wp_ajax_' . self::AJAX_ACTION_CLEAR_POST_TYPE,    [$this, 'handleClearPostType']);
         add_action('wp_ajax_' . self::AJAX_ACTION_GET_FACET_FIELDS,   [$this, 'handleGetFacetFields']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_CHECK_STATUS,       [$this, 'handleCheckStatus']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_FIX_SEARCH_KEY,     [$this, 'handleFixSearchKey']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_STATUS_CREATE_COL,  [$this, 'handleStatusCreateCollection']);
     }
 
     // ── Shared helpers ────────────────────────────────────────────────────────
@@ -378,5 +384,267 @@ class SettingsAjax
         }
 
         wp_send_json_success(['fields' => $facetableFields]);
+    }
+
+    // ── 7. Check saved-settings status ────────────────────────────────────────
+
+    /**
+     * Server-side health check using the credentials stored in WordPress options.
+     *
+     * Returns a structured object with three checks:
+     *  - connection : can the server be reached and is it healthy?
+     *  - adminKey   : does the admin key allow listing collections?
+     *  - searchKey  : can the search key search the configured collection?
+     *
+     * When the search key check fails the response also includes `searchKeyCanFix: true`
+     * so the front-end can offer a "Create new search key" button.
+     */
+    public function handleCheckStatus(): void
+    {
+        check_ajax_referer(self::AJAX_ACTION_CHECK_STATUS, 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Unauthorized.', 'typesense-search')], 403);
+            return;
+        }
+
+        $remote         = (string) get_option(Settings::OPTION_REMOTE, '');
+        $adminKey       = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
+        $searchKey      = (string) get_option(Settings::OPTION_SEARCH_KEY, '');
+        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+
+        $result = [
+            'connection'        => ['ok' => false, 'message' => ''],
+            'adminKey'          => ['ok' => false, 'message' => ''],
+            'collection'        => ['ok' => false, 'message' => ''],
+            'searchKey'         => ['ok' => false, 'message' => ''],
+            'collectionCanFix'  => false,
+            'searchKeyCanFix'   => false,
+        ];
+
+        // ── 1. Connection ────────────────────────────────────────────────────
+
+        if (empty($remote)) {
+            $result['connection']['message'] = __('No host URL configured.', 'typesense-search');
+            wp_send_json_success($result);
+            return;
+        }
+
+        try {
+            $client = ClientFactory::build($remote, $adminKey ?: 'placeholder', 5);
+            $health = $client->health->retrieve();
+
+            if (!empty($health['ok'])) {
+                $result['connection']['ok']      = true;
+                $result['connection']['message'] = __('Server is reachable and healthy.', 'typesense-search');
+            } else {
+                $result['connection']['message'] = __('Server responded but reported an unhealthy status.', 'typesense-search');
+                wp_send_json_success($result);
+                return;
+            }
+        } catch (\Exception $e) {
+            $result['connection']['message'] = sprintf(
+                /* translators: %s: error message */
+                __('Could not reach server: %s', 'typesense-search'),
+                $e->getMessage()
+            );
+            wp_send_json_success($result);
+            return;
+        }
+
+        // ── 2. Admin key ─────────────────────────────────────────────────────
+
+        if (empty($adminKey)) {
+            $result['adminKey']['message'] = __('No admin key configured.', 'typesense-search');
+        } else {
+            try {
+                $client = ClientFactory::build($remote, $adminKey, 5);
+                $client->collections->retrieve();
+                $result['adminKey']['ok']      = true;
+                $result['adminKey']['message'] = __('Admin key is valid.', 'typesense-search');
+            } catch (RequestUnauthorized $e) {
+                $result['adminKey']['message'] = __('Admin key was rejected by the server.', 'typesense-search');
+            } catch (\Exception $e) {
+                $result['adminKey']['message'] = sprintf(
+                    /* translators: %s: error message */
+                    __('Admin key check failed: %s', 'typesense-search'),
+                    $e->getMessage()
+                );
+            }
+        }
+
+        // ── 3. Collection existence ──────────────────────────────────────────
+
+        if (!$result['adminKey']['ok']) {
+            $result['collection']['message'] = __('Cannot check — admin key is not valid.', 'typesense-search');
+        } elseif (empty($collectionName)) {
+            $result['collection']['message'] = __('No collection name configured.', 'typesense-search');
+        } else {
+            try {
+                $adminClient = ClientFactory::build($remote, $adminKey, 5);
+                if (Collection::exists($adminClient, $collectionName)) {
+                    $result['collection']['ok']      = true;
+                    $result['collection']['message'] = sprintf(
+                        /* translators: %s: collection name */
+                        __('Collection "%s" exists.', 'typesense-search'),
+                        $collectionName
+                    );
+                } else {
+                    $result['collection']['message'] = sprintf(
+                        /* translators: %s: collection name */
+                        __('Collection "%s" does not exist.', 'typesense-search'),
+                        $collectionName
+                    );
+                    $result['collectionCanFix'] = true;
+                }
+            } catch (\Exception $e) {
+                $result['collection']['message'] = sprintf(
+                    /* translators: %s: error message */
+                    __('Collection check failed: %s', 'typesense-search'),
+                    $e->getMessage()
+                );
+            }
+        }
+
+        // ── 4. Search key ─────────────────────────────────────────────────────
+
+        if (empty($searchKey)) {
+            $result['searchKey']['message'] = __('No search key configured.', 'typesense-search');
+            $result['searchKeyCanFix']      = $result['adminKey']['ok'] && !empty($collectionName);
+        } elseif (empty($collectionName)) {
+            $result['searchKey']['message'] = __('No collection name configured — cannot test the search key.', 'typesense-search');
+        } else {
+            try {
+                $searchClient = ClientFactory::build($remote, $searchKey, 5);
+                $searchClient->collections[$collectionName]->documents->search([
+                    'q'        => '*',
+                    'query_by' => 'title',
+                    'per_page' => 0,
+                ]);
+                $result['searchKey']['ok']      = true;
+                $result['searchKey']['message'] = sprintf(
+                    /* translators: %s: collection name */
+                    __('Search key works against collection "%s".', 'typesense-search'),
+                    $collectionName
+                );
+            } catch (RequestUnauthorized $e) {
+                $result['searchKey']['message'] = sprintf(
+                    /* translators: %s: collection name */
+                    __('Search key does not have access to collection "%s".', 'typesense-search'),
+                    $collectionName
+                );
+                // We can always create a new correctly-scoped key if the admin key works
+                $result['searchKeyCanFix'] = $result['adminKey']['ok'];
+            } catch (\Exception $e) {
+                $result['searchKey']['message'] = sprintf(
+                    /* translators: %s: error message */
+                    __('Search key check failed: %s', 'typesense-search'),
+                    $e->getMessage()
+                );
+            }
+        }
+
+        wp_send_json_success($result);
+    }
+
+    // ── 8. Fix (regenerate) search key ────────────────────────────────────────
+
+    /**
+     * Generate a new search key scoped to the configured collection and persist
+     * it directly to the WordPress options table.
+     *
+     * This is the one-click "fix" offered when the current search key is not
+     * working against the configured collection. Because Typesense does not
+     * support modifying an existing key's collection scope, the only remedy is
+     * to create a new, correctly-scoped key.
+     */
+    public function handleFixSearchKey(): void
+    {
+        check_ajax_referer(self::AJAX_ACTION_FIX_SEARCH_KEY, 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Unauthorized.', 'typesense-search')], 403);
+            return;
+        }
+
+        $remote         = (string) get_option(Settings::OPTION_REMOTE, '');
+        $adminKey       = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
+        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+
+        if (empty($remote) || empty($adminKey) || empty($collectionName)) {
+            wp_send_json_error([
+                'message' => __('Host, admin key, and collection name must all be saved before a new search key can be created.', 'typesense-search'),
+            ]);
+            return;
+        }
+
+        try {
+            $client = ClientFactory::build($remote, $adminKey);
+            $newKey = ApiKey::generateSearchKey($client, $collectionName);
+        } catch (\Exception $e) {
+            wp_send_json_error([
+                'message' => sprintf(
+                    /* translators: %s: error message */
+                    __('Could not create search key: %s', 'typesense-search'),
+                    $e->getMessage()
+                ),
+            ]);
+            return;
+        }
+
+        update_option(Settings::OPTION_SEARCH_KEY, $newKey);
+
+        wp_send_json_success([
+            'message' => __('New search key created and saved. The status checks should now pass.', 'typesense-search'),
+        ]);
+    }
+
+    // ── 9. Create collection from saved settings (Status tab) ─────────────────
+
+    /**
+     * Create the Typesense collection using the credentials stored in options.
+     * Used by the one-click "Create collection" button on the Status tab.
+     */
+    public function handleStatusCreateCollection(): void
+    {
+        check_ajax_referer(self::AJAX_ACTION_STATUS_CREATE_COL, 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Unauthorized.', 'typesense-search')], 403);
+            return;
+        }
+
+        $remote         = (string) get_option(Settings::OPTION_REMOTE, '');
+        $adminKey       = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
+        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+
+        if (empty($remote) || empty($adminKey) || empty($collectionName)) {
+            wp_send_json_error([
+                'message' => __('Host, admin key, and collection name must all be saved before the collection can be created.', 'typesense-search'),
+            ]);
+            return;
+        }
+
+        try {
+            $client = ClientFactory::build($remote, $adminKey);
+            Collection::create($client, $collectionName);
+        } catch (\Exception $e) {
+            wp_send_json_error([
+                'message' => sprintf(
+                    /* translators: %s: error message */
+                    __('Could not create collection: %s', 'typesense-search'),
+                    $e->getMessage()
+                ),
+            ]);
+            return;
+        }
+
+        wp_send_json_success([
+            'message' => sprintf(
+                /* translators: %s: collection name */
+                __('Collection "%s" created successfully.', 'typesense-search'),
+                $collectionName
+            ),
+        ]);
     }
 }

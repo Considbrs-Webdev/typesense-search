@@ -882,3 +882,114 @@ $ts-thumb-size: 18px;
   padding: 16px 24px;
   border-top: 1px solid $ts-bg;
 }
+
+// ── Status tab ────────────────────────────────────────────────────────────────
+
+.ts-status-card {
+  // Re-use the existing card structure
+}
+
+.ts-status-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid $ts-bg;
+}
+
+.ts-status-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 24px;
+  border-bottom: 1px solid $ts-bg;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+
+    svg {
+      display: block;
+    }
+  }
+
+  &.is-ok &__icon {
+    color: $ts-green;
+  }
+
+  &.is-fail &__icon {
+    color: #d63638;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $ts-text;
+    display: block;
+  }
+
+  &__message {
+    font-size: 13px;
+    color: $ts-muted;
+    display: block;
+  }
+
+  &.is-ok &__message {
+    color: $ts-green;
+  }
+
+  &.is-fail &__message {
+    color: #d63638;
+  }
+}
+
+.ts-status-fix {
+  &__description {
+    font-size: 12px;
+    color: $ts-muted;
+    margin: 8px 0 10px;
+    max-width: 520px;
+  }
+
+  &__hint {
+    font-size: 12px;
+    color: $ts-muted;
+    margin: 8px 0 0;
+    max-width: 520px;
+  }
+
+  &__result {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 13px;
+    vertical-align: middle;
+
+    &.is-success {
+      color: $ts-green;
+    }
+
+    &.is-error {
+      color: #d63638;
+    }
+  }
+}
+
+.ts-status-actions {
+  padding: 16px 24px;
+  border-top: 1px solid $ts-bg;
+}
