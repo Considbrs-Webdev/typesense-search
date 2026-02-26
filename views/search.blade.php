@@ -42,7 +42,7 @@
                             </div>
                         </div>
 
-                        <div class="wa-stack" data-js-search-results-container>
+                        <div class="wa-stack ts-results-container" data-js-search-results-container>
                             <div class="search-meta" data-js-hits-meta>
                                 <h2>{{ $lang->searchResults }}</h2>
                                 <span data-js-search-results-count data-lang-singular="%d träff"
@@ -53,7 +53,7 @@
                             </div>
                         </div>
 
-                        <div class="wa-stack" data-js-no-hits-container>
+                        <div class="wa-stack ts-no-hits-container" data-js-no-hits-container>
                             <div class="no-hits">
                                 <h2>{{ $lang->noResults }}</h2>
                                 <span>{{ $lang->noResultsMessage }}</span>

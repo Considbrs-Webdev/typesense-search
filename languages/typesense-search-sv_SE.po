@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-02-26T17:27:20+00:00\n"
-"PO-Revision-Date: 2026-02-26 18:37+0100\n"
+"POT-Creation-Date: 2026-02-26T17:40:03+00:00\n"
+"PO-Revision-Date: 2026-02-26 18:40+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -16,9 +16,8 @@ msgstr ""
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
-#: typesense-search.php source/php/Admin/MetaBox.php:41
-#: source/php/Admin/Settings.php:59 source/php/Admin/Settings.php:60
-#: views/admin/settings-page.php:23
+#: typesense-search.php source/php/Admin/Settings.php:59
+#: source/php/Admin/Settings.php:60 views/admin/settings-page.php:23
 msgid "Typesense Search"
 msgstr "Typesense-sök"
 
@@ -42,19 +41,23 @@ msgstr "Consid Borås AB"
 msgid "https://github.com/considbrs-webdev"
 msgstr "https://github.com/considbrs-webdev"
 
-#: source/php/Admin/MetaBox.php:74
+#: source/php/Admin/MetaBox.php:41
+msgid "Search settings"
+msgstr "Sökinställningar"
+
+#: source/php/Admin/MetaBox.php:85
 msgid "Exclude from search index"
 msgstr "Exkludera från sökindex"
 
-#: source/php/Admin/MetaBox.php:80
+#: source/php/Admin/MetaBox.php:91
 msgid "Extra search terms"
 msgstr "Extra söktermer"
 
-#: source/php/Admin/MetaBox.php:87
+#: source/php/Admin/MetaBox.php:98
 msgid "Keywords, synonyms or alternate phrasings…"
 msgstr "Nyckelord, synonymer eller alternativa formuleringar…"
 
-#: source/php/Admin/MetaBox.php:90
+#: source/php/Admin/MetaBox.php:101
 msgid ""
 "Additional words or phrases that should match this post in search, even if "
 "they do not appear in the content."

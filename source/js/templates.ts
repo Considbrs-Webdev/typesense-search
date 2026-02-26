@@ -29,9 +29,17 @@ export function pickTemplate(
   const hasImage = !!(doc.thumbnail && String(doc.thumbnail).length > 0);
 
   const templateMapping =
-    (typeof window !== "undefined" && (window as any).typesenseConfig?.templateMapping) || {};
+    (typeof window !== "undefined" &&
+      (window as any).typesenseConfig?.templateMapping) ||
+    {};
   const mappedKey = templateMapping[postType];
+  console.log("Mapped key for post type", postType, "is", mappedKey, templates);
   if (mappedKey && templates.has(mappedKey)) return templates.get(mappedKey)!;
+
+  if (!hasImage) {
+    const noimageKey = `${postType}-noimage`;
+    if (templates.has(noimageKey)) return templates.get(noimageKey)!;
+  }
 
   if (templates.has(postType)) return templates.get(postType)!;
   if (hasImage && templates.has("image")) return templates.get("image")!;

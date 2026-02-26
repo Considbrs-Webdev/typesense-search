@@ -38,11 +38,11 @@ class MetaBox
         foreach ($enabledPostTypes as $postType) {
             add_meta_box(
                 'typesense-search',
-                __('Typesense Search', 'typesense-search'),
+                __('Search settings', 'typesense-search'),
                 [$this, 'render'],
                 $postType,
                 'side',
-                'default'
+                'high'
             );
         }
     }
@@ -59,6 +59,17 @@ class MetaBox
         $exclude    = get_post_meta($post->ID, self::META_EXCLUDE, true) === '1';
         $extraTerms = (string) get_post_meta($post->ID, self::META_EXTRA_TERMS, true);
         ?>
+
+        <style>
+        .ts-metabox { padding: 8px 0; }
+        .ts-metabox__row { margin-bottom: 12px; }
+        .ts-metabox__row--checkbox { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+        .ts-metabox__checkbox-label { display: inline-block; margin-left: 4px; font-weight: 600; }
+        .ts-metabox__label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+        .ts-metabox__textarea { margin-top: 4px; min-height: 72px; resize: vertical; }
+        .ts-metabox__description { margin-top: 6px; color: #666; font-size: 12px; line-height: 1.3; }
+        .ts-metabox input[type="checkbox"] { width: 16px; height: 16px; margin: 0; }
+        </style>
 
         <div class="ts-metabox">
 

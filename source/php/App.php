@@ -27,8 +27,9 @@ class App {
         new Frontend\TypesenseConfig();
 
         new Indexing\IndexingHooks();
-        new Indexing\Adapters\PageAdapter();
+        new Indexing\Adapters\JobPostingAdapter();
         new Indexing\Adapters\ModularityAdapter();
+        new Indexing\Adapters\PageAdapter();
 
         if (defined('WP_CLI') && constant('WP_CLI') === true) {
             \WP_CLI::add_command('typesense', CLI\IndexCommand::class);

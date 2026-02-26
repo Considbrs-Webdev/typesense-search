@@ -9,14 +9,13 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-26T17:27:20+00:00\n"
+"POT-Creation-Date: 2026-02-26T17:40:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
 #: typesense-search.php
-#: source/php/Admin/MetaBox.php:41
 #: source/php/Admin/Settings.php:59
 #: source/php/Admin/Settings.php:60
 #: views/admin/settings-page.php:23
@@ -43,19 +42,23 @@ msgstr ""
 msgid "https://github.com/considbrs-webdev"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:74
+#: source/php/Admin/MetaBox.php:41
+msgid "Search settings"
+msgstr ""
+
+#: source/php/Admin/MetaBox.php:85
 msgid "Exclude from search index"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:80
+#: source/php/Admin/MetaBox.php:91
 msgid "Extra search terms"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:87
+#: source/php/Admin/MetaBox.php:98
 msgid "Keywords, synonyms or alternate phrasings…"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:90
+#: source/php/Admin/MetaBox.php:101
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 

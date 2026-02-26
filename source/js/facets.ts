@@ -106,6 +106,7 @@ function buildFacetElement(parentEl: HTMLElement, facet: FacetConfig): Element {
     select.setAttribute("label", facet.label);
     select.setAttribute("placeholder", facet.placeholder);
     select.setAttribute("with-clear", "");
+    select.setAttribute("max-options-visible", "2");
     select.setAttribute("data-facet-field", facet.field);
 
     parentEl.appendChild(select);

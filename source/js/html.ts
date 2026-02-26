@@ -17,12 +17,10 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
     return String(d.title ?? "");
   },
   SEARCH_HIT_SUBHEADING: (d) =>
-    String(
-      d.post_type_name ?? d.type_name ?? d.post_date_formatted ?? "",
-    ),
+    String(d.post_type_name ?? d.type_name ?? d.post_date_formatted ?? ""),
   SEARCH_HIT_EXCERPT: (d, h) => {
     const snippet = h?.excerpt?.snippet ?? h?.content?.snippet;
-    if (snippet) return { value: snippet, highlighted: true };
+    if (snippet) return { value: `[..] ${snippet} [..]`, highlighted: true };
     return String(d.excerpt ?? "");
   },
   SEARCH_HIT_LINK: (d) => String(d.permalink ?? d.url ?? "#"),
@@ -40,6 +38,23 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
     const type = String(d.post_type_name ?? d.type_name ?? "");
     const date = String(d.post_date_formatted ?? "");
     return [type, date].filter(Boolean).join(" · ");
+  },
+  SEARCH_HIT_PATH: (d) => {
+    const raw = String(d.path ?? "");
+    if (!raw) return "";
+    const parts = raw
+      .split("/")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    const sep = ' <span class="separator">/</span> ';
+    const html = parts
+      .map((part, idx) => {
+        const safe = escapeHtml(decodeHtmlEntities(String(part ?? "")));
+        return idx === parts.length - 1 ? safe : `<strong>${safe}</strong>`;
+      })
+      .join(sep);
+    const wrapped = `<span class="breadcrumbs">${html}</span>`;
+    return { value: wrapped, highlighted: true } as const;
   },
 };
 
@@ -113,10 +128,15 @@ export function replacePlaceholders(
   let result = html;
   for (const [key, fn] of Object.entries(placeholders)) {
     const out = fn(doc, highlight);
-    const value =
-      typeof out === "object" && out.highlighted
-        ? escapeHtmlPreservingMarks(out.value)
-        : escapeHtml(decodeHtmlEntities(String(out)));
+    let value: string;
+    if (typeof out === "object" && out.highlighted) {
+      // out.value may contain intentional HTML (e.g. <strong>, <span>)
+      // assume we've escaped internal text when building it and decode entities
+      // so we can insert the HTML as-is.
+      value = decodeHtmlEntities(String(out.value));
+    } else {
+      value = escapeHtml(decodeHtmlEntities(String(out)));
+    }
     result = result.replaceAll(`{${key}}`, value);
   }
   return result;
