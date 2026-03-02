@@ -31,7 +31,7 @@ class JobPostingAdapter {
     {
         $schemaData = get_post_meta($post->ID, 'schemaData', true);
 
-        $document['post_date_formatted'] = date_i18n('l j F, Y', $document['date']);
+        // $document['post_date_formatted'] = date_i18n('l j F, Y', $document['date']);
 
         if (is_array($schemaData) && isset($schemaData['validThrough'])) {
             $document['last_application_date'] = date_i18n('l j F, Y', strtotime($schemaData['validThrough']));
