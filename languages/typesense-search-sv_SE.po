@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-02-26T17:40:03+00:00\n"
-"PO-Revision-Date: 2026-02-26 18:40+0100\n"
+"POT-Creation-Date: 2026-03-02T07:18:33+00:00\n"
+"PO-Revision-Date: 2026-03-02 08:52+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -16,8 +16,8 @@ msgstr ""
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
-#: typesense-search.php source/php/Admin/Settings.php:59
-#: source/php/Admin/Settings.php:60 views/admin/settings-page.php:23
+#: typesense-search.php source/php/Admin/Settings.php:64
+#: source/php/Admin/Settings.php:65 views/admin/settings-page.php:25
 msgid "Typesense Search"
 msgstr "Typesense-sök"
 
@@ -65,23 +65,28 @@ msgstr ""
 "Ytterligare ord eller fraser som ska matcha detta inlägg i sökningen, även "
 "om de inte förekommer i innehållet."
 
-#: source/php/Admin/Settings.php:38
+#: source/php/Admin/Settings.php:42
 msgid "Typesense Connection"
 msgstr "Anslutning"
 
-#: source/php/Admin/Settings.php:39
+#: source/php/Admin/Settings.php:43
 msgid "Settings"
 msgstr "Inställningar"
 
-#: source/php/Admin/Settings.php:40
+#: source/php/Admin/Settings.php:44
 msgid "Facetting"
 msgstr "Facettering"
 
-#: source/php/Admin/Settings.php:41
+#: source/php/Admin/Settings.php:45
+#: views/admin/settings-tabs/quick-search.php:15
+msgid "Quick search"
+msgstr "Snabbsök"
+
+#: source/php/Admin/Settings.php:46
 msgid "Statistics"
 msgstr "Statistik"
 
-#: source/php/Admin/Settings.php:42
+#: source/php/Admin/Settings.php:47
 msgid "Status"
 msgstr "Status"
 
@@ -321,6 +326,14 @@ msgstr "Äldst först"
 msgid "Date Descending"
 msgstr "Nyast först"
 
+#: source/php/Frontend/EnrichSearchTemplate.php:44
+msgid "Filter"
+msgstr "Visa filter"
+
+#: source/php/Frontend/EnrichSearchTemplate.php:45
+msgid "Close filter"
+msgstr "Stäng filter"
+
 #: source/php/Frontend/I18n.php:24
 msgid "%d result"
 msgstr "%d resultat"
@@ -340,6 +353,10 @@ msgstr "Läs mer: "
 #: source/php/Frontend/I18n.php:34
 msgid "Search result pages"
 msgstr "Sökresultatsidor"
+
+#: source/php/Frontend/I18n.php:37
+msgid "See all results"
+msgstr "Se alla resultat"
 
 #: source/php/Frontend/I18n.php:47
 msgid "OK"
@@ -432,6 +449,29 @@ msgstr "Knappgrupp"
 msgid "Remove facet"
 msgstr "Ta bort facett"
 
+#: source/php/Frontend/I18n.php:80
+#: views/admin/settings-tabs/quick-search.php:72
+msgid "CSS selector"
+msgstr "CSS-selektor"
+
+#: source/php/Frontend/I18n.php:81
+#: views/admin/settings-tabs/quick-search.php:77
+msgid "e.g. .site-header input[type=search]"
+msgstr "t.ex. .site-header input[type=search]"
+
+#: source/php/Frontend/I18n.php:82
+#: views/admin/settings-tabs/quick-search.php:85
+#: views/admin/settings-tabs/quick-search.php:86
+msgid "Remove selector"
+msgstr "Ta bort selektor"
+
+#: source/php/Frontend/I18n.php:83
+#: views/admin/settings-tabs/quick-search.php:97
+msgid "No selectors configured yet. Click \"Add selector\" to get started."
+msgstr ""
+"Inga selektorer är konfigurerade ännu. Klicka på “Lägg till selektor” för "
+"att komma igång."
+
 #: source/php/Typesense/ApiKey.php:39
 msgid ""
 "Key was created but no value was returned. Please check your Typesense "
@@ -440,14 +480,14 @@ msgstr ""
 "Nyckeln skapades men inget värde returnerades. Kontrollera din Typesense-"
 "panel."
 
-#: views/admin/settings-page.php:27
+#: views/admin/settings-page.php:29
 msgid ""
 "Configure your Typesense server connection and choose which content to index."
 msgstr ""
 "Konfigurera anslutningen till din Typesense-server och välj vilket innehåll "
 "som ska indexeras."
 
-#: views/admin/settings-page.php:33
+#: views/admin/settings-page.php:35
 msgid "Settings sections"
 msgstr "Inställningssektioner"
 
@@ -575,8 +615,9 @@ msgid "Generate search key"
 msgstr "Generera söknyckel"
 
 #: views/admin/settings-tabs/connection.php:218
-#: views/admin/settings-tabs/content.php:181
+#: views/admin/settings-tabs/content.php:201
 #: views/admin/settings-tabs/facetting.php:105
+#: views/admin/settings-tabs/quick-search.php:109
 msgid "Save settings"
 msgstr "Spara inställningar"
 
@@ -602,13 +643,15 @@ msgstr "Indexera Modularity-innehåll"
 
 #: views/admin/settings-tabs/content.php:60
 #: views/admin/settings-tabs/content.php:91
-#: views/admin/settings-tabs/content.php:169
+#: views/admin/settings-tabs/content.php:189
+#: views/admin/settings-tabs/quick-search.php:42
 msgid "On"
 msgstr "På"
 
 #: views/admin/settings-tabs/content.php:61
 #: views/admin/settings-tabs/content.php:92
-#: views/admin/settings-tabs/content.php:170
+#: views/admin/settings-tabs/content.php:190
+#: views/admin/settings-tabs/quick-search.php:43
 msgid "Off"
 msgstr "Av"
 
@@ -647,11 +690,23 @@ msgstr ""
 "Hur länge man ska vänta efter att användaren slutar skriva innan sökningen "
 "utförs."
 
-#: views/admin/settings-tabs/content.php:137
+#: views/admin/settings-tabs/content.php:134
+msgid "Highlight context tokens"
+msgstr "Visa kontext runt träffar"
+
+#: views/admin/settings-tabs/content.php:148
+msgid ""
+"Number of tokens (words) to include before and after each highlighted match "
+"in search result snippets. Higher values show more context around matches."
+msgstr ""
+"Antal ord (tokens) som ska inkluderas före och efter varje markerad träff i "
+"sökresultatens utdrag. Högre värden visar mer sammanhang runt träffarna."
+
+#: views/admin/settings-tabs/content.php:157
 msgid "Post types"
 msgstr "Inläggstyper"
 
-#: views/admin/settings-tabs/content.php:138
+#: views/admin/settings-tabs/content.php:158
 msgid ""
 "Choose which content types should be synced to Typesense. Disabled types are "
 "excluded from indexing and search results."
@@ -659,7 +714,7 @@ msgstr ""
 "Välj vilka innehållstyper som ska synkas till Typesense. Inaktiverade typer "
 "exkluderas från indexering och sökresultat."
 
-#: views/admin/settings-tabs/content.php:143
+#: views/admin/settings-tabs/content.php:163
 msgid "No public post types found."
 msgstr "Inga publika inläggstyper hittades."
 
@@ -686,6 +741,46 @@ msgstr ""
 #: views/admin/settings-tabs/facetting.php:100
 msgid "Add facet"
 msgstr "Lägg till facett"
+
+#: views/admin/settings-tabs/quick-search.php:16
+msgid ""
+"Enable autocomplete / quick search for input fields outside the main search "
+"page. When active, users get instant suggestions while typing in any matched "
+"field."
+msgstr ""
+"Aktivera autokomplettering / snabbsökning för inmatningsfält utanför den "
+"huvudsakliga söksidan. När funktionen är aktiv får användare omedelbara "
+"förslag medan de skriver i alla matchande fält."
+
+#: views/admin/settings-tabs/quick-search.php:24
+msgid "Enable quick search"
+msgstr "Aktivera snabbsökning"
+
+#: views/admin/settings-tabs/quick-search.php:48
+msgid ""
+"When enabled, quick search will be attached to the CSS selectors defined "
+"below. It reuses the same frontend Typesense configuration as the main "
+"search."
+msgstr ""
+"När detta är aktiverat kopplas snabbsökning till de CSS-selektorer som "
+"definieras nedan. Den återanvänder samma frontend-konfiguration för "
+"Typesense som huvudsökningen."
+
+#: views/admin/settings-tabs/quick-search.php:62
+msgid "Target fields"
+msgstr "Målfält"
+
+#: views/admin/settings-tabs/quick-search.php:63
+msgid ""
+"Add one or more CSS selectors that match the search inputs you want to "
+"enhance with quick search autocomplete."
+msgstr ""
+"Lägg till en eller flera CSS-selektorer som matchar de sökfält du vill "
+"förbättra med autokomplettering för snabbsökning."
+
+#: views/admin/settings-tabs/quick-search.php:104
+msgid "Add selector"
+msgstr "Lägg till selektor"
 
 #: views/admin/settings-tabs/statistics.php:11
 msgid "Index overview"

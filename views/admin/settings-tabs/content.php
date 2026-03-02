@@ -129,6 +129,26 @@ if ($activeTab !== 'content') {
                     }
                 }());
                 </script>
+                <div class="ts-field">
+                    <label for="ts-highlight-affix-num-tokens" class="ts-field__label">
+                        <?php esc_html_e('Highlight context tokens', 'typesense-search'); ?>
+                    </label>
+                    <div class="ts-field__body">
+                        <input
+                            type="number"
+                            id="ts-highlight-affix-num-tokens"
+                            name="<?php echo esc_attr(Settings::OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS); ?>"
+                            value="<?php echo esc_attr(get_option(Settings::OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS, 15)); ?>"
+                            class="small-text ts-field__input"
+                            step="1"
+                            min="1"
+                            max="50"
+                        />
+                        <p class="ts-field__description">
+                            <?php esc_html_e('Number of tokens (words) to include before and after each highlighted match in search result snippets. Higher values show more context around matches.', 'typesense-search'); ?>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
 

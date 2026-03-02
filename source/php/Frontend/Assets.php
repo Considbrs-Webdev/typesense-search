@@ -114,6 +114,12 @@ class Assets
             null,
             true
         );
+
+        wp_localize_script(
+            'typesense-quick-search',
+            'typesenseQuickSearchI18n',
+            I18n::quickSearchStrings()
+        );
     }
 
     /**

@@ -2,31 +2,102 @@
 @use "@awesome.me/webawesome/dist/styles/utilities.css";
 
 // ---------------------------------------------------------------------------
-// Look and feel for the main filter area (search input and facet controls)
+// Component-level design tokens — override these to customise the search UI.
+// All variables are declared on [data-js-search-page-container] so they
+// cascade to every child without polluting the global :root scope.
+// ---------------------------------------------------------------------------
+[data-js-search-page-container] {
+  // Colours (fall back to theme vars when not set)
+  --ts-color-primary: var(--color-primary, black);
+  --ts-color-on-primary: var(--text-base, white);
+  --ts-color-surface-tint: 15%; // how much primary is mixed into backgrounds
+
+  // Form controls
+  --ts-border-width: 2px;
+  --ts-label-font-weight: 700;
+  --ts-tag-max-size: 20ch;
+  --ts-form-control-height: 2.25rem;
+
+  // Search-input box
+  --ts-main-filter-padding: 2.5rem 2rem;
+  --ts-main-filter-padding-mobile: 1.25rem 1rem;
+
+  // Filter sidebar (desktop)
+  --ts-sidebar-width: 260px;
+  --ts-sidebar-padding: 1.5rem;
+  --ts-sidebar-sticky-top: var(--wa-space-l, 1.5rem);
+
+  // Mobile slide-in panel
+  --ts-panel-width: min(85vw, 300px);
+  --ts-panel-transition: transform 0.3s ease;
+  --ts-panel-z-index: 1000;
+
+  // Backdrop overlay
+  --ts-overlay-bg: rgba(0, 0, 0, 0.45);
+  --ts-overlay-z-index: 999;
+
+  // Toggle button
+  --ts-toggle-btn-padding: 0.5rem 1.25rem;
+  --ts-toggle-btn-hover-opacity: 0.88;
+
+  // Close button
+  --ts-close-btn-font-size: 1.75rem;
+  --ts-close-btn-hover-opacity: 0.7;
+
+  // Sidebar divider (header border on mobile panel)
+  --ts-sidebar-divider: 1px solid
+    color-mix(in srgb, var(--ts-color-primary) 25%, white);
+}
+
+// ---------------------------------------------------------------------------
+// Shared wa-select theming — single mixin-like ruleset reused in multiple
+// places via the same property names.
+// ---------------------------------------------------------------------------
+%ts-select-theme {
+  --wa-color-surface-border: var(--ts-color-primary);
+  --wa-form-control-border-color: var(--ts-color-primary);
+  --wa-form-control-border-width: var(--ts-border-width);
+  --wa-form-control-label-font-weight: var(--ts-label-font-weight);
+  --tag-max-size: var(--ts-tag-max-size);
+  --wa-color-brand-fill-loud: var(--ts-color-primary);
+}
+
+%ts-select-tag-theme {
+  --wa-color-neutral-fill-quiet: var(--ts-color-primary);
+  --wa-color-neutral-on-quiet: var(--ts-color-on-primary);
+  --wa-border-width-s: 0;
+  --wa-form-control-height: var(--ts-form-control-height);
+}
+
+// ---------------------------------------------------------------------------
+// Look and feel for the main filter area (search input)
 // ---------------------------------------------------------------------------
 .ts-main-filter {
-  background: color-mix(in srgb, var(--color-primary, black) 15%, white);
+  background: var(
+    --ts-main-filter-background,
+    color-mix(
+      in srgb,
+      var(--ts-color-primary) var(--ts-color-surface-tint),
+      white
+    )
+  );
   border-radius: var(--radius-m, 0.5rem);
-  padding: 2.5rem 2rem;
+  padding: var(--ts-main-filter-padding);
 
   wa-select,
   wa-input {
-    --wa-color-surface-border: var(--color-primary, black);
-    --wa-form-control-border-color: var(--color-primary, black);
-    --wa-form-control-border-width: 2px;
-    --wa-form-control-label-font-weight: 700;
+    --wa-color-surface-border: var(--ts-color-primary);
+    --wa-form-control-border-color: var(--ts-color-primary);
+    --wa-form-control-border-width: var(--ts-border-width);
+    --wa-form-control-label-font-weight: var(--ts-label-font-weight);
   }
 
   wa-select {
-    --tag-max-size: 20ch;
-    --wa-color-brand-fill-loud: var(--color-primary, black);
+    @extend %ts-select-theme;
   }
 
   wa-select::part(tag) {
-    --wa-color-neutral-fill-quiet: var(--color-primary, black);
-    --wa-color-neutral-on-quiet: var(--text-base, white);
-    --wa-border-width-s: 0;
-    --wa-form-control-height: 2.25rem;
+    @extend %ts-select-tag-theme;
   }
 
   wa-option {
@@ -36,17 +107,170 @@
   }
 
   wa-icon {
-    color: var(--color-primary, black);
+    color: var(--ts-color-primary);
   }
 }
 
 .ts-results-container {
-  flex: 0 0 1024px;
+  // width is managed by the flex layout
 }
 
 // ---------------------------------------------------------------------------
-// Pagination
+// Sidebar layout: results (left) + filter sidebar (right)
 // ---------------------------------------------------------------------------
+
+.ts-search-layout {
+  display: flex;
+  gap: var(--wa-space-xl, 2rem);
+  align-items: flex-start;
+}
+
+.ts-search-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.ts-filter-sidebar {
+  flex: 0 0 var(--ts-sidebar-width);
+  width: var(--ts-sidebar-width);
+  position: sticky;
+  top: var(--ts-sidebar-sticky-top);
+  background: var(--ts-sidebar-background, color-mix(
+    in srgb,
+    var(--ts-color-primary) var(--ts-color-surface-tint),
+    white
+  ));
+  border-radius: var(--radius-m, 0.5rem);
+  padding: var(--ts-sidebar-padding);
+
+  wa-select {
+    @extend %ts-select-theme;
+  }
+
+  wa-select::part(tag) {
+    @extend %ts-select-tag-theme;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile filter toggle bar (visible only on small screens)
+// ---------------------------------------------------------------------------
+
+.ts-filter-toggle-bar {
+  display: none;
+}
+
+.ts-filter-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--ts-toggle-btn-padding);
+  background: var(--ts-color-primary);
+  color: var(--ts-color-on-primary);
+  border: none;
+  border-radius: var(--radius-m, 0.375rem);
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+
+  svg {
+    width: 1.1em;
+    height: 1.1em;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    opacity: var(--ts-toggle-btn-hover-opacity);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Filter sidebar header (close button + count — only used on mobile)
+// ---------------------------------------------------------------------------
+
+.ts-filter-sidebar__header {
+  display: none;
+}
+
+// ---------------------------------------------------------------------------
+// Responsive: on small screens show toggle, turn sidebar into slide-in panel
+// ---------------------------------------------------------------------------
+
+@media (max-width: 47.99em) {
+  .ts-filter-toggle-bar {
+    display: flex;
+  }
+
+  .ts-main-filter {
+    padding: var(--ts-main-filter-padding-mobile);
+  }
+
+  .ts-search-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ts-filter-sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: 0;
+    height: 100%;
+    width: var(--ts-panel-width);
+    flex: unset;
+    border-radius: 0;
+    overflow-y: auto;
+    z-index: var(--ts-panel-z-index);
+    transform: translateX(100%);
+    transition: var(--ts-panel-transition);
+  }
+
+  .ts-filter-sidebar--open {
+    transform: translateX(0);
+  }
+
+  .ts-filter-sidebar__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: var(--ts-sidebar-divider);
+  }
+
+  .ts-sidebar-results-count {
+    font-size: var(--wa-font-size-s, 0.875rem);
+    color: var(--wa-color-neutral-600, #4b5563);
+  }
+
+  .ts-filter-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--ts-close-btn-font-size);
+    line-height: 1;
+    padding: 0 0.25rem;
+    color: inherit;
+
+    &:hover {
+      opacity: var(--ts-close-btn-hover-opacity);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Backdrop overlay for mobile filter panel
+// ---------------------------------------------------------------------------
+
+.ts-filter-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--ts-overlay-bg);
+  z-index: var(--ts-overlay-z-index);
+}
+
+.ts-filter-overlay--open {
+  display: block;
+}
 
 .ts-pagination {
   display: flex;
@@ -54,10 +278,10 @@
   margin-block: var(--wa-space-l, 1.5rem);
 
   wa-button {
-    --wa-color-neutral-fill-normal: var(--color-primary, black);
-    --wa-color-neutral-on-normal: var(--text-base, white);
-    --wa-color-neutral-fill-loud: var(--color-primary, black);
-    --wa-color-neutral-on-loud: var(--text-base, white);
+    --wa-color-neutral-fill-normal: var(--ts-color-primary);
+    --wa-color-neutral-on-normal: var(--ts-color-on-primary);
+    --wa-color-neutral-fill-loud: var(--ts-color-primary);
+    --wa-color-neutral-on-loud: var(--ts-color-on-primary);
 
     &:disabled {
       opacity: 1;

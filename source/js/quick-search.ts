@@ -17,6 +17,7 @@ declare global {
 
 const DEFAULT_HITS = 5;
 const ITEM_CLASS = "ts-qs-item";
+const FOOTER_CLASS = "ts-qs-footer";
 
 // ---------------------------------------------------------------------------
 // Positioning helper (fixed, using viewport coords)
@@ -66,6 +67,28 @@ function attachQuickSearch(
   let isOpen = false;
   let debounceTimer: ReturnType<typeof setTimeout>;
   let lastSearchedQuery = "";
+  let footerEl: HTMLAnchorElement | null = null;
+
+  // ── Build search-page URL (mirrors form GET submission) ────────────────────────────
+
+  function buildSearchUrl(): string {
+    const form = input.closest("form");
+    if (form && (form.method || "get").toLowerCase() === "get") {
+      const url = new URL(
+        form.action || window.location.href,
+        window.location.href,
+      );
+      url.search = "";
+      new FormData(form).forEach((value, key) =>
+        url.searchParams.append(key, String(value)),
+      );
+      return url.toString();
+    }
+    // Fallback: append ?s= to the current URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("s", input.value);
+    return url.toString();
+  }
 
   // ── Open / close ─────────────────────────────────────────────────────────
 
@@ -90,18 +113,32 @@ function attachQuickSearch(
 
   function setActive(index: number): void {
     const items = dropdown.querySelectorAll<HTMLElement>(`.${ITEM_CLASS}`);
+    const isFooter = footerEl !== null && index === currentHits.length;
+
     items.forEach((item, i) => {
-      const active = i === index;
+      const active = !isFooter && i === index;
       item.classList.toggle("is-active", active);
       item.setAttribute("aria-selected", String(active));
     });
+
+    if (footerEl) {
+      footerEl.classList.toggle("is-active", isFooter);
+      footerEl.setAttribute("aria-selected", String(isFooter));
+    }
+
     activeIndex = index;
-    const activeItem = items[index];
-    if (activeItem) {
-      input.setAttribute("aria-activedescendant", activeItem.id);
-      activeItem.scrollIntoView({ block: "nearest" });
+
+    if (isFooter && footerEl) {
+      input.setAttribute("aria-activedescendant", footerEl.id);
+      footerEl.scrollIntoView({ block: "nearest" });
     } else {
-      input.removeAttribute("aria-activedescendant");
+      const activeItem = items[index];
+      if (activeItem) {
+        input.setAttribute("aria-activedescendant", activeItem.id);
+        activeItem.scrollIntoView({ block: "nearest" });
+      } else {
+        input.removeAttribute("aria-activedescendant");
+      }
     }
   }
 
@@ -110,6 +147,7 @@ function attachQuickSearch(
   function render(hits: SearchHit[]): void {
     dropdown.innerHTML = "";
     activeIndex = -1;
+    footerEl = null;
 
     if (!hits.length) {
       close();
@@ -149,6 +187,26 @@ function attachQuickSearch(
 
       dropdown.appendChild(item);
     });
+
+    // ── "See all results" footer ─────────────────────────────────────────────
+    const footerLabel =
+      window.typesenseQuickSearchI18n?.seeAllResults ?? "See all results";
+    footerEl = document.createElement("a");
+    footerEl.className = FOOTER_CLASS;
+    footerEl.id = `${dropdownId}-footer`;
+    footerEl.href = buildSearchUrl();
+    footerEl.tabIndex = -1;
+    footerEl.setAttribute("role", "option");
+    footerEl.setAttribute("aria-selected", "false");
+    footerEl.textContent = footerLabel;
+    footerEl.addEventListener("mouseenter", () =>
+      setActive(currentHits.length),
+    );
+    footerEl.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = buildSearchUrl();
+    });
+    dropdown.appendChild(footerEl);
 
     open();
   }
@@ -208,7 +266,7 @@ function attachQuickSearch(
 
   input.addEventListener("keydown", (e) => {
     if (!isOpen) return;
-    const count = currentHits.length;
+    const count = currentHits.length + (footerEl ? 1 : 0);
     if (!count) return;
 
     switch (e.key) {
@@ -223,7 +281,10 @@ function attachQuickSearch(
         break;
 
       case "Enter":
-        if (activeIndex >= 0 && currentHits[activeIndex]) {
+        if (footerEl && activeIndex === currentHits.length) {
+          e.preventDefault();
+          window.location.href = buildSearchUrl();
+        } else if (activeIndex >= 0 && currentHits[activeIndex]) {
           e.preventDefault();
           window.location.href = String(
             currentHits[activeIndex].document.url ?? "#",
@@ -245,7 +306,7 @@ function attachQuickSearch(
   function tabLock(e: KeyboardEvent): void {
     if (!isOpen || e.key !== "Tab") return;
     e.preventDefault();
-    const count = currentHits.length;
+    const count = currentHits.length + (footerEl ? 1 : 0);
     if (!count) return;
     const next = e.shiftKey
       ? (activeIndex - 1 + count) % count

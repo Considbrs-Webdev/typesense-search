@@ -32,6 +32,7 @@ class Settings
     public const OPTION_INDEX_MODULARITY = 'typesense_index_modularity_content';
     public const OPTION_DEBOUNCE              = 'typesense_search_debounce';
     public const OPTION_DEBOUNCE_DELAY         = 'typesense_search_debounce_delay';
+    public const OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS = 'typesense_search_highlight_affix_num_tokens';
     public const OPTION_QUICK_SEARCH_ENABLED   = 'typesense_quick_search_enabled';
     public const OPTION_QUICK_SEARCH_SELECTORS = 'typesense_quick_search_selectors';
 
@@ -115,6 +116,12 @@ class Settings
             'type'              => 'integer',
             'sanitize_callback' => 'absint',
             'default'           => 10,
+        ]);
+
+        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS, [
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 15,
         ]);
 
         register_setting(self::OPTION_GROUP_FACETS, self::OPTION_FACETS, [

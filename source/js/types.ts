@@ -18,6 +18,7 @@ export interface TypesenseSearchConfig {
   facets?: FacetConfig[];
   debounce?: boolean;
   debounceDelay?: number;
+  highlightAffixNumTokens?: number;
 }
 
 export interface TypesenseI18n {
@@ -28,10 +29,15 @@ export interface TypesenseI18n {
   paginationLabel: string;
 }
 
+export interface TypesenseQuickSearchI18n {
+  seeAllResults: string;
+}
+
 declare global {
   interface Window {
     typesenseConfig?: TypesenseSearchConfig;
     typesenseI18n?: TypesenseI18n;
+    typesenseQuickSearchI18n?: TypesenseQuickSearchI18n;
   }
 }
 

@@ -69,7 +69,19 @@ function init(): void {
   );
 
   const triggerSearch = (): void => {
-    search(getUrlState()).then(facets.render);
+    search(getUrlState()).then((facetData) => {
+      facets.render(facetData);
+      // Mirror count into the mobile sidebar panel
+      const sidebarCountEl = container.querySelector<HTMLElement>(
+        "[data-js-sidebar-results-count]",
+      );
+      if (sidebarCountEl) {
+        const mainCountEl = container.querySelector<HTMLElement>(
+          "[data-js-search-results-count]",
+        );
+        sidebarCountEl.textContent = mainCountEl?.textContent ?? "";
+      }
+    });
   };
 
   // ── URL → UI sync ────────────────────────────────────────────────────────
@@ -129,6 +141,37 @@ function init(): void {
     syncUiFromUrl();
     triggerSearch();
   });
+
+  // ── Mobile filter panel (CSS slide-in) ─────────────────────────────────────────
+
+  const filterToggleEl = container.querySelector<HTMLElement>(
+    "[data-js-filter-toggle]",
+  );
+  const filterSidebarEl = container.querySelector<HTMLElement>(
+    "[data-js-filter-sidebar]",
+  );
+  const filterOverlayEl = document.querySelector<HTMLElement>(
+    "[data-js-filter-overlay]",
+  );
+  const filterCloseEl = container.querySelector<HTMLElement>(
+    "[data-js-filter-close]",
+  );
+
+  const openPanel = (): void => {
+    filterSidebarEl?.classList.add("ts-filter-sidebar--open");
+    filterOverlayEl?.classList.add("ts-filter-overlay--open");
+    document.body.style.overflow = "hidden";
+  };
+
+  const closePanel = (): void => {
+    filterSidebarEl?.classList.remove("ts-filter-sidebar--open");
+    filterOverlayEl?.classList.remove("ts-filter-overlay--open");
+    document.body.style.overflow = "";
+  };
+
+  filterToggleEl?.addEventListener("click", openPanel);
+  filterCloseEl?.addEventListener("click", closePanel);
+  filterOverlayEl?.addEventListener("click", closePanel);
 
   // ── Boot ─────────────────────────────────────────────────────────────────
 

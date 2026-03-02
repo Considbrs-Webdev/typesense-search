@@ -41,6 +41,8 @@ class EnrichSearchTemplate
 			'relevance' => __("Relevance", 'typesense-search'),
 			'dateAsc' => __("Date Ascending", 'typesense-search'),
 			'dateDesc' => __("Date Descending", 'typesense-search'),
+			'filter' => __("Filter", 'typesense-search'),
+			'closeFilter' => __("Close filter", 'typesense-search'),
 		]);
 
 		$data['lang'] = (object)$lang;

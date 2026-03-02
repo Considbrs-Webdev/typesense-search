@@ -36,6 +36,19 @@ class I18n
     }
 
     /**
+     * Returns translatable strings for the quick-search JS bundle.
+     * Localized as `window.typesenseQuickSearchI18n` on every page.
+     *
+     * @return array<string, string>
+     */
+    public static function quickSearchStrings(): array
+    {
+        return [
+            'seeAllResults' => __('See all results', 'typesense-search'),
+        ];
+    }
+
+    /**
      * Returns an array of all translatable strings for the admin settings JS bundle.
      *
      * @return array<string, string>

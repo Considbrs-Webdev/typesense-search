@@ -9,15 +9,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-02T05:06:39+00:00\n"
+"POT-Creation-Date: 2026-03-02T07:52:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
 #: typesense-search.php
-#: source/php/Admin/Settings.php:63
 #: source/php/Admin/Settings.php:64
+#: source/php/Admin/Settings.php:65
 #: views/admin/settings-page.php:25
 msgid "Typesense Search"
 msgstr ""
@@ -62,28 +62,28 @@ msgstr ""
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
-#: source/php/Admin/Settings.php:41
+#: source/php/Admin/Settings.php:42
 msgid "Typesense Connection"
 msgstr ""
 
-#: source/php/Admin/Settings.php:42
+#: source/php/Admin/Settings.php:43
 msgid "Settings"
 msgstr ""
 
-#: source/php/Admin/Settings.php:43
+#: source/php/Admin/Settings.php:44
 msgid "Facetting"
 msgstr ""
 
-#: source/php/Admin/Settings.php:44
+#: source/php/Admin/Settings.php:45
 #: views/admin/settings-tabs/quick-search.php:15
 msgid "Quick search"
 msgstr ""
 
-#: source/php/Admin/Settings.php:45
+#: source/php/Admin/Settings.php:46
 msgid "Statistics"
 msgstr ""
 
-#: source/php/Admin/Settings.php:46
+#: source/php/Admin/Settings.php:47
 msgid "Status"
 msgstr ""
 
@@ -315,6 +315,14 @@ msgstr ""
 msgid "Date Descending"
 msgstr ""
 
+#: source/php/Frontend/EnrichSearchTemplate.php:44
+msgid "Filter"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:45
+msgid "Close filter"
+msgstr ""
+
 #: source/php/Frontend/I18n.php:24
 msgid "%d result"
 msgstr ""
@@ -335,117 +343,121 @@ msgstr ""
 msgid "Search result pages"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:47
+#: source/php/Frontend/I18n.php:37
+msgid "See all results"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:50
 msgid "OK"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:48
+#: source/php/Frontend/I18n.php:51
 msgid "Unknown error."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:49
+#: source/php/Frontend/I18n.php:52
 msgid "Error."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:51
+#: source/php/Frontend/I18n.php:54
 msgid "Request failed: "
 msgstr ""
 
-#: source/php/Frontend/I18n.php:54
+#: source/php/Frontend/I18n.php:57
 msgid "Pie chart showing document distribution"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:55
+#: source/php/Frontend/I18n.php:58
 msgid "documents"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:59
+#: source/php/Frontend/I18n.php:62
 msgid "Remove all \"%s\" documents from the Typesense index? This cannot be undone."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:60
+#: source/php/Frontend/I18n.php:63
 msgid "Clear"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:63
+#: source/php/Frontend/I18n.php:66
 msgid "Could not load facetable fields."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:64
+#: source/php/Frontend/I18n.php:67
 msgid "— No facetable fields found —"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:65
+#: source/php/Frontend/I18n.php:68
 msgid "No facetable fields found in the collection schema. Make sure the collection exists and has fields with facet: true."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:66
+#: source/php/Frontend/I18n.php:69
 msgid "All facetable fields have already been added as facets."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:69
+#: source/php/Frontend/I18n.php:72
 #: views/admin/settings-tabs/facetting.php:30
 msgid "Field"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:70
+#: source/php/Frontend/I18n.php:73
 #: views/admin/settings-tabs/facetting.php:46
 msgid "Label"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:71
+#: source/php/Frontend/I18n.php:74
 #: views/admin/settings-tabs/facetting.php:51
 msgid "e.g. Category"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:72
+#: source/php/Frontend/I18n.php:75
 #: views/admin/settings-tabs/facetting.php:56
 msgid "Placeholder"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:73
+#: source/php/Frontend/I18n.php:76
 #: views/admin/settings-tabs/facetting.php:61
 msgid "e.g. All categories"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:74
+#: source/php/Frontend/I18n.php:77
 #: views/admin/settings-tabs/facetting.php:66
 msgid "Display as"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:75
+#: source/php/Frontend/I18n.php:78
 #: views/admin/settings-tabs/facetting.php:73
 msgid "Dropdown"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:76
+#: source/php/Frontend/I18n.php:79
 #: views/admin/settings-tabs/facetting.php:74
 msgid "Button group"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:77
+#: source/php/Frontend/I18n.php:80
 #: views/admin/settings-tabs/facetting.php:80
 #: views/admin/settings-tabs/facetting.php:81
 msgid "Remove facet"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:80
+#: source/php/Frontend/I18n.php:83
 #: views/admin/settings-tabs/quick-search.php:72
 msgid "CSS selector"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:81
+#: source/php/Frontend/I18n.php:84
 #: views/admin/settings-tabs/quick-search.php:77
 msgid "e.g. .site-header input[type=search]"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:82
+#: source/php/Frontend/I18n.php:85
 #: views/admin/settings-tabs/quick-search.php:85
 #: views/admin/settings-tabs/quick-search.php:86
 msgid "Remove selector"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:83
+#: source/php/Frontend/I18n.php:86
 #: views/admin/settings-tabs/quick-search.php:97
 msgid "No selectors configured yet. Click \"Add selector\" to get started."
 msgstr ""
@@ -554,7 +566,7 @@ msgid "Generate search key"
 msgstr ""
 
 #: views/admin/settings-tabs/connection.php:218
-#: views/admin/settings-tabs/content.php:181
+#: views/admin/settings-tabs/content.php:201
 #: views/admin/settings-tabs/facetting.php:105
 #: views/admin/settings-tabs/quick-search.php:109
 msgid "Save settings"
@@ -582,14 +594,14 @@ msgstr ""
 
 #: views/admin/settings-tabs/content.php:60
 #: views/admin/settings-tabs/content.php:91
-#: views/admin/settings-tabs/content.php:169
+#: views/admin/settings-tabs/content.php:189
 #: views/admin/settings-tabs/quick-search.php:42
 msgid "On"
 msgstr ""
 
 #: views/admin/settings-tabs/content.php:61
 #: views/admin/settings-tabs/content.php:92
-#: views/admin/settings-tabs/content.php:170
+#: views/admin/settings-tabs/content.php:190
 #: views/admin/settings-tabs/quick-search.php:43
 msgid "Off"
 msgstr ""
@@ -614,15 +626,23 @@ msgstr ""
 msgid "How long to wait after the user stops typing before firing the search request."
 msgstr ""
 
-#: views/admin/settings-tabs/content.php:137
+#: views/admin/settings-tabs/content.php:134
+msgid "Highlight context tokens"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:148
+msgid "Number of tokens (words) to include before and after each highlighted match in search result snippets. Higher values show more context around matches."
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:157
 msgid "Post types"
 msgstr ""
 
-#: views/admin/settings-tabs/content.php:138
+#: views/admin/settings-tabs/content.php:158
 msgid "Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results."
 msgstr ""
 
-#: views/admin/settings-tabs/content.php:143
+#: views/admin/settings-tabs/content.php:163
 msgid "No public post types found."
 msgstr ""
 
