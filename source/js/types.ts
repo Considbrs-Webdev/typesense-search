@@ -14,6 +14,7 @@ export interface TypesenseSearchConfig {
   collection: string;
   searchKey: string;
   hitsPerPage: number;
+  quickSearchHitsPerPage?: number;
   facets?: FacetConfig[];
   debounce?: boolean;
   debounceDelay?: number;

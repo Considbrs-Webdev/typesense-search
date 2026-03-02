@@ -1,0 +1,112 @@
+// ---------------------------------------------------------------------------
+// Quick search autocomplete dropdown
+// ---------------------------------------------------------------------------
+//
+// CSS custom properties (set on :root or any ancestor to override defaults):
+//
+//  --ts-qs-bg                Dropdown background              default: #fff
+//  --ts-qs-border            Dropdown border colour           default: rgba(0,0,0,.12)
+//  --ts-qs-radius            Dropdown border-radius           default: 8px
+//  --ts-qs-shadow            Dropdown box-shadow              default: layered shadow
+//  --ts-qs-max-height        Max height before scrolling      default: 360px
+//  --ts-qs-z-index           z-index                          default: 99999
+//
+//  --ts-qs-item-padding      Row padding                      default: 10px 16px
+//  --ts-qs-item-gap          Gap between name and type badge  default: 12px
+//  --ts-qs-item-divider      Row divider colour               default: rgba(0,0,0,.06)
+//  --ts-qs-item-hover-bg     Hover / active row background    default: rgba(0,0,0,.04)
+//
+//  --ts-qs-name-size         Result title font-size           default: 0.9rem
+//  --ts-qs-name-weight       Result title font-weight         default: 500
+//  --ts-qs-name-color        Result title colour              default: #111
+//
+//  --ts-qs-type-size         Type badge font-size             default: 0.72rem
+//  --ts-qs-type-weight       Type badge font-weight           default: 500
+//  --ts-qs-type-color        Type badge text colour           default: #666
+//  --ts-qs-type-bg           Type badge background            default: rgba(0,0,0,.06)
+//  --ts-qs-type-radius       Type badge border-radius         default: 99px
+// ---------------------------------------------------------------------------
+
+.ts-quick-search {
+  position: fixed;
+  z-index: var(--ts-qs-z-index, 99999);
+  background: var(--ts-qs-bg, #fff);
+  border: 1px solid var(--ts-qs-border, rgba(0, 0, 0, 0.12));
+  border-radius: var(--ts-qs-radius, 8px);
+  box-shadow: var(
+    --ts-qs-shadow,
+    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 10px 24px -4px rgba(0, 0, 0, 0.14)
+  );
+  overflow: hidden;
+  max-height: var(--ts-qs-max-height, 360px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+
+  // Smooth appear
+  animation: ts-qs-appear 0.1s ease-out;
+}
+
+@keyframes ts-qs-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ts-qs-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ts-qs-item-gap, 12px);
+  padding: var(--ts-qs-item-padding, 10px 16px);
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--ts-qs-item-divider, rgba(0, 0, 0, 0.06));
+  cursor: pointer;
+  min-width: 0;
+  transition: background 0.1s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.is-active,
+  &:hover {
+    background: var(--ts-qs-item-hover-bg, rgba(0, 0, 0, 0.04));
+    text-decoration: none;
+  }
+
+  &:focus {
+    outline: none;
+    background: var(--ts-qs-item-hover-bg, rgba(0, 0, 0, 0.04));
+  }
+
+  &__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--ts-qs-name-size, 0.9rem);
+    font-weight: var(--ts-qs-name-weight, 500);
+    color: var(--ts-qs-name-color, #111);
+    line-height: 1.4;
+  }
+
+  &__type {
+    flex: 0 0 auto;
+    font-size: var(--ts-qs-type-size, 0.72rem);
+    font-weight: var(--ts-qs-type-weight, 500);
+    color: var(--ts-qs-type-color, #666);
+    white-space: nowrap;
+    padding: 2px 8px;
+    background: var(--ts-qs-type-bg, rgba(0, 0, 0, 0.06));
+    border-radius: var(--ts-qs-type-radius, 99px);
+    line-height: 1.6;
+  }
+}

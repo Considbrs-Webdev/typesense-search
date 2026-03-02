@@ -8,7 +8,9 @@
  *  @var array<string,string> $tabs      Map of tab slug => label.
  *  @var \WP_Post_Type[] $postTypes      All indexable post types.
  *  @var string[]      $enabledPostTypes Slugs of currently enabled post types.
- *  @var array[]       $facets           Saved facet entries (field, label, placeholder).
+ *  @var array[]       $facets               Saved facet entries (field, label, placeholder).
+ *  @var int           $quickSearchEnabled   Whether quick search is enabled (1/0).
+ *  @var array[]       $quickSearchSelectors Saved CSS selector entries.
  */
 
 use TypesenseSearch\Admin\Settings;
@@ -40,6 +42,8 @@ $pageUrl = admin_url('options-general.php?page=' . Settings::PAGE_SLUG);
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 <?php elseif ($slug === 'status') : ?>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <?php elseif ($slug === 'quick-search') : ?>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><polyline points="11 8 11 14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
                 <?php else : ?>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 <?php endif; ?>
@@ -50,6 +54,7 @@ $pageUrl = admin_url('options-general.php?page=' . Settings::PAGE_SLUG);
     <?php include __DIR__ . '/settings-tabs/connection.php'; ?>
     <?php include __DIR__ . '/settings-tabs/content.php'; ?>
     <?php include __DIR__ . '/settings-tabs/facetting.php'; ?>
+    <?php include __DIR__ . '/settings-tabs/quick-search.php'; ?>
     <?php include __DIR__ . '/settings-tabs/statistics.php'; ?>
     <?php include __DIR__ . '/settings-tabs/status.php'; ?>
 

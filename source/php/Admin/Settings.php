@@ -16,9 +16,10 @@ class Settings
 {
     public const PAGE_SLUG = 'typesense-search';
 
-    public const OPTION_GROUP_CONNECTION = 'typesense_search_connection';
-    public const OPTION_GROUP_CONTENT    = 'typesense_search_content';
-    public const OPTION_GROUP_FACETS     = 'typesense_search_facetting';
+    public const OPTION_GROUP_CONNECTION   = 'typesense_search_connection';
+    public const OPTION_GROUP_CONTENT      = 'typesense_search_content';
+    public const OPTION_GROUP_FACETS       = 'typesense_search_facetting';
+    public const OPTION_GROUP_QUICK_SEARCH = 'typesense_search_quick_search';
 
     public const OPTION_REMOTE     = 'typesense_search_remote';
     public const OPTION_INDEX_NAME = 'typesense_search_index_name';
@@ -29,17 +30,20 @@ class Settings
     public const OPTION_FACETS     = 'typesense_search_facets';
     public const OPTION_HITS_PER_PAGE = 'typesense_search_hits_per_page';
     public const OPTION_INDEX_MODULARITY = 'typesense_index_modularity_content';
-    public const OPTION_DEBOUNCE         = 'typesense_search_debounce';
-    public const OPTION_DEBOUNCE_DELAY    = 'typesense_search_debounce_delay';
+    public const OPTION_DEBOUNCE              = 'typesense_search_debounce';
+    public const OPTION_DEBOUNCE_DELAY         = 'typesense_search_debounce_delay';
+    public const OPTION_QUICK_SEARCH_ENABLED   = 'typesense_quick_search_enabled';
+    public const OPTION_QUICK_SEARCH_SELECTORS = 'typesense_quick_search_selectors';
 
     private static function getTabs(): array
     {
         return [
-            'connection' => __('Typesense Connection', 'typesense-search'),
-            'content'    => __('Settings', 'typesense-search'),
-            'facetting'  => __('Facetting', 'typesense-search'),
-            'statistics' => __('Statistics', 'typesense-search'),
-            'status'     => __('Status', 'typesense-search'),
+            'connection'   => __('Typesense Connection', 'typesense-search'),
+            'content'      => __('Settings', 'typesense-search'),
+            'facetting'    => __('Facetting', 'typesense-search'),
+            'quick-search' => __('Quick search', 'typesense-search'),
+            'statistics'   => __('Statistics', 'typesense-search'),
+            'status'       => __('Status', 'typesense-search'),
         ];
     }
 
@@ -116,6 +120,18 @@ class Settings
         register_setting(self::OPTION_GROUP_FACETS, self::OPTION_FACETS, [
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitizeFacets'],
+            'default'           => [],
+        ]);
+
+        register_setting(self::OPTION_GROUP_QUICK_SEARCH, self::OPTION_QUICK_SEARCH_ENABLED, [
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 0,
+        ]);
+
+        register_setting(self::OPTION_GROUP_QUICK_SEARCH, self::OPTION_QUICK_SEARCH_SELECTORS, [
+            'type'              => 'array',
+            'sanitize_callback' => [$this, 'sanitizeQuickSearchSelectors'],
             'default'           => [],
         ]);
     }
@@ -195,8 +211,10 @@ class Settings
         $tabs             = self::getTabs();
         $postTypes        = self::getIndexablePostTypes();
         $enabledPostTypes = (array) get_option(self::OPTION_POST_TYPES, []);
-        $facets           = (array) get_option(self::OPTION_FACETS, []);
-        $hitsPerPage      = (int) get_option(self::OPTION_HITS_PER_PAGE, 10);
+        $facets                = (array) get_option(self::OPTION_FACETS, []);
+        $hitsPerPage           = (int) get_option(self::OPTION_HITS_PER_PAGE, 10);
+        $quickSearchEnabled    = (int) get_option(self::OPTION_QUICK_SEARCH_ENABLED, 0);
+        $quickSearchSelectors  = (array) get_option(self::OPTION_QUICK_SEARCH_SELECTORS, []);
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';
     }
@@ -211,6 +229,31 @@ class Settings
         }
 
         return array_map('sanitize_key', $value);
+    }
+
+    /**
+     * Sanitize the quick search CSS selectors array before saving.
+     * Each entry must have a non-empty 'selector' key.
+     */
+    public function sanitizeQuickSearchSelectors(mixed $value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($value as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $selector = sanitize_text_field($item['selector'] ?? '');
+            if (empty($selector)) {
+                continue;
+            }
+            $result[] = ['selector' => $selector];
+        }
+
+        return $result;
     }
 
     /**

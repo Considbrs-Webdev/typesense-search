@@ -22,7 +22,7 @@ if ($activeTab !== 'facetting') {
             </div>
 
             <!-- Facet rows -->
-            <div id="ts-facet-list" class="ts-facet-list">
+            <div id="ts-facet-list" class="ts-repeater-list">
                 <?php if (!empty($facets)) : ?>
                     <?php foreach ($facets as $index => $facet) : ?>
                     <div class="ts-facet-row" data-index="<?php echo esc_attr($index); ?>">
@@ -93,7 +93,7 @@ if ($activeTab !== 'facetting') {
             </p>
 
             <!-- Add facet button -->
-            <div class="ts-facet-actions">
+            <div class="ts-repeater-actions">
                 <button type="button" id="ts-add-facet" class="button button-secondary ts-connection-test__button">
                     <svg class="ts-connection-test__spinner" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                     <svg class="ts-connection-test__icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>

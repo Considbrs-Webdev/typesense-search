@@ -22,14 +22,17 @@ class TypesenseConfig
 	 */
 	public function localizeConfig(): void
 	{
-		if (!is_search()) {
+		$isSearch          = is_search();
+		$quickSearchEnabled = (bool) get_option(Settings::OPTION_QUICK_SEARCH_ENABLED, 0);
+
+		if (!$isSearch && !$quickSearchEnabled) {
 			return;
 		}
 
-		$host       = get_option(Settings::OPTION_REMOTE, '');
+		$host         = get_option(Settings::OPTION_REMOTE, '');
 		$frontendHost = get_option(Settings::OPTION_FRONTEND_HOST, '');
-		$collection = get_option(Settings::OPTION_INDEX_NAME, '');
-		$searchKey  = get_option(Settings::OPTION_SEARCH_KEY, '');
+		$collection   = get_option(Settings::OPTION_INDEX_NAME, '');
+		$searchKey    = get_option(Settings::OPTION_SEARCH_KEY, '');
 		$hitsPerPage   = (int) get_option(Settings::OPTION_HITS_PER_PAGE, 10);
 		$debounce      = (bool) get_option(Settings::OPTION_DEBOUNCE, true);
 		$debounceDelay = (int) get_option(Settings::OPTION_DEBOUNCE_DELAY, 300);
@@ -87,7 +90,27 @@ class TypesenseConfig
 		$placeholderMappings = (array) apply_filters('Municipio/TypesenseSearch/placeholderMappings', []);
 		$config['placeholderMappings'] = array_map('sanitize_text_field', $placeholderMappings);
 
-		wp_localize_script('typesense-search', 'typesenseConfig', $config);
+		if ($isSearch) {
+			wp_localize_script('typesense-search', 'typesenseConfig', $config);
+		}
+
+		if ($quickSearchEnabled) {
+			// quickSearchHitsPerPage defaults to 5; can be made a setting in the future.
+			$config['quickSearchHitsPerPage'] = 5;
+
+			wp_localize_script('typesense-quick-search', 'typesenseConfig', $config);
+
+			// Build selectors list from saved option
+			$rawSelectors = (array) get_option(Settings::OPTION_QUICK_SEARCH_SELECTORS, []);
+			$selectors    = array_values(array_filter(array_map(
+				fn($s) => is_array($s) ? sanitize_text_field($s['selector'] ?? '') : '',
+				$rawSelectors,
+			)));
+
+			wp_localize_script('typesense-quick-search', 'typesenseQuickSearchConfig', [
+				'selectors' => $selectors,
+			]);
+		}
 	}
 }
 

@@ -686,6 +686,115 @@ document.addEventListener('DOMContentLoaded', () => {
         // (hydrateExistingRows will call updateDisabledOptions when complete)
     }
 
+    // ── Quick search tab ──────────────────────────────────────────────────────
+
+    const quickSearchPanel = document.getElementById('ts-tab-quick-search');
+
+    if (quickSearchPanel) {
+        const enabledToggle    = document.getElementById('ts-quick-search-enabled');
+        const selectorsCard    = document.getElementById('ts-quick-search-selectors-card');
+        const selectorList     = document.getElementById('ts-qs-selector-list');
+        const addSelectorBtn   = document.getElementById('ts-qs-add-selector');
+        const selectorEmpty    = document.getElementById('ts-qs-selector-empty');
+
+        let qsSelectorCounter = selectorList ? selectorList.querySelectorAll('.ts-qs-selector-row').length : 0;
+
+        /**
+         * Show/hide the selectors card based on the toggle state.
+         */
+        function syncSelectorsCardVisibility() {
+            if (!selectorsCard) return;
+            selectorsCard.hidden = !enabledToggle?.checked;
+        }
+
+        /**
+         * Update the empty-state notice based on whether any rows exist.
+         */
+        function updateQsEmptyState() {
+            if (!selectorEmpty || !selectorList) return;
+            selectorEmpty.hidden = selectorList.querySelectorAll('.ts-qs-selector-row').length > 0;
+        }
+
+        /**
+         * Escape HTML for use inside attribute strings.
+         */
+        function escAttrQs(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        /**
+         * Append a new blank CSS-selector row to the list.
+         */
+        function appendSelectorRow() {
+            const index   = qsSelectorCounter++;
+            const optName = 'typesense_quick_search_selectors';
+
+            const row = document.createElement('div');
+            row.className    = 'ts-qs-selector-row';
+            row.dataset.index = String(index);
+            row.innerHTML = `
+                <div class="ts-qs-selector-row__field" style="flex:1">
+                    <label class="ts-qs-selector-row__label">${escAttrQs(i18n.qsSelectorLabel ?? 'CSS selector')}</label>
+                    <input
+                        type="text"
+                        name="${escAttrQs(optName)}[${index}][selector]"
+                        value=""
+                        placeholder="${escAttrQs(i18n.qsSelectorPlaceholder ?? 'e.g. .site-header input[type=search]')}"
+                        class="regular-text ts-qs-selector-row__input"
+                        spellcheck="false"
+                    />
+                </div>
+                <button
+                    type="button"
+                    class="button ts-qs-selector-row__remove"
+                    title="${escAttrQs(i18n.removeSelector ?? 'Remove selector')}"
+                    aria-label="${escAttrQs(i18n.removeSelector ?? 'Remove selector')}"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>`;
+
+            row.querySelector('.ts-qs-selector-row__remove').addEventListener('click', () => {
+                row.remove();
+                updateQsEmptyState();
+            });
+
+            selectorList.appendChild(row);
+            updateQsEmptyState();
+
+            // Focus the newly added input for convenience
+            row.querySelector('input')?.focus();
+        }
+
+        // Wire up toggle
+        if (enabledToggle) {
+            enabledToggle.addEventListener('change', syncSelectorsCardVisibility);
+        }
+
+        // Wire up remove buttons on PHP-rendered rows
+        if (selectorList) {
+            selectorList.querySelectorAll('.ts-qs-selector-row__remove').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.ts-qs-selector-row').remove();
+                    updateQsEmptyState();
+                });
+            });
+        }
+
+        // Wire up add button
+        if (addSelectorBtn) {
+            addSelectorBtn.addEventListener('click', appendSelectorRow);
+        }
+
+        // Initial sync (matches the PHP-rendered state)
+        syncSelectorsCardVisibility();
+        updateQsEmptyState();
+    }
+
     // ── Status tab ────────────────────────────────────────────────────────────
 
     const statusPanel = document.getElementById('ts-tab-status');

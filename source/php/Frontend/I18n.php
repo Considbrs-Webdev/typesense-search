@@ -75,6 +75,12 @@ class I18n
             'facetOptDropdown'     => __('Dropdown', 'typesense-search'),
             'facetOptButtonGroup'  => __('Button group', 'typesense-search'),
             'removeFacet'          => __('Remove facet', 'typesense-search'),
+
+            // Quick search tab
+            'qsSelectorLabel'      => __('CSS selector', 'typesense-search'),
+            'qsSelectorPlaceholder'=> __('e.g. .site-header input[type=search]', 'typesense-search'),
+            'removeSelector'       => __('Remove selector', 'typesense-search'),
+            'qsNoSelectors'        => __('No selectors configured yet. Click "Add selector" to get started.', 'typesense-search'),
         ];
     }
 }

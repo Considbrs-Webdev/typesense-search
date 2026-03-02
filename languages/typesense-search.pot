@@ -9,16 +9,16 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-26T17:40:03+00:00\n"
+"POT-Creation-Date: 2026-03-02T05:06:39+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
 #: typesense-search.php
-#: source/php/Admin/Settings.php:59
-#: source/php/Admin/Settings.php:60
-#: views/admin/settings-page.php:23
+#: source/php/Admin/Settings.php:63
+#: source/php/Admin/Settings.php:64
+#: views/admin/settings-page.php:25
 msgid "Typesense Search"
 msgstr ""
 
@@ -62,23 +62,28 @@ msgstr ""
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
-#: source/php/Admin/Settings.php:38
+#: source/php/Admin/Settings.php:41
 msgid "Typesense Connection"
 msgstr ""
 
-#: source/php/Admin/Settings.php:39
+#: source/php/Admin/Settings.php:42
 msgid "Settings"
 msgstr ""
 
-#: source/php/Admin/Settings.php:40
+#: source/php/Admin/Settings.php:43
 msgid "Facetting"
 msgstr ""
 
-#: source/php/Admin/Settings.php:41
+#: source/php/Admin/Settings.php:44
+#: views/admin/settings-tabs/quick-search.php:15
+msgid "Quick search"
+msgstr ""
+
+#: source/php/Admin/Settings.php:45
 msgid "Statistics"
 msgstr ""
 
-#: source/php/Admin/Settings.php:42
+#: source/php/Admin/Settings.php:46
 msgid "Status"
 msgstr ""
 
@@ -424,15 +429,36 @@ msgstr ""
 msgid "Remove facet"
 msgstr ""
 
+#: source/php/Frontend/I18n.php:80
+#: views/admin/settings-tabs/quick-search.php:72
+msgid "CSS selector"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:81
+#: views/admin/settings-tabs/quick-search.php:77
+msgid "e.g. .site-header input[type=search]"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:82
+#: views/admin/settings-tabs/quick-search.php:85
+#: views/admin/settings-tabs/quick-search.php:86
+msgid "Remove selector"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:83
+#: views/admin/settings-tabs/quick-search.php:97
+msgid "No selectors configured yet. Click \"Add selector\" to get started."
+msgstr ""
+
 #: source/php/Typesense/ApiKey.php:39
 msgid "Key was created but no value was returned. Please check your Typesense dashboard."
 msgstr ""
 
-#: views/admin/settings-page.php:27
+#: views/admin/settings-page.php:29
 msgid "Configure your Typesense server connection and choose which content to index."
 msgstr ""
 
-#: views/admin/settings-page.php:33
+#: views/admin/settings-page.php:35
 msgid "Settings sections"
 msgstr ""
 
@@ -530,6 +556,7 @@ msgstr ""
 #: views/admin/settings-tabs/connection.php:218
 #: views/admin/settings-tabs/content.php:181
 #: views/admin/settings-tabs/facetting.php:105
+#: views/admin/settings-tabs/quick-search.php:109
 msgid "Save settings"
 msgstr ""
 
@@ -556,12 +583,14 @@ msgstr ""
 #: views/admin/settings-tabs/content.php:60
 #: views/admin/settings-tabs/content.php:91
 #: views/admin/settings-tabs/content.php:169
+#: views/admin/settings-tabs/quick-search.php:42
 msgid "On"
 msgstr ""
 
 #: views/admin/settings-tabs/content.php:61
 #: views/admin/settings-tabs/content.php:92
 #: views/admin/settings-tabs/content.php:170
+#: views/admin/settings-tabs/quick-search.php:43
 msgid "Off"
 msgstr ""
 
@@ -611,6 +640,30 @@ msgstr ""
 
 #: views/admin/settings-tabs/facetting.php:100
 msgid "Add facet"
+msgstr ""
+
+#: views/admin/settings-tabs/quick-search.php:16
+msgid "Enable autocomplete / quick search for input fields outside the main search page. When active, users get instant suggestions while typing in any matched field."
+msgstr ""
+
+#: views/admin/settings-tabs/quick-search.php:24
+msgid "Enable quick search"
+msgstr ""
+
+#: views/admin/settings-tabs/quick-search.php:48
+msgid "When enabled, quick search will be attached to the CSS selectors defined below. It reuses the same frontend Typesense configuration as the main search."
+msgstr ""
+
+#: views/admin/settings-tabs/quick-search.php:62
+msgid "Target fields"
+msgstr ""
+
+#: views/admin/settings-tabs/quick-search.php:63
+msgid "Add one or more CSS selectors that match the search inputs you want to enhance with quick search autocomplete."
+msgstr ""
+
+#: views/admin/settings-tabs/quick-search.php:104
+msgid "Add selector"
 msgstr ""
 
 #: views/admin/settings-tabs/statistics.php:11
