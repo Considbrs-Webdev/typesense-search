@@ -8,7 +8,6 @@
 //  --ts-qs-border            Dropdown border colour           default: rgba(0,0,0,.12)
 //  --ts-qs-radius            Dropdown border-radius           default: 8px
 //  --ts-qs-shadow            Dropdown box-shadow              default: layered shadow
-//  --ts-qs-max-height        Max height before scrolling      default: 360px
 //  --ts-qs-z-index           z-index                          default: 99999
 //
 //  --ts-qs-item-padding      Row padding                      default: 10px 16px
@@ -25,11 +24,33 @@
 //  --ts-qs-type-color        Type badge text colour           default: #666
 //  --ts-qs-type-bg           Type badge background            default: rgba(0,0,0,.06)
 //  --ts-qs-type-radius       Type badge border-radius         default: 99px
+//
+//  --ts-qs-track-width       Track width                      default: 4px
+//  --ts-qs-track-bg          Track background                 default: rgba(0,0,0,.07)
+//  --ts-qs-track-thumb-bg    Thumb colour                     default: rgba(0,0,0,.22)
 // ---------------------------------------------------------------------------
 
 .ts-quick-search {
   position: fixed;
   z-index: var(--ts-qs-z-index, 99999);
+
+  // Sibling-injection variant: positioned relative to the parent element
+  &--sibling {
+    position: absolute;
+    z-index: var(--ts-qs-z-index, 99999);
+  }
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // clips the results list; height is set precisely by JS
+
+  // Ensure the [hidden] attribute can still hide the dropdown even though
+  // the explicit display:flex above would otherwise override the browser's
+  // weak [hidden]{display:none} rule.
+  &[hidden] {
+    display: none;
+  }
+
   background: var(--ts-qs-bg, #fff);
   border: 1px solid var(--ts-qs-border, rgba(0, 0, 0, 0.12));
   border-radius: var(--ts-qs-radius, 8px);
@@ -38,14 +59,42 @@
     0 4px 6px -1px rgba(0, 0, 0, 0.08),
     0 10px 24px -4px rgba(0, 0, 0, 0.14)
   );
-  overflow: hidden;
-  max-height: var(--ts-qs-max-height, 360px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
 
   // Smooth appear
   animation: ts-qs-appear 0.1s ease-out;
+}
+
+// ── Results viewport ─────────────────────────────────────────────────────────
+// Height is set explicitly by JS; only the visible window slice is rendered.
+
+.ts-qs-results {
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+// ── Scrollbar track (position indicator) ────────────────────────────────────
+
+.ts-qs-track {
+  position: absolute;
+  right: 3px;
+  top: 4px;
+  bottom: 4px;
+  width: var(--ts-qs-track-width, 4px);
+  border-radius: 2px;
+  background: var(--ts-qs-track-bg, rgba(0, 0, 0, 0.07));
+  pointer-events: none;
+}
+
+.ts-qs-track__thumb {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 2px;
+  background: var(--ts-qs-track-thumb-bg, rgba(0, 0, 0, 0.22));
+  transition:
+    top 0.1s ease,
+    height 0.1s ease;
 }
 
 @keyframes ts-qs-appear {
@@ -71,7 +120,7 @@
   min-width: 0;
   transition: background 0.1s;
 
-  &:last-child {
+  &:last-of-type {
     border-bottom: none;
   }
 

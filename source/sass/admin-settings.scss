@@ -898,6 +898,7 @@ $ts-thumb-size: 18px;
 
   &__field {
     display: flex;
+    flex: 0 0 150px;
     flex-direction: column;
     gap: 5px;
   }
@@ -919,6 +920,27 @@ $ts-thumb-size: 18px;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+
+    &:focus {
+      border-color: $ts-blue !important;
+      box-shadow: 0 0 0 1px $ts-blue !important;
+      outline: none !important;
+    }
+  }
+
+  &__sibling-select {
+    font-size: 13px !important;
+    height: 36px !important;
+    padding: 0 10px !important;
+    border-color: $ts-border !important;
+    border-radius: $ts-radius !important;
+    width: 100%;
+    max-width: 100%;
+    background-color: #fff;
+    cursor: pointer;
     transition:
       border-color 0.15s,
       box-shadow 0.15s;

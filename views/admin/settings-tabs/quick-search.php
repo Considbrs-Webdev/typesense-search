@@ -49,6 +49,32 @@ if ($activeTab !== 'quick-search') {
                         </p>
                     </div>
                 </div>
+
+                <!-- Number of hits — only visible when quick search is enabled -->
+                <div
+                    id="ts-quick-search-hits-field"
+                    class="ts-field"
+                    <?php echo $quickSearchEnabled ? '' : 'hidden'; ?>
+                >
+                    <div class="ts-field__label">
+                        <?php esc_html_e('Number of results', 'typesense-search'); ?>
+                    </div>
+                    <div class="ts-field__body">
+                        <input
+                            type="number"
+                            id="ts-quick-search-hits-per-page"
+                            name="<?php echo esc_attr(Settings::OPTION_QUICK_SEARCH_HITS_PER_PAGE); ?>"
+                            value="<?php echo esc_attr($quickSearchHitsPerPage); ?>"
+                            min="1"
+                            max="50"
+                            class="small-text"
+                        />
+                        <p class="ts-field__description">
+                            <?php esc_html_e('How many suggestions to show in the quick search dropdown.', 'typesense-search'); ?>
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -78,6 +104,17 @@ if ($activeTab !== 'quick-search') {
                                 class="regular-text ts-qs-selector-row__input"
                                 spellcheck="false"
                             />
+                        </div>
+                        <div class="ts-qs-selector-row__field">
+                            <label class="ts-qs-selector-row__label"><?php esc_html_e('Placement', 'typesense-search'); ?></label>
+                            <?php $isSibling = !empty($entry['sibling']); ?>
+                            <select
+                                name="<?php echo esc_attr(Settings::OPTION_QUICK_SEARCH_SELECTORS); ?>[<?php echo esc_attr($index); ?>][sibling]"
+                                class="ts-qs-selector-row__sibling-select"
+                            >
+                                <option value="0" <?php selected($isSibling, false); ?>><?php esc_html_e('Default (body)', 'typesense-search'); ?></option>
+                                <option value="1" <?php selected($isSibling, true); ?>><?php esc_html_e('Sibling', 'typesense-search'); ?></option>
+                            </select>
                         </div>
                         <button
                             type="button"

@@ -33,8 +33,9 @@ class Settings
     public const OPTION_DEBOUNCE              = 'typesense_search_debounce';
     public const OPTION_DEBOUNCE_DELAY         = 'typesense_search_debounce_delay';
     public const OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS = 'typesense_search_highlight_affix_num_tokens';
-    public const OPTION_QUICK_SEARCH_ENABLED   = 'typesense_quick_search_enabled';
-    public const OPTION_QUICK_SEARCH_SELECTORS = 'typesense_quick_search_selectors';
+    public const OPTION_QUICK_SEARCH_ENABLED        = 'typesense_quick_search_enabled';
+    public const OPTION_QUICK_SEARCH_SELECTORS      = 'typesense_quick_search_selectors';
+    public const OPTION_QUICK_SEARCH_HITS_PER_PAGE  = 'typesense_quick_search_hits_per_page';
 
     private static function getTabs(): array
     {
@@ -141,6 +142,12 @@ class Settings
             'sanitize_callback' => [$this, 'sanitizeQuickSearchSelectors'],
             'default'           => [],
         ]);
+
+        register_setting(self::OPTION_GROUP_QUICK_SEARCH, self::OPTION_QUICK_SEARCH_HITS_PER_PAGE, [
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 5,
+        ]);
     }
 
     /**
@@ -220,8 +227,9 @@ class Settings
         $enabledPostTypes = (array) get_option(self::OPTION_POST_TYPES, []);
         $facets                = (array) get_option(self::OPTION_FACETS, []);
         $hitsPerPage           = (int) get_option(self::OPTION_HITS_PER_PAGE, 10);
-        $quickSearchEnabled    = (int) get_option(self::OPTION_QUICK_SEARCH_ENABLED, 0);
-        $quickSearchSelectors  = (array) get_option(self::OPTION_QUICK_SEARCH_SELECTORS, []);
+        $quickSearchEnabled       = (int) get_option(self::OPTION_QUICK_SEARCH_ENABLED, 0);
+        $quickSearchSelectors     = (array) get_option(self::OPTION_QUICK_SEARCH_SELECTORS, []);
+        $quickSearchHitsPerPage   = (int) get_option(self::OPTION_QUICK_SEARCH_HITS_PER_PAGE, 5);
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';
     }
@@ -257,7 +265,11 @@ class Settings
             if (empty($selector)) {
                 continue;
             }
-            $result[] = ['selector' => $selector];
+            $sibling = !empty($item['sibling']);
+            $result[] = [
+                'selector' => $selector,
+                'sibling'  => $sibling,
+            ];
         }
 
         return $result;

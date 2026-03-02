@@ -693,6 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (quickSearchPanel) {
         const enabledToggle    = document.getElementById('ts-quick-search-enabled');
         const selectorsCard    = document.getElementById('ts-quick-search-selectors-card');
+        const hitsField        = document.getElementById('ts-quick-search-hits-field');
         const selectorList     = document.getElementById('ts-qs-selector-list');
         const addSelectorBtn   = document.getElementById('ts-qs-add-selector');
         const selectorEmpty    = document.getElementById('ts-qs-selector-empty');
@@ -705,6 +706,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function syncSelectorsCardVisibility() {
             if (!selectorsCard) return;
             selectorsCard.hidden = !enabledToggle?.checked;
+            if (hitsField) hitsField.hidden = !enabledToggle?.checked;
         }
 
         /**
@@ -748,6 +750,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         class="regular-text ts-qs-selector-row__input"
                         spellcheck="false"
                     />
+                </div>
+                <div class="ts-qs-selector-row__field">
+                    <label class="ts-qs-selector-row__label">${escAttrQs(i18n.qsPlacementLabel ?? 'Placement')}</label>
+                    <select name="${escAttrQs(optName)}[${index}][sibling]" class="ts-qs-selector-row__sibling-select">
+                        <option value="0">${escAttrQs(i18n.qsPlacementDefault ?? 'Default (body)')}</option>
+                        <option value="1">${escAttrQs(i18n.qsPlacementSibling ?? 'Sibling')}</option>
+                    </select>
                 </div>
                 <button
                     type="button"

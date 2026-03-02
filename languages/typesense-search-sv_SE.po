@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-03-02T07:18:33+00:00\n"
-"PO-Revision-Date: 2026-03-02 08:52+0100\n"
+"POT-Creation-Date: 2026-03-02T13:02:45+00:00\n"
+"PO-Revision-Date: 2026-03-02 14:03+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -16,8 +16,8 @@ msgstr ""
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
-#: typesense-search.php source/php/Admin/Settings.php:64
-#: source/php/Admin/Settings.php:65 views/admin/settings-page.php:25
+#: typesense-search.php source/php/Admin/Settings.php:65
+#: source/php/Admin/Settings.php:66 views/admin/settings-page.php:25
 msgid "Typesense Search"
 msgstr "Typesense-sök"
 
@@ -65,28 +65,28 @@ msgstr ""
 "Ytterligare ord eller fraser som ska matcha detta inlägg i sökningen, även "
 "om de inte förekommer i innehållet."
 
-#: source/php/Admin/Settings.php:42
+#: source/php/Admin/Settings.php:43
 msgid "Typesense Connection"
 msgstr "Anslutning"
 
-#: source/php/Admin/Settings.php:43
+#: source/php/Admin/Settings.php:44
 msgid "Settings"
 msgstr "Inställningar"
 
-#: source/php/Admin/Settings.php:44
+#: source/php/Admin/Settings.php:45
 msgid "Facetting"
 msgstr "Facettering"
 
-#: source/php/Admin/Settings.php:45
+#: source/php/Admin/Settings.php:46
 #: views/admin/settings-tabs/quick-search.php:15
 msgid "Quick search"
 msgstr "Snabbsök"
 
-#: source/php/Admin/Settings.php:46
+#: source/php/Admin/Settings.php:47
 msgid "Statistics"
 msgstr "Statistik"
 
-#: source/php/Admin/Settings.php:47
+#: source/php/Admin/Settings.php:48
 msgid "Status"
 msgstr "Status"
 
@@ -354,53 +354,53 @@ msgstr "Läs mer: "
 msgid "Search result pages"
 msgstr "Sökresultatsidor"
 
-#: source/php/Frontend/I18n.php:37
+#: source/php/Frontend/I18n.php:47
 msgid "See all results"
 msgstr "Se alla resultat"
 
-#: source/php/Frontend/I18n.php:47
+#: source/php/Frontend/I18n.php:60
 msgid "OK"
 msgstr "OK"
 
-#: source/php/Frontend/I18n.php:48
+#: source/php/Frontend/I18n.php:61
 msgid "Unknown error."
 msgstr "Okänt fel."
 
-#: source/php/Frontend/I18n.php:49
+#: source/php/Frontend/I18n.php:62
 msgid "Error."
 msgstr "Fel."
 
-#: source/php/Frontend/I18n.php:51
+#: source/php/Frontend/I18n.php:64
 msgid "Request failed: "
 msgstr "Förfrågan misslyckades: "
 
-#: source/php/Frontend/I18n.php:54
+#: source/php/Frontend/I18n.php:67
 msgid "Pie chart showing document distribution"
 msgstr "Cirkeldiagram som visar dokumentfördelning"
 
-#: source/php/Frontend/I18n.php:55
+#: source/php/Frontend/I18n.php:68
 msgid "documents"
 msgstr "dokument"
 
-#: source/php/Frontend/I18n.php:59
+#: source/php/Frontend/I18n.php:72
 msgid ""
 "Remove all \"%s\" documents from the Typesense index? This cannot be undone."
 msgstr ""
 "Ta bort alla \"%s\"-dokument från Typesense-indexet? Det här kan inte ångras."
 
-#: source/php/Frontend/I18n.php:60
+#: source/php/Frontend/I18n.php:73
 msgid "Clear"
 msgstr "Rensa"
 
-#: source/php/Frontend/I18n.php:63
+#: source/php/Frontend/I18n.php:76
 msgid "Could not load facetable fields."
 msgstr "Kunde inte läsa in filterbara fält."
 
-#: source/php/Frontend/I18n.php:64
+#: source/php/Frontend/I18n.php:77
 msgid "— No facetable fields found —"
 msgstr "— Inga filterbara fält hittades —"
 
-#: source/php/Frontend/I18n.php:65
+#: source/php/Frontend/I18n.php:78
 msgid ""
 "No facetable fields found in the collection schema. Make sure the collection "
 "exists and has fields with facet: true."
@@ -408,65 +408,80 @@ msgstr ""
 "Inga filterbara fält hittades i samlingens schema. Kontrollera att samlingen "
 "finns och har fält med facet: true."
 
-#: source/php/Frontend/I18n.php:66
+#: source/php/Frontend/I18n.php:79
 msgid "All facetable fields have already been added as facets."
 msgstr "Alla filterbara fält har redan lagts till som facetter."
 
-#: source/php/Frontend/I18n.php:69 views/admin/settings-tabs/facetting.php:30
+#: source/php/Frontend/I18n.php:82 views/admin/settings-tabs/facetting.php:30
 msgid "Field"
 msgstr "Fält"
 
-#: source/php/Frontend/I18n.php:70 views/admin/settings-tabs/facetting.php:46
+#: source/php/Frontend/I18n.php:83 views/admin/settings-tabs/facetting.php:46
 msgid "Label"
 msgstr "Etikett"
 
-#: source/php/Frontend/I18n.php:71 views/admin/settings-tabs/facetting.php:51
+#: source/php/Frontend/I18n.php:84 views/admin/settings-tabs/facetting.php:51
 msgid "e.g. Category"
 msgstr "t.ex. Kategori"
 
-#: source/php/Frontend/I18n.php:72 views/admin/settings-tabs/facetting.php:56
+#: source/php/Frontend/I18n.php:85 views/admin/settings-tabs/facetting.php:56
 msgid "Placeholder"
 msgstr "Platshållare"
 
-#: source/php/Frontend/I18n.php:73 views/admin/settings-tabs/facetting.php:61
+#: source/php/Frontend/I18n.php:86 views/admin/settings-tabs/facetting.php:61
 msgid "e.g. All categories"
 msgstr "t.ex. Alla kategorier"
 
-#: source/php/Frontend/I18n.php:74 views/admin/settings-tabs/facetting.php:66
+#: source/php/Frontend/I18n.php:87 views/admin/settings-tabs/facetting.php:66
 msgid "Display as"
 msgstr "Visa som"
 
-#: source/php/Frontend/I18n.php:75 views/admin/settings-tabs/facetting.php:73
+#: source/php/Frontend/I18n.php:88 views/admin/settings-tabs/facetting.php:73
 msgid "Dropdown"
 msgstr "Rullista"
 
-#: source/php/Frontend/I18n.php:76 views/admin/settings-tabs/facetting.php:74
+#: source/php/Frontend/I18n.php:89 views/admin/settings-tabs/facetting.php:74
 msgid "Button group"
 msgstr "Knappgrupp"
 
-#: source/php/Frontend/I18n.php:77 views/admin/settings-tabs/facetting.php:80
+#: source/php/Frontend/I18n.php:90 views/admin/settings-tabs/facetting.php:80
 #: views/admin/settings-tabs/facetting.php:81
 msgid "Remove facet"
 msgstr "Ta bort facett"
 
-#: source/php/Frontend/I18n.php:80
-#: views/admin/settings-tabs/quick-search.php:72
+#: source/php/Frontend/I18n.php:93
+#: views/admin/settings-tabs/quick-search.php:98
 msgid "CSS selector"
 msgstr "CSS-selektor"
 
-#: source/php/Frontend/I18n.php:81
-#: views/admin/settings-tabs/quick-search.php:77
+#: source/php/Frontend/I18n.php:94
+#: views/admin/settings-tabs/quick-search.php:103
 msgid "e.g. .site-header input[type=search]"
 msgstr "t.ex. .site-header input[type=search]"
 
-#: source/php/Frontend/I18n.php:82
-#: views/admin/settings-tabs/quick-search.php:85
-#: views/admin/settings-tabs/quick-search.php:86
+#: source/php/Frontend/I18n.php:95
+#: views/admin/settings-tabs/quick-search.php:122
+#: views/admin/settings-tabs/quick-search.php:123
 msgid "Remove selector"
 msgstr "Ta bort selektor"
 
-#: source/php/Frontend/I18n.php:83
-#: views/admin/settings-tabs/quick-search.php:97
+#: source/php/Frontend/I18n.php:96
+#: views/admin/settings-tabs/quick-search.php:109
+msgid "Placement"
+msgstr "DOM-placering"
+
+#: source/php/Frontend/I18n.php:97
+#: views/admin/settings-tabs/quick-search.php:115
+msgid "Default (body)"
+msgstr "Standard (body)"
+
+#: source/php/Frontend/I18n.php:98
+#: views/admin/settings-tabs/quick-search.php:116
+msgid "Sibling"
+msgstr "Syskon"
+
+#: source/php/Frontend/I18n.php:99
+#: views/admin/settings-tabs/quick-search.php:134
 msgid "No selectors configured yet. Click \"Add selector\" to get started."
 msgstr ""
 "Inga selektorer är konfigurerade ännu. Klicka på “Lägg till selektor” för "
@@ -617,7 +632,7 @@ msgstr "Generera söknyckel"
 #: views/admin/settings-tabs/connection.php:218
 #: views/admin/settings-tabs/content.php:201
 #: views/admin/settings-tabs/facetting.php:105
-#: views/admin/settings-tabs/quick-search.php:109
+#: views/admin/settings-tabs/quick-search.php:146
 msgid "Save settings"
 msgstr "Spara inställningar"
 
@@ -766,11 +781,19 @@ msgstr ""
 "definieras nedan. Den återanvänder samma frontend-konfiguration för "
 "Typesense som huvudsökningen."
 
-#: views/admin/settings-tabs/quick-search.php:62
+#: views/admin/settings-tabs/quick-search.php:60
+msgid "Number of results"
+msgstr "Max antal sökträffar"
+
+#: views/admin/settings-tabs/quick-search.php:73
+msgid "How many suggestions to show in the quick search dropdown."
+msgstr "Hur många förslag som ska visas i snabbsökningens rullgardinslista."
+
+#: views/admin/settings-tabs/quick-search.php:88
 msgid "Target fields"
 msgstr "Målfält"
 
-#: views/admin/settings-tabs/quick-search.php:63
+#: views/admin/settings-tabs/quick-search.php:89
 msgid ""
 "Add one or more CSS selectors that match the search inputs you want to "
 "enhance with quick search autocomplete."
@@ -778,7 +801,7 @@ msgstr ""
 "Lägg till en eller flera CSS-selektorer som matchar de sökfält du vill "
 "förbättra med autokomplettering för snabbsökning."
 
-#: views/admin/settings-tabs/quick-search.php:104
+#: views/admin/settings-tabs/quick-search.php:141
 msgid "Add selector"
 msgstr "Lägg till selektor"
 

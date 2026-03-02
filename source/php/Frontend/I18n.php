@@ -93,6 +93,9 @@ class I18n
             'qsSelectorLabel'      => __('CSS selector', 'typesense-search'),
             'qsSelectorPlaceholder'=> __('e.g. .site-header input[type=search]', 'typesense-search'),
             'removeSelector'       => __('Remove selector', 'typesense-search'),
+            'qsPlacementLabel'     => __('Placement', 'typesense-search'),
+            'qsPlacementDefault'   => __('Default (body)', 'typesense-search'),
+            'qsPlacementSibling'   => __('Sibling', 'typesense-search'),
             'qsNoSelectors'        => __('No selectors configured yet. Click "Add selector" to get started.', 'typesense-search'),
         ];
     }

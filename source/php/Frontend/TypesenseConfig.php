@@ -97,15 +97,30 @@ class TypesenseConfig
 		}
 
 		if ($quickSearchEnabled) {
-			// quickSearchHitsPerPage defaults to 5; can be made a setting in the future.
-			$config['quickSearchHitsPerPage'] = 5;
+			$quickSearchHitsPerPage = (int) get_option(Settings::OPTION_QUICK_SEARCH_HITS_PER_PAGE, 5);
+			if ($quickSearchHitsPerPage < 1) {
+				$quickSearchHitsPerPage = 5;
+			}
+			$config['quickSearchHitsPerPage'] = $quickSearchHitsPerPage;
 
 			wp_localize_script('typesense-quick-search', 'typesenseConfig', $config);
 
 			// Build selectors list from saved option
 			$rawSelectors = (array) get_option(Settings::OPTION_QUICK_SEARCH_SELECTORS, []);
 			$selectors    = array_values(array_filter(array_map(
-				fn($s) => is_array($s) ? sanitize_text_field($s['selector'] ?? '') : '',
+				function ($s) {
+					if (!is_array($s)) {
+						return null;
+					}
+					$selector = sanitize_text_field($s['selector'] ?? '');
+					if (empty($selector)) {
+						return null;
+					}
+					return [
+						'selector' => $selector,
+						'sibling'  => !empty($s['sibling']),
+					];
+				},
 				$rawSelectors,
 			)));
 
