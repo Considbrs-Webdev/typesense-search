@@ -28,6 +28,11 @@
 //  --ts-qs-track-width       Track width                      default: 4px
 //  --ts-qs-track-bg          Track background                 default: rgba(0,0,0,.07)
 //  --ts-qs-track-thumb-bg    Thumb colour                     default: rgba(0,0,0,.22)
+//
+//  --ts-qs-highlight-bg      Mark highlight background        default: rgba(255,200,0,.35)
+//  --ts-qs-highlight-color   Mark highlight text colour       default: inherit
+//
+//  --ts-qs-no-results-color  No-results message colour        default: #888
 // ---------------------------------------------------------------------------
 
 .ts-quick-search {
@@ -145,6 +150,13 @@
     font-weight: var(--ts-qs-name-weight, 500);
     color: var(--ts-qs-name-color, #111);
     line-height: 1.4;
+
+    mark {
+      background: var(--ts-qs-highlight-bg, rgba(255, 200, 0, 0.35));
+      color: var(--ts-qs-highlight-color, inherit);
+      border-radius: 2px;
+      padding: 0 1px;
+    }
   }
 
   &__type {
@@ -158,6 +170,15 @@
     border-radius: var(--ts-qs-type-radius, 99px);
     line-height: 1.6;
   }
+}
+
+// No-results message
+.ts-qs-no-results {
+  padding: var(--ts-qs-item-padding, 10px 16px);
+  font-size: var(--ts-qs-name-size, 0.9rem);
+  color: var(--ts-qs-no-results-color, #888);
+  font-style: italic;
+  text-align: center;
 }
 
 // "See all results" footer link

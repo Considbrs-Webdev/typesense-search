@@ -93,7 +93,11 @@ class TypesenseConfig
 		$config['placeholderMappings'] = array_map('sanitize_text_field', $placeholderMappings);
 
 		if ($isSearch) {
-			wp_localize_script('typesense-search', 'typesenseConfig', $config);
+			wp_add_inline_script(
+				'typesense-search',
+				'var typesenseConfig = ' . wp_json_encode($config) . ';',
+				'before'
+			);
 		}
 
 		if ($quickSearchEnabled) {
@@ -103,7 +107,11 @@ class TypesenseConfig
 			}
 			$config['quickSearchHitsPerPage'] = $quickSearchHitsPerPage;
 
-			wp_localize_script('typesense-quick-search', 'typesenseConfig', $config);
+			wp_add_inline_script(
+				'typesense-quick-search',
+				'var typesenseConfig = ' . wp_json_encode($config) . ';',
+				'before'
+			);
 
 			// Build selectors list from saved option
 			$rawSelectors = (array) get_option(Settings::OPTION_QUICK_SEARCH_SELECTORS, []);
@@ -124,9 +132,11 @@ class TypesenseConfig
 				$rawSelectors,
 			)));
 
-			wp_localize_script('typesense-quick-search', 'typesenseQuickSearchConfig', [
-				'selectors' => $selectors,
-			]);
+			wp_add_inline_script(
+				'typesense-quick-search',
+				'var typesenseQuickSearchConfig = ' . wp_json_encode(['selectors' => $selectors]) . ';',
+				'before'
+			);
 		}
 	}
 }

@@ -45,6 +45,7 @@ class I18n
     {
         return [
             'seeAllResults' => __('See all results', 'typesense-search'),
+            'noResults'     => __('No hits for your search term', 'typesense-search'),
         ];
     }
 

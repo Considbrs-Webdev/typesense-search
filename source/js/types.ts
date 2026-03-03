@@ -31,6 +31,7 @@ export interface TypesenseI18n {
 
 export interface TypesenseQuickSearchI18n {
   seeAllResults: string;
+  noResults?: string;
 }
 
 declare global {

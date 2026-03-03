@@ -195,7 +195,12 @@ function attachQuickSearch(
 
     const nameEl = document.createElement("span");
     nameEl.className = "ts-qs-item__name";
-    nameEl.textContent = title;
+    const titleSnippet = hit.highlight?.title?.snippet;
+    if (titleSnippet) {
+      nameEl.innerHTML = titleSnippet;
+    } else {
+      nameEl.textContent = title;
+    }
 
     const typeEl = document.createElement("span");
     typeEl.className = "ts-qs-item__type";
@@ -363,7 +368,26 @@ function attachQuickSearch(
     dropdown.style.height = "";
 
     if (!hits.length) {
-      close();
+      // Clear any previous items.
+      Array.from(resultsEl.children).forEach((child) => {
+        if (!child.classList.contains("ts-qs-track")) child.remove();
+      });
+      dropdown
+        .querySelectorAll(`.${FOOTER_CLASS}`)
+        .forEach((el) => el.remove());
+      trackEl.hidden = true;
+      resultsEl.style.height = "";
+
+      const noResultsLabel =
+        window.typesenseQuickSearchI18n?.noResults ??
+        "No hits for your search term";
+      const noResultsEl = document.createElement("div");
+      noResultsEl.className = "ts-qs-no-results";
+      noResultsEl.setAttribute("aria-live", "polite");
+      noResultsEl.textContent = noResultsLabel;
+      resultsEl.insertBefore(noResultsEl, trackEl);
+
+      open();
       return;
     }
 

@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-03-02T13:02:45+00:00\n"
-"PO-Revision-Date: 2026-03-02 14:03+0100\n"
+"POT-Creation-Date: 2026-03-03T09:34:23+00:00\n"
+"PO-Revision-Date: 2026-03-03 10:34+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -358,49 +358,53 @@ msgstr "Sökresultatsidor"
 msgid "See all results"
 msgstr "Se alla resultat"
 
-#: source/php/Frontend/I18n.php:60
+#: source/php/Frontend/I18n.php:48
+msgid "No hits for your search term"
+msgstr "Inget innehåll matchade din sökning"
+
+#: source/php/Frontend/I18n.php:61
 msgid "OK"
 msgstr "OK"
 
-#: source/php/Frontend/I18n.php:61
+#: source/php/Frontend/I18n.php:62
 msgid "Unknown error."
 msgstr "Okänt fel."
 
-#: source/php/Frontend/I18n.php:62
+#: source/php/Frontend/I18n.php:63
 msgid "Error."
 msgstr "Fel."
 
-#: source/php/Frontend/I18n.php:64
+#: source/php/Frontend/I18n.php:65
 msgid "Request failed: "
 msgstr "Förfrågan misslyckades: "
 
-#: source/php/Frontend/I18n.php:67
+#: source/php/Frontend/I18n.php:68
 msgid "Pie chart showing document distribution"
 msgstr "Cirkeldiagram som visar dokumentfördelning"
 
-#: source/php/Frontend/I18n.php:68
+#: source/php/Frontend/I18n.php:69
 msgid "documents"
 msgstr "dokument"
 
-#: source/php/Frontend/I18n.php:72
+#: source/php/Frontend/I18n.php:73
 msgid ""
 "Remove all \"%s\" documents from the Typesense index? This cannot be undone."
 msgstr ""
 "Ta bort alla \"%s\"-dokument från Typesense-indexet? Det här kan inte ångras."
 
-#: source/php/Frontend/I18n.php:73
+#: source/php/Frontend/I18n.php:74
 msgid "Clear"
 msgstr "Rensa"
 
-#: source/php/Frontend/I18n.php:76
+#: source/php/Frontend/I18n.php:77
 msgid "Could not load facetable fields."
 msgstr "Kunde inte läsa in filterbara fält."
 
-#: source/php/Frontend/I18n.php:77
+#: source/php/Frontend/I18n.php:78
 msgid "— No facetable fields found —"
 msgstr "— Inga filterbara fält hittades —"
 
-#: source/php/Frontend/I18n.php:78
+#: source/php/Frontend/I18n.php:79
 msgid ""
 "No facetable fields found in the collection schema. Make sure the collection "
 "exists and has fields with facet: true."
@@ -408,79 +412,79 @@ msgstr ""
 "Inga filterbara fält hittades i samlingens schema. Kontrollera att samlingen "
 "finns och har fält med facet: true."
 
-#: source/php/Frontend/I18n.php:79
+#: source/php/Frontend/I18n.php:80
 msgid "All facetable fields have already been added as facets."
 msgstr "Alla filterbara fält har redan lagts till som facetter."
 
-#: source/php/Frontend/I18n.php:82 views/admin/settings-tabs/facetting.php:30
+#: source/php/Frontend/I18n.php:83 views/admin/settings-tabs/facetting.php:30
 msgid "Field"
 msgstr "Fält"
 
-#: source/php/Frontend/I18n.php:83 views/admin/settings-tabs/facetting.php:46
+#: source/php/Frontend/I18n.php:84 views/admin/settings-tabs/facetting.php:46
 msgid "Label"
 msgstr "Etikett"
 
-#: source/php/Frontend/I18n.php:84 views/admin/settings-tabs/facetting.php:51
+#: source/php/Frontend/I18n.php:85 views/admin/settings-tabs/facetting.php:51
 msgid "e.g. Category"
 msgstr "t.ex. Kategori"
 
-#: source/php/Frontend/I18n.php:85 views/admin/settings-tabs/facetting.php:56
+#: source/php/Frontend/I18n.php:86 views/admin/settings-tabs/facetting.php:56
 msgid "Placeholder"
 msgstr "Platshållare"
 
-#: source/php/Frontend/I18n.php:86 views/admin/settings-tabs/facetting.php:61
+#: source/php/Frontend/I18n.php:87 views/admin/settings-tabs/facetting.php:61
 msgid "e.g. All categories"
 msgstr "t.ex. Alla kategorier"
 
-#: source/php/Frontend/I18n.php:87 views/admin/settings-tabs/facetting.php:66
+#: source/php/Frontend/I18n.php:88 views/admin/settings-tabs/facetting.php:66
 msgid "Display as"
 msgstr "Visa som"
 
-#: source/php/Frontend/I18n.php:88 views/admin/settings-tabs/facetting.php:73
+#: source/php/Frontend/I18n.php:89 views/admin/settings-tabs/facetting.php:73
 msgid "Dropdown"
 msgstr "Rullista"
 
-#: source/php/Frontend/I18n.php:89 views/admin/settings-tabs/facetting.php:74
+#: source/php/Frontend/I18n.php:90 views/admin/settings-tabs/facetting.php:74
 msgid "Button group"
 msgstr "Knappgrupp"
 
-#: source/php/Frontend/I18n.php:90 views/admin/settings-tabs/facetting.php:80
+#: source/php/Frontend/I18n.php:91 views/admin/settings-tabs/facetting.php:80
 #: views/admin/settings-tabs/facetting.php:81
 msgid "Remove facet"
 msgstr "Ta bort facett"
 
-#: source/php/Frontend/I18n.php:93
+#: source/php/Frontend/I18n.php:94
 #: views/admin/settings-tabs/quick-search.php:98
 msgid "CSS selector"
 msgstr "CSS-selektor"
 
-#: source/php/Frontend/I18n.php:94
+#: source/php/Frontend/I18n.php:95
 #: views/admin/settings-tabs/quick-search.php:103
 msgid "e.g. .site-header input[type=search]"
 msgstr "t.ex. .site-header input[type=search]"
 
-#: source/php/Frontend/I18n.php:95
+#: source/php/Frontend/I18n.php:96
 #: views/admin/settings-tabs/quick-search.php:122
 #: views/admin/settings-tabs/quick-search.php:123
 msgid "Remove selector"
 msgstr "Ta bort selektor"
 
-#: source/php/Frontend/I18n.php:96
+#: source/php/Frontend/I18n.php:97
 #: views/admin/settings-tabs/quick-search.php:109
 msgid "Placement"
 msgstr "DOM-placering"
 
-#: source/php/Frontend/I18n.php:97
+#: source/php/Frontend/I18n.php:98
 #: views/admin/settings-tabs/quick-search.php:115
 msgid "Default (body)"
 msgstr "Standard (body)"
 
-#: source/php/Frontend/I18n.php:98
+#: source/php/Frontend/I18n.php:99
 #: views/admin/settings-tabs/quick-search.php:116
 msgid "Sibling"
 msgstr "Syskon"
 
-#: source/php/Frontend/I18n.php:99
+#: source/php/Frontend/I18n.php:100
 #: views/admin/settings-tabs/quick-search.php:134
 msgid "No selectors configured yet. Click \"Add selector\" to get started."
 msgstr ""

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-02T13:02:45+00:00\n"
+"POT-Creation-Date: 2026-03-03T09:34:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -347,132 +347,136 @@ msgstr ""
 msgid "See all results"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:60
-msgid "OK"
+#: source/php/Frontend/I18n.php:48
+msgid "No hits for your search term"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:61
-msgid "Unknown error."
+msgid "OK"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:62
+msgid "Unknown error."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:63
 msgid "Error."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:64
+#: source/php/Frontend/I18n.php:65
 msgid "Request failed: "
 msgstr ""
 
-#: source/php/Frontend/I18n.php:67
+#: source/php/Frontend/I18n.php:68
 msgid "Pie chart showing document distribution"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:68
+#: source/php/Frontend/I18n.php:69
 msgid "documents"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:72
+#: source/php/Frontend/I18n.php:73
 msgid "Remove all \"%s\" documents from the Typesense index? This cannot be undone."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:73
+#: source/php/Frontend/I18n.php:74
 msgid "Clear"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:76
+#: source/php/Frontend/I18n.php:77
 msgid "Could not load facetable fields."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:77
+#: source/php/Frontend/I18n.php:78
 msgid "— No facetable fields found —"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:78
+#: source/php/Frontend/I18n.php:79
 msgid "No facetable fields found in the collection schema. Make sure the collection exists and has fields with facet: true."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:79
+#: source/php/Frontend/I18n.php:80
 msgid "All facetable fields have already been added as facets."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:82
+#: source/php/Frontend/I18n.php:83
 #: views/admin/settings-tabs/facetting.php:30
 msgid "Field"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:83
+#: source/php/Frontend/I18n.php:84
 #: views/admin/settings-tabs/facetting.php:46
 msgid "Label"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:84
+#: source/php/Frontend/I18n.php:85
 #: views/admin/settings-tabs/facetting.php:51
 msgid "e.g. Category"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:85
+#: source/php/Frontend/I18n.php:86
 #: views/admin/settings-tabs/facetting.php:56
 msgid "Placeholder"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:86
+#: source/php/Frontend/I18n.php:87
 #: views/admin/settings-tabs/facetting.php:61
 msgid "e.g. All categories"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:87
+#: source/php/Frontend/I18n.php:88
 #: views/admin/settings-tabs/facetting.php:66
 msgid "Display as"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:88
+#: source/php/Frontend/I18n.php:89
 #: views/admin/settings-tabs/facetting.php:73
 msgid "Dropdown"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:89
+#: source/php/Frontend/I18n.php:90
 #: views/admin/settings-tabs/facetting.php:74
 msgid "Button group"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:90
+#: source/php/Frontend/I18n.php:91
 #: views/admin/settings-tabs/facetting.php:80
 #: views/admin/settings-tabs/facetting.php:81
 msgid "Remove facet"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:93
+#: source/php/Frontend/I18n.php:94
 #: views/admin/settings-tabs/quick-search.php:98
 msgid "CSS selector"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:94
+#: source/php/Frontend/I18n.php:95
 #: views/admin/settings-tabs/quick-search.php:103
 msgid "e.g. .site-header input[type=search]"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:95
+#: source/php/Frontend/I18n.php:96
 #: views/admin/settings-tabs/quick-search.php:122
 #: views/admin/settings-tabs/quick-search.php:123
 msgid "Remove selector"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:96
+#: source/php/Frontend/I18n.php:97
 #: views/admin/settings-tabs/quick-search.php:109
 msgid "Placement"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:97
+#: source/php/Frontend/I18n.php:98
 #: views/admin/settings-tabs/quick-search.php:115
 msgid "Default (body)"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:98
+#: source/php/Frontend/I18n.php:99
 #: views/admin/settings-tabs/quick-search.php:116
 msgid "Sibling"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:99
+#: source/php/Frontend/I18n.php:100
 #: views/admin/settings-tabs/quick-search.php:134
 msgid "No selectors configured yet. Click \"Add selector\" to get started."
 msgstr ""
