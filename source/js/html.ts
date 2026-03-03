@@ -20,7 +20,7 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
     String(d.post_type_name ?? d.type_name ?? d.post_date_formatted ?? ""),
   SEARCH_HIT_EXCERPT: (d, h) => {
     const snippet = h?.excerpt?.snippet ?? h?.content?.snippet;
-    if (snippet) return { value: `${snippet}`, highlighted: true };
+    if (snippet) return { value: ` [...] ${snippet} [...]`, highlighted: true };
     return String(d.excerpt ?? "");
   },
   SEARCH_HIT_LINK: (d) => String(d.permalink ?? d.url ?? "#"),

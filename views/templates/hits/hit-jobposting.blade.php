@@ -20,8 +20,7 @@
                             </svg>
                         </span>
                         <span class="c-typography c-typography__variant--meta">
-                            <strong>{{ __('Published', 'municipio') }}</strong>: <time
-                                class="c-date">{SEARCH_HIT_DATE}</time>
+                            <time class="c-date">{SEARCH_HIT_DATE}</time>
                         </span>
                     </div>
                     <h2 class="c-typography c-card__heading u-margin__y--0 c-typography__variant--h3">

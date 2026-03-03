@@ -51,7 +51,7 @@ class EnrichSearchTemplate
 		$data['homeUrl'] = $data['homeUrl'] ?? home_url('/');
 
 		// Built-in template keys (match data-js-search-hit-template-{key} convention)
-		$templates = ['default', 'image', 'noimage', 'page', 'page-noimage', 'jobposting'];
+		$templates = ['default', 'noimage', 'jobposting'];
 
 		/**
 		 * Filters the list of hit template keys.
@@ -63,10 +63,7 @@ class EnrichSearchTemplate
 		// Resolve view path for each template
 		$builtInViews = [
 			'default'       => 'templates.hits.hit-default',
-			'image'         => 'templates.hits.hit-image',
 			'noimage'       => 'templates.hits.hit-noimage',
-			'page'          => 'templates.hits.hit-page',
-			'page-noimage'  => 'templates.hits.hit-page-noimage',
 			'jobposting'    => 'templates.hits.hit-jobposting',
 		];
 		$data['hitTemplateViews'] = [];
@@ -84,4 +81,3 @@ class EnrichSearchTemplate
 		return $data;
 	}
 }
-
