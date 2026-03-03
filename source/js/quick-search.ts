@@ -227,7 +227,7 @@ function attachQuickSearch(
       return;
     }
     trackEl.hidden = false;
-    const trackH = resultsEl.offsetHeight;
+    const trackH = trackEl.offsetHeight;
     const ratio = visibleCount / total;
     const thumbH = Math.max(16, Math.round(ratio * trackH));
     const maxTop = trackH - thumbH;
