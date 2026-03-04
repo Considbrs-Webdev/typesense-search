@@ -116,6 +116,24 @@
 }
 
 // ---------------------------------------------------------------------------
+// Search results: highlight marks injected by Typesense
+// ---------------------------------------------------------------------------
+
+.ts-search-results {
+  mark {
+    background-color: var(
+      --ts-mark-background,
+      color-mix(in srgb, var(--ts-color-primary) 20%, white)
+    );
+    color: var(--ts-mark-color, inherit);
+    border-radius: var(--ts-mark-border-radius, 0.15em);
+    padding: var(--ts-mark-padding, 0 0.15em);
+    font-style: inherit;
+    font-weight: inherit;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Sidebar layout: results (left) + filter sidebar (right)
 // ---------------------------------------------------------------------------
 
@@ -135,11 +153,14 @@
   width: var(--ts-sidebar-width);
   position: sticky;
   top: var(--ts-sidebar-sticky-top);
-  background: var(--ts-sidebar-background, color-mix(
-    in srgb,
-    var(--ts-color-primary) var(--ts-color-surface-tint),
-    white
-  ));
+  background: var(
+    --ts-sidebar-background,
+    color-mix(
+      in srgb,
+      var(--ts-color-primary) var(--ts-color-surface-tint),
+      white
+    )
+  );
   border-radius: var(--radius-m, 0.5rem);
   padding: var(--ts-sidebar-padding);
 
