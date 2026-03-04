@@ -19,8 +19,31 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
   SEARCH_HIT_SUBHEADING: (d) =>
     String(d.post_type_name ?? d.type_name ?? d.post_date_formatted ?? ""),
   SEARCH_HIT_EXCERPT: (d, h) => {
-    const snippet = h?.excerpt?.snippet ?? h?.content?.snippet;
-    if (snippet) return { value: ` [...] ${snippet} [...]`, highlighted: true };
+    const excerptSnippet = h?.excerpt?.snippet;
+    const contentSnippet = h?.content?.snippet;
+    const snippet = excerptSnippet ?? contentSnippet;
+    if (snippet) {
+      const fullText = String(
+        excerptSnippet ? (d.excerpt ?? "") : (d.content ?? ""),
+      ).trim();
+      const snippetText = snippet.replace(/<\/?mark>/gi, "").trim();
+      const atStart = !fullText || fullText.startsWith(snippetText);
+      const atEnd = !fullText || fullText.endsWith(snippetText);
+      const truncator =
+        (typeof window !== "undefined" &&
+          (window as any).typesenseConfig?.truncator) ||
+        "[...]";
+
+      // If user explicitly sets 'none', don't add truncation markers.
+      if (truncator === "none") {
+        return { value: snippet, highlighted: true };
+      }
+
+      const prefix = atStart ? "" : `${truncator} `;
+      const suffix = atEnd ? "" : ` ${truncator}`;
+
+      return { value: `${prefix}${snippet}${suffix}`, highlighted: true };
+    }
     return String(d.excerpt ?? "");
   },
   SEARCH_HIT_LINK: (d) => String(d.permalink ?? d.url ?? "#"),

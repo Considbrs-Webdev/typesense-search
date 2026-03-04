@@ -37,6 +37,8 @@ class TypesenseConfig
 		$debounce                 = (bool) get_option(Settings::OPTION_DEBOUNCE, true);
 		$debounceDelay            = (int) get_option(Settings::OPTION_DEBOUNCE_DELAY, 300);
 		$highlightAffixNumTokens  = (int) get_option(Settings::OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS, 15);
+		// How to truncate text snippets in the frontend: 'brackets'|'ellipsis'|'none'
+		$truncator = (string) get_option(Settings::OPTION_TRUNCATOR, '[...]');
 
 		$config = [
 			'host'                    => esc_url_raw($frontendHost ?: $host),
@@ -46,6 +48,7 @@ class TypesenseConfig
 			'debounce'                => $debounce,
 			'debounceDelay'           => $debounceDelay,
 			'highlightAffixNumTokens' => $highlightAffixNumTokens,
+			'truncator'               => sanitize_text_field($truncator),
 		];
 
 		// Include configured facets (field, label, placeholder, display_as)

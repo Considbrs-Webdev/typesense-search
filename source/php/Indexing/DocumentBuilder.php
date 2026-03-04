@@ -42,6 +42,28 @@ class DocumentBuilder
     public const FILTER_BUILD_POST_TYPE = 'Municipio/TypesenseSearch/DocumentBuilder/%s/build';
 
     /**
+     * Default maximum excerpt length in characters. Can be filtered via
+     * `Municipio/TypesenseSearch/DocumentBuilder/excerpt_length`.
+     */
+    public const DEFAULT_EXCERPT_LENGTH = 140;
+
+    /**
+     * Filter hook to modify the excerpt max length. Receives: (int $length, \WP_Post $post)
+     */
+    public const FILTER_EXCERPT_LENGTH = 'Municipio/TypesenseSearch/DocumentBuilder/excerpt_length';
+
+    /**
+     * Default truncator appended to trimmed excerpts. Can be filtered via
+     * `Municipio/TypesenseSearch/DocumentBuilder/excerpt_truncator`.
+     */
+    public const DEFAULT_EXCERPT_TRUNCATOR = '[...]';
+
+    /**
+     * Filter hook to modify the truncator string. Receives: (string $truncator, \WP_Post $post)
+     */
+    public const FILTER_EXCERPT_TRUNCATOR = 'Municipio/TypesenseSearch/DocumentBuilder/excerpt_truncator';
+
+    /**
      * Build a Typesense document array from a WP_Post object.
      *
      * @param \WP_Post $post The post to build the document for.
@@ -59,7 +81,8 @@ class DocumentBuilder
             'id'                   => (string) $post->ID,
             'title'                => (string) $post->post_title,
             'content'              => wp_strip_all_tags((string) apply_filters('the_content', $post->post_content)),
-            'excerpt'              => wp_strip_all_tags((string) get_the_excerpt($post)),
+            // Build a cleaned excerpt and trim it to the configured length.
+            'excerpt'              => self::buildExcerpt(get_the_excerpt($post), $post),
             'url'                  => (string) get_permalink($post),
             'type'                 => (string) $post->post_type,
             'type_name'            => (string) get_post_type_object($post->post_type)->label,
@@ -92,5 +115,39 @@ class DocumentBuilder
             $document,
             $post
         );
+    }
+
+    /**
+     * Build a safe, trimmed excerpt string.
+     *
+     * @param string  $excerpt Raw excerpt to clean and trim.
+     * @param \WP_Post $post  The source post object (passed to the length filter).
+     * @return string
+     */
+    private static function buildExcerpt(string $excerpt, \WP_Post $post): string
+    {
+        $clean = wp_strip_all_tags((string) $excerpt);
+        if ($clean === '') {
+            return '';
+        }
+
+        $maxLength = (int) apply_filters(self::FILTER_EXCERPT_LENGTH, self::DEFAULT_EXCERPT_LENGTH, $post);
+        if ($maxLength <= 0) {
+            return $clean;
+        }
+
+        if (mb_strlen($clean) <= $maxLength) {
+            return $clean;
+        }
+
+        $truncated = mb_substr($clean, 0, $maxLength);
+        $lastSpace = mb_strrpos($truncated, ' ');
+        if ($lastSpace !== false) {
+            $truncated = mb_substr($truncated, 0, $lastSpace);
+        }
+
+        $truncator = (string) apply_filters(self::FILTER_EXCERPT_TRUNCATOR, self::DEFAULT_EXCERPT_TRUNCATOR, $post);
+
+        return rtrim($truncated) . ' ' . $truncator;
     }
 }

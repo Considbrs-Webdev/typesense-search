@@ -149,6 +149,77 @@ if ($activeTab !== 'content') {
                         </p>
                     </div>
                 </div>
+
+                <div class="ts-field">
+                    <label for="ts-truncator-mode" class="ts-field__label">
+                        <?php esc_html_e('Snippet truncator', 'typesense-search'); ?>
+                    </label>
+                    <div class="ts-field__body">
+                        <?php
+                        $current = get_option(Settings::OPTION_TRUNCATOR, '[...]');
+                        $pre_brackets = '[...]';
+                        $pre_ellipsis = '…';
+                        $pre_none = 'none';
+                        $mode = ($current === $pre_brackets) ? 'brackets' :
+                                (($current === $pre_ellipsis) ? 'ellipsis' :
+                                (($current === $pre_none) ? 'none' : 'custom'));
+                        ?>
+
+                        <select id="ts-truncator-mode" class="ts-field__input">
+                            <option value="brackets" <?php selected('brackets', $mode); ?>><?php esc_html_e('Brackets (e.g. [...] )', 'typesense-search'); ?></option>
+                            <option value="ellipsis" <?php selected('ellipsis', $mode); ?>><?php esc_html_e('Ellipsis (e.g. … )', 'typesense-search'); ?></option>
+                            <option value="none" <?php selected('none', $mode); ?>><?php esc_html_e('None (no truncation marker)', 'typesense-search'); ?></option>
+                            <option value="custom" <?php selected('custom', $mode); ?>><?php esc_html_e('Custom', 'typesense-search'); ?></option>
+                        </select>
+
+                        <input type="hidden" id="ts-truncator" name="<?php echo esc_attr(Settings::OPTION_TRUNCATOR); ?>" value="<?php echo esc_attr($current); ?>" />
+
+                        <input
+                            type="text"
+                            id="ts-truncator-custom"
+                            class="regular-text ts-field__input"
+                            placeholder="[...]"
+                            value="<?php echo esc_attr($mode === 'custom' ? $current : ''); ?>"
+                            <?php echo $mode === 'custom' ? '' : 'hidden'; ?>
+                        />
+
+                        <p class="ts-field__description">
+                            <?php esc_html_e("Select any of the predefined markers, or choose 'Custom' to enter your own.", 'typesense-search'); ?>
+                        </p>
+
+                        <script>
+                        (function () {
+                            var mode = document.getElementById('ts-truncator-mode');
+                            var hidden = document.getElementById('ts-truncator');
+                            var custom = document.getElementById('ts-truncator-custom');
+                            var pre = {
+                                brackets: '[...]',
+                                ellipsis: '…',
+                                none: 'none'
+                            };
+
+                            function updateVisibility() {
+                                if (mode.value === 'custom') {
+                                    custom.hidden = false;
+                                    // if custom has value, use it, otherwise keep hidden value
+                                    hidden.value = custom.value || hidden.value || pre.brackets;
+                                } else {
+                                    custom.hidden = true;
+                                    hidden.value = pre[mode.value] || pre.brackets;
+                                }
+                            }
+
+                            mode.addEventListener('change', updateVisibility);
+                            custom.addEventListener('input', function () {
+                                hidden.value = custom.value || pre.brackets;
+                            });
+
+                            // ensure initial visibility is correct
+                            updateVisibility();
+                        }());
+                        </script>
+                    </div>
+                </div>
             </div>
         </div>
 

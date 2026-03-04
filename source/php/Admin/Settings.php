@@ -33,6 +33,7 @@ class Settings
     public const OPTION_DEBOUNCE              = 'typesense_search_debounce';
     public const OPTION_DEBOUNCE_DELAY         = 'typesense_search_debounce_delay';
     public const OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS = 'typesense_search_highlight_affix_num_tokens';
+    public const OPTION_TRUNCATOR = 'typesense_search_truncator';
     public const OPTION_QUICK_SEARCH_ENABLED        = 'typesense_quick_search_enabled';
     public const OPTION_QUICK_SEARCH_SELECTORS      = 'typesense_quick_search_selectors';
     public const OPTION_QUICK_SEARCH_HITS_PER_PAGE  = 'typesense_quick_search_hits_per_page';
@@ -123,6 +124,12 @@ class Settings
             'type'              => 'integer',
             'sanitize_callback' => 'absint',
             'default'           => 15,
+        ]);
+
+        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_TRUNCATOR, [
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '[...]',
         ]);
 
         register_setting(self::OPTION_GROUP_FACETS, self::OPTION_FACETS, [

@@ -444,6 +444,7 @@ function attachQuickSearch(
         .search({
           q: query,
           query_by: "title,excerpt,content,extra_terms",
+          infix: "always,off,off,always",
           per_page: hitsPerPage,
         });
       currentHits = (response.hits as SearchHit[]) ?? [];

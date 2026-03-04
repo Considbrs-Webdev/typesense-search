@@ -50,7 +50,7 @@ class Collection
             'name'   => $collectionName,
             'fields' => [
                 ['name' => 'id',        'type' => 'string'],
-                ['name' => 'title',     'type' => 'string'],
+                ['name' => 'title',     'type' => 'string', 'infix' => true],
                 ['name' => 'content',   'type' => 'string'],
                 ['name' => 'excerpt',   'type' => 'string',  'optional' => true],
                 ['name' => 'url',       'type' => 'string',  'index'    => false],
@@ -59,7 +59,7 @@ class Collection
                 ['name' => 'date',      'type' => 'int64',   'optional' => true],
                 ['name' => 'top_most_parent',      'type' => 'string',   'optional' => true, 'facet' => true],
                 ['name' => 'thumbnail', 'type' => 'string',  'optional' => true, 'index' => false],
-                ['name' => 'extra_terms', 'type' => 'string',  'optional' => true],
+                ['name' => 'extra_terms', 'type' => 'string',  'optional' => true, 'infix' => true],
                 // Catch-all: any extra field sent during indexing is auto-typed
                 // and added to the schema on first use.
                 ['name' => '.*',        'type' => 'auto'],
@@ -102,6 +102,27 @@ class Collection
             return false;
         } catch (\Exception $e) {
             return false;
+        }
+    }
+
+    /**
+     * Drops (deletes) the named collection from Typesense, including all its
+     * documents and schema definition. The operation is a hard delete — data
+     * cannot be recovered afterwards.
+     *
+     * If the collection does not exist the method returns silently so that
+     * callers do not need to check `exists()` beforehand.
+     *
+     * @param Client $client         An authenticated Typesense client.
+     * @param string $collectionName The collection to delete.
+     * @throws \Exception On API failure (other than "not found").
+     */
+    public static function drop(Client $client, string $collectionName): void
+    {
+        try {
+            $client->collections[$collectionName]->delete();
+        } catch (ObjectNotFound $e) {
+            // Already gone — treat as success.
         }
     }
 }

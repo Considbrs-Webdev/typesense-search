@@ -259,6 +259,178 @@ class IndexCommand
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Rebuild command
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Drop the Typesense collection, recreate it from the plugin schema, and
+     * optionally re-index all published posts in one operation.
+     *
+     * This is the recommended way to apply schema changes (e.g. after editing
+     * the `Municipio/TypesenseSearch/Collection/getSchema` filter). It combines
+     * three steps: drop → create → index.
+     *
+     * Use `--skip-index` when you only want to reset the schema without
+     * immediately re-populating it (you can run `wp typesense index` later).
+     *
+     * ## OPTIONS
+     *
+     * [--post-type=<type>]
+     * : Comma-separated list of post types to re-index after the schema reset.
+     *   Defaults to all post types enabled in the Typesense Search settings.
+     *   Only relevant when --skip-index is not set.
+     *
+     * [--batch-size=<number>]
+     * : Number of posts to query per database batch during re-indexing.
+     *   Defaults to all posts in a single query.
+     *
+     * [--skip-index]
+     * : Drop and recreate the schema only; do not re-index any posts.
+     *
+     * [--dry-run]
+     * : Preview what would happen without writing anything to Typesense.
+     *   Reports whether the collection exists, what schema would be created,
+     *   and how many posts would be re-indexed.
+     *
+     * [--yes]
+     * : Skip the confirmation prompt.
+     *
+     * [--sleep=<milliseconds>]
+     * : Sleep for the given number of milliseconds after each post during
+     *   re-indexing. Useful for pacing during development/testing.
+     *
+     * ## EXAMPLES
+     *
+     *   # Full rebuild: drop schema, recreate, re-index everything.
+     *   wp typesense rebuild
+     *
+     *   # Preview without making any changes.
+     *   wp typesense rebuild --dry-run
+     *
+     *   # Reset schema only, re-index manually later.
+     *   wp typesense rebuild --skip-index --yes
+     *
+     *   # Rebuild and re-index only pages, skip confirmation.
+     *   wp typesense rebuild --post-type=page --yes
+     *
+     * @subcommand rebuild
+     * @when after_wp_load
+     *
+     * @param array<int,string>    $args
+     * @param array<string,string> $assocArgs
+     */
+    public function rebuild(array $args, array $assocArgs): void
+    {
+        $isDryRun  = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
+        $skipIndex = \WP_CLI\Utils\get_flag_value($assocArgs, 'skip-index', false);
+        $skipYes   = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
+
+        // ── Client + collection name ─────────────────────────────────────────
+        $client         = ClientFactory::fromOptions();
+        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+
+        if ($client === null || $collectionName === '') {
+            \WP_CLI::error('Typesense connection is not configured. Check the plugin settings page.');
+            return;
+        }
+
+        // ── Dry-run banner ───────────────────────────────────────────────────
+        if ($isDryRun) {
+            \WP_CLI::warning('DRY RUN — no changes will be made to Typesense.');
+        }
+
+        // ── Confirmation ─────────────────────────────────────────────────────
+        $actionLabel = $skipIndex
+            ? sprintf('drop and recreate the schema for collection "%s"', $collectionName)
+            : sprintf('drop, recreate, and re-index collection "%s"', $collectionName);
+
+        if (!$isDryRun && !$skipYes) {
+            \WP_CLI::confirm(sprintf(
+                'This will permanently %s. All existing documents will be lost. Continue?',
+                $actionLabel
+            ));
+        }
+
+        // ── Inspect current state ────────────────────────────────────────────
+        $collectionExists = \TypesenseSearch\Typesense\Collection::exists($client, $collectionName);
+
+        if ($isDryRun) {
+            \WP_CLI::log(sprintf(
+                '  Collection "%s" %s.',
+                $collectionName,
+                $collectionExists ? 'exists and would be dropped' : 'does not exist (nothing to drop)'
+            ));
+            \WP_CLI::log(sprintf(
+                '  Schema would be recreated using %s.',
+                \TypesenseSearch\Typesense\Collection::FILTER_SCHEMA
+            ));
+
+            if (!$skipIndex) {
+                $enabledTypes = $this->resolvePostTypes($assocArgs);
+                if (empty($enabledTypes)) {
+                    \WP_CLI::log('  No post types enabled — re-indexing step would be skipped.');
+                } else {
+                    $total = 0;
+                    foreach ($enabledTypes as $pt) {
+                        $total += (int) wp_count_posts($pt)->publish;
+                    }
+                    \WP_CLI::log(sprintf(
+                        '  Would re-index %d published post(s) across type(s): %s.',
+                        $total,
+                        implode(', ', $enabledTypes)
+                    ));
+                }
+            } else {
+                \WP_CLI::log('  --skip-index set: re-indexing step would be skipped.');
+            }
+
+            \WP_CLI::success('Dry run complete. No changes were made.');
+            return;
+        }
+
+        // ── Drop ─────────────────────────────────────────────────────────────
+        if ($collectionExists) {
+            \WP_CLI::log(sprintf('Dropping collection "%s"…', $collectionName));
+            try {
+                \TypesenseSearch\Typesense\Collection::drop($client, $collectionName);
+                \WP_CLI::log('  Done.');
+            } catch (\Exception $e) {
+                \WP_CLI::error(sprintf('Failed to drop collection: %s', $e->getMessage()));
+                return;
+            }
+        } else {
+            \WP_CLI::log(sprintf(
+                'Collection "%s" does not exist — skipping drop step.',
+                $collectionName
+            ));
+        }
+
+        // ── Create ───────────────────────────────────────────────────────────
+        \WP_CLI::log(sprintf('Creating collection "%s" from schema…', $collectionName));
+        try {
+            \TypesenseSearch\Typesense\Collection::create($client, $collectionName);
+            \WP_CLI::log('  Done.');
+        } catch (\Exception $e) {
+            \WP_CLI::error(sprintf('Failed to create collection: %s', $e->getMessage()));
+            return;
+        }
+
+        // ── Re-index ─────────────────────────────────────────────────────────
+        if ($skipIndex) {
+            \WP_CLI::log('');
+            \WP_CLI::success(sprintf(
+                'Schema for collection "%s" has been reset. Run `wp typesense index` to populate it.',
+                $collectionName
+            ));
+            return;
+        }
+
+        \WP_CLI::log('');
+        \WP_CLI::log('Starting re-indexing…');
+        $this->index($args, array_merge($assocArgs, ['yes' => true]));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Clear command
     // ─────────────────────────────────────────────────────────────────────────
 
