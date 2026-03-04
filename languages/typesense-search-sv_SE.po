@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-03-03T09:34:23+00:00\n"
-"PO-Revision-Date: 2026-03-03 10:34+0100\n"
+"POT-Creation-Date: 2026-03-04T18:32:23+00:00\n"
+"PO-Revision-Date: 2026-03-04 19:34+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -16,8 +16,8 @@ msgstr ""
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
-#: typesense-search.php source/php/Admin/Settings.php:65
-#: source/php/Admin/Settings.php:66 views/admin/settings-page.php:25
+#: typesense-search.php source/php/Admin/Settings.php:66
+#: source/php/Admin/Settings.php:67 views/admin/settings-page.php:25
 msgid "Typesense Search"
 msgstr "Typesense-sök"
 
@@ -65,28 +65,28 @@ msgstr ""
 "Ytterligare ord eller fraser som ska matcha detta inlägg i sökningen, även "
 "om de inte förekommer i innehållet."
 
-#: source/php/Admin/Settings.php:43
+#: source/php/Admin/Settings.php:44
 msgid "Typesense Connection"
 msgstr "Anslutning"
 
-#: source/php/Admin/Settings.php:44
+#: source/php/Admin/Settings.php:45
 msgid "Settings"
 msgstr "Inställningar"
 
-#: source/php/Admin/Settings.php:45
+#: source/php/Admin/Settings.php:46
 msgid "Facetting"
 msgstr "Facettering"
 
-#: source/php/Admin/Settings.php:46
+#: source/php/Admin/Settings.php:47
 #: views/admin/settings-tabs/quick-search.php:15
 msgid "Quick search"
 msgstr "Snabbsök"
 
-#: source/php/Admin/Settings.php:47
+#: source/php/Admin/Settings.php:48
 msgid "Statistics"
 msgstr "Statistik"
 
-#: source/php/Admin/Settings.php:48
+#: source/php/Admin/Settings.php:49
 msgid "Status"
 msgstr "Status"
 
@@ -634,7 +634,7 @@ msgid "Generate search key"
 msgstr "Generera söknyckel"
 
 #: views/admin/settings-tabs/connection.php:218
-#: views/admin/settings-tabs/content.php:201
+#: views/admin/settings-tabs/content.php:272
 #: views/admin/settings-tabs/facetting.php:105
 #: views/admin/settings-tabs/quick-search.php:146
 msgid "Save settings"
@@ -662,14 +662,14 @@ msgstr "Indexera Modularity-innehåll"
 
 #: views/admin/settings-tabs/content.php:60
 #: views/admin/settings-tabs/content.php:91
-#: views/admin/settings-tabs/content.php:189
+#: views/admin/settings-tabs/content.php:260
 #: views/admin/settings-tabs/quick-search.php:42
 msgid "On"
 msgstr "På"
 
 #: views/admin/settings-tabs/content.php:61
 #: views/admin/settings-tabs/content.php:92
-#: views/admin/settings-tabs/content.php:190
+#: views/admin/settings-tabs/content.php:261
 #: views/admin/settings-tabs/quick-search.php:43
 msgid "Off"
 msgstr "Av"
@@ -721,11 +721,38 @@ msgstr ""
 "Antal ord (tokens) som ska inkluderas före och efter varje markerad träff i "
 "sökresultatens utdrag. Högre värden visar mer sammanhang runt träffarna."
 
-#: views/admin/settings-tabs/content.php:157
+#: views/admin/settings-tabs/content.php:155
+msgid "Snippet truncator"
+msgstr "Snippet-trunkerare"
+
+#: views/admin/settings-tabs/content.php:169
+msgid "Brackets (e.g. [...] )"
+msgstr "Hakparenteser (t.ex. […])"
+
+#: views/admin/settings-tabs/content.php:170
+msgid "Ellipsis (e.g. … )"
+msgstr "Ellips (t.ex. …)"
+
+#: views/admin/settings-tabs/content.php:171
+msgid "None (no truncation marker)"
+msgstr "Ingen markör"
+
+#: views/admin/settings-tabs/content.php:172
+msgid "Custom"
+msgstr "Egen"
+
+#: views/admin/settings-tabs/content.php:187
+msgid ""
+"Select any of the predefined markers, or choose 'Custom' to enter your own."
+msgstr ""
+"Välj en av de fördefinierade markörerna eller välj ”Egen” för att ange en "
+"egen markör."
+
+#: views/admin/settings-tabs/content.php:228
 msgid "Post types"
 msgstr "Inläggstyper"
 
-#: views/admin/settings-tabs/content.php:158
+#: views/admin/settings-tabs/content.php:229
 msgid ""
 "Choose which content types should be synced to Typesense. Disabled types are "
 "excluded from indexing and search results."
@@ -733,7 +760,7 @@ msgstr ""
 "Välj vilka innehållstyper som ska synkas till Typesense. Inaktiverade typer "
 "exkluderas från indexering och sökresultat."
 
-#: views/admin/settings-tabs/content.php:163
+#: views/admin/settings-tabs/content.php:234
 msgid "No public post types found."
 msgstr "Inga publika inläggstyper hittades."
 

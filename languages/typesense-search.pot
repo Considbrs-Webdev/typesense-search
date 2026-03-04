@@ -9,15 +9,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-03T09:34:23+00:00\n"
+"POT-Creation-Date: 2026-03-04T18:32:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
 #: typesense-search.php
-#: source/php/Admin/Settings.php:65
 #: source/php/Admin/Settings.php:66
+#: source/php/Admin/Settings.php:67
 #: views/admin/settings-page.php:25
 msgid "Typesense Search"
 msgstr ""
@@ -62,28 +62,28 @@ msgstr ""
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
-#: source/php/Admin/Settings.php:43
+#: source/php/Admin/Settings.php:44
 msgid "Typesense Connection"
 msgstr ""
 
-#: source/php/Admin/Settings.php:44
+#: source/php/Admin/Settings.php:45
 msgid "Settings"
 msgstr ""
 
-#: source/php/Admin/Settings.php:45
+#: source/php/Admin/Settings.php:46
 msgid "Facetting"
 msgstr ""
 
-#: source/php/Admin/Settings.php:46
+#: source/php/Admin/Settings.php:47
 #: views/admin/settings-tabs/quick-search.php:15
 msgid "Quick search"
 msgstr ""
 
-#: source/php/Admin/Settings.php:47
+#: source/php/Admin/Settings.php:48
 msgid "Statistics"
 msgstr ""
 
-#: source/php/Admin/Settings.php:48
+#: source/php/Admin/Settings.php:49
 msgid "Status"
 msgstr ""
 
@@ -585,7 +585,7 @@ msgid "Generate search key"
 msgstr ""
 
 #: views/admin/settings-tabs/connection.php:218
-#: views/admin/settings-tabs/content.php:201
+#: views/admin/settings-tabs/content.php:272
 #: views/admin/settings-tabs/facetting.php:105
 #: views/admin/settings-tabs/quick-search.php:146
 msgid "Save settings"
@@ -613,14 +613,14 @@ msgstr ""
 
 #: views/admin/settings-tabs/content.php:60
 #: views/admin/settings-tabs/content.php:91
-#: views/admin/settings-tabs/content.php:189
+#: views/admin/settings-tabs/content.php:260
 #: views/admin/settings-tabs/quick-search.php:42
 msgid "On"
 msgstr ""
 
 #: views/admin/settings-tabs/content.php:61
 #: views/admin/settings-tabs/content.php:92
-#: views/admin/settings-tabs/content.php:190
+#: views/admin/settings-tabs/content.php:261
 #: views/admin/settings-tabs/quick-search.php:43
 msgid "Off"
 msgstr ""
@@ -653,15 +653,39 @@ msgstr ""
 msgid "Number of tokens (words) to include before and after each highlighted match in search result snippets. Higher values show more context around matches."
 msgstr ""
 
-#: views/admin/settings-tabs/content.php:157
+#: views/admin/settings-tabs/content.php:155
+msgid "Snippet truncator"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:169
+msgid "Brackets (e.g. [...] )"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:170
+msgid "Ellipsis (e.g. … )"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:171
+msgid "None (no truncation marker)"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:172
+msgid "Custom"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:187
+msgid "Select any of the predefined markers, or choose 'Custom' to enter your own."
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:228
 msgid "Post types"
 msgstr ""
 
-#: views/admin/settings-tabs/content.php:158
+#: views/admin/settings-tabs/content.php:229
 msgid "Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results."
 msgstr ""
 
-#: views/admin/settings-tabs/content.php:163
+#: views/admin/settings-tabs/content.php:234
 msgid "No public post types found."
 msgstr ""
 
