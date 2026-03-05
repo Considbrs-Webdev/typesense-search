@@ -69,11 +69,21 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
       .split("/")
       .map((p) => p.trim())
       .filter(Boolean);
+    const urls = String(d.path_urls ?? "")
+      .split("|")
+      .map((u) => u.trim())
+      .filter(Boolean);
     const sep = ' <span class="separator">/</span> ';
     const html = parts
       .map((part, idx) => {
         const safe = escapeHtml(decodeHtmlEntities(String(part ?? "")));
-        return idx === parts.length - 1 ? safe : `<strong>${safe}</strong>`;
+        const isLast = idx === parts.length - 1;
+        const inner = isLast ? safe : `<strong>${safe}</strong>`;
+        const url = urls[idx];
+        if (url) {
+          return `<span class="ts-breadcrumb-link" data-href="${escapeAttr(url)}" role="link" tabindex="0">${inner}</span>`;
+        }
+        return inner;
       })
       .join(sep);
     const wrapped = `<span class="breadcrumbs">${html}</span>`;

@@ -40,6 +40,12 @@ class PageAdapter
             10,
             2
         );
+        add_filter(
+            sprintf(DocumentBuilder::FILTER_BUILD_POST_TYPE, 'page'),
+            [$this, 'addPathUrls'],
+            10,
+            2
+        );
     }
 
     /**
@@ -105,6 +111,47 @@ class PageAdapter
             $segments[] = (string) $post->post_title;
 
             $document['path'] = implode(' / ', $segments);
+        }
+
+        return $document;
+    }
+
+    /**
+     * Adds a `path_urls` field — a pipe-separated list of permalink URLs for
+     * each breadcrumb segment, in the same order as `path`.
+     * Used by the frontend to render clickable breadcrumbs.
+     *
+     * @param array<string, mixed> $document
+     * @param \WP_Post $post
+     * @return array<string, mixed>
+     */
+    public function addPathUrls(array $document, \WP_Post $post): array
+    {
+        if ($this->frontPageId && isset($post->ID) && (int) $post->ID === $this->frontPageId) {
+            $document['path_urls'] = '';
+            return $document;
+        }
+
+        $ancestors = get_post_ancestors($post);
+        $document['path_urls'] = '';
+
+        if (!empty($ancestors)) {
+            $ancestors  = array_reverse($ancestors);
+            $urls       = [];
+
+            foreach ($ancestors as $ancestorId) {
+                $url = get_permalink((int) $ancestorId);
+                if ($url) {
+                    $urls[] = (string) $url;
+                }
+            }
+
+            $url = get_permalink($post->ID);
+            if ($url) {
+                $urls[] = (string) $url;
+            }
+
+            $document['path_urls'] = implode(' | ', $urls);
         }
 
         return $document;

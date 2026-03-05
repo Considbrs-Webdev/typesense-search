@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Frontend;
 
 use stdClass;
+use TypesenseSearch\Admin\Settings;
 
 /**
  * Enrich view data for the search template with translations and templates
@@ -33,11 +34,15 @@ class EnrichSearchTemplate
 		$existingLang = (array)($data['lang'] ?? []);
 		$lang = array_merge($existingLang, [
 			'search' => __("Search", 'typesense-search'),
+			'searchLabel' => __("Enter search term", 'typesense-search'),
 			'searchPlaceholder' => __("Search term here..", 'typesense-search'),
-			'searchResults' => __("Search Results", 'typesense-search'),
+			'searchSummaryTemplate' => __("Your search for %1\$s returned %2\$s", 'typesense-search'),
+			'resultSingular' => __("%d result", 'typesense-search'),
+			'resultPlural' => __("%d results", 'typesense-search'),
 			'noResults' => __("No Results", 'typesense-search'),
 			'noResultsMessage' => __("No results found for your search.", 'typesense-search'),
 			'sort' => __("Sort", 'typesense-search'),
+			'sortBy' => __("Sort by", 'typesense-search'),
 			'relevance' => __("Relevance", 'typesense-search'),
 			'dateAsc' => __("Date Ascending", 'typesense-search'),
 			'dateDesc' => __("Date Descending", 'typesense-search'),
@@ -46,6 +51,10 @@ class EnrichSearchTemplate
 		]);
 
 		$data['lang'] = (object)$lang;
+
+		// Sort control style: 'radio' | 'dropdown' — controlled by admin setting
+		$sortDisplay = get_option(Settings::OPTION_SORT_DISPLAY, 'radio');
+		$data['sortDisplay'] = in_array($sortDisplay, ['radio', 'dropdown'], true) ? $sortDisplay : 'radio';
 
 		// Home URL used by the search form
 		$data['homeUrl'] = $data['homeUrl'] ?? home_url('/');

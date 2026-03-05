@@ -1,5 +1,8 @@
+import "@awesome.me/webawesome/dist/components/badge/badge";
 import "@awesome.me/webawesome/dist/components/icon/icon";
 import "@awesome.me/webawesome/dist/components/input/input";
+import "@awesome.me/webawesome/dist/components/radio-group/radio-group";
+import "@awesome.me/webawesome/dist/components/radio/radio";
 
 import { createClient } from "./client";
 import { createSearchRunner } from "./search";
@@ -52,6 +55,9 @@ function init(): void {
   if (!client) return;
 
   const facets = setupFacets(config.facets ?? []);
+  const summaryEl = container.querySelector<HTMLElement>(
+    "[data-js-search-summary]",
+  );
 
   // ── Search ───────────────────────────────────────────────────────────────
 
@@ -71,15 +77,33 @@ function init(): void {
   const triggerSearch = (): void => {
     search(getUrlState()).then((facetData) => {
       facets.render(facetData);
+
       // Mirror count into the mobile sidebar panel
+      const countEl = container.querySelector<HTMLElement>(
+        "[data-js-search-results-count]",
+      );
       const sidebarCountEl = container.querySelector<HTMLElement>(
         "[data-js-sidebar-results-count]",
       );
       if (sidebarCountEl) {
-        const mainCountEl = container.querySelector<HTMLElement>(
-          "[data-js-search-results-count]",
-        );
-        sidebarCountEl.textContent = mainCountEl?.textContent ?? "";
+        sidebarCountEl.textContent = countEl?.textContent ?? "";
+      }
+
+      // Update the summary sentence below the search input.
+      // Template (set via data-lang-template on the element from PHP):
+      if (summaryEl) {
+        const { query } = getUrlState();
+        const countText = countEl?.textContent?.trim() ?? "";
+        const template = summaryEl.dataset.langTemplate ?? "";
+
+        if (query && countText && template) {
+          summaryEl.textContent = template
+            .replace("%1$s", query)
+            .replace("%2$s", countText);
+          summaryEl.hidden = false;
+        } else {
+          summaryEl.hidden = true;
+        }
       }
     });
   };
@@ -140,6 +164,35 @@ function init(): void {
   window.addEventListener("popstate", () => {
     syncUiFromUrl();
     triggerSearch();
+  });
+
+  // ── Breadcrumb navigation ────────────────────────────────────────────────
+  // Breadcrumb segments inside hit cards carry data-href instead of being
+  // real <a> tags (the whole card is already an <a>). We intercept clicks
+  // and keyboard activation here, prevent the card link from firing, and
+  // navigate to the breadcrumb URL instead.
+
+  resultsEl.addEventListener("click", (e) => {
+    const target = (e.target as Element).closest<HTMLElement>(
+      "[data-href]",
+    );
+    if (!target) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const href = target.dataset.href;
+    if (href) window.location.href = href;
+  });
+
+  resultsEl.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const target = (e.target as Element).closest<HTMLElement>(
+      "[data-href]",
+    );
+    if (!target) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const href = target.dataset.href;
+    if (href) window.location.href = href;
   });
 
   // ── Mobile filter panel (CSS slide-in) ─────────────────────────────────────────

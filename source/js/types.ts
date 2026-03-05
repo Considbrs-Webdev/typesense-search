@@ -19,6 +19,7 @@ export interface TypesenseSearchConfig {
   debounce?: boolean;
   debounceDelay?: number;
   highlightAffixNumTokens?: number;
+  sortDisplay?: "radio" | "dropdown";
 }
 
 export interface TypesenseI18n {

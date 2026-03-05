@@ -935,3 +935,15 @@ msgstr ""
 #: views/admin/settings-tabs/status.php:97
 msgid "Re-run checks"
 msgstr "Kör om kontroller"
+
+#: source/php/Frontend/EnrichSearchTemplate.php
+msgid "Enter search term"
+msgstr "Ange sökord"
+
+#: source/php/Frontend/EnrichSearchTemplate.php
+msgid "Sort by"
+msgstr "Sortera på"
+
+#: source/php/Frontend/EnrichSearchTemplate.php
+msgid "Your search for %1$s returned %2$s"
+msgstr "Din sökning %1$s gav %2$s"

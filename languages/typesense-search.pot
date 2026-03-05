@@ -9,15 +9,24 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2026-03-04T18:32:23+00:00\n"
+=======
+"POT-Creation-Date: 2026-03-04T17:24:38+01:00\n"
+>>>>>>> 07ab461 (Implement breadcrumb navigation and enhance search result display)
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.11.0\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
 #: typesense-search.php
+<<<<<<< HEAD
 #: source/php/Admin/Settings.php:66
 #: source/php/Admin/Settings.php:67
+=======
+#: source/php/Admin/Settings.php:68
+#: source/php/Admin/Settings.php:69
+>>>>>>> 07ab461 (Implement breadcrumb navigation and enhance search result display)
 #: views/admin/settings-page.php:25
 msgid "Typesense Search"
 msgstr ""
@@ -62,6 +71,7 @@ msgstr ""
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
+<<<<<<< HEAD
 #: source/php/Admin/Settings.php:44
 msgid "Typesense Connection"
 msgstr ""
@@ -75,15 +85,38 @@ msgid "Facetting"
 msgstr ""
 
 #: source/php/Admin/Settings.php:47
+=======
+#: source/php/Admin/Settings.php:46
+msgid "Typesense Connection"
+msgstr ""
+
+#: source/php/Admin/Settings.php:47
+msgid "Settings"
+msgstr ""
+
+#: source/php/Admin/Settings.php:48
+msgid "Facetting"
+msgstr ""
+
+#: source/php/Admin/Settings.php:49
+>>>>>>> 07ab461 (Implement breadcrumb navigation and enhance search result display)
 #: views/admin/settings-tabs/quick-search.php:15
 msgid "Quick search"
 msgstr ""
 
+<<<<<<< HEAD
 #: source/php/Admin/Settings.php:48
 msgid "Statistics"
 msgstr ""
 
 #: source/php/Admin/Settings.php:49
+=======
+#: source/php/Admin/Settings.php:50
+msgid "Statistics"
+msgstr ""
+
+#: source/php/Admin/Settings.php:51
+>>>>>>> 07ab461 (Implement breadcrumb navigation and enhance search result display)
 msgid "Status"
 msgstr ""
 
@@ -108,6 +141,7 @@ msgstr ""
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:96
 #: source/php/Admin/SettingsAjax.php:448
+#, php-format
 msgid "Could not reach server: %s"
 msgstr ""
 
@@ -122,6 +156,7 @@ msgstr ""
 
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:125
+#, php-format
 msgid "Server is reachable, but key validation failed: %s"
 msgstr ""
 
@@ -136,12 +171,14 @@ msgstr ""
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:169
 #: source/php/Admin/SettingsAjax.php:635
+#, php-format
 msgid "Could not create collection: %s"
 msgstr ""
 
 #. translators: %s: collection name
 #: source/php/Admin/SettingsAjax.php:179
 #: source/php/Admin/SettingsAjax.php:645
+#, php-format
 msgid "Collection \"%s\" created successfully."
 msgstr ""
 
@@ -151,6 +188,7 @@ msgstr ""
 
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:207
+#, php-format
 msgid "Could not generate search key: %s"
 msgstr ""
 
@@ -165,6 +203,7 @@ msgstr ""
 
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:273
+#, php-format
 msgid "Could not load statistics: %s"
 msgstr ""
 
@@ -178,16 +217,19 @@ msgstr ""
 
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:323
+#, php-format
 msgid "Could not clear post type: %s"
 msgstr ""
 
 #. translators: 1: number of deleted docs, 2: post type slug
 #: source/php/Admin/SettingsAjax.php:333
+#, php-format
 msgid "Removed %1$d documents of type \"%2$s\" from the index."
 msgstr ""
 
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:379
+#, php-format
 msgid "Could not fetch collection schema: %s"
 msgstr ""
 
@@ -213,6 +255,7 @@ msgstr ""
 
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:470
+#, php-format
 msgid "Admin key check failed: %s"
 msgstr ""
 
@@ -226,16 +269,19 @@ msgstr ""
 
 #. translators: %s: collection name
 #: source/php/Admin/SettingsAjax.php:489
+#, php-format
 msgid "Collection \"%s\" exists."
 msgstr ""
 
 #. translators: %s: collection name
 #: source/php/Admin/SettingsAjax.php:495
+#, php-format
 msgid "Collection \"%s\" does not exist."
 msgstr ""
 
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:503
+#, php-format
 msgid "Collection check failed: %s"
 msgstr ""
 
@@ -249,16 +295,19 @@ msgstr ""
 
 #. translators: %s: collection name
 #: source/php/Admin/SettingsAjax.php:527
+#, php-format
 msgid "Search key works against collection \"%s\"."
 msgstr ""
 
 #. translators: %s: collection name
 #: source/php/Admin/SettingsAjax.php:533
+#, php-format
 msgid "Search key does not have access to collection \"%s\"."
 msgstr ""
 
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:541
+#, php-format
 msgid "Search key check failed: %s"
 msgstr ""
 
@@ -268,6 +317,7 @@ msgstr ""
 
 #. translators: %s: error message
 #: source/php/Admin/SettingsAjax.php:588
+#, php-format
 msgid "Could not create search key: %s"
 msgstr ""
 
@@ -279,56 +329,69 @@ msgstr ""
 msgid "Host, admin key, and collection name must all be saved before the collection can be created."
 msgstr ""
 
-#: source/php/Frontend/EnrichSearchTemplate.php:35
+#: source/php/Frontend/EnrichSearchTemplate.php:36
 msgid "Search"
 msgstr ""
 
-#: source/php/Frontend/EnrichSearchTemplate.php:36
-msgid "Search term here.."
-msgstr ""
-
 #: source/php/Frontend/EnrichSearchTemplate.php:37
-msgid "Search Results"
+msgid "Enter search term"
 msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:38
-msgid "No Results"
+msgid "Search term here.."
 msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:39
-msgid "No results found for your search."
+#, php-format
+msgid "Your search for %1$s returned %2$s"
 msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:40
-msgid "Sort"
-msgstr ""
-
-#: source/php/Frontend/EnrichSearchTemplate.php:41
-msgid "Relevance"
-msgstr ""
-
-#: source/php/Frontend/EnrichSearchTemplate.php:42
-msgid "Date Ascending"
-msgstr ""
-
-#: source/php/Frontend/EnrichSearchTemplate.php:43
-msgid "Date Descending"
-msgstr ""
-
-#: source/php/Frontend/EnrichSearchTemplate.php:44
-msgid "Filter"
-msgstr ""
-
-#: source/php/Frontend/EnrichSearchTemplate.php:45
-msgid "Close filter"
-msgstr ""
-
 #: source/php/Frontend/I18n.php:24
+#, php-format
 msgid "%d result"
 msgstr ""
 
+#: source/php/Frontend/EnrichSearchTemplate.php:41
 #: source/php/Frontend/I18n.php:25
+#, php-format
 msgid "%d results"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:42
+msgid "No Results"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:43
+msgid "No results found for your search."
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:44
+msgid "Sort"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:45
+msgid "Sort by"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:46
+msgid "Relevance"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:47
+msgid "Date Ascending"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:48
+msgid "Date Descending"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:49
+msgid "Filter"
+msgstr ""
+
+#: source/php/Frontend/EnrichSearchTemplate.php:50
+msgid "Close filter"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:28
@@ -376,6 +439,7 @@ msgid "documents"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:73
+#, php-format
 msgid "Remove all \"%s\" documents from the Typesense index? This cannot be undone."
 msgstr ""
 
@@ -430,6 +494,7 @@ msgid "Display as"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:89
+#: views/admin/settings-tabs/content.php:237
 #: views/admin/settings-tabs/facetting.php:73
 msgid "Dropdown"
 msgstr ""
@@ -585,7 +650,11 @@ msgid "Generate search key"
 msgstr ""
 
 #: views/admin/settings-tabs/connection.php:218
+<<<<<<< HEAD
 #: views/admin/settings-tabs/content.php:272
+=======
+#: views/admin/settings-tabs/content.php:294
+>>>>>>> 07ab461 (Implement breadcrumb navigation and enhance search result display)
 #: views/admin/settings-tabs/facetting.php:105
 #: views/admin/settings-tabs/quick-search.php:146
 msgid "Save settings"
@@ -613,14 +682,22 @@ msgstr ""
 
 #: views/admin/settings-tabs/content.php:60
 #: views/admin/settings-tabs/content.php:91
+<<<<<<< HEAD
 #: views/admin/settings-tabs/content.php:260
+=======
+#: views/admin/settings-tabs/content.php:282
+>>>>>>> 07ab461 (Implement breadcrumb navigation and enhance search result display)
 #: views/admin/settings-tabs/quick-search.php:42
 msgid "On"
 msgstr ""
 
 #: views/admin/settings-tabs/content.php:61
 #: views/admin/settings-tabs/content.php:92
+<<<<<<< HEAD
 #: views/admin/settings-tabs/content.php:261
+=======
+#: views/admin/settings-tabs/content.php:283
+>>>>>>> 07ab461 (Implement breadcrumb navigation and enhance search result display)
 #: views/admin/settings-tabs/quick-search.php:43
 msgid "Off"
 msgstr ""
@@ -677,6 +754,7 @@ msgstr ""
 msgid "Select any of the predefined markers, or choose 'Custom' to enter your own."
 msgstr ""
 
+<<<<<<< HEAD
 #: views/admin/settings-tabs/content.php:228
 msgid "Post types"
 msgstr ""
@@ -686,6 +764,29 @@ msgid "Choose which content types should be synced to Typesense. Disabled types 
 msgstr ""
 
 #: views/admin/settings-tabs/content.php:234
+=======
+#: views/admin/settings-tabs/content.php:225
+msgid "Sort control style"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:234
+msgid "Radio buttons"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:241
+msgid "How the sort options are displayed on the search page. \"Radio buttons\" shows inline options; \"Dropdown\" uses a select element like the facet filters."
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:250
+msgid "Post types"
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:251
+msgid "Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results."
+msgstr ""
+
+#: views/admin/settings-tabs/content.php:256
+>>>>>>> 07ab461 (Implement breadcrumb navigation and enhance search result display)
 msgid "No public post types found."
 msgstr ""
 
@@ -811,4 +912,8 @@ msgstr ""
 
 #: views/admin/settings-tabs/status.php:97
 msgid "Re-run checks"
+msgstr ""
+
+#: views/templates/hits/hit-jobposting.blade.php:23
+msgid "Valid through"
 msgstr ""

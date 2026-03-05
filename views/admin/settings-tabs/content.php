@@ -220,6 +220,28 @@ if ($activeTab !== 'content') {
                         </script>
                     </div>
                 </div>
+                <div class="ts-field">
+                    <label for="ts-sort-display" class="ts-field__label">
+                        <?php esc_html_e('Sort control style', 'typesense-search'); ?>
+                    </label>
+                    <div class="ts-field__body">
+                        <select
+                            id="ts-sort-display"
+                            name="<?php echo esc_attr(Settings::OPTION_SORT_DISPLAY); ?>"
+                            class="ts-field__input"
+                        >
+                            <option value="radio" <?php selected('radio', get_option(Settings::OPTION_SORT_DISPLAY, 'radio')); ?>>
+                                <?php esc_html_e('Radio buttons', 'typesense-search'); ?>
+                            </option>
+                            <option value="dropdown" <?php selected('dropdown', get_option(Settings::OPTION_SORT_DISPLAY, 'radio')); ?>>
+                                <?php esc_html_e('Dropdown', 'typesense-search'); ?>
+                            </option>
+                        </select>
+                        <p class="ts-field__description">
+                            <?php esc_html_e('How the sort options are displayed on the search page. "Radio buttons" shows inline options; "Dropdown" uses a select element like the facet filters.', 'typesense-search'); ?>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
 

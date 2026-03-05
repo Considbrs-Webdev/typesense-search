@@ -39,6 +39,9 @@ class TypesenseConfig
 		$highlightAffixNumTokens  = (int) get_option(Settings::OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS, 15);
 		// How to truncate text snippets in the frontend: 'brackets'|'ellipsis'|'none'
 		$truncator = (string) get_option(Settings::OPTION_TRUNCATOR, '[...]');
+		// Sort control style: 'radio'|'dropdown'
+		$sortDisplayRaw = (string) get_option(Settings::OPTION_SORT_DISPLAY, 'radio');
+		$sortDisplay    = in_array($sortDisplayRaw, ['radio', 'dropdown'], true) ? $sortDisplayRaw : 'radio';
 
 		$config = [
 			'host'                    => esc_url_raw($frontendHost ?: $host),
@@ -49,6 +52,7 @@ class TypesenseConfig
 			'debounceDelay'           => $debounceDelay,
 			'highlightAffixNumTokens' => $highlightAffixNumTokens,
 			'truncator'               => sanitize_text_field($truncator),
+			'sortDisplay'             => $sortDisplay,
 		];
 
 		// Include configured facets (field, label, placeholder, display_as)
