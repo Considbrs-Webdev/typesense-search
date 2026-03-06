@@ -222,6 +222,8 @@ class Settings
                 'actionGetStats'       => SettingsAjax::AJAX_ACTION_GET_STATS,
                 'nonceClearType'       => wp_create_nonce(SettingsAjax::AJAX_ACTION_CLEAR_POST_TYPE),
                 'actionClearType'      => SettingsAjax::AJAX_ACTION_CLEAR_POST_TYPE,
+                'nonceReindexType'     => wp_create_nonce(SettingsAjax::AJAX_ACTION_REINDEX_POST_TYPE),
+                'actionReindexType'    => SettingsAjax::AJAX_ACTION_REINDEX_POST_TYPE,
                 'nonceGetFacetFields'  => wp_create_nonce(SettingsAjax::AJAX_ACTION_GET_FACET_FIELDS),
                 'actionGetFacetFields' => SettingsAjax::AJAX_ACTION_GET_FACET_FIELDS,
                 'nonceCheckStatus'     => wp_create_nonce(SettingsAjax::AJAX_ACTION_CHECK_STATUS),

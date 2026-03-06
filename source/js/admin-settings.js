@@ -282,12 +282,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             li.innerHTML = `
                 <span class="ts-stats-row__swatch" style="background:${color}" aria-hidden="true"></span>
-                <span class="ts-stats-row__label">${escHtml(facet.label)}<span class="ts-stats-row__slug">${escHtml(facet.slug)}</span></span>
+                <span class="ts-stats-row__label">${escHtml(facet.label)}<span class="ts-stats-row__slug">${escHtml(facet.slug)}</span>${facet.external ? `<span class="ts-stats-row__badge ts-stats-row__badge--external">${escHtml(i18n.externalBadge ?? 'External')}</span>` : ''}</span>
                 <span class="ts-stats-row__count">${facet.count.toLocaleString()}</span>
                 <span class="ts-stats-row__pct">${pct}%</span>
                 <button type="button" class="button button-small ts-stats-row__clear" data-post-type="${escAttr(facet.slug)}" data-label="${escAttr(facet.label)}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                     ${escHtml(i18n.clearBtn ?? 'Clear')}
+                </button>
+                <button type="button" class="button button-small ts-stats-row__reindex" data-post-type="${escAttr(facet.slug)}" data-label="${escAttr(facet.label)}"${facet.external ? ` disabled title="${escAttr(i18n.reindexExternalTitle ?? 'Managed by an external strategy — use WP-CLI to reindex.')}"` : ''}>
+                    <svg class="ts-stats-row__reindex-spinner" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    <svg class="ts-stats-row__reindex-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 640 640" fill="currentColor" aria-hidden="true"><path d="M552.2 64C538.9 64 528.2 74.7 528.2 88L528.2 166.1L501.1 139C401.1 39 239 39 139.1 139C39.2 239 39.1 401.1 139.1 501C239.1 600.9 401.2 601 501.1 501C516 486.1 528.7 469.8 539.2 452.5C546.1 441.2 542.4 426.4 531.1 419.5C519.8 412.6 505 416.3 498.1 427.6C489.6 441.6 479.3 454.9 467.1 467C385.9 548.2 254.2 548.2 172.9 467C91.6 385.8 91.7 254.1 172.9 172.8C254.1 91.5 385.8 91.6 467.1 172.8L494.2 199.9L416 199.9C402.7 199.9 392 210.6 392 223.9C392 237.2 402.7 247.9 416 247.9L552.1 247.9C565.4 247.9 576.1 237.2 576.1 223.9L576.1 87.9C576.1 74.6 565.4 63.9 552.1 63.9z"/></svg>
+                    ${escHtml(i18n.reindexBtn ?? 'Reindex')}
                 </button>
                 <span class="ts-stats-row__feedback" hidden></span>`;
 
@@ -297,6 +302,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Bind clear buttons
         listEl.querySelectorAll('.ts-stats-row__clear').forEach((btn) => {
             btn.addEventListener('click', () => handleClearPostType(btn));
+        });
+
+        // Bind reindex buttons
+        listEl.querySelectorAll('.ts-stats-row__reindex').forEach((btn) => {
+            btn.addEventListener('click', () => handleReindexPostType(btn));
         });
     }
 
@@ -344,6 +354,73 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedback.className   = 'ts-stats-row__feedback is-error';
                 feedback.hidden      = false;
             }
+        }
+    }
+
+    /**
+     * Show a notice at the top of the statistics card.
+     * @param {string}  message
+     * @param {'success'|'error'} type
+     */
+    function showStatsNotice(message, type) {
+        const noticeEl  = document.getElementById('ts-stats-notice');
+        const messageEl = document.getElementById('ts-stats-notice-message');
+        if (!noticeEl || !messageEl) return;
+
+        messageEl.textContent = message;
+        noticeEl.classList.remove('ts-stats-notice--success', 'ts-stats-notice--error');
+        noticeEl.classList.add(type === 'success' ? 'ts-stats-notice--success' : 'ts-stats-notice--error');
+        noticeEl.hidden = false;
+    }
+
+    function hideStatsNotice() {
+        const noticeEl = document.getElementById('ts-stats-notice');
+        if (noticeEl) noticeEl.hidden = true;
+    }
+
+    // Dismiss button
+    document.getElementById('ts-stats-notice-dismiss')?.addEventListener('click', hideStatsNotice);
+
+    /**
+     * Handle a "Reindex" button click for a specific post type.
+     */
+    async function handleReindexPostType(btn) {
+        const postType = btn.dataset.postType;
+        const label    = btn.dataset.label || postType;
+        const row      = btn.closest('.ts-stats-row');
+        const feedback = row?.querySelector('.ts-stats-row__feedback');
+
+        if (!confirm((i18n.confirmReindexType ?? 'Re-index all "%s" documents? Existing entries will be re-processed and overwritten.').replace('%s', label))) {
+            return;
+        }
+
+        setButtonLoading(btn, true);
+        hideStatsNotice();
+        if (feedback) { feedback.hidden = true; }
+
+        // Also disable the clear button on the same row while reindexing
+        const clearBtn = row?.querySelector('.ts-stats-row__clear');
+        if (clearBtn) clearBtn.disabled = true;
+
+        let data;
+        try {
+            data = await ajaxPost({
+                action:    tsSettings.actionReindexType,
+                nonce:     tsSettings.nonceReindexType,
+                post_type: postType,
+            });
+        } catch (err) {
+            data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
+        } finally {
+            setButtonLoading(btn, false);
+            if (clearBtn) clearBtn.disabled = false;
+        }
+
+        const message = data?.data?.message ?? (data.success ? (i18n.ok ?? 'OK') : (i18n.error ?? 'Error.'));
+        showStatsNotice(message, data.success ? 'success' : 'error');
+
+        if (data.success) {
+            await loadStats();
         }
     }
 

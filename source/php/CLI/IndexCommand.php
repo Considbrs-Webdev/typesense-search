@@ -604,11 +604,25 @@ class IndexCommand
      *
  * [--include-pdf]
      * : Also clear PDF attachment documents (type=attachment) from the index.
+     *   Combined with post-type clearing, not exclusive.
      *
      * [--include-external]
      * : Also clear all documents belonging to registered external strategies,
      *   matched by their type identifier. Ignored when --post-type=all is used
      *   since that already removes every document.
+     *
+     * [--only-pdf]
+     * : Clear ONLY PDF attachment documents (type=attachment) from the index;
+     *   skips the post-type loop entirely. Cannot be combined with
+     *   --post-type, --only-external, or --post-type=all.
+     *
+     * [--only-external[=<identifier>]]
+     * : Clear ONLY documents belonging to external strategies; skips the
+     *   post-type loop and the PDF step. When given without a value, all
+     *   registered external strategies are targeted. When given with an
+     *   identifier (e.g. --only-external=pitea-eservice), only that
+     *   strategy's documents are removed. Cannot be combined with
+     *   --post-type or --only-pdf.
      *
      * [--sleep=<milliseconds>]
      * : Sleep for the given number of milliseconds between post-type operations.
@@ -628,6 +642,15 @@ class IndexCommand
      *   # Remove every document regardless of settings.
      *   wp typesense clear --post-type=all --yes
      *
+     *   # Clear only PDF attachments (no post types, no external).
+     *   wp typesense clear --only-pdf --yes
+     *
+     *   # Clear only external strategy documents (all strategies).
+     *   wp typesense clear --only-external --yes
+     *
+     *   # Clear only one external strategy's documents.
+     *   wp typesense clear --only-external=pitea-eservice --yes
+     *
      * @subcommand clear
      * @when after_wp_load
      *
@@ -643,6 +666,20 @@ class IndexCommand
         $clearAll        = $rawType === 'all';
         $includePdf      = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
         $includeExternal = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-external', false);
+        $onlyPdf         = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'only-pdf', false);
+        // false = not set | true = all external | string = specific identifier
+        $onlyExternal    = \WP_CLI\Utils\get_flag_value($assocArgs, 'only-external', false);
+
+        // ── Mutual exclusivity ───────────────────────────────────────────────
+        if ($onlyPdf && $onlyExternal !== false) {
+            \WP_CLI::error('--only-pdf and --only-external are mutually exclusive.');
+        }
+        if ($onlyPdf && ($clearAll || $rawType !== null)) {
+            \WP_CLI::error('--only-pdf cannot be combined with --post-type.');
+        }
+        if ($onlyExternal !== false && ($clearAll || $rawType !== null)) {
+            \WP_CLI::error('--only-external cannot be combined with --post-type.');
+        }
 
         // ── Client + collection name ─────────────────────────────────────────
         $client         = ClientFactory::fromOptions();
@@ -658,7 +695,9 @@ class IndexCommand
         }
 
         // ── Post types to clear ──────────────────────────────────────────────
-        if ($clearAll) {
+        // When --only-pdf or --only-external is set the post-type loop is
+        // skipped entirely, so we can leave $postTypes empty.
+        if ($clearAll || $onlyPdf || $onlyExternal !== false) {
             $postTypes = [];
         } else {
             $postTypes = $this->resolvePostTypesForClear($rawType);
@@ -671,12 +710,19 @@ class IndexCommand
         }
 
         // ── Confirmation ─────────────────────────────────────────────────────
-        $externalSuffix = $includeExternal && !$clearAll ? ' and external strategy documents' : '';
-        if ($clearAll) {
+        if ($onlyPdf) {
+            $scopeLabel = 'PDF attachment documents only';
+        } elseif ($onlyExternal !== false) {
+            $extId = is_string($onlyExternal) && $onlyExternal !== '' ? $onlyExternal : null;
+            $scopeLabel = $extId !== null
+                ? sprintf('documents for external strategy "%s"', $extId)
+                : 'all external strategy documents';
+        } elseif ($clearAll) {
             $scopeLabel = $includePdf
                 ? 'ALL documents (including PDF attachments)'
                 : 'ALL documents';
         } else {
+            $externalSuffix = $includeExternal ? ' and external strategy documents' : '';
             $scopeLabel = sprintf(
                 'documents for post type(s): %s%s%s',
                 implode(', ', $postTypes),
@@ -695,6 +741,7 @@ class IndexCommand
 
         // ── Execute per operation ─────────────────────────────────────────────
         // $operations is a list of post-type strings, or [null] for "clear all".
+        // Empty when --only-pdf or --only-external is set — loop won't execute.
         $operations     = $clearAll ? [null] : $postTypes;
         $enabledObjects = Settings::getIndexablePostTypes();
         $totalDeleted   = 0;
@@ -752,7 +799,7 @@ class IndexCommand
         }
 
         // ── PDF attachments ──────────────────────────────────────────────────
-        if ($includePdf && !$clearAll) {
+        if (($onlyPdf || $includePdf) && !$clearAll) {
             $pdfFilterBy = 'type:=attachment';
 
             try {
@@ -788,8 +835,21 @@ class IndexCommand
         }
 
         // ── External strategies ────────────────────────────────────────────────
-        if ($includeExternal && !$clearAll) {
+        if (($onlyExternal !== false || $includeExternal) && !$clearAll) {
             $extStrategies = App::getRegistry()->allExternal();
+
+            // Filter to a specific strategy when --only-external=<identifier>.
+            if (is_string($onlyExternal) && $onlyExternal !== '') {
+                if (!isset($extStrategies[$onlyExternal])) {
+                    $available = implode(', ', array_keys($extStrategies));
+                    \WP_CLI::error(sprintf(
+                        'Unknown external strategy "%s". Available: %s',
+                        $onlyExternal,
+                        $available ?: 'none registered'
+                    ));
+                }
+                $extStrategies = [$onlyExternal => $extStrategies[$onlyExternal]];
+            }
 
             if (empty($extStrategies)) {
                 \WP_CLI::log('  No external strategies registered — skipping.');
@@ -996,6 +1056,54 @@ class IndexCommand
                 $totalFailed
             ));
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // list-external command
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * List all registered external indexing strategies.
+     *
+     * Displays the identifier of each strategy registered via the
+     * 'Municipio/TypesenseSearch/RegisterStrategies' action. Use the
+     * identifier with `sync-external` or `clear --only-external=<identifier>`.
+     *
+     * ## EXAMPLES
+     *
+     *   wp typesense list-external
+     *
+     * @subcommand list-external
+     * @when after_wp_load
+     *
+     * @param array<int,string>    $args
+     * @param array<string,string> $assocArgs
+     */
+    public function listExternal(array $args, array $assocArgs): void
+    {
+        $strategies = App::getRegistry()->allExternal();
+
+        if (empty($strategies)) {
+            \WP_CLI::warning(
+                'No external strategies are registered. ' .
+                'Third-party plugins register strategies via the ' .
+                '\'Municipio/TypesenseSearch/RegisterStrategies\' action.'
+            );
+            return;
+        }
+
+        \WP_CLI::log(sprintf('%d external strategy/strategies registered:', count($strategies)));
+        \WP_CLI::log('');
+
+        foreach ($strategies as $id => $strategy) {
+            \WP_CLI::log(sprintf('  • %s', $id));
+        }
+
+        \WP_CLI::log('');
+        \WP_CLI::success(
+            'Use `wp typesense sync-external <identifier>` to sync, ' .
+            'or `wp typesense clear --only-external=<identifier>` to remove documents.'
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -23,7 +23,8 @@ class SettingsAjax
     public const AJAX_ACTION_CREATE_COL       = 'typesense_create_collection';
     public const AJAX_ACTION_GEN_KEY          = 'typesense_generate_search_key';
     public const AJAX_ACTION_GET_STATS        = 'typesense_get_stats';
-    public const AJAX_ACTION_CLEAR_POST_TYPE  = 'typesense_clear_post_type';
+    public const AJAX_ACTION_CLEAR_POST_TYPE   = 'typesense_clear_post_type';
+    public const AJAX_ACTION_REINDEX_POST_TYPE = 'typesense_reindex_post_type';
     public const AJAX_ACTION_GET_FACET_FIELDS = 'typesense_get_facet_fields';
     public const AJAX_ACTION_CHECK_STATUS       = 'typesense_check_status';
     public const AJAX_ACTION_FIX_SEARCH_KEY      = 'typesense_fix_search_key';
@@ -36,6 +37,7 @@ class SettingsAjax
         add_action('wp_ajax_' . self::AJAX_ACTION_GEN_KEY,            [$this, 'handleGenerateSearchKey']);
         add_action('wp_ajax_' . self::AJAX_ACTION_GET_STATS,          [$this, 'handleGetStats']);
         add_action('wp_ajax_' . self::AJAX_ACTION_CLEAR_POST_TYPE,    [$this, 'handleClearPostType']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_REINDEX_POST_TYPE,  [$this, 'handleReindexPostType']);
         add_action('wp_ajax_' . self::AJAX_ACTION_GET_FACET_FIELDS,   [$this, 'handleGetFacetFields']);
         add_action('wp_ajax_' . self::AJAX_ACTION_CHECK_STATUS,       [$this, 'handleCheckStatus']);
         add_action('wp_ajax_' . self::AJAX_ACTION_FIX_SEARCH_KEY,     [$this, 'handleFixSearchKey']);
@@ -243,7 +245,7 @@ class SettingsAjax
             $result = $client->collections[$collectionName]->documents->search([
                 'q'                => '*',
                 'query_by'         => 'title',
-                'facet_by'         => 'type',
+                'facet_by'         => 'type,type_name',
                 'max_facet_values' => 100,
                 'per_page'         => 0,
             ]);
@@ -251,16 +253,38 @@ class SettingsAjax
             $total  = $result['found'] ?? 0;
             $facets = [];
 
+            // Build a position-indexed map of type_name values. Because type and
+            // type_name have a strict 1:1 relationship per document, Typesense
+            // returns both facet groups in the same count-descending order, so
+            // the N-th type entry corresponds to the N-th type_name entry.
+            $typeNamesByPosition = [];
+            foreach ($result['facet_counts'] ?? [] as $facetGroup) {
+                if (($facetGroup['field_name'] ?? '') === 'type_name') {
+                    foreach ($facetGroup['counts'] ?? [] as $i => $item) {
+                        $typeNamesByPosition[$i] = $item['value'];
+                    }
+                    break;
+                }
+            }
+
             foreach ($result['facet_counts'] ?? [] as $facetGroup) {
                 if (($facetGroup['field_name'] ?? '') === 'type') {
-                    foreach ($facetGroup['counts'] ?? [] as $item) {
-                        $slug = $item['value'];
-                        // Try to resolve a human-readable label from WP
+                    $externalIds = array_keys(\TypesenseSearch\App::getRegistry()->allExternal());
+
+                    foreach ($facetGroup['counts'] ?? [] as $i => $item) {
+                        $slug        = $item['value'];
+                        // Prefer the registered WP label; fall back to the stored
+                        // type_name (correct for external services), then the slug.
                         $postTypeObj = get_post_type_object($slug);
+                        $label       = $postTypeObj
+                            ? $postTypeObj->label
+                            : ($typeNamesByPosition[$i] ?? $slug);
+
                         $facets[] = [
-                            'slug'  => $slug,
-                            'label' => $postTypeObj ? $postTypeObj->label : $slug,
-                            'count' => (int) $item['count'],
+                            'slug'     => $slug,
+                            'label'    => $label,
+                            'count'    => (int) $item['count'],
+                            'external' => in_array($slug, $externalIds, true),
                         ];
                     }
                 }
@@ -339,7 +363,128 @@ class SettingsAjax
         ]);
     }
 
-    // ── 6. Get facetable fields ───────────────────────────────────────────────
+    // ── 6. Reindex post type ─────────────────────────────────────────────────
+
+    public function handleReindexPostType(): void
+    {
+        check_ajax_referer(self::AJAX_ACTION_REINDEX_POST_TYPE, 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Unauthorized.', 'typesense-search')], 403);
+            return;
+        }
+
+        $postType = sanitize_key(wp_unslash($_POST['post_type'] ?? ''));
+
+        if (empty($postType)) {
+            wp_send_json_error(['message' => __('Post type is required.', 'typesense-search')]);
+            return;
+        }
+
+        // Allow the indexing loop to run to completion regardless of request
+        // timeout or client disconnect — important for large sites.
+        ignore_user_abort(true);
+        set_time_limit(0);
+
+        $indexed  = 0;
+        $skipped  = 0;
+        $failed   = 0;
+        $registry = \TypesenseSearch\App::getRegistry();
+
+        try {
+            if ($postType === 'attachment') {
+                // PDF attachment reindex
+                $strategy = $registry->get('pdf');
+
+                if ($strategy === null) {
+                    wp_send_json_error(['message' => __('PDF indexing strategy is not available.', 'typesense-search')]);
+                    return;
+                }
+
+                $offset    = 0;
+                $batchSize = 50;
+
+                do {
+                    $posts = get_posts([
+                        'post_type'        => 'attachment',
+                        'post_status'      => 'inherit',
+                        'post_mime_type'   => 'application/pdf',
+                        'posts_per_page'   => $batchSize,
+                        'offset'           => $offset,
+                        'orderby'          => 'ID',
+                        'order'            => 'ASC',
+                        'suppress_filters' => false,
+                    ]);
+
+                    foreach ($posts as $post) {
+                        if (!$strategy->shouldIndex($post)) {
+                            $skipped++;
+                            continue;
+                        }
+
+                        $strategy->index($post) ? $indexed++ : $failed++;
+                    }
+
+                    $offset += $batchSize;
+                } while (count($posts) === $batchSize);
+            } else {
+                // Standard published post type reindex
+                $offset    = 0;
+                $batchSize = 50;
+
+                do {
+                    $posts = get_posts([
+                        'post_type'        => $postType,
+                        'post_status'      => 'publish',
+                        'posts_per_page'   => $batchSize,
+                        'offset'           => $offset,
+                        'orderby'          => 'ID',
+                        'order'            => 'ASC',
+                        'suppress_filters' => false,
+                    ]);
+
+                    foreach ($posts as $post) {
+                        $strategy = $registry->resolve($post);
+
+                        if (!$strategy || !$strategy->shouldIndex($post)) {
+                            $skipped++;
+                            continue;
+                        }
+
+                        $strategy->index($post) ? $indexed++ : $failed++;
+                    }
+
+                    $offset += $batchSize;
+                } while (count($posts) === $batchSize);
+            }
+        } catch (\Exception $e) {
+            wp_send_json_error([
+                'message' => sprintf(
+                    /* translators: %s: error message */
+                    __('Reindex failed: %s', 'typesense-search'),
+                    $e->getMessage()
+                ),
+            ]);
+            return;
+        }
+
+        wp_send_json_success([
+            /* translators: 1: indexed count, 2: skipped count, 3: failed count, 4: post type slug */
+            'message'  => sprintf(
+                __('Reindexed "%4$s": %1$d indexed, %2$d skipped, %3$d failed.', 'typesense-search'),
+                $indexed,
+                $skipped,
+                $failed,
+                $postType
+            ),
+            'indexed'  => $indexed,
+            'skipped'  => $skipped,
+            'failed'   => $failed,
+            'postType' => $postType,
+        ]);
+    }
+
+    // ── 7. Get facetable fields ───────────────────────────────────────────────
 
     public function handleGetFacetFields(): void
     {

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-06T11:06:42+00:00\n"
+"POT-Creation-Date: 2026-03-06T18:14:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -88,195 +88,210 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:57
-#: source/php/Admin/SettingsAjax.php:227
-#: source/php/Admin/SettingsAjax.php:294
-#: source/php/Admin/SettingsAjax.php:349
-#: source/php/Admin/SettingsAjax.php:407
-#: source/php/Admin/SettingsAjax.php:566
-#: source/php/Admin/SettingsAjax.php:613
+#: source/php/Admin/SettingsAjax.php:59
+#: source/php/Admin/SettingsAjax.php:229
+#: source/php/Admin/SettingsAjax.php:318
+#: source/php/Admin/SettingsAjax.php:373
+#: source/php/Admin/SettingsAjax.php:494
+#: source/php/Admin/SettingsAjax.php:552
+#: source/php/Admin/SettingsAjax.php:711
+#: source/php/Admin/SettingsAjax.php:758
 msgid "Unauthorized."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:66
+#: source/php/Admin/SettingsAjax.php:68
 msgid "Enter both a host URL and an Admin API key before testing."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:74
+#: source/php/Admin/SettingsAjax.php:76
 msgid "The host value is not a valid URL."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:96
-#: source/php/Admin/SettingsAjax.php:448
+#: source/php/Admin/SettingsAjax.php:98
+#: source/php/Admin/SettingsAjax.php:593
 msgid "Could not reach server: %s"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:106
-#: source/php/Admin/SettingsAjax.php:441
+#: source/php/Admin/SettingsAjax.php:108
+#: source/php/Admin/SettingsAjax.php:586
 msgid "Server responded but reported an unhealthy status."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:117
+#: source/php/Admin/SettingsAjax.php:119
 msgid "Server is reachable, but the Admin API key was rejected."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:125
+#: source/php/Admin/SettingsAjax.php:127
 msgid "Server is reachable, but key validation failed: %s"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:141
+#: source/php/Admin/SettingsAjax.php:143
 msgid "Connected successfully. Server is healthy and the Admin API key is valid."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:157
+#: source/php/Admin/SettingsAjax.php:159
 msgid "Collection name is required."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:169
-#: source/php/Admin/SettingsAjax.php:635
+#: source/php/Admin/SettingsAjax.php:171
+#: source/php/Admin/SettingsAjax.php:780
 msgid "Could not create collection: %s"
 msgstr ""
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:179
-#: source/php/Admin/SettingsAjax.php:645
+#: source/php/Admin/SettingsAjax.php:181
+#: source/php/Admin/SettingsAjax.php:790
 msgid "Collection \"%s\" created successfully."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:195
+#: source/php/Admin/SettingsAjax.php:197
 msgid "Set a collection name before generating a search key."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:207
+#: source/php/Admin/SettingsAjax.php:209
 msgid "Could not generate search key: %s"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:215
+#: source/php/Admin/SettingsAjax.php:217
 msgid "Search key generated. It has been filled in below — save settings to keep it."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:236
-#: source/php/Admin/SettingsAjax.php:358
+#: source/php/Admin/SettingsAjax.php:238
+#: source/php/Admin/SettingsAjax.php:503
 msgid "Connection settings are incomplete. Please configure the connection first."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:273
+#: source/php/Admin/SettingsAjax.php:297
 msgid "Could not load statistics: %s"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:301
+#: source/php/Admin/SettingsAjax.php:325
+#: source/php/Admin/SettingsAjax.php:380
 msgid "Post type is required."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:310
+#: source/php/Admin/SettingsAjax.php:334
 msgid "Connection settings are incomplete."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:323
+#: source/php/Admin/SettingsAjax.php:347
 msgid "Could not clear post type: %s"
 msgstr ""
 
 #. translators: 1: number of deleted docs, 2: post type slug
-#: source/php/Admin/SettingsAjax.php:333
+#: source/php/Admin/SettingsAjax.php:357
 msgid "Removed %1$d documents of type \"%2$s\" from the index."
 msgstr ""
 
+#: source/php/Admin/SettingsAjax.php:400
+msgid "PDF indexing strategy is not available."
+msgstr ""
+
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:379
+#: source/php/Admin/SettingsAjax.php:464
+msgid "Reindex failed: %s"
+msgstr ""
+
+#: source/php/Admin/SettingsAjax.php:474
+msgid "Reindexed \"%4$s\": %1$d indexed, %2$d skipped, %3$d failed."
+msgstr ""
+
+#. translators: %s: error message
+#: source/php/Admin/SettingsAjax.php:524
 msgid "Could not fetch collection schema: %s"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:428
+#: source/php/Admin/SettingsAjax.php:573
 msgid "No host URL configured."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:439
+#: source/php/Admin/SettingsAjax.php:584
 msgid "Server is reachable and healthy."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:458
+#: source/php/Admin/SettingsAjax.php:603
 msgid "No admin key configured."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:464
+#: source/php/Admin/SettingsAjax.php:609
 msgid "Admin key is valid."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:466
+#: source/php/Admin/SettingsAjax.php:611
 msgid "Admin key was rejected by the server."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:470
+#: source/php/Admin/SettingsAjax.php:615
 msgid "Admin key check failed: %s"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:479
+#: source/php/Admin/SettingsAjax.php:624
 msgid "Cannot check — admin key is not valid."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:481
+#: source/php/Admin/SettingsAjax.php:626
 msgid "No collection name configured."
 msgstr ""
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:489
+#: source/php/Admin/SettingsAjax.php:634
 msgid "Collection \"%s\" exists."
 msgstr ""
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:495
+#: source/php/Admin/SettingsAjax.php:640
 msgid "Collection \"%s\" does not exist."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:503
+#: source/php/Admin/SettingsAjax.php:648
 msgid "Collection check failed: %s"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:512
+#: source/php/Admin/SettingsAjax.php:657
 msgid "No search key configured."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:515
+#: source/php/Admin/SettingsAjax.php:660
 msgid "No collection name configured — cannot test the search key."
 msgstr ""
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:527
+#: source/php/Admin/SettingsAjax.php:672
 msgid "Search key works against collection \"%s\"."
 msgstr ""
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:533
+#: source/php/Admin/SettingsAjax.php:678
 msgid "Search key does not have access to collection \"%s\"."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:541
+#: source/php/Admin/SettingsAjax.php:686
 msgid "Search key check failed: %s"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:576
+#: source/php/Admin/SettingsAjax.php:721
 msgid "Host, admin key, and collection name must all be saved before a new search key can be created."
 msgstr ""
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:588
+#: source/php/Admin/SettingsAjax.php:733
 msgid "Could not create search key: %s"
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:598
+#: source/php/Admin/SettingsAjax.php:743
 msgid "New search key created and saved. The status checks should now pass."
 msgstr ""
 
-#: source/php/Admin/SettingsAjax.php:623
+#: source/php/Admin/SettingsAjax.php:768
 msgid "Host, admin key, and collection name must all be saved before the collection can be created."
 msgstr ""
 
@@ -394,101 +409,113 @@ msgstr ""
 msgid "Clear"
 msgstr ""
 
+#: source/php/Frontend/I18n.php:76
+msgid "Re-index all \"%s\" documents? Existing entries will be re-processed and overwritten."
+msgstr ""
+
 #: source/php/Frontend/I18n.php:77
-msgid "Could not load facetable fields."
+msgid "Reindex"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:78
+msgid "Managed by an external strategy — use WP-CLI to reindex."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:81
+msgid "Could not load facetable fields."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:82
 msgid "— No facetable fields found —"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:79
+#: source/php/Frontend/I18n.php:83
 msgid "No facetable fields found in the collection schema. Make sure the collection exists and has fields with facet: true."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:80
+#: source/php/Frontend/I18n.php:84
 msgid "All facetable fields have already been added as facets."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:83
+#: source/php/Frontend/I18n.php:87
 #: views/admin/settings-tabs/facetting.php:30
 msgid "Field"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:84
+#: source/php/Frontend/I18n.php:88
 #: views/admin/settings-tabs/facetting.php:46
 msgid "Label"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:85
+#: source/php/Frontend/I18n.php:89
 #: views/admin/settings-tabs/facetting.php:51
 msgid "e.g. Category"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:86
+#: source/php/Frontend/I18n.php:90
 #: views/admin/settings-tabs/facetting.php:56
 msgid "Placeholder"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:87
+#: source/php/Frontend/I18n.php:91
 #: views/admin/settings-tabs/facetting.php:61
 msgid "e.g. All categories"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:88
+#: source/php/Frontend/I18n.php:92
 #: views/admin/settings-tabs/facetting.php:66
 msgid "Display as"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:89
+#: source/php/Frontend/I18n.php:93
 #: views/admin/settings-tabs/content.php:237
 #: views/admin/settings-tabs/facetting.php:73
 msgid "Dropdown"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:90
+#: source/php/Frontend/I18n.php:94
 #: views/admin/settings-tabs/facetting.php:74
 msgid "Button group"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:91
+#: source/php/Frontend/I18n.php:95
 #: views/admin/settings-tabs/facetting.php:80
 #: views/admin/settings-tabs/facetting.php:81
 msgid "Remove facet"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:94
+#: source/php/Frontend/I18n.php:98
 #: views/admin/settings-tabs/quick-search.php:98
 msgid "CSS selector"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:95
+#: source/php/Frontend/I18n.php:99
 #: views/admin/settings-tabs/quick-search.php:103
 msgid "e.g. .site-header input[type=search]"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:96
+#: source/php/Frontend/I18n.php:100
 #: views/admin/settings-tabs/quick-search.php:122
 #: views/admin/settings-tabs/quick-search.php:123
 msgid "Remove selector"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:97
+#: source/php/Frontend/I18n.php:101
 #: views/admin/settings-tabs/quick-search.php:109
 msgid "Placement"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:98
+#: source/php/Frontend/I18n.php:102
 #: views/admin/settings-tabs/quick-search.php:115
 msgid "Default (body)"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:99
+#: source/php/Frontend/I18n.php:103
 #: views/admin/settings-tabs/quick-search.php:116
 msgid "Sibling"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:100
+#: source/php/Frontend/I18n.php:104
 #: views/admin/settings-tabs/quick-search.php:134
 msgid "No selectors configured yet. Click \"Add selector\" to get started."
 msgstr ""
@@ -509,98 +536,119 @@ msgstr ""
 msgid "Settings sections"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:15
+#: views/admin/settings-tabs/connection.php:23
 msgid "Server"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:16
+#: views/admin/settings-tabs/connection.php:24
 msgid "Point the plugin to your Typesense instance. You can self-host Typesense or use Typesense Cloud at cloud.typesense.org."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:24
+#: views/admin/settings-tabs/connection.php:28
+msgid "One or more connection settings are defined in the plugin's .env file. Those fields are read-only and cannot be changed here. See the plugin README for details."
+msgstr ""
+
+#. translators: %s is a link to the plugin README
+#: views/admin/settings-tabs/connection.php:36
+msgid "Connection settings can also be defined using environment variables in a .env file inside the plugin directory. %s"
+msgstr ""
+
+#: views/admin/settings-tabs/connection.php:37
+msgid "See README for details."
+msgstr ""
+
+#: views/admin/settings-tabs/connection.php:50
 msgid "Host"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:39
+#: views/admin/settings-tabs/connection.php:66
 msgid "The full URL to your Typesense server, including protocol and port if needed (e.g. https://search.example.com:8108)."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:47
+#: views/admin/settings-tabs/connection.php:70
+#: views/admin/settings-tabs/connection.php:98
+#: views/admin/settings-tabs/connection.php:127
+#: views/admin/settings-tabs/connection.php:217
+#: views/admin/settings-tabs/connection.php:252
+msgid "Set via .env — read only."
+msgstr ""
+
+#: views/admin/settings-tabs/connection.php:79
 msgid "Frontend host (optional)"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:61
+#: views/admin/settings-tabs/connection.php:94
 msgid "Optional host used by browsers to reach Typesense. Useful when you expose Typesense through a proxy or different public host than the server-side host."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:69
+#: views/admin/settings-tabs/connection.php:107
 msgid "Collection name"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:84
+#: views/admin/settings-tabs/connection.php:123
 msgid "The name of the Typesense collection where content will be indexed. Use lowercase letters, numbers, and hyphens only."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:91
+#: views/admin/settings-tabs/connection.php:135
 msgid "Connection"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:97
+#: views/admin/settings-tabs/connection.php:141
 msgid "Test connection and check collection"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:101
+#: views/admin/settings-tabs/connection.php:145
 msgid "Verify that the host is reachable, the Admin API key is accepted and the collection exists."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:112
-#: views/admin/settings-tabs/connection.php:118
+#: views/admin/settings-tabs/connection.php:156
+#: views/admin/settings-tabs/connection.php:162
 #: views/admin/settings-tabs/status.php:48
 msgid "Create collection"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:127
+#: views/admin/settings-tabs/connection.php:171
 msgid "The collection does not yet exist in Typesense."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:128
+#: views/admin/settings-tabs/connection.php:172
 msgid "Click the button to create it before indexing."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:138
+#: views/admin/settings-tabs/connection.php:182
 msgid "API Keys"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:139
+#: views/admin/settings-tabs/connection.php:183
 msgid "Keep your admin key secret — it grants full access to your cluster. The search key is safe to expose in your front-end JavaScript."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:147
+#: views/admin/settings-tabs/connection.php:191
 msgid "Admin API key"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:162
-#: views/admin/settings-tabs/connection.php:191
+#: views/admin/settings-tabs/connection.php:207
+#: views/admin/settings-tabs/connection.php:242
 msgid "Toggle key visibility"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:168
+#: views/admin/settings-tabs/connection.php:213
 msgid "Used server-side for indexing operations. Never expose this key publicly."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:176
+#: views/admin/settings-tabs/connection.php:226
 msgid "Search API key"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:197
+#: views/admin/settings-tabs/connection.php:248
 msgid "A search-only API key used in your front-end JavaScript. This key has read-only access and is safe to include in public code."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:204
+#: views/admin/settings-tabs/connection.php:260
 msgid "Generate search key"
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:218
+#: views/admin/settings-tabs/connection.php:274
 #: views/admin/settings-tabs/content.php:331
 #: views/admin/settings-tabs/facetting.php:105
 #: views/admin/settings-tabs/quick-search.php:146
@@ -775,32 +823,32 @@ msgstr ""
 msgid "Add selector"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:11
+#: views/admin/settings-tabs/statistics.php:12
 msgid "Index overview"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:12
-msgid "Live snapshot of what is currently stored in your Typesense collection. Use the clear buttons to remove all documents of a specific post type from the index."
+#: views/admin/settings-tabs/statistics.php:13
+msgid "Live snapshot of what is currently stored in your Typesense collection. Use the clear buttons to remove all documents of a specific post type, or the reindex buttons to re-process and overwrite them."
 msgstr ""
 
 #: views/admin/settings-tabs/statistics.php:18
+msgid "Refresh"
+msgstr ""
+
+#: views/admin/settings-tabs/statistics.php:25
 msgid "Loading statistics…"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:34
+#: views/admin/settings-tabs/statistics.php:41
 msgid "total documents"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:38
+#: views/admin/settings-tabs/statistics.php:45
 msgid "post types indexed"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:42
+#: views/admin/settings-tabs/statistics.php:49
 msgid "collection"
-msgstr ""
-
-#: views/admin/settings-tabs/statistics.php:69
-msgid "Refresh"
 msgstr ""
 
 #: views/admin/settings-tabs/status.php:11

@@ -282,21 +282,45 @@ wp typesense clear --post-type=page
 # Remove every document from the collection regardless of settings
 wp typesense clear --post-type=all --yes
 
-# Clear posts and PDF documents
+# Clear posts and PDF documents (together)
 wp typesense clear --include-pdf --yes
 
-# Clear posts and external strategy documents
+# Clear posts and external strategy documents (together)
 wp typesense clear --include-external --yes
+
+# Clear ONLY PDF attachments — no post types, no external strategies
+wp typesense clear --only-pdf --yes
+
+# Clear ONLY external strategy documents (all registered strategies)
+wp typesense clear --only-external --yes
+
+# Clear ONLY a single external strategy's documents
+wp typesense clear --only-external=pitea-eservice --yes
 ```
 
-| Flag                  | Description                                                                                                                                |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--post-type=<types>` | Comma-separated post-type slugs to clear. Defaults to all types enabled in settings. Pass `all` to remove every document in the collection |
-| `--dry-run`           | Count matching documents and print a summary without deleting anything                                                                     |
-| `--include-pdf`       | Also clear PDF attachment documents (`type=attachment`) from the index                                                                     |
-| `--include-external`  | Also clear all documents belonging to registered external strategies (ignored when `--post-type=all`)                                      |
-| `--yes`               | Skip the confirmation prompt                                                                                                               |
-| `--sleep=<ms>`        | Sleep between post-type operations in milliseconds                                                                                         |
+| Flag                             | Description                                                                                                                                                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--post-type=<types>`            | Comma-separated post-type slugs to clear. Defaults to all types enabled in settings. Pass `all` to remove every document in the collection                                                                                                        |
+| `--dry-run`                      | Count matching documents and print a summary without deleting anything                                                                                                                                                                            |
+| `--include-pdf`                  | Also clear PDF attachment documents (`type=attachment`) alongside post types                                                                                                                                                                      |
+| `--include-external`             | Also clear all documents belonging to registered external strategies alongside post types (ignored when `--post-type=all`)                                                                                                                        |
+| `--only-pdf`                     | Clear **only** PDF attachment documents; skip the post-type loop entirely. Cannot be combined with `--post-type` or `--only-external`                                                                                                             |
+| `--only-external[=<identifier>]` | Clear **only** external strategy documents. Without a value, all strategies are targeted. With a value (e.g. `--only-external=pitea-eservice`), only that strategy's documents are removed. Cannot be combined with `--post-type` or `--only-pdf` |
+| `--yes`                          | Skip the confirmation prompt                                                                                                                                                                                                                      |
+| `--sleep=<ms>`                   | Sleep between post-type operations in milliseconds                                                                                                                                                                                                |
+
+---
+
+### `wp typesense list-external`
+
+Lists all external indexing strategies registered by third-party plugins via the `Municipio/TypesenseSearch/RegisterStrategies` action. Use the printed identifiers with `sync-external` or `clear --only-external`.
+
+```bash
+# List all registered external strategies
+wp typesense list-external
+```
+
+> This command takes no flags.
 
 ---
 
