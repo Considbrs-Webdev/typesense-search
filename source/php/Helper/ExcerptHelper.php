@@ -30,7 +30,7 @@ class ExcerptHelper
 
     /**
      * Filter hook to modify the excerpt max length.
-     * Receives: (int $length, \WP_Post $post)
+     * Receives: (int $length, ?\WP_Post $post)
      */
     public const FILTER_LENGTH = 'Municipio/TypesenseSearch/DocumentBuilder/excerpt_length';
 
@@ -41,7 +41,7 @@ class ExcerptHelper
 
     /**
      * Filter hook to modify the truncation string.
-     * Receives: (string $truncator, \WP_Post $post)
+     * Receives: (string $truncator, ?\WP_Post $post)
      */
     public const FILTER_TRUNCATOR = 'Municipio/TypesenseSearch/DocumentBuilder/excerpt_truncator';
 
@@ -54,13 +54,14 @@ class ExcerptHelper
      *  3. Trim to the last word boundary within the limit and append the
      *     truncation marker.
      *
-     * @param string   $text Raw text (may contain HTML, will be stripped).
-     * @param \WP_Post $post The source post — passed to the length and
-     *                       truncator filters so callers can adjust values
-     *                       per post type, taxonomy, etc.
+     * @param string        $text Raw text (may contain HTML, will be stripped).
+     * @param \WP_Post|null $post Optional source post — passed to the length and
+     *                            truncator filters so callers can adjust values
+     *                            per post type, taxonomy, etc. Non-post callers
+     *                            (e.g. external importer strategies) may omit this.
      * @return string
      */
-    public static function build(string $text, \WP_Post $post): string
+    public static function build(string $text, ?\WP_Post $post = null): string
     {
         $clean = wp_strip_all_tags($text);
         if ($clean === '') {
