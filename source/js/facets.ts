@@ -35,7 +35,14 @@ function renderDropdown(
 
   programmaticUpdates.add(selectEl);
 
-  selectEl.innerHTML = [...ghosts, ...counts]
+  const selectItems = [...ghosts, ...counts].sort((a, b) =>
+    a.value.localeCompare(b.value, undefined, {
+      sensitivity: "base",
+      numeric: true,
+    }),
+  );
+
+  selectEl.innerHTML = selectItems
     .map(
       ({ value, count }) =>
         `<wa-option value="${escapeAttr(value)}">${escapeText(value)}${count > 0 ? ` (${count})` : ""}</wa-option>`,
@@ -62,7 +69,14 @@ function renderButtonGroup(
     .filter((v) => !countValues.has(v))
     .map((v) => ({ value: v, count: 0 }));
 
-  groupEl.innerHTML = [...ghosts, ...counts]
+  const buttonItems = [...ghosts, ...counts].sort((a, b) =>
+    a.value.localeCompare(b.value, undefined, {
+      sensitivity: "base",
+      numeric: true,
+    }),
+  );
+
+  groupEl.innerHTML = buttonItems
     .map(({ value, count }) => {
       const active = selectedSet.has(value);
       return `<wa-button
@@ -106,7 +120,7 @@ function buildFacetElement(parentEl: HTMLElement, facet: FacetConfig): Element {
     select.setAttribute("label", facet.label);
     select.setAttribute("placeholder", facet.placeholder);
     select.setAttribute("with-clear", "");
-    select.setAttribute("max-options-visible", "2");
+    select.setAttribute("max-options-visible", "1");
     select.setAttribute("data-facet-field", facet.field);
 
     parentEl.appendChild(select);
