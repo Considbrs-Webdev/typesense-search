@@ -62,6 +62,9 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
     const date = String(d.post_date_formatted ?? "");
     return [type, date].filter(Boolean).join(" · ");
   },
+  SEARCH_HIT_VALID_THROUGH: (d) => {
+    return String(d.last_application_date ?? "");
+  },
   SEARCH_HIT_PATH: (d) => {
     const raw = String(d.path ?? "");
     if (!raw) return "";

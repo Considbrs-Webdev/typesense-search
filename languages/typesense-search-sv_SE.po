@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-03-06T10:38:09+00:00\n"
-"PO-Revision-Date: 2026-03-06 11:39+0100\n"
+"POT-Creation-Date: 2026-03-06T11:06:42+00:00\n"
+"PO-Revision-Date: 2026-03-06 12:07+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -502,10 +502,6 @@ msgstr ""
 "Inga selektorer är konfigurerade ännu. Klicka på “Lägg till selektor” för "
 "att komma igång."
 
-#: source/php/Indexing/Strategies/EServiceIndexingStrategy.php:155
-msgid "E-service"
-msgstr "E-tjänst"
-
 #: source/php/Indexing/Strategies/PdfIndexingStrategy.php:120
 msgid "PDF document"
 msgstr "PDF-dokument"
@@ -986,7 +982,10 @@ msgstr "Kör om kontroller"
 
 #: views/templates/hits/hit-jobposting.blade.php:23
 msgid "Valid through"
-msgstr ""
+msgstr "Sista ansökningsdag"
+
+#~ msgid "E-service"
+#~ msgstr "E-tjänst"
 
 #~ msgid "Search Results"
 #~ msgstr "Sökresultat"

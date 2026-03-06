@@ -62,6 +62,10 @@ class IndexCommand
      *   for visually verifying the progress bar during development/testing.
      *   Example: --sleep=200
      *
+     * [--include-external]
+     * : After indexing posts (and optionally PDFs), also run all registered
+     *   external strategies. Equivalent to appending `wp typesense sync-external`.
+     *
      * ## EXAMPLES
      *
      *   wp typesense index
@@ -70,6 +74,7 @@ class IndexCommand
      *   wp typesense index --batch-size=50 --yes
      *   wp typesense index --include-pdf
      *   wp typesense index --dry-run --sleep=200
+     *   wp typesense index --include-external --yes
      *
      * @subcommand index
      * @when after_wp_load
@@ -79,12 +84,13 @@ class IndexCommand
      */
     public function index(array $args, array $assocArgs): void
     {
-        $isDryRun   = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
-        $rawBatch   = \WP_CLI\Utils\get_flag_value($assocArgs, 'batch-size', null);
-        $batchSize  = $rawBatch === null ? -1 : max(1, (int) $rawBatch);
-        $skipYes    = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
-        $sleepUs    = (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'sleep', 0) * 1000;
-        $includePdf = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
+        $isDryRun        = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
+        $rawBatch        = \WP_CLI\Utils\get_flag_value($assocArgs, 'batch-size', null);
+        $batchSize       = $rawBatch === null ? -1 : max(1, (int) $rawBatch);
+        $skipYes         = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
+        $sleepUs         = (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'sleep', 0) * 1000;
+        $includePdf      = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
+        $includeExternal = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-external', false);
 
         // ── Resolve post types ──────────────────────────────────────────────
         $enabledTypes   = $this->resolvePostTypes($assocArgs);
@@ -104,7 +110,12 @@ class IndexCommand
         }
 
         // ── Confirmation ────────────────────────────────────────────────────
-        $indexScope = sprintf('%s%s', implode(', ', $enabledTypes), $includePdf ? ' and PDF attachments' : '');
+        $indexScope = sprintf(
+            '%s%s%s',
+            implode(', ', $enabledTypes),
+            $includePdf ? ' and PDF attachments' : '',
+            $includeExternal ? ' and external strategies' : ''
+        );
 
         if (!$isDryRun && !$skipYes) {
             \WP_CLI::confirm(
@@ -337,6 +348,15 @@ class IndexCommand
             }
         }
 
+        // ── External strategies ────────────────────────────────────────────────
+        if ($includeExternal) {
+            \WP_CLI::log('');
+            \WP_CLI::log('Running external strategies…');
+            [$extIndexed, $extFailed] = $this->runExternalSync($isDryRun);
+            $totalIndexed += $extIndexed;
+            $totalFailed  += $extFailed;
+        }
+
         // ── Summary ─────────────────────────────────────────────────────────
         \WP_CLI::log('');
         $dryLabel = $isDryRun ? ' (dry run)' : '';
@@ -407,6 +427,10 @@ class IndexCommand
      * : Sleep for the given number of milliseconds after each post during
      *   re-indexing. Useful for pacing during development/testing.
      *
+     * [--include-external]
+     * : After re-indexing posts (and optionally PDFs), also run all registered
+     *   external strategies. Forwarded transparently to the internal index step.
+     *
      * ## EXAMPLES
      *
      *   # Full rebuild: drop schema, recreate, re-index everything.
@@ -432,10 +456,11 @@ class IndexCommand
      */
     public function rebuild(array $args, array $assocArgs): void
     {
-        $isDryRun   = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
-        $skipIndex  = \WP_CLI\Utils\get_flag_value($assocArgs, 'skip-index', false);
-        $skipYes    = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
-        $includePdf = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
+        $isDryRun        = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
+        $skipIndex       = \WP_CLI\Utils\get_flag_value($assocArgs, 'skip-index', false);
+        $skipYes         = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
+        $includePdf      = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
+        $includeExternal = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-external', false);
 
         // ── Client + collection name ─────────────────────────────────────────
         $client         = ClientFactory::fromOptions();
@@ -487,10 +512,11 @@ class IndexCommand
                         $total += (int) wp_count_posts($pt)->publish;
                     }
                     \WP_CLI::log(sprintf(
-                        '  Would re-index %d published post(s) across type(s): %s%s.',
+                        '  Would re-index %d published post(s) across type(s): %s%s%s.',
                         $total,
                         implode(', ', $enabledTypes),
-                        $includePdf ? ' and PDF attachments' : ''
+                        $includePdf ? ' and PDF attachments' : '',
+                        $includeExternal ? ' and external strategies' : ''
                     ));
                 }
             } else {
@@ -544,6 +570,9 @@ class IndexCommand
         if ($includePdf) {
             $forwardArgs['include-pdf'] = true;
         }
+        if ($includeExternal) {
+            $forwardArgs['include-external'] = true;
+        }
         $this->index($args, $forwardArgs);
     }
 
@@ -576,6 +605,11 @@ class IndexCommand
  * [--include-pdf]
      * : Also clear PDF attachment documents (type=attachment) from the index.
      *
+     * [--include-external]
+     * : Also clear all documents belonging to registered external strategies,
+     *   matched by their type identifier. Ignored when --post-type=all is used
+     *   since that already removes every document.
+     *
      * [--sleep=<milliseconds>]
      * : Sleep for the given number of milliseconds between post-type operations.
      *   Useful when verifying output during development.
@@ -602,12 +636,13 @@ class IndexCommand
      */
     public function clear(array $args, array $assocArgs): void
     {
-        $isDryRun   = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
-        $skipYes    = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
-        $sleepUs    = (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'sleep', 0) * 1000;
-        $rawType    = \WP_CLI\Utils\get_flag_value($assocArgs, 'post-type', null);
-        $clearAll   = $rawType === 'all';
-        $includePdf = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
+        $isDryRun        = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
+        $skipYes         = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
+        $sleepUs         = (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'sleep', 0) * 1000;
+        $rawType         = \WP_CLI\Utils\get_flag_value($assocArgs, 'post-type', null);
+        $clearAll        = $rawType === 'all';
+        $includePdf      = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
+        $includeExternal = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-external', false);
 
         // ── Client + collection name ─────────────────────────────────────────
         $client         = ClientFactory::fromOptions();
@@ -636,15 +671,17 @@ class IndexCommand
         }
 
         // ── Confirmation ─────────────────────────────────────────────────────
+        $externalSuffix = $includeExternal && !$clearAll ? ' and external strategy documents' : '';
         if ($clearAll) {
             $scopeLabel = $includePdf
                 ? 'ALL documents (including PDF attachments)'
                 : 'ALL documents';
         } else {
             $scopeLabel = sprintf(
-                'documents for post type(s): %s%s',
+                'documents for post type(s): %s%s%s',
                 implode(', ', $postTypes),
-                $includePdf ? ' and PDF attachments' : ''
+                $includePdf ? ' and PDF attachments' : '',
+                $externalSuffix
             );
         }
 
@@ -750,6 +787,69 @@ class IndexCommand
             }
         }
 
+        // ── External strategies ────────────────────────────────────────────────
+        if ($includeExternal && !$clearAll) {
+            $extStrategies = App::getRegistry()->allExternal();
+
+            if (empty($extStrategies)) {
+                \WP_CLI::log('  No external strategies registered — skipping.');
+            } else {
+                foreach ($extStrategies as $extId => $strategy) {
+                    $extFilter = sprintf('type:=%s', $strategy->getIdentifier());
+
+                    try {
+                        $extSearch = $client->collections[$collectionName]->documents->search([
+                            'q'              => '*',
+                            'query_by'       => 'title',
+                            'filter_by'      => $extFilter,
+                            'per_page'       => 0,
+                            'include_fields' => 'id',
+                        ]);
+                        $extCount = (int) ($extSearch['found'] ?? 0);
+                    } catch (\Exception $e) {
+                        \WP_CLI::warning(sprintf(
+                            'Could not count documents for external strategy "%s": %s',
+                            $extId,
+                            $e->getMessage()
+                        ));
+                        continue;
+                    }
+
+                    if ($isDryRun) {
+                        \WP_CLI::log(sprintf(
+                            '  Would delete %d document(s) for external strategy "%s".',
+                            $extCount,
+                            $extId
+                        ));
+                    } elseif ($extCount === 0) {
+                        \WP_CLI::log(sprintf(
+                            '  No documents found for external strategy "%s" — skipping.',
+                            $extId
+                        ));
+                    } else {
+                        try {
+                            $extResult     = $client->collections[$collectionName]->documents->delete([
+                                'filter_by' => $extFilter,
+                            ]);
+                            $extDeleted    = (int) ($extResult['num_deleted'] ?? 0);
+                            $totalDeleted += $extDeleted;
+                            \WP_CLI::log(sprintf(
+                                '  Deleted %d document(s) for external strategy "%s".',
+                                $extDeleted,
+                                $extId
+                            ));
+                        } catch (\Exception $e) {
+                            \WP_CLI::warning(sprintf(
+                                'Failed to clear external strategy "%s": %s',
+                                $extId,
+                                $e->getMessage()
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+
         // ── Summary ──────────────────────────────────────────────────────────
         \WP_CLI::log('');
         if ($isDryRun) {
@@ -764,8 +864,184 @@ class IndexCommand
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // sync-external command
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Sync one or all external indexing strategies (e.g. e-services from an API).
+     *
+     * External strategies are registered by third-party plugins via the
+     * 'Municipio/TypesenseSearch/RegisterStrategies' action and extend
+     * AbstractExternalIndexingStrategy. They pull content from outside
+     * WordPress and have no post lifecycle hooks, so syncing must be triggered
+     * explicitly (this command) or via WP-Cron.
+     *
+     * ## OPTIONS
+     *
+     * [<identifier>]
+     * : Identifier of a single strategy to sync (e.g. "pitea-eservice").
+     *   Omit to sync all registered external strategies.
+     *
+     * [--dry-run]
+     * : List registered external strategies and the source URL each would
+     *   hit, without actually fetching or upserting anything.
+     *
+     * [--yes]
+     * : Skip the confirmation prompt.
+     *
+     * ## EXAMPLES
+     *
+     *   # Sync all registered external strategies.
+     *   wp typesense sync-external
+     *
+     *   # Sync only the Piteå e-services strategy.
+     *   wp typesense sync-external pitea-eservice
+     *
+     *   # Preview without fetching or writing anything.
+     *   wp typesense sync-external --dry-run
+     *
+     * @subcommand sync-external
+     * @when after_wp_load
+     *
+     * @param array<int,string>    $args       Positional arguments (0 = optional identifier).
+     * @param array<string,string> $assocArgs  Named arguments.
+     */
+    public function syncExternal(array $args, array $assocArgs): void
+    {
+        $isDryRun  = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
+        $skipYes   = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
+        $targetId  = $args[0] ?? null;
+
+        $registry = App::getRegistry();
+
+        $strategies = $registry->allExternal();
+
+        if (empty($strategies)) {
+            \WP_CLI::warning(
+                'No external strategies are registered. ' .
+                'Third-party plugins register strategies via the ' .
+                '\'Municipio/TypesenseSearch/RegisterStrategies\' action.'
+            );
+            return;
+        }
+
+        // Filter to the requested identifier when one is given.
+        if ($targetId !== null) {
+            if (!isset($strategies[$targetId])) {
+                $available = implode(', ', array_keys($strategies));
+                \WP_CLI::error(sprintf(
+                    'Unknown external strategy "%s". Available: %s',
+                    $targetId,
+                    $available
+                ));
+                return;
+            }
+
+            $strategies = [$targetId => $strategies[$targetId]];
+        }
+
+        // ── Dry-run ──────────────────────────────────────────────────────────
+        if ($isDryRun) {
+            \WP_CLI::warning('DRY RUN — no documents will be fetched or written.');
+            \WP_CLI::log('');
+            \WP_CLI::log(sprintf('%d external strategy/strategies registered:', count($strategies)));
+
+            foreach ($strategies as $id => $strategy) {
+                \WP_CLI::log(sprintf('  • %s', $id));
+            }
+
+            \WP_CLI::log('');
+            \WP_CLI::success('Dry run complete. Run without --dry-run to sync.');
+            return;
+        }
+
+        // ── Confirmation ─────────────────────────────────────────────────────
+        if (!$skipYes) {
+            \WP_CLI::confirm(sprintf(
+                'This will sync %d external strategy/strategies: %s. Continue?',
+                count($strategies),
+                implode(', ', array_keys($strategies))
+            ));
+        }
+
+        // ── Run each strategy ─────────────────────────────────────────────────
+        $totalIndexed = 0;
+        $totalFailed  = 0;
+
+        foreach ($strategies as $id => $strategy) {
+            \WP_CLI::log(sprintf('Syncing "%s"…', $id));
+
+            try {
+                $count = $strategy->syncAll();
+                \WP_CLI::log(sprintf('  ✓ %d document(s) indexed.', $count));
+                $totalIndexed += $count;
+            } catch (\Exception $e) {
+                \WP_CLI::warning(sprintf('  ✗ "%s" failed: %s', $id, $e->getMessage()));
+                $totalFailed++;
+            }
+        }
+
+        \WP_CLI::log('');
+
+        if ($totalFailed === 0) {
+            \WP_CLI::success(sprintf(
+                'Done. %d document(s) indexed across %d strategy/strategies.',
+                $totalIndexed,
+                count($strategies)
+            ));
+        } else {
+            \WP_CLI::warning(sprintf(
+                'Finished with errors. %d indexed, %d strategy/strategies failed.',
+                $totalIndexed,
+                $totalFailed
+            ));
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Run all registered external strategies and return [totalIndexed, totalFailed].
+     *
+     * Used by commands that support --include-external. Prints per-strategy
+     * log lines but does not print a final summary (the caller does that).
+     *
+     * @return array{int, int}
+     */
+    private function runExternalSync(bool $isDryRun): array
+    {
+        $strategies = App::getRegistry()->allExternal();
+
+        if (empty($strategies)) {
+            \WP_CLI::log('  No external strategies registered — skipping.');
+            return [0, 0];
+        }
+
+        $indexed = 0;
+        $failed  = 0;
+
+        foreach ($strategies as $id => $strategy) {
+            \WP_CLI::log(sprintf('  Syncing "%s"…', $id));
+
+            if ($isDryRun) {
+                \WP_CLI::log(sprintf('    [dry run] Would sync external strategy "%s".', $id));
+                continue;
+            }
+
+            try {
+                $count    = $strategy->syncAll();
+                $indexed += $count;
+                \WP_CLI::log(sprintf('    ✓ %d document(s) indexed.', $count));
+            } catch (\Exception $e) {
+                $failed++;
+                \WP_CLI::warning(sprintf('    ✗ "%s" failed: %s', $id, $e->getMessage()));
+            }
+        }
+
+        return [$indexed, $failed];
+    }
 
     /**
      * Resolve which post types to index.
