@@ -76,6 +76,7 @@ class I18n
             'confirmReindexType'   => __('Re-index all "%s" documents? Existing entries will be re-processed and overwritten.', 'typesense-search'),
             'reindexBtn'           => __('Reindex', 'typesense-search'),
             'reindexExternalTitle' => __('Managed by an external strategy — use WP-CLI to reindex.', 'typesense-search'),
+            'externalBadge'        => __('External', 'typesense-search'),
 
             // Facetting – notices
             'couldNotLoadFields'   => __('Could not load facetable fields.', 'typesense-search'),
