@@ -118,8 +118,8 @@ export async function runSearch(
           .documents()
           .search({
             q,
-            query_by: "title,excerpt,content,extra_terms",
-            infix: "always,off,off,always",
+            query_by: "title,excerpt,content,extra_terms,type_name",
+            infix: "always,off,off,always,off",
             highlight_full_fields: "title,excerpt,content",
             highlight_affix_num_tokens: config.highlightAffixNumTokens ?? 15,
             per_page: config.hitsPerPage,

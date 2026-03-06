@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Admin;
 
 use TypesenseSearch\Helper\CacheBust;
+use TypesenseSearch\Helper\PdfToText;
 use TypesenseSearch\Frontend\I18n;
 
 /**
@@ -39,6 +40,7 @@ class Settings
     public const OPTION_QUICK_SEARCH_ENABLED        = 'typesense_quick_search_enabled';
     public const OPTION_QUICK_SEARCH_SELECTORS      = 'typesense_quick_search_selectors';
     public const OPTION_QUICK_SEARCH_HITS_PER_PAGE  = 'typesense_quick_search_hits_per_page';
+    public const OPTION_INDEX_PDF                   = 'typesense_search_index_pdf';
 
     private static function getTabs(): array
     {
@@ -141,6 +143,12 @@ class Settings
             },
             'default'           => 'radio',
         ]);
+        
+        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_INDEX_PDF, [
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 0,
+        ]);
 
         register_setting(self::OPTION_GROUP_FACETS, self::OPTION_FACETS, [
             'type'              => 'array',
@@ -242,6 +250,7 @@ class Settings
         $tabs             = self::getTabs();
         $postTypes        = self::getIndexablePostTypes();
         $enabledPostTypes = (array) get_option(self::OPTION_POST_TYPES, []);
+        $pdfToTextAvailable = self::isPdfToTextAvailable();
         $facets                = (array) get_option(self::OPTION_FACETS, []);
         $hitsPerPage           = (int) get_option(self::OPTION_HITS_PER_PAGE, 10);
         $quickSearchEnabled       = (int) get_option(self::OPTION_QUICK_SEARCH_ENABLED, 0);
@@ -325,6 +334,17 @@ class Settings
         }
 
         return $result;
+    }
+
+    /**
+     * Check whether the pdftotext binary is available on the server.
+     *
+     * Delegates to {@see PdfToText::isAvailable()} — use that class directly
+     * when you also need the binary path or text extraction.
+     */
+    public static function isPdfToTextAvailable(): bool
+    {
+        return PdfToText::isAvailable();
     }
 
     /**

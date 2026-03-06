@@ -3,7 +3,8 @@
 namespace TypesenseSearch\CLI;
 
 use TypesenseSearch\Admin\Settings;
-use TypesenseSearch\Indexing\Indexer;
+use TypesenseSearch\App;
+use TypesenseSearch\Helper\PdfToText;
 use TypesenseSearch\Typesense\ClientFactory;
 
 /**
@@ -45,11 +46,16 @@ class IndexCommand
      *
      * [--skip-excluded]
      * : Also skip posts that have the "exclude from search" meta flag set
-     *   (this is already enforced by Indexer::shouldIndex — use this flag to
-     *   make it explicit in the output).
+     *   (this is already enforced by the strategy's shouldIndex() — use this
+     *   flag to make it explicit in the output).
      *
      * [--yes]
      * : Skip the confirmation prompt.
+     *
+     * [--include-pdf]
+     * : Also index PDF files from the media library using pdftotext. Requires
+     *   pdftotext to be available on the server. Operates independently of
+     *   the "Index PDF files" toggle on the settings page.
      *
      * [--sleep=<milliseconds>]
      * : Sleep for the given number of milliseconds after each post. Useful
@@ -62,6 +68,7 @@ class IndexCommand
      *   wp typesense index --dry-run
      *   wp typesense index --post-type=post,page
      *   wp typesense index --batch-size=50 --yes
+     *   wp typesense index --include-pdf
      *   wp typesense index --dry-run --sleep=200
      *
      * @subcommand index
@@ -77,6 +84,7 @@ class IndexCommand
         $batchSize  = $rawBatch === null ? -1 : max(1, (int) $rawBatch);
         $skipYes    = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
         $sleepUs    = (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'sleep', 0) * 1000;
+        $includePdf = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
 
         // ── Resolve post types ──────────────────────────────────────────────
         $enabledTypes   = $this->resolvePostTypes($assocArgs);
@@ -96,11 +104,13 @@ class IndexCommand
         }
 
         // ── Confirmation ────────────────────────────────────────────────────
+        $indexScope = sprintf('%s%s', implode(', ', $enabledTypes), $includePdf ? ' and PDF attachments' : '');
+
         if (!$isDryRun && !$skipYes) {
             \WP_CLI::confirm(
                 sprintf(
                     'This will index posts of type(s): %s. Continue?',
-                    implode(', ', $enabledTypes)
+                    $indexScope
                 )
             );
         }
@@ -180,7 +190,8 @@ class IndexCommand
                 $posts = get_posts($queryArgs);
 
                 foreach ($posts as $post) {
-                    if (!Indexer::shouldIndex($post)) {
+                    $strategy = App::getRegistry()->resolve($post);
+                    if (!$strategy || !$strategy->shouldIndex($post)) {
                         $skipped++;
                         $progress->tick();
                         if ($sleepUs > 0) {
@@ -198,7 +209,7 @@ class IndexCommand
                         continue;
                     }
 
-                    $result = Indexer::index($post);
+                    $result = $strategy->index($post);
 
                     if ($result) {
                         $indexed++;
@@ -233,6 +244,97 @@ class IndexCommand
             $totalIndexed += $indexed;
             $totalSkipped += $skipped;
             $totalFailed  += $failed;
+        }
+
+        // ── PDF attachments ──────────────────────────────────────────────────
+        if ($includePdf) {
+            if (!PdfToText::isAvailable()) {
+                \WP_CLI::warning('--include-pdf skipped: pdftotext binary is not available on this server.');
+            } else {
+                $pdfQueryArgs = [
+                    'post_type'      => 'attachment',
+                    'post_status'    => 'inherit',
+                    'post_mime_type' => 'application/pdf',
+                    'posts_per_page' => 1,
+                    'no_found_rows'  => false,
+                    'fields'         => 'ids',
+                ];
+
+                $countQuery = new \WP_Query($pdfQueryArgs);
+                $pdfTotal   = $countQuery->found_posts;
+
+                if ($pdfTotal === 0) {
+                    \WP_CLI::log('  Skipping PDF attachments — none found in media library.');
+                } else {
+                    \WP_CLI::log(sprintf('Indexing PDF attachments (%d file(s))', $pdfTotal));
+                    $progress = \WP_CLI\Utils\make_progress_bar('  [pdf]', $pdfTotal);
+
+                    $pdfIndexed = 0;
+                    $pdfSkipped = 0;
+                    $pdfFailed  = 0;
+                    $pdfOffset  = 0;
+
+                    $pdfQueryArgs['fields']         = '';
+                    $pdfQueryArgs['posts_per_page']  = $batchSize;
+
+                    $pdfStrategy = App::getRegistry()->get('pdf');
+
+                    do {
+                        if ($batchSize !== -1) {
+                            $pdfQueryArgs['offset'] = $pdfOffset;
+                        }
+
+                        $pdfs = get_posts($pdfQueryArgs);
+
+                        foreach ($pdfs as $pdf) {
+                            if (!$pdfStrategy || $pdf->post_mime_type !== 'application/pdf') {
+                                $pdfSkipped++;
+                                $progress->tick();
+                                continue;
+                            }
+
+                            if ($isDryRun) {
+                                $pdfIndexed++;
+                                $progress->tick();
+                                continue;
+                            }
+
+                            $result = $pdfStrategy->index($pdf);
+                            if ($result) {
+                                $pdfIndexed++;
+                            } else {
+                                $pdfFailed++;
+                                \WP_CLI::warning(sprintf(
+                                    '    Failed to index PDF attachment ID %d ("%s").',
+                                    $pdf->ID,
+                                    $pdf->post_title
+                                ));
+                            }
+
+                            $progress->tick();
+                            if ($sleepUs > 0) {
+                                usleep($sleepUs);
+                            }
+                            $this->freeMemory();
+                        }
+
+                        $pdfOffset += $batchSize;
+                    } while ($batchSize !== -1 && count($pdfs) === $batchSize);
+
+                    $progress->finish();
+
+                    \WP_CLI::log(sprintf(
+                        '  Done: %d indexed, %d skipped, %d failed.',
+                        $pdfIndexed,
+                        $pdfSkipped,
+                        $pdfFailed
+                    ));
+
+                    $totalIndexed += $pdfIndexed;
+                    $totalSkipped += $pdfSkipped;
+                    $totalFailed  += $pdfFailed;
+                }
+            }
         }
 
         // ── Summary ─────────────────────────────────────────────────────────
@@ -295,6 +397,12 @@ class IndexCommand
      * [--yes]
      * : Skip the confirmation prompt.
      *
+     * [--include-pdf]
+     * : Also index PDF files from the media library using pdftotext after the
+     *   schema has been recreated. Requires pdftotext to be available on the
+     *   server. Operates independently of the "Index PDF files" toggle on the
+     *   settings page.
+     *
      * [--sleep=<milliseconds>]
      * : Sleep for the given number of milliseconds after each post during
      *   re-indexing. Useful for pacing during development/testing.
@@ -313,6 +421,9 @@ class IndexCommand
      *   # Rebuild and re-index only pages, skip confirmation.
      *   wp typesense rebuild --post-type=page --yes
      *
+     *   # Full rebuild including PDF attachments.
+     *   wp typesense rebuild --include-pdf --yes
+     *
      * @subcommand rebuild
      * @when after_wp_load
      *
@@ -321,9 +432,10 @@ class IndexCommand
      */
     public function rebuild(array $args, array $assocArgs): void
     {
-        $isDryRun  = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
-        $skipIndex = \WP_CLI\Utils\get_flag_value($assocArgs, 'skip-index', false);
-        $skipYes   = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
+        $isDryRun   = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
+        $skipIndex  = \WP_CLI\Utils\get_flag_value($assocArgs, 'skip-index', false);
+        $skipYes    = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
+        $includePdf = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
 
         // ── Client + collection name ─────────────────────────────────────────
         $client         = ClientFactory::fromOptions();
@@ -375,9 +487,10 @@ class IndexCommand
                         $total += (int) wp_count_posts($pt)->publish;
                     }
                     \WP_CLI::log(sprintf(
-                        '  Would re-index %d published post(s) across type(s): %s.',
+                        '  Would re-index %d published post(s) across type(s): %s%s.',
                         $total,
-                        implode(', ', $enabledTypes)
+                        implode(', ', $enabledTypes),
+                        $includePdf ? ' and PDF attachments' : ''
                     ));
                 }
             } else {
@@ -427,7 +540,11 @@ class IndexCommand
 
         \WP_CLI::log('');
         \WP_CLI::log('Starting re-indexing…');
-        $this->index($args, array_merge($assocArgs, ['yes' => true]));
+        $forwardArgs = array_merge($assocArgs, ['yes' => true]);
+        if ($includePdf) {
+            $forwardArgs['include-pdf'] = true;
+        }
+        $this->index($args, $forwardArgs);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -456,6 +573,9 @@ class IndexCommand
      * [--yes]
      * : Skip the confirmation prompt.
      *
+ * [--include-pdf]
+     * : Also clear PDF attachment documents (type=attachment) from the index.
+     *
      * [--sleep=<milliseconds>]
      * : Sleep for the given number of milliseconds between post-type operations.
      *   Useful when verifying output during development.
@@ -482,11 +602,12 @@ class IndexCommand
      */
     public function clear(array $args, array $assocArgs): void
     {
-        $isDryRun = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
-        $skipYes  = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
-        $sleepUs  = (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'sleep', 0) * 1000;
-        $rawType  = \WP_CLI\Utils\get_flag_value($assocArgs, 'post-type', null);
-        $clearAll = $rawType === 'all';
+        $isDryRun   = \WP_CLI\Utils\get_flag_value($assocArgs, 'dry-run', false);
+        $skipYes    = \WP_CLI\Utils\get_flag_value($assocArgs, 'yes', false);
+        $sleepUs    = (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'sleep', 0) * 1000;
+        $rawType    = \WP_CLI\Utils\get_flag_value($assocArgs, 'post-type', null);
+        $clearAll   = $rawType === 'all';
+        $includePdf = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
 
         // ── Client + collection name ─────────────────────────────────────────
         $client         = ClientFactory::fromOptions();
@@ -515,9 +636,17 @@ class IndexCommand
         }
 
         // ── Confirmation ─────────────────────────────────────────────────────
-        $scopeLabel = $clearAll
-            ? 'ALL documents'
-            : sprintf('documents for post type(s): %s', implode(', ', $postTypes));
+        if ($clearAll) {
+            $scopeLabel = $includePdf
+                ? 'ALL documents (including PDF attachments)'
+                : 'ALL documents';
+        } else {
+            $scopeLabel = sprintf(
+                'documents for post type(s): %s%s',
+                implode(', ', $postTypes),
+                $includePdf ? ' and PDF attachments' : ''
+            );
+        }
 
         if (!$isDryRun && !$skipYes) {
             \WP_CLI::confirm(sprintf(
@@ -582,6 +711,42 @@ class IndexCommand
 
             if ($sleepUs > 0) {
                 usleep($sleepUs);
+            }
+        }
+
+        // ── PDF attachments ──────────────────────────────────────────────────
+        if ($includePdf && !$clearAll) {
+            $pdfFilterBy = 'type:=attachment';
+
+            try {
+                $search = $client->collections[$collectionName]->documents->search([
+                    'q'              => '*',
+                    'query_by'       => 'title',
+                    'filter_by'      => $pdfFilterBy,
+                    'per_page'       => 0,
+                    'include_fields' => 'id',
+                ]);
+                $pdfCount = (int) ($search['found'] ?? 0);
+            } catch (\Exception $e) {
+                \WP_CLI::warning(sprintf('Could not count PDF documents: %s', $e->getMessage()));
+                $pdfCount = 0;
+            }
+
+            if ($isDryRun) {
+                \WP_CLI::log(sprintf('  Would delete %d PDF document(s) (type=attachment).', $pdfCount));
+            } elseif ($pdfCount === 0) {
+                \WP_CLI::log('  No PDF documents found in index — skipping.');
+            } else {
+                try {
+                    $result = $client->collections[$collectionName]->documents->delete([
+                        'filter_by' => $pdfFilterBy,
+                    ]);
+                    $deleted       = (int) ($result['num_deleted'] ?? 0);
+                    $totalDeleted += $deleted;
+                    \WP_CLI::log(sprintf('  Deleted %d PDF document(s).', $deleted));
+                } catch (\Exception $e) {
+                    \WP_CLI::warning(sprintf('Failed to clear PDF documents: %s', $e->getMessage()));
+                }
             }
         }
 

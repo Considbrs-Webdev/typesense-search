@@ -1,11 +1,11 @@
 <?php
 
-namespace TypesenseSearch\Indexing\Adapters;
+namespace TypesenseSearch\Indexing\Enrichers;
 
 use TypesenseSearch\Indexing\DocumentBuilder;
 
 /**
- * Class ModularityAdapter
+ * Class ModularityEnricher
  *
  * Appends the rendered text content of Modularity modules to the `content`
  * field of the indexed document. This ensures that text inside modules is
@@ -17,9 +17,9 @@ use TypesenseSearch\Indexing\DocumentBuilder;
  *
  * Hook: Municipio/TypesenseSearch/DocumentBuilder/build
  *
- * @package TypesenseSearch\Indexing\Adapters
+ * @package TypesenseSearch\Indexing\Enrichers
  */
-class ModularityAdapter
+class ModularityEnricher
 {
     public function __construct()
     {
@@ -51,17 +51,16 @@ class ModularityAdapter
             $enabled_modules   = $modularityOptions['enabled-modules'] ?? [];
 
             // getPostTemplate reads the global $post, so temporarily override it.
-            $original_post       = $GLOBALS['post'] ?? null;
-            $GLOBALS['post']     = $post;
-            $template_key        = \Modularity\Helper\Post::getPostTemplate($post->ID);
+            $original_post   = $GLOBALS['post'] ?? null;
+            $GLOBALS['post'] = $post;
+            $template_key    = \Modularity\Helper\Post::getPostTemplate($post->ID);
             if ($original_post !== null) {
                 $GLOBALS['post'] = $original_post;
             } else {
                 unset($GLOBALS['post']);
             }
 
-            $enabled_areas = $modularityOptions['enabled-areas'][$template_key] ?? [];
-
+            $enabled_areas   = $modularityOptions['enabled-areas'][$template_key] ?? [];
             $modules_content = '';
 
             foreach ($modules as $area_slug => $area) {
@@ -104,6 +103,8 @@ class ModularityAdapter
                 $document['content'] = trim($document['content'] . ' ' . trim($modules_content));
             }
         } catch (\Exception $e) {
+            // Gracefully degrade — indexing must not break when Modularity
+            // encounters an unexpected state.
         }
 
         return $document;
@@ -111,8 +112,6 @@ class ModularityAdapter
 
     /**
      * Returns true when both Modularity classes required for rendering are available.
-     *
-     * @return bool
      */
     private function isInstalled(): bool
     {

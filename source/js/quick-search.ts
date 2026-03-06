@@ -443,8 +443,8 @@ function attachQuickSearch(
         .documents()
         .search({
           q: query,
-          query_by: "title,excerpt,content,extra_terms",
-          infix: "always,off,off,always",
+          query_by: "title,excerpt,content,extra_terms,type_name",
+          infix: "always,off,off,always,off",
           per_page: hitsPerPage,
         });
       currentHits = (response.hits as SearchHit[]) ?? [];

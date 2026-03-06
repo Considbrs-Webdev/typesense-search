@@ -127,10 +127,36 @@ $ts-thumb-size: 18px;
       color: $ts-text;
     }
 
-    p {
+    p:not(.ts-settings__notice) {
       font-size: 13px;
       color: $ts-muted;
       margin: 0;
+    }
+  }
+
+  &__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 8px 12px;
+    border-radius: $ts-radius;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    border: 1px solid transparent;
+
+    &--warning {
+      color: #5c3c00;
+      background: #fef7e0;
+      border-color: #e8c547;
+
+      &::before {
+        content: "⚠";
+        flex-shrink: 0;
+        font-size: 13px;
+        line-height: 1.4;
+      }
     }
   }
 
@@ -253,6 +279,26 @@ $ts-thumb-size: 18px;
     &:last-child {
       border-bottom: none;
     }
+
+    &--disabled {
+      opacity: 0.5;
+
+      .ts-toggle-item {
+        cursor: not-allowed;
+
+        &:hover {
+          background-color: transparent;
+        }
+      }
+
+      .ts-toggle__track {
+        background-color: #e0e0e0;
+      }
+
+      .ts-toggle__thumb {
+        box-shadow: none;
+      }
+    }
   }
 }
 
@@ -371,6 +417,20 @@ $ts-thumb-size: 18px;
     ~ .ts-toggle__status .ts-toggle__status-off {
       display: none;
     }
+  }
+
+  // Disabled state
+  &__input:disabled ~ .ts-toggle__track {
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+  }
+
+  &__input:disabled ~ .ts-toggle__track .ts-toggle__thumb {
+    box-shadow: none;
+  }
+
+  &__input:disabled ~ .ts-toggle__status {
+    color: $ts-muted;
   }
 
   // Focus ring on the track when the hidden input is focused

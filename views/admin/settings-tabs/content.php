@@ -249,6 +249,11 @@ if ($activeTab !== 'content') {
             <div class="ts-settings__card-header">
                 <h2><?php esc_html_e('Post types', 'typesense-search'); ?></h2>
                 <p><?php esc_html_e('Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results.', 'typesense-search'); ?></p>
+                <?php if (!$pdfToTextAvailable) : ?>
+                <p class="ts-settings__notice ts-settings__notice--warning">
+                    <?php esc_html_e('PDF indexing requires the pdftotext binary to be installed on the server.', 'typesense-search'); ?>
+                </p>
+                <?php endif; ?>
             </div>
 
             <?php if (empty($postTypes)) : ?>
@@ -286,6 +291,38 @@ if ($activeTab !== 'content') {
 
                     </label>
                 </li>
+                <?php if ($postType->name === 'page') : ?>
+                <li class="ts-toggle-list__item<?php echo !$pdfToTextAvailable ? ' ts-toggle-list__item--disabled' : ''; ?>">
+                    <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_INDEX_PDF); ?>" value="0" />
+                    <label class="ts-toggle-item" for="ts-index-pdf">
+
+                        <span class="ts-toggle-item__meta">
+                            <span class="ts-toggle-item__label"><?php esc_html_e('PDF files', 'typesense-search'); ?></span>
+                            <span class="ts-toggle-item__slug">attachment</span>
+                        </span>
+
+                        <span class="ts-toggle" role="presentation">
+                            <input
+                                type="checkbox"
+                                id="ts-index-pdf"
+                                name="<?php echo esc_attr(Settings::OPTION_INDEX_PDF); ?>"
+                                value="1"
+                                <?php checked(1, !$pdfToTextAvailable ? 0 : (int) get_option(Settings::OPTION_INDEX_PDF, 0)); ?>
+                                class="ts-toggle__input"
+                                <?php echo !$pdfToTextAvailable ? 'disabled' : ''; ?>
+                            />
+                            <span class="ts-toggle__track" aria-hidden="true">
+                                <span class="ts-toggle__thumb"></span>
+                            </span>
+                            <span class="ts-toggle__status">
+                                <span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span>
+                                <span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span>
+                            </span>
+                        </span>
+
+                    </label>
+                </li>
+                <?php endif; ?>
                 <?php endforeach; ?>
             </ul>
             <?php endif; ?>
