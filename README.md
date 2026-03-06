@@ -14,10 +14,21 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 2. [Requirements](#2-requirements)
 3. [Installation](#3-installation)
 4. [Settings](#4-settings)
+   - [4.1 Environment variables](#41-environment-variables)
+   - [4.2 Connection tab](#42-connection-tab)
+   - [4.3 Settings tab (content)](#43-settings-tab-content)
+   - [4.4 Facetting tab](#44-facetting-tab)
+   - [4.5 Quick search tab](#45-quick-search-tab)
+   - [4.6 Statistics tab](#46-statistics-tab)
+   - [4.7 Status tab](#47-status-tab)
 5. [Per-post controls](#5-per-post-controls)
 6. [WP-CLI commands](#6-wp-cli-commands)
 7. [How indexing works](#7-how-indexing-works)
 8. [Extensibility](#8-extensibility)
+   - [8.1 Add or transform fields via DocumentBuilder filters](#81-add-or-transform-fields-via-documentbuilder-filters)
+   - [8.2 Register a custom WordPress strategy](#82-register-a-custom-wordpress-strategy)
+   - [8.3 Index external content](#83-index-external-content)
+   - [8.4 Customise hit templates](#84-customise-hit-templates)
 9. [WordPress hooks and filters reference](#9-wordpress-hooks-and-filters-reference)
 
 ---
@@ -59,7 +70,52 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 
 The settings page is at **Settings → Typesense Search** and is split into six tabs.
 
-### Connection tab
+---
+
+### 4.1 Environment variables
+
+All five connection settings can be defined in a `.env` file placed at the **root of the plugin directory** (`wp-content/plugins/typesense-search/.env`).
+
+When a value is present in `.env`:
+
+- It is used **instead of** whatever is stored in the WordPress database.
+- The corresponding field in **Settings → Connection** is rendered **read-only** so it cannot accidentally be overwritten from the UI.
+- Any `save_settings` form submission that would change the value is silently a no-op.
+
+This lets you store sensitive credentials (especially the Admin API key) in environment-specific configuration that is never committed to version control.
+
+#### Supported variables
+
+| Variable                  | WordPress option                 | Description                                    |
+| ------------------------- | -------------------------------- | ---------------------------------------------- |
+| `TYPESENSE_HOST`          | `typesense_search_remote`        | Full URL to the Typesense server               |
+| `TYPESENSE_FRONTEND_HOST` | `typesense_search_frontend_host` | Optional public host sent to the browser       |
+| `TYPESENSE_COLLECTION`    | `typesense_search_index_name`    | Name of the Typesense collection               |
+| `TYPESENSE_ADMIN_KEY`     | `typesense_search_admin_key`     | Full-access Admin API key (server-side only)   |
+| `TYPESENSE_SEARCH_KEY`    | `typesense_search_search_key`    | Search-only key passed to front-end JavaScript |
+
+#### Setup
+
+1. Copy `.env.example` (found in the plugin root) to `.env`.
+2. Fill in the values you want to override.
+3. Make sure `.env` is listed in your `.gitignore` / `.deployignore` — it should **never** be committed.
+
+```ini
+# wp-content/plugins/typesense-search/.env
+TYPESENSE_HOST=https://search.example.com
+TYPESENSE_FRONTEND_HOST=
+TYPESENSE_COLLECTION=my-wordpress-site
+TYPESENSE_ADMIN_KEY=your-admin-key
+TYPESENSE_SEARCH_KEY=your-search-only-key
+```
+
+> **Quoting** — values may optionally be wrapped in single or double quotes; they are stripped automatically.  
+> **Comments** — lines starting with `#` are ignored.  
+> **Blank values** — a variable with an empty value (`TYPESENSE_FRONTEND_HOST=`) is treated as "not set" and the database option is used instead.
+
+---
+
+### 4.2 Connection tab
 
 These settings tell the plugin how to reach your Typesense instance.
 
@@ -73,7 +129,7 @@ These settings tell the plugin how to reach your Typesense instance.
 
 The admin key is kept server-side. The search key is the only credential exposed to the browser.
 
-### Settings tab (content)
+### 4.3 Settings tab (content)
 
 | Setting                  | Option key                                    | Description                                                                                             |
 | ------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -86,7 +142,7 @@ The admin key is kept server-side. The search key is the only credential exposed
 | Highlight context tokens | `typesense_search_highlight_affix_num_tokens` | Number of words shown around a highlighted match in search snippets (default: 15)                       |
 | Truncation string        | `typesense_search_truncator`                  | The string appended to truncated excerpts (default: `[...]`)                                            |
 
-### Facetting tab
+### 4.4 Facetting tab
 
 Configure which fields can be used as facets in the search UI.
 
@@ -94,7 +150,7 @@ Configure which fields can be used as facets in the search UI.
 | ------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Facets  | `typesense_search_facets` | Array of facet definitions. Each entry has: `field` (Typesense field name), `label` (UI label), `placeholder`, `display_as` (`dropdown` or `button_group`) |
 
-### Quick search tab
+### 4.5 Quick search tab
 
 Quick search is a lightweight search overlay that attaches to any element on the page.
 
@@ -104,11 +160,11 @@ Quick search is a lightweight search overlay that attaches to any element on the
 | CSS selectors       | `typesense_quick_search_selectors`     | One or more CSS selectors the overlay binds to. Each entry has `selector` and `sibling` (bool — place the widget next to the element rather than inside it) |
 | Results per page    | `typesense_quick_search_hits_per_page` | Number of results shown in the overlay (default: 5)                                                                                                         |
 
-### Statistics tab
+### 4.6 Statistics tab
 
 Read-only overview of the Typesense collection: document count and index size. Uses the admin API key to query Typesense directly from the browser via an AJAX proxy.
 
-### Status tab
+### 4.7 Status tab
 
 Checks whether the current configuration is valid and the collection exists. Can create the collection if it is missing.
 
@@ -129,7 +185,9 @@ The `_typesense_exclude` flag is honoured by all built-in strategies. Custom str
 
 ## 6. WP-CLI commands
 
-The plugin registers a `typesense` command when WP-CLI is loaded.
+The plugin registers a `typesense` command when WP-CLI is loaded. All subcommands run after WordPress is fully loaded (`--when after_wp_load`).
+
+---
 
 ### `wp typesense index`
 
@@ -151,18 +209,117 @@ wp typesense index --batch-size=50 --yes
 # Include PDF attachments from the media library
 wp typesense index --include-pdf
 
+# Also run all external strategies after indexing posts
+wp typesense index --include-external --yes
+
 # Slow down the progress bar for visual debugging
 wp typesense index --dry-run --sleep=200
 ```
 
-| Flag                  | Description                                                                |
-| --------------------- | -------------------------------------------------------------------------- |
-| `--post-type=<types>` | Comma-separated post-type slugs. Defaults to all types enabled in settings |
-| `--batch-size=<n>`    | Posts per database query. Defaults to all posts in one query               |
-| `--dry-run`           | Resolve strategies and check `shouldIndex()` but do not write to Typesense |
-| `--include-pdf`       | Also index PDF attachments via the PDF strategy                            |
-| `--yes`               | Skip the confirmation prompt                                               |
-| `--sleep=<ms>`        | Sleep after each post (useful for development)                             |
+| Flag                  | Description                                                                      |
+| --------------------- | -------------------------------------------------------------------------------- |
+| `--post-type=<types>` | Comma-separated post-type slugs. Defaults to all types enabled in settings       |
+| `--batch-size=<n>`    | Posts per database query. Defaults to all posts in one query                     |
+| `--dry-run`           | Resolve strategies and check `shouldIndex()` but do not write to Typesense       |
+| `--include-pdf`       | Also index PDF attachments via `pdftotext` (requires the binary to be installed) |
+| `--include-external`  | After indexing posts (and PDFs), also run all registered external strategies     |
+| `--yes`               | Skip the confirmation prompt                                                     |
+| `--sleep=<ms>`        | Sleep after each post in milliseconds (useful for development)                   |
+
+---
+
+### `wp typesense rebuild`
+
+Drops the Typesense collection, recreates it from the plugin schema, then optionally re-indexes all content in one operation. Use this whenever the Typesense collection schema needs to change (e.g. after modifying the `Municipio/TypesenseSearch/Collection/getSchema` filter).
+
+```bash
+# Full rebuild: drop schema, recreate, re-index everything
+wp typesense rebuild
+
+# Preview what would happen without making any changes
+wp typesense rebuild --dry-run
+
+# Reset schema only — re-index manually later with wp typesense index
+wp typesense rebuild --skip-index --yes
+
+# Rebuild and re-index only pages
+wp typesense rebuild --post-type=page --yes
+
+# Full rebuild including PDF attachments
+wp typesense rebuild --include-pdf --yes
+
+# Full rebuild including external strategies
+wp typesense rebuild --include-external --yes
+```
+
+| Flag                  | Description                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| `--post-type=<types>` | Comma-separated post-type slugs to re-index. Defaults to all types enabled in settings |
+| `--batch-size=<n>`    | Posts per database query during re-indexing. Defaults to all posts in one query        |
+| `--skip-index`        | Drop and recreate the schema only; do not re-index any posts                           |
+| `--dry-run`           | Report what would happen without writing anything to Typesense                         |
+| `--include-pdf`       | Also index PDF attachments after the schema is recreated                               |
+| `--include-external`  | Also run all registered external strategies after re-indexing posts                    |
+| `--yes`               | Skip the confirmation prompt                                                           |
+| `--sleep=<ms>`        | Sleep after each post in milliseconds during re-indexing                               |
+
+---
+
+### `wp typesense clear`
+
+Removes indexed documents from the Typesense collection. Deletes are executed as a single bulk request per post type, so the operation is fast even for large collections.
+
+```bash
+# Clear all post types enabled in settings
+wp typesense clear
+
+# Preview without deleting anything
+wp typesense clear --dry-run
+
+# Remove only pages
+wp typesense clear --post-type=page
+
+# Remove every document from the collection regardless of settings
+wp typesense clear --post-type=all --yes
+
+# Clear posts and PDF documents
+wp typesense clear --include-pdf --yes
+
+# Clear posts and external strategy documents
+wp typesense clear --include-external --yes
+```
+
+| Flag                  | Description                                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--post-type=<types>` | Comma-separated post-type slugs to clear. Defaults to all types enabled in settings. Pass `all` to remove every document in the collection |
+| `--dry-run`           | Count matching documents and print a summary without deleting anything                                                                     |
+| `--include-pdf`       | Also clear PDF attachment documents (`type=attachment`) from the index                                                                     |
+| `--include-external`  | Also clear all documents belonging to registered external strategies (ignored when `--post-type=all`)                                      |
+| `--yes`               | Skip the confirmation prompt                                                                                                               |
+| `--sleep=<ms>`        | Sleep between post-type operations in milliseconds                                                                                         |
+
+---
+
+### `wp typesense sync-external`
+
+Fetches and upserts documents from all registered external indexing strategies (or a single named one). External strategies are registered by third-party plugins via the `Municipio/TypesenseSearch/RegisterStrategies` action and have no WordPress lifecycle hooks — syncing must be triggered explicitly here or via WP-Cron.
+
+```bash
+# Sync all registered external strategies
+wp typesense sync-external
+
+# Sync only one strategy by its identifier
+wp typesense sync-external pitea-eservice
+
+# Preview registered strategies without fetching or writing anything
+wp typesense sync-external --dry-run
+```
+
+| Argument / Flag  | Description                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------- |
+| `[<identifier>]` | Optional strategy identifier (e.g. `pitea-eservice`). Omit to sync all registered external strategies |
+| `--dry-run`      | List registered strategies without fetching or upserting anything                                     |
+| `--yes`          | Skip the confirmation prompt                                                                          |
 
 ---
 
@@ -585,6 +742,138 @@ $registry->getExternal('eservice')->deindex('eservice-42');
 | `deindex(string $externalId): bool` | Delete one document by its namespaced ID                                    |
 | `registerHooks(): void`             | Wire cron events, admin actions, or any other WordPress triggers            |
 
+### 8.4 Customise hit templates
+
+The search results page renders each hit using a small HTML snippet called a **hit template**. Templates are compiled from Blade view files and injected into the page as `<template>` elements. The front-end JavaScript selects the right template for each hit based on the document's `post_type` and replaces placeholder tokens with live values.
+
+#### Built-in templates
+
+| Template key | Blade view file                           | Best used for                                        |
+| ------------ | ----------------------------------------- | ---------------------------------------------------- |
+| `default`    | `templates/hits/hit-default.blade.php`    | Any post without a featured image                    |
+| `noimage`    | `templates/hits/hit-noimage.blade.php`    | Explicitly image-free cards (identical to `default`) |
+| `image`      | `templates/hits/hit-image.blade.php`      | Posts with a featured image (`thumbnail` field)      |
+| `jobposting` | `templates/hits/hit-jobposting.blade.php` | Structured job-listing cards with a validity date    |
+
+#### Placeholder tokens
+
+Tokens are `{UPPER_SNAKE_CASE}` strings embedded in the template HTML. The JavaScript search layer replaces each token with the corresponding value from the Typesense hit document before inserting the card into the DOM.
+
+##### Core tokens (always available)
+
+| Token                        | Source field in document | Description                                       |
+| ---------------------------- | ------------------------ | ------------------------------------------------- |
+| `{SEARCH_HIT_LINK}`          | `url`                    | Full permalink to the post                        |
+| `{SEARCH_HIT_ARIA_LABEL}`    | `title`                  | Accessible label on the card anchor               |
+| `{SEARCH_HIT_HEADING}`       | `title` (highlighted)    | Post title, with Typesense highlights applied     |
+| `{SEARCH_HIT_SUBHEADING}`    | `type_name`              | Human-readable post-type label                    |
+| `{SEARCH_HIT_EXCERPT}`       | `excerpt` (highlighted)  | Snippet with highlights, truncated                |
+| `{SEARCH_HIT_DATE}`          | `post_date_formatted`    | Formatted publication date                        |
+| `{SEARCH_HIT_PATH}`          | `path`                   | Breadcrumb string (pages only, otherwise empty)   |
+| `{SEARCH_HIT_IMAGE_URL}`     | `thumbnail`              | Featured image URL (used by the `image` template) |
+| `{SEARCH_HIT_IMAGE_ALT}`     | `title`                  | Alt text for the featured image                   |
+| `{SEARCH_HIT_VALID_THROUGH}` | `validThrough`           | Job-posting expiry date (used by `jobposting`)    |
+
+##### Custom tokens via `placeholderMappings` filter
+
+You can map additional token names to any field in the Typesense document:
+
+```php
+add_filter(
+    'Municipio/TypesenseSearch/placeholderMappings',
+    function (array $mappings): array {
+        // {SEARCH_HIT_DEPARTMENT} will be replaced with the value of the
+        // 'department' field on each Typesense hit document.
+        $mappings['SEARCH_HIT_DEPARTMENT'] = 'department';
+        return $mappings;
+    }
+);
+```
+
+You can then use `{SEARCH_HIT_DEPARTMENT}` freely in any custom template.
+
+#### Mapping post types to templates
+
+By default all posts use the `default` template. Use the `postTypeToTemplate` filter to route specific post types to a different built-in or custom template:
+
+```php
+add_filter(
+    'Municipio/TypesenseSearch/postTypeToTemplate',
+    function (array $mapping): array {
+        $mapping['page']        = 'noimage';      // built-in
+        $mapping['product']     = 'image';        // built-in
+        $mapping['job_listing'] = 'jobposting';   // built-in
+        $mapping['event']       = 'my-event';     // custom (see below)
+        return $mapping;
+    }
+);
+```
+
+#### Adding a custom template
+
+**Step 1 — Register the template key**
+
+```php
+add_filter(
+    'Municipio/TypesenseSearch/hitTemplates',
+    function (array $templates): array {
+        $templates[] = 'my-event';
+        return $templates;
+    }
+);
+```
+
+**Step 2 — Point the key to a Blade view**
+
+The default view path for a custom key `foo` is `templates.hits.foo`, which resolves to `views/templates/hits/foo.blade.php` relative to each registered view path. You can override the path for any key using the `hitTemplateView` filter:
+
+```php
+add_filter(
+    'Municipio/TypesenseSearch/hitTemplateView',
+    function (string $view, string $key): string {
+        if ($key === 'my-event') {
+            // Point to a view inside your theme or another plugin
+            return 'my-theme.search.hit-event';
+        }
+        return $view;
+    },
+    10,
+    2
+);
+```
+
+**Step 3 — Create the Blade file**
+
+The file must render a `<template>` element with a `data-js-search-hit-template-{key}` attribute so the front-end can find it. Use the Municipio `@element` directive or plain HTML:
+
+```blade
+@element([
+    'componentElement' => 'template',
+    'attributeList' => ['data-js-search-hit-template-my-event' => true]
+])
+    <a class="c-card c-card--action" href="{SEARCH_HIT_LINK}" aria-label="{SEARCH_HIT_ARIA_LABEL}">
+        <div class="c-card__body">
+            <h2>{SEARCH_HIT_HEADING}</h2>
+            <p>{SEARCH_HIT_EXCERPT}</p>
+            {{-- Custom token mapped via placeholderMappings --}}
+            <span>{SEARCH_HIT_DEPARTMENT}</span>
+        </div>
+    </a>
+@endelement
+```
+
+**Step 4 — Route the post type to the new template**
+
+```php
+add_filter(
+    'Municipio/TypesenseSearch/postTypeToTemplate',
+    function (array $mapping): array {
+        $mapping['event'] = 'my-event';
+        return $mapping;
+    }
+);
+```
+
 ---
 
 ## 9. WordPress hooks and filters reference
@@ -597,9 +886,20 @@ $registry->getExternal('eservice')->deindex('eservice-42');
 
 ### Filters
 
+#### Indexing filters
+
 | Hook                                                                | Parameters                            | Purpose                                                                                             |
 | ------------------------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `Municipio/TypesenseSearch/Indexer/shouldIndex`                     | `bool $result, WP_Post $post`         | Override `PostIndexingStrategy::shouldIndex()` for any post                                         |
 | `Municipio/TypesenseSearch/DocumentBuilder/build`                   | `array $document, WP_Post $post`      | Add or transform fields on every indexed post                                                       |
 | `Municipio/TypesenseSearch/DocumentBuilder/{post_type}/build`       | `array $document, WP_Post $post`      | Add or transform fields for a specific post type (replace `{post_type}` with the slug, e.g. `page`) |
 | `Municipio/TypesenseSearch/PdfAttachmentAdapter/max_content_length` | `int $maxLength, WP_Post $attachment` | Override the 50 000-character PDF content cap                                                       |
+
+#### Hit template filters
+
+| Hook                                            | Parameters                       | Purpose                                                                                                                              |
+| ----------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Municipio/TypesenseSearch/hitTemplates`        | `string[] $templates`            | Add or remove template keys rendered on the search page (e.g. `['default', 'image', 'my-event']`)                                    |
+| `Municipio/TypesenseSearch/hitTemplateView`     | `string $view, string $key`      | Override the Blade view path for a given template key (e.g. map `'my-event'` to `'my-theme.search.hit-event'`)                       |
+| `Municipio/TypesenseSearch/postTypeToTemplate`  | `array<string,string> $mapping`  | Map Typesense `post_type` values to template keys. Entries not listed fall back to `'default'`                                       |
+| `Municipio/TypesenseSearch/placeholderMappings` | `array<string,string> $mappings` | Add custom `{TOKEN}` → document field mappings that the front-end JavaScript uses when rendering hit cards (see §8.4 for an example) |

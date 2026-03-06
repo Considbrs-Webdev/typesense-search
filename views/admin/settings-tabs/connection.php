@@ -1,9 +1,17 @@
 <?php
 use TypesenseSearch\Admin\Settings;
+use TypesenseSearch\EnvLoader;
 
 if ($activeTab !== 'connection') {
     return;
 }
+
+// Determine which fields are locked via the .env file.
+$tsHostLocked         = EnvLoader::isDefinedInEnv(Settings::OPTION_REMOTE);
+$tsFrontendHostLocked = EnvLoader::isDefinedInEnv(Settings::OPTION_FRONTEND_HOST);
+$tsCollectionLocked   = EnvLoader::isDefinedInEnv(Settings::OPTION_INDEX_NAME);
+$tsAdminKeyLocked     = EnvLoader::isDefinedInEnv(Settings::OPTION_ADMIN_KEY);
+$tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
 ?>
 
 <div class="ts-settings__panel" id="ts-tab-connection">
@@ -14,6 +22,24 @@ if ($activeTab !== 'connection') {
             <div class="ts-settings__card-header">
                 <h2><?php esc_html_e('Server', 'typesense-search'); ?></h2>
                 <p><?php esc_html_e('Point the plugin to your Typesense instance. You can self-host Typesense or use Typesense Cloud at cloud.typesense.org.', 'typesense-search'); ?></p>
+
+                <?php if ($tsHostLocked || $tsFrontendHostLocked || $tsCollectionLocked || $tsAdminKeyLocked || $tsSearchKeyLocked) : ?>
+                <div class="ts-notice ts-notice--env" style="margin:12px 0 0;padding:10px 14px;background:#e5f3fb;border-left:4px solid #0071a1;border-radius:2px;">
+                    <p style="margin:0;"><?php esc_html_e('One or more connection settings are defined in the plugin\'s .env file. Those fields are read-only and cannot be changed here. See the plugin README for details.', 'typesense-search'); ?></p>
+                </div>
+                <?php else : ?>
+                <div class="ts-notice" style="margin:12px 0 0;padding:10px 14px;background:#e5f3fb;border-left:4px solid #0071a1;border-radius:2px;">
+                    <p style="margin:0;">
+                        <?php
+                        printf(
+                            /* translators: %s is a link to the plugin README */
+                            esc_html__('Connection settings can also be defined using environment variables in a .env file inside the plugin directory. %s', 'typesense-search'),
+                            '<a href="https://github.com/considbrs-webdev/typesense-search#environment-variables" target="_blank" rel="noopener noreferrer">' . esc_html__('See README for details.', 'typesense-search') . '</a>'
+                        );
+                        ?>
+                    </p>
+                </div>
+                <?php endif; ?>
             </div>
 
             <div class="ts-settings__fields">
@@ -31,13 +57,19 @@ if ($activeTab !== 'connection') {
                             name="<?php echo esc_attr(Settings::OPTION_REMOTE); ?>"
                             value="<?php echo esc_attr(get_option(Settings::OPTION_REMOTE)); ?>"
                             placeholder="https://your-instance.typesense.net"
-                            class="regular-text ts-field__input"
+                            class="regular-text ts-field__input<?php echo $tsHostLocked ? ' ts-field__input--env-locked' : ''; ?>"
                             spellcheck="false"
                             autocomplete="off"
+                            <?php echo $tsHostLocked ? 'readonly aria-describedby="ts-remote-env-note"' : ''; ?>
                         />
                         <p class="ts-field__description">
                             <?php esc_html_e('The full URL to your Typesense server, including protocol and port if needed (e.g. https://search.example.com:8108).', 'typesense-search'); ?>
                         </p>
+                        <?php if ($tsHostLocked) : ?>
+                        <p id="ts-remote-env-note" class="ts-field__env-notice">
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                        </p>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -53,13 +85,19 @@ if ($activeTab !== 'connection') {
                             name="<?php echo esc_attr(Settings::OPTION_FRONTEND_HOST); ?>"
                             value="<?php echo esc_attr(get_option(Settings::OPTION_FRONTEND_HOST)); ?>"
                             placeholder="https://search.example.com"
-                            class="regular-text ts-field__input"
+                            class="regular-text ts-field__input<?php echo $tsFrontendHostLocked ? ' ts-field__input--env-locked' : ''; ?>"
                             spellcheck="false"
                             autocomplete="off"
+                            <?php echo $tsFrontendHostLocked ? 'readonly aria-describedby="ts-frontend-env-note"' : ''; ?>
                         />
                         <p class="ts-field__description">
                             <?php esc_html_e('Optional host used by browsers to reach Typesense. Useful when you expose Typesense through a proxy or different public host than the server-side host.', 'typesense-search'); ?>
                         </p>
+                        <?php if ($tsFrontendHostLocked) : ?>
+                        <p id="ts-frontend-env-note" class="ts-field__env-notice">
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                        </p>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -76,13 +114,19 @@ if ($activeTab !== 'connection') {
                             name="<?php echo esc_attr(Settings::OPTION_INDEX_NAME); ?>"
                             value="<?php echo esc_attr(get_option(Settings::OPTION_INDEX_NAME)); ?>"
                             placeholder="my-wordpress-site"
-                            class="regular-text ts-field__input"
+                            class="regular-text ts-field__input<?php echo $tsCollectionLocked ? ' ts-field__input--env-locked' : ''; ?>"
                             spellcheck="false"
                             autocomplete="off"
+                            <?php echo $tsCollectionLocked ? 'readonly aria-describedby="ts-index-name-env-note"' : ''; ?>
                         />
                         <p class="ts-field__description">
                             <?php esc_html_e('The name of the Typesense collection where content will be indexed. Use lowercase letters, numbers, and hyphens only.', 'typesense-search'); ?>
                         </p>
+                        <?php if ($tsCollectionLocked) : ?>
+                        <p id="ts-index-name-env-note" class="ts-field__env-notice">
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                        </p>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -155,11 +199,12 @@ if ($activeTab !== 'connection') {
                                 name="<?php echo esc_attr(Settings::OPTION_ADMIN_KEY); ?>"
                                 value="<?php echo esc_attr(get_option(Settings::OPTION_ADMIN_KEY)); ?>"
                                 placeholder=""
-                                class="regular-text ts-field__input"
+                                class="regular-text ts-field__input<?php echo $tsAdminKeyLocked ? ' ts-field__input--env-locked' : ''; ?>"
                                 spellcheck="false"
                                 autocomplete="new-password"
+                                <?php echo $tsAdminKeyLocked ? 'readonly aria-describedby="ts-admin-key-env-note"' : ''; ?>
                             />
-                            <button type="button" class="button ts-field__toggle-visibility" aria-label="<?php esc_attr_e('Toggle key visibility', 'typesense-search'); ?>" data-target="ts-admin-key">
+                            <button type="button" class="button ts-field__toggle-visibility" aria-label="<?php esc_attr_e('Toggle key visibility', 'typesense-search'); ?>" data-target="ts-admin-key" <?php echo $tsAdminKeyLocked ? 'disabled' : ''; ?>>
                                 <svg class="ts-icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                 <svg class="ts-icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                             </button>
@@ -167,6 +212,11 @@ if ($activeTab !== 'connection') {
                         <p class="ts-field__description">
                             <?php esc_html_e('Used server-side for indexing operations. Never expose this key publicly.', 'typesense-search'); ?>
                         </p>
+                        <?php if ($tsAdminKeyLocked) : ?>
+                        <p id="ts-admin-key-env-note" class="ts-field__env-notice">
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                        </p>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -184,11 +234,12 @@ if ($activeTab !== 'connection') {
                                 name="<?php echo esc_attr(Settings::OPTION_SEARCH_KEY); ?>"
                                 value="<?php echo esc_attr(get_option(Settings::OPTION_SEARCH_KEY)); ?>"
                                 placeholder=""
-                                class="regular-text ts-field__input"
+                                class="regular-text ts-field__input<?php echo $tsSearchKeyLocked ? ' ts-field__input--env-locked' : ''; ?>"
                                 spellcheck="false"
                                 autocomplete="new-password"
+                                <?php echo $tsSearchKeyLocked ? 'readonly aria-describedby="ts-search-key-env-note"' : ''; ?>
                             />
-                            <button type="button" class="button ts-field__toggle-visibility" aria-label="<?php esc_attr_e('Toggle key visibility', 'typesense-search'); ?>" data-target="ts-search-key">
+                            <button type="button" class="button ts-field__toggle-visibility" aria-label="<?php esc_attr_e('Toggle key visibility', 'typesense-search'); ?>" data-target="ts-search-key" <?php echo $tsSearchKeyLocked ? 'disabled' : ''; ?>>
                                 <svg class="ts-icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                 <svg class="ts-icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                             </button>
@@ -196,6 +247,11 @@ if ($activeTab !== 'connection') {
                         <p class="ts-field__description">
                             <?php esc_html_e('A search-only API key used in your front-end JavaScript. This key has read-only access and is safe to include in public code.', 'typesense-search'); ?>
                         </p>
+                        <?php if ($tsSearchKeyLocked) : ?>
+                        <p id="ts-search-key-env-note" class="ts-field__env-notice">
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                        </p>
+                        <?php endif; ?>
 
                         <div id="ts-gen-key-wrap" <?php echo get_option(Settings::OPTION_SEARCH_KEY) ? 'hidden' : ''; ?>>
                             <button type="button" id="ts-generate-search-key" class="button button-secondary ts-connection-test__button">

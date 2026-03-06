@@ -23,6 +23,9 @@ class App {
 
     public function __construct() {
 
+        // Load .env overrides before anything reads options.
+        new EnvLoader();
+
         new Config();
         new Templates();
 
