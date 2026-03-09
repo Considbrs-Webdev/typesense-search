@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-03-06T18:41:18+00:00\n"
-"PO-Revision-Date: 2026-03-06 19:42+0100\n"
+"POT-Creation-Date: 2026-03-09T20:30:23+00:00\n"
+"PO-Revision-Date: 2026-03-09 21:32+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -318,18 +318,18 @@ msgid "Search term here.."
 msgstr "Skriv din sökfras här.."
 
 #: source/php/Frontend/EnrichSearchTemplate.php:39
-msgid "Your search for %1$s returned %2$s"
-msgstr "Din sökning %1$s gav %2$s"
+msgid "Your search for <strong>%1$s</strong> returned %2$s"
+msgstr "Din sökning efter <strong>%1$s</strong> gav %2$s"
 
 #: source/php/Frontend/EnrichSearchTemplate.php:40
 #: source/php/Frontend/I18n.php:24
 msgid "%d result"
-msgstr "%d resultat"
+msgstr "%d träff"
 
 #: source/php/Frontend/EnrichSearchTemplate.php:41
 #: source/php/Frontend/I18n.php:25
 msgid "%d results"
-msgstr "%d resultat"
+msgstr "%d träffar"
 
 #: source/php/Frontend/EnrichSearchTemplate.php:42
 msgid "No Results"

@@ -97,7 +97,7 @@ function init(): void {
         const template = summaryEl.dataset.langTemplate ?? "";
 
         if (query && countText && template) {
-          summaryEl.textContent = template
+          summaryEl.innerHTML = template
             .replace("%1$s", query)
             .replace("%2$s", countText);
           summaryEl.hidden = false;
@@ -173,9 +173,7 @@ function init(): void {
   // navigate to the breadcrumb URL instead.
 
   resultsEl.addEventListener("click", (e) => {
-    const target = (e.target as Element).closest<HTMLElement>(
-      "[data-href]",
-    );
+    const target = (e.target as Element).closest<HTMLElement>("[data-href]");
     if (!target) return;
     e.preventDefault();
     e.stopPropagation();
@@ -185,9 +183,7 @@ function init(): void {
 
   resultsEl.addEventListener("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
-    const target = (e.target as Element).closest<HTMLElement>(
-      "[data-href]",
-    );
+    const target = (e.target as Element).closest<HTMLElement>("[data-href]");
     if (!target) return;
     e.preventDefault();
     e.stopPropagation();

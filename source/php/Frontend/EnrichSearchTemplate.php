@@ -36,7 +36,7 @@ class EnrichSearchTemplate
 			'search' => __("Search", 'typesense-search'),
 			'searchLabel' => __("Enter search term", 'typesense-search'),
 			'searchPlaceholder' => __("Search term here..", 'typesense-search'),
-			'searchSummaryTemplate' => __("Your search for %1\$s returned %2\$s", 'typesense-search'),
+			'searchSummaryTemplate' => __("Your search for <strong>%1\$s</strong> returned %2\$s", 'typesense-search'),
 			'resultSingular' => __("%d result", 'typesense-search'),
 			'resultPlural' => __("%d results", 'typesense-search'),
 			'noResults' => __("No Results", 'typesense-search'),
