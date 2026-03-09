@@ -49,9 +49,11 @@ function init(): void {
   const resultsEl = resolveResultsEl(container);
   const loaderEl = container.querySelector<HTMLElement>("[data-js-loader]");
   const searchFormEl = container.querySelector<HTMLElement>(".ts-search");
-  const searchHeadingEl = container.querySelector<HTMLElement>(
+  const searchHeadingEl = document.querySelector<HTMLElement>(
     ".ts-search__heading",
   );
+
+  console.log(searchHeadingEl);
 
   if (!inputEl) return;
 

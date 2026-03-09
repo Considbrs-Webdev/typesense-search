@@ -117,7 +117,7 @@
 
                 </form>
 
-                <div class="ts-loader" data-js-loader hidden></div>
+                <div class="ts-loader" data-js-loader></div>
 
                 {{-- Backdrop overlay for mobile filter panel --}}
                 <div class="ts-filter-overlay" data-js-filter-overlay></div>
