@@ -47,6 +47,11 @@ function init(): void {
     "[data-js-search-pagination]",
   );
   const resultsEl = resolveResultsEl(container);
+  const loaderEl = container.querySelector<HTMLElement>("[data-js-loader]");
+  const searchFormEl = container.querySelector<HTMLElement>(".ts-search");
+  const searchHeadingEl = container.querySelector<HTMLElement>(
+    ".ts-search__heading",
+  );
 
   if (!inputEl) return;
 
@@ -74,6 +79,7 @@ function init(): void {
     },
   );
 
+  let isFirstSearch = true;
   const triggerSearch = (): void => {
     search(getUrlState()).then((facetData) => {
       facets.render(facetData);
@@ -104,6 +110,18 @@ function init(): void {
         } else {
           summaryEl.hidden = true;
         }
+      }
+
+      // Hide loader and show search interface after first search completes
+      if (isFirstSearch && loaderEl) {
+        loaderEl.hidden = true;
+        if (searchFormEl) {
+          searchFormEl.hidden = false;
+        }
+        if (searchHeadingEl) {
+          searchHeadingEl.hidden = false;
+        }
+        isFirstSearch = false;
       }
     });
   };
@@ -223,6 +241,19 @@ function init(): void {
   filterOverlayEl?.addEventListener("click", closePanel);
 
   // ── Boot ─────────────────────────────────────────────────────────────────
+
+  // Show loader initially
+  if (loaderEl) {
+    loaderEl.hidden = false;
+  }
+
+  // Hide search form and heading initially
+  if (searchFormEl) {
+    searchFormEl.hidden = true;
+  }
+  if (searchHeadingEl) {
+    searchHeadingEl.hidden = true;
+  }
 
   syncUiFromUrl();
   triggerSearch();

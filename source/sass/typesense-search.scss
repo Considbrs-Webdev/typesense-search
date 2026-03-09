@@ -445,6 +445,33 @@
   user-select: none;
 }
 
+// Loader styling
+.ts-loader:not([hidden]) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  width: 100%;
+  min-height: 50vh;
+}
+
+.ts-loader::before {
+  content: "";
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--ts-color-primary, #000);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 // Breadcrumb links inside hit cards
 .ts-breadcrumb-link {
   cursor: pointer;

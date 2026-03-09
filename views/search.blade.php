@@ -6,7 +6,7 @@
     <section class="o-container u-margin__top--6">
         <div class="o-grid">
             <div class="o-grid-12">
-                <h1 class="ts-search__heading">
+                <h1 class="ts-search__heading" hidden>
                     {{ $lang->search }}
                 </h1>
             </div>
@@ -18,7 +18,7 @@
         <div class="o-grid">
             <div class="o-grid-12">
 
-                <form class="ts-search" method="get" action="{{ $homeUrl ?? '/' }}">
+                <form class="ts-search" method="get" action="{{ $homeUrl ?? '/' }}" hidden>
 
                     <div class="wa-stack wa-gap-xl">
 
@@ -116,6 +116,8 @@
                     </div>
 
                 </form>
+
+                <div class="ts-loader" data-js-loader hidden></div>
 
                 {{-- Backdrop overlay for mobile filter panel --}}
                 <div class="ts-filter-overlay" data-js-filter-overlay></div>
