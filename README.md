@@ -24,6 +24,15 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 5. [Per-post controls](#5-per-post-controls)
 6. [WP-CLI commands](#6-wp-cli-commands)
 7. [How indexing works](#7-how-indexing-works)
+   - [7.1 Architecture overview](#71-architecture-overview)
+   - [7.2 Services layer](#72-services-layer)
+   - [7.3 IndexingHooks](#73-indexinghooks)
+   - [7.4 IndexingRegistry](#74-indexingregistry)
+   - [7.5 IndexingStrategyInterface](#75-indexingstrategyinterface)
+   - [7.6 IndexableDocument](#76-indexabledocument)
+   - [7.7 Built-in strategies](#77-built-in-strategies)
+   - [7.8 DocumentBuilder and the filter chain](#78-documentbuilder-and-the-filter-chain)
+   - [7.9 Enrichers](#79-enrichers)
 8. [Extensibility](#8-extensibility)
    - [8.1 Add or transform fields via DocumentBuilder filters](#81-add-or-transform-fields-via-documentbuilder-filters)
    - [8.2 Register a custom WordPress strategy](#82-register-a-custom-wordpress-strategy)
@@ -367,9 +376,41 @@ WordPress lifecycle event
         ├─ shouldIndex()  ← eligibility check (post status, settings, meta flags)
         ├─ buildDocument()← assembles IndexableDocument from the post
         └─ index() / deindex() ← upsert or delete in Typesense
+                │
+        ┌───────┴────────┐
+        ▼                ▼
+TypesenseClientService   SettingsRepository
+(cached client)          (typed option reads)
 ```
 
-### 7.2 IndexingHooks
+### 7.2 Services layer
+
+Three shared services are built once by `App` and injected into every component that needs them.
+
+| Class                    | Namespace                  | Responsibility                                                                                                                                                                                                                           |
+| ------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SettingsRepository`     | `TypesenseSearch\Services` | Typed, default-aware getters for every WordPress option used by the plugin. Replaces scattered `get_option()` calls throughout the codebase.                                                                                             |
+| `TypesenseClientService` | `TypesenseSearch\Services` | Lazily builds and caches the `\Typesense\Client` for the lifetime of the request. Consumers call `getClient()` — credentials are only read once even if dozens of strategies or hooks call it.                                           |
+| `ErrorLogLogger`         | `TypesenseSearch\Logger`   | Default implementation of `LoggerInterface` that writes to PHP's `error_log()`. Debug messages are suppressed unless `WP_DEBUG` is enabled. Swap it for any other implementation by passing a different `LoggerInterface` to strategies. |
+
+**Replacing the logger** — if you want to route plugin log messages to a custom destination (e.g. Sentry, a file, or a test spy), implement `LoggerInterface` and pass your implementation when registering strategies:
+
+```php
+add_action(
+    'Municipio/TypesenseSearch/RegisterStrategies',
+    function (
+        \TypesenseSearch\Indexing\IndexingRegistry $registry,
+        \TypesenseSearch\Services\TypesenseClientService $clientService,
+        \TypesenseSearch\Services\SettingsRepository $settings,
+        \TypesenseSearch\Logger\LoggerInterface $logger
+    ): void {
+        $registry->register(new MyCustomStrategy($clientService, $settings, new MySentryLogger()));
+    },
+    10, 4
+);
+```
+
+### 7.3 IndexingHooks
 
 `IndexingHooks` wires three WordPress actions to the registry during bootstrap.
 
@@ -383,7 +424,7 @@ Priority 20 on `wp_after_insert_post` is intentional — it ensures all meta box
 
 PDF attachments have their own lifecycle hooks (`add_attachment`, `edit_attachment`, `delete_attachment`) registered by `PdfIndexingStrategy::registerHooks()`.
 
-### 7.3 IndexingRegistry
+### 7.4 IndexingRegistry
 
 The registry is the central routing table. It holds two separate sets of strategies:
 
@@ -395,7 +436,7 @@ Built-in registration order (order matters — first match wins for WordPress st
 1. `PdfIndexingStrategy` — matches PDF attachments
 2. `PostIndexingStrategy` — matches everything else that is not an attachment
 
-### 7.4 IndexingStrategyInterface
+### 7.5 IndexingStrategyInterface
 
 Every WordPress indexing strategy implements this contract:
 
@@ -411,7 +452,7 @@ Every WordPress indexing strategy implements this contract:
 
 `AbstractIndexingStrategy` provides default `index()` and `deindex()` implementations (upsert and delete via the Typesense PHP client) so concrete strategies only need to implement `supports()`, `shouldIndex()`, `buildDocument()`, and optionally `registerHooks()`.
 
-### 7.5 IndexableDocument
+### 7.6 IndexableDocument
 
 `IndexableDocument` is an immutable value object returned by `buildDocument()`. It guarantees that every document sent to Typesense has at minimum a non-empty `id` and `title` field (both required by Typesense).
 
@@ -430,7 +471,7 @@ $doc = $doc->with('author', get_the_author());
 $doc->toArray();
 ```
 
-### 7.6 Built-in strategies
+### 7.7 Built-in strategies
 
 #### PostIndexingStrategy (`'post'`)
 
@@ -474,7 +515,7 @@ Additional PDF document field:
 | ----------------- | ------------------------------------------------------------------ |
 | `top_most_parent` | Title of the top-level ancestor of the page the PDF is attached to |
 
-### 7.7 DocumentBuilder and the filter chain
+### 7.8 DocumentBuilder and the filter chain
 
 `DocumentBuilder::build()` assembles the document array for a WordPress post and passes it through two WordPress filter layers before wrapping it in `IndexableDocument`.
 
@@ -485,7 +526,7 @@ Additional PDF document field:
 
 Both filters receive and must return a plain `array`. `IndexableDocument` is created after all filters have run.
 
-### 7.8 Enrichers
+### 7.9 Enrichers
 
 Enrichers are classes that hook into the `DocumentBuilder` filter chain at bootstrap to add fields to specific post types. The plugin ships three:
 
@@ -583,16 +624,24 @@ class ProductIndexingStrategy extends AbstractIndexingStrategy
 
 `AbstractIndexingStrategy` provides working `index()` and `deindex()` implementations, so you don't need to write those.
 
+Inside a strategy, the injected logger is accessible as `$this->logger` and the settings repository as `$this->getSettings()`.
+
 #### Step 2 — Register via the action hook
 
 ```php
 add_action(
     'Municipio/TypesenseSearch/RegisterStrategies',
-    function (\TypesenseSearch\Indexing\IndexingRegistry $registry): void {
+    function (
+        \TypesenseSearch\Indexing\IndexingRegistry $registry,
+        \TypesenseSearch\Services\TypesenseClientService $clientService,
+        \TypesenseSearch\Services\SettingsRepository $settings,
+        \TypesenseSearch\Logger\LoggerInterface $logger
+    ): void {
         // Register before PostIndexingStrategy if your type could otherwise
         // be caught by the generic post handler first.
-        $registry->register(new \MyPlugin\Search\ProductIndexingStrategy());
-    }
+        $registry->register(new \MyPlugin\Search\ProductIndexingStrategy($clientService, $settings, $logger));
+    },
+    10, 4
 );
 ```
 
@@ -674,7 +723,7 @@ class EServiceIndexingStrategy extends AbstractExternalIndexingStrategy
         $response = wp_remote_get('https://api.example.com/eservices', ['timeout' => 15]);
 
         if (is_wp_error($response)) {
-            error_log('[EService] API error: ' . $response->get_error_message());
+            $this->logger->error('[EService] API error: ' . $response->get_error_message());
             return [];
         }
 
@@ -722,14 +771,22 @@ class EServiceIndexingStrategy extends AbstractExternalIndexingStrategy
 
 `AbstractExternalIndexingStrategy` provides working `syncAll()` and `deindex()` implementations. `syncAll()` iterates `fetchItems()`, calls `buildDocument()` on each item, and upserts the result. Individual failures are logged and skipped so the rest of the batch completes.
 
+Notice that `$this->logger` is already available in the strategy for logging — no `error_log()` calls needed.
+
 #### Step 2 — Register via the action hook
 
 ```php
 add_action(
     'Municipio/TypesenseSearch/RegisterStrategies',
-    function (\TypesenseSearch\Indexing\IndexingRegistry $registry): void {
-        $registry->registerExternal(new \MyPlugin\Search\EServiceIndexingStrategy());
-    }
+    function (
+        \TypesenseSearch\Indexing\IndexingRegistry $registry,
+        \TypesenseSearch\Services\TypesenseClientService $clientService,
+        \TypesenseSearch\Services\SettingsRepository $settings,
+        \TypesenseSearch\Logger\LoggerInterface $logger
+    ): void {
+        $registry->registerExternal(new \MyPlugin\Search\EServiceIndexingStrategy($clientService, $settings, $logger));
+    },
+    10, 4
 );
 ```
 
@@ -904,9 +961,9 @@ add_filter(
 
 ### Actions
 
-| Hook                                           | Parameters                   | When                                                                                                                              |
-| ---------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `Municipio/TypesenseSearch/RegisterStrategies` | `IndexingRegistry $registry` | After built-in strategies are registered, before `IndexingHooks` is constructed. Use to register custom WP or external strategies |
+| Hook                                           | Parameters                                                                                                                 | When                                                                                                                                                                                |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Municipio/TypesenseSearch/RegisterStrategies` | `IndexingRegistry $registry, TypesenseClientService $clientService, SettingsRepository $settings, LoggerInterface $logger` | After built-in strategies are registered, before `IndexingHooks` is constructed. Use to register custom WP or external strategies. Accept all 4 args: `add_action(..., ..., 10, 4)` |
 
 ### Filters
 

@@ -2,10 +2,11 @@
 
 namespace TypesenseSearch\Indexing\Strategies;
 
-use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\Indexing\Contracts\ExternalIndexingStrategyInterface;
 use TypesenseSearch\Indexing\IndexableDocument;
-use TypesenseSearch\Typesense\ClientFactory;
+use TypesenseSearch\Logger\LoggerInterface;
+use TypesenseSearch\Services\SettingsRepository;
+use TypesenseSearch\Services\TypesenseClientService;
 
 /**
  * Class AbstractExternalIndexingStrategy
@@ -53,6 +54,20 @@ use TypesenseSearch\Typesense\ClientFactory;
  */
 abstract class AbstractExternalIndexingStrategy implements ExternalIndexingStrategyInterface
 {
+    private TypesenseClientService $clientService;
+    private SettingsRepository $settings;
+    protected LoggerInterface $logger;
+
+    public function __construct(
+        TypesenseClientService $clientService,
+        SettingsRepository $settings,
+        LoggerInterface $logger
+    ) {
+        $this->settings      = $settings;
+        $this->clientService = $clientService;
+        $this->logger        = $logger;
+    }
+
     /**
      * Fetch all raw items from the external source.
      *
@@ -112,7 +127,7 @@ abstract class AbstractExternalIndexingStrategy implements ExternalIndexingStrat
             $document = $this->buildDocument($item);
 
             if ($document === false) {
-                error_log(sprintf(
+                $this->logger->warning(sprintf(
                     '[TypesenseSearch][%s] buildDocument() returned false, skipping item.',
                     $this->getIdentifier()
                 ));
@@ -123,7 +138,7 @@ abstract class AbstractExternalIndexingStrategy implements ExternalIndexingStrat
                 $client->collections[$collectionName]->documents->upsert($document->toArray());
                 $indexed++;
             } catch (\Exception $e) {
-                error_log(sprintf(
+                $this->logger->error(sprintf(
                     '[TypesenseSearch][%s] Failed to index document "%s": %s',
                     $this->getIdentifier(),
                     $document->get('id'),
@@ -156,7 +171,7 @@ abstract class AbstractExternalIndexingStrategy implements ExternalIndexingStrat
         } catch (\Typesense\Exceptions\ObjectNotFound $e) {
             return true; // Already absent — treat as success.
         } catch (\Exception $e) {
-            error_log(sprintf(
+            $this->logger->error(sprintf(
                 '[TypesenseSearch][%s] Failed to deindex document "%s": %s',
                 $this->getIdentifier(),
                 $externalId,
@@ -183,7 +198,7 @@ abstract class AbstractExternalIndexingStrategy implements ExternalIndexingStrat
      */
     protected function getClient(): mixed
     {
-        return ClientFactory::fromOptions();
+        return $this->clientService->getClient();
     }
 
     /**
@@ -193,6 +208,14 @@ abstract class AbstractExternalIndexingStrategy implements ExternalIndexingStrat
      */
     protected function getCollectionName(): string
     {
-        return (string) get_option(Settings::OPTION_INDEX_NAME, '');
+        return $this->settings->getCollectionName();
+    }
+
+    /**
+     * Provide subclasses access to the settings repository.
+     */
+    protected function getSettings(): SettingsRepository
+    {
+        return $this->settings;
     }
 }

@@ -98,7 +98,7 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
 
         $content = PdfToText::extractText($filePath);
         if ($content === false) {
-            error_log(sprintf(
+            $this->logger->error(sprintf(
                 '[TypesenseSearch] pdftotext failed for attachment %d (%s)',
                 $post->ID,
                 $filePath

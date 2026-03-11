@@ -5,6 +5,10 @@ namespace TypesenseSearch;
 use TypesenseSearch\Indexing\IndexingRegistry;
 use TypesenseSearch\Indexing\Strategies\PdfIndexingStrategy;
 use TypesenseSearch\Indexing\Strategies\PostIndexingStrategy;
+use TypesenseSearch\Logger\ErrorLogLogger;
+use TypesenseSearch\Logger\LoggerInterface;
+use TypesenseSearch\Services\SettingsRepository;
+use TypesenseSearch\Services\TypesenseClientService;
 
 /**
  * Class App
@@ -26,25 +30,38 @@ class App {
         // Load .env overrides before anything reads options.
         new EnvLoader();
 
-        new Config();
+        // Build shared services once so every component uses the same instances.
+        $settings      = new SettingsRepository();
+        $clientService = new TypesenseClientService($settings);
+        $logger        = new ErrorLogLogger();
+
+        // Load translations early so they're available in all components.
+        add_action('init', fn() => load_plugin_textdomain(
+            'typesense-search',
+            false,
+            './typesense-search/languages'
+        ));
+
         new Templates();
 
         new ACF\Fields();
 
+        // Admin UI components
         new Admin\Settings();
         new Admin\SettingsAjax();
         new Admin\MetaBox();
 
+        // Frontend components
         new Frontend\Assets();
         new Frontend\EnrichSearchTemplate();
-        new Frontend\TypesenseConfig();
+        new Frontend\TypesenseConfig($settings);
 
         // ── Indexing: build registry with strategies ────────────────────────
         // Register more specific strategies first — the registry evaluates
         // them in order and the first match wins.
         self::$registry = new IndexingRegistry();
-        self::$registry->register(new PdfIndexingStrategy());
-        self::$registry->register(new PostIndexingStrategy());
+        self::$registry->register(new PdfIndexingStrategy($clientService, $settings, $logger));
+        self::$registry->register(new PostIndexingStrategy($clientService, $settings, $logger));
 
         /**
          * Fires after the built-in indexing strategies are registered,
@@ -55,11 +72,11 @@ class App {
          *
          * Example:
          *   add_action('Municipio/TypesenseSearch/RegisterStrategies',
-         *       function (IndexingRegistry $registry): void {
-         *           $registry->register(new MyCustomProductStrategy());
-         *       });
+         *       function (IndexingRegistry $registry, TypesenseClientService $clientService, SettingsRepository $settings, LoggerInterface $logger): void {
+         *           $registry->register(new MyCustomProductStrategy($clientService, $settings, $logger));
+         *       }, 10, 4);
          */
-        do_action('Municipio/TypesenseSearch/RegisterStrategies', self::$registry);
+        do_action('Municipio/TypesenseSearch/RegisterStrategies', self::$registry, $clientService, $settings, $logger);
 
         new Indexing\IndexingHooks(self::$registry);
 

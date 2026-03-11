@@ -2,10 +2,11 @@
 
 namespace TypesenseSearch\Indexing\Strategies;
 
-use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\Indexing\Contracts\IndexingStrategyInterface;
 use TypesenseSearch\Indexing\IndexableDocument;
-use TypesenseSearch\Typesense\ClientFactory;
+use TypesenseSearch\Logger\LoggerInterface;
+use TypesenseSearch\Services\SettingsRepository;
+use TypesenseSearch\Services\TypesenseClientService;
 
 /**
  * Class AbstractIndexingStrategy
@@ -17,10 +18,34 @@ use TypesenseSearch\Typesense\ClientFactory;
  * Subclasses may override index() and deindex() for custom behaviour, but
  * the default implementations here cover the standard upsert/delete pattern.
  *
+ * ── Dependency injection ─────────────────────────────────────────────────
+ *
+ * The constructor requires three services. Pass them from the composition
+ * root (App) or build them at the registration site:
+ *
+ *   $settings = new SettingsRepository();
+ *   $client   = new TypesenseClientService($settings);
+ *   $logger   = new ErrorLogLogger();
+ *   $registry->register(new MyCustomStrategy($client, $settings, $logger));
+ *
  * @package TypesenseSearch\Indexing\Strategies
  */
 abstract class AbstractIndexingStrategy implements IndexingStrategyInterface
 {
+    private TypesenseClientService $clientService;
+    private SettingsRepository $settings;
+    protected LoggerInterface $logger;
+
+    public function __construct(
+        TypesenseClientService $clientService,
+        SettingsRepository $settings,
+        LoggerInterface $logger
+    ) {
+        $this->settings      = $settings;
+        $this->clientService = $clientService;
+        $this->logger        = $logger;
+    }
+
     /**
      * {@inheritdoc}
      *
@@ -46,7 +71,7 @@ abstract class AbstractIndexingStrategy implements IndexingStrategyInterface
             $client->collections[$collectionName]->documents->upsert($document->toArray());
             return true;
         } catch (\Exception $e) {
-            error_log(sprintf(
+            $this->logger->error(sprintf(
                 '[TypesenseSearch][%s] Failed to index post %d: %s',
                 $this->getIdentifier(),
                 $post->ID,
@@ -77,7 +102,7 @@ abstract class AbstractIndexingStrategy implements IndexingStrategyInterface
         } catch (\Typesense\Exceptions\ObjectNotFound $e) {
             return true; // Already absent — treat as success.
         } catch (\Exception $e) {
-            error_log(sprintf(
+            $this->logger->error(sprintf(
                 '[TypesenseSearch][%s] Failed to deindex post %d: %s',
                 $this->getIdentifier(),
                 $postId,
@@ -108,7 +133,7 @@ abstract class AbstractIndexingStrategy implements IndexingStrategyInterface
      */
     protected function getClient(): mixed
     {
-        return ClientFactory::fromOptions();
+        return $this->clientService->getClient();
     }
 
     /**
@@ -118,6 +143,18 @@ abstract class AbstractIndexingStrategy implements IndexingStrategyInterface
      */
     protected function getCollectionName(): string
     {
-        return (string) get_option(Settings::OPTION_INDEX_NAME, '');
+        return $this->settings->getCollectionName();
+    }
+
+    /**
+     * Provide subclasses access to the settings repository.
+     *
+     * Useful when a concrete strategy needs to read additional settings
+     * (e.g. whether a feature is enabled) without importing get_option()
+     * or Settings directly.
+     */
+    protected function getSettings(): SettingsRepository
+    {
+        return $this->settings;
     }
 }

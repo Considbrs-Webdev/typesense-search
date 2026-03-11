@@ -3,7 +3,7 @@
 namespace TypesenseSearch\Frontend;
 
 use TypesenseSearch\Helper\CacheBust;
-use TypesenseSearch\Admin\Settings;
+use TypesenseSearch\Services\SettingsRepository;
 
 /**
  * Class TypesenseConfig
@@ -12,8 +12,11 @@ use TypesenseSearch\Admin\Settings;
  */
 class TypesenseConfig
 {
-	public function __construct()
+	private SettingsRepository $settings;
+
+	public function __construct(SettingsRepository $settings)
 	{
+		$this->settings = $settings;
 		add_action('wp_enqueue_scripts', [$this, 'localizeConfig'], 11);
 	}
 
@@ -22,43 +25,33 @@ class TypesenseConfig
 	 */
 	public function localizeConfig(): void
 	{
-		$isSearch          = is_search();
-		$quickSearchEnabled = (bool) get_option(Settings::OPTION_QUICK_SEARCH_ENABLED, 0);
+		$isSearch           = is_search();
+		$quickSearchEnabled = $this->settings->isQuickSearchEnabled();
 
 		if (!$isSearch && !$quickSearchEnabled) {
 			return;
 		}
 
-		$host         = get_option(Settings::OPTION_REMOTE, '');
-		$frontendHost = get_option(Settings::OPTION_FRONTEND_HOST, '');
-		$collection   = get_option(Settings::OPTION_INDEX_NAME, '');
-		$searchKey    = get_option(Settings::OPTION_SEARCH_KEY, '');
-		$hitsPerPage              = (int) get_option(Settings::OPTION_HITS_PER_PAGE, 10);
-		$debounce                 = (bool) get_option(Settings::OPTION_DEBOUNCE, true);
-		$debounceDelay            = (int) get_option(Settings::OPTION_DEBOUNCE_DELAY, 300);
-		$highlightAffixNumTokens  = (int) get_option(Settings::OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS, 15);
-		// How to truncate text snippets in the frontend: 'brackets'|'ellipsis'|'none'
-		$truncator = (string) get_option(Settings::OPTION_TRUNCATOR, '[...]');
-		// Sort control style: 'radio'|'dropdown'
-		$sortDisplayRaw = (string) get_option(Settings::OPTION_SORT_DISPLAY, 'radio');
-		$sortDisplay    = in_array($sortDisplayRaw, ['radio', 'dropdown'], true) ? $sortDisplayRaw : 'radio';
+		$host        = $this->settings->getRemote();
+		$frontendHost = $this->settings->getFrontendHost();
+		$collection  = $this->settings->getCollectionName();
+		$searchKey   = $this->settings->getSearchKey();
 
 		$config = [
 			'host'                    => esc_url_raw($frontendHost ?: $host),
 			'collection'              => sanitize_text_field($collection),
 			'searchKey'               => sanitize_text_field($searchKey),
-			'hitsPerPage'             => $hitsPerPage,
-			'debounce'                => $debounce,
-			'debounceDelay'           => $debounceDelay,
-			'highlightAffixNumTokens' => $highlightAffixNumTokens,
-			'truncator'               => sanitize_text_field($truncator),
-			'sortDisplay'             => $sortDisplay,
+			'hitsPerPage'             => $this->settings->getHitsPerPage(),
+			'debounce'                => $this->settings->isDebounceEnabled(),
+			'debounceDelay'           => $this->settings->getDebounceDelay(),
+			'highlightAffixNumTokens' => $this->settings->getHighlightAffixNumTokens(),
+			'truncator'               => sanitize_text_field($this->settings->getTruncator()),
+			'sortDisplay'             => $this->settings->getSortDisplay(),
 		];
 
 		// Include configured facets (field, label, placeholder, display_as)
-		$rawFacets = (array) get_option(\TypesenseSearch\Admin\Settings::OPTION_FACETS, []);
 		$facets = [];
-		foreach ($rawFacets as $f) {
+		foreach ($this->settings->getFacets() as $f) {
 			if (!is_array($f)) {
 				continue;
 			}
@@ -108,11 +101,7 @@ class TypesenseConfig
 		}
 
 		if ($quickSearchEnabled) {
-			$quickSearchHitsPerPage = (int) get_option(Settings::OPTION_QUICK_SEARCH_HITS_PER_PAGE, 5);
-			if ($quickSearchHitsPerPage < 1) {
-				$quickSearchHitsPerPage = 5;
-			}
-			$config['quickSearchHitsPerPage'] = $quickSearchHitsPerPage;
+			$config['quickSearchHitsPerPage'] = $this->settings->getQuickSearchHitsPerPage();
 
 			wp_add_inline_script(
 				'typesense-quick-search',
@@ -121,8 +110,7 @@ class TypesenseConfig
 			);
 
 			// Build selectors list from saved option
-			$rawSelectors = (array) get_option(Settings::OPTION_QUICK_SEARCH_SELECTORS, []);
-			$selectors    = array_values(array_filter(array_map(
+			$selectors = array_values(array_filter(array_map(
 				function ($s) {
 					if (!is_array($s)) {
 						return null;
@@ -136,7 +124,7 @@ class TypesenseConfig
 						'sibling'  => !empty($s['sibling']),
 					];
 				},
-				$rawSelectors,
+				$this->settings->getQuickSearchSelectors(),
 			)));
 
 			wp_add_inline_script(

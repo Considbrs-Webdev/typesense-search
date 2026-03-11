@@ -143,7 +143,7 @@ export async function runSearch(
         .documents()
         .search({
           q,
-          query_by: "title,excerpt,content",
+          query_by: "title,excerpt,content,extra_terms,type_name",
           per_page: 0,
           facet_by: field,
           max_facet_values: 200,
