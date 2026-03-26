@@ -53,8 +53,6 @@ function init(): void {
     ".ts-search__heading",
   );
 
-  console.log(searchHeadingEl);
-
   if (!inputEl) return;
 
   const client = createClient(config);
