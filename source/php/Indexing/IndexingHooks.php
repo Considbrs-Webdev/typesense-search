@@ -53,6 +53,12 @@ class IndexingHooks
 
         // Fires just before a post is permanently deleted from the database.
         add_action('before_delete_post', [$this, 'onPostDeindexed']);
+
+        // External API: allow any plugin/theme to trigger index or deindex.
+        //   do_action('typesense_search/index_post', $post_id);
+        //   do_action('typesense_search/deindex_post', $post_id);
+        add_action('typesense_search/index_post', [$this, 'onExternalIndexPost']);
+        add_action('typesense_search/deindex_post', [$this, 'onPostDeindexed']);
     }
 
     /**
@@ -94,6 +100,43 @@ class IndexingHooks
 
         // Transitioning away from published (unpublishing) → remove from index.
         if ($oldStatus === 'publish') {
+            $strategy->deindex($post->ID);
+        }
+    }
+
+    /**
+     * Triggered by the `typesense_search/index_post` action.
+     *
+     * Lets external plugins and themes request (re-)indexing of a single post
+     * without depending on internal classes:
+     *
+     *   do_action('typesense_search/index_post', $post_id);
+     *
+     * The post must be published. If no strategy supports the post type, or if
+     * the strategy's shouldIndex() returns false, the call is a no-op (the
+     * document is removed from the index in the latter case, matching the
+     * behaviour of onAfterInsertPost).
+     *
+     * @param int $postId WordPress post ID.
+     */
+    public function onExternalIndexPost(int $postId): void
+    {
+        // Raw SQL writes (e.g. Nested Pages sort) bypass WordPress and leave
+        // stale data in the object cache. Clear it before reading the post.
+        clean_post_cache($postId);
+        $post = get_post($postId);
+        if (!$post || $post->post_status !== 'publish') {
+            return;
+        }
+
+        $strategy = $this->registry->resolve($post);
+        if ($strategy === null) {
+            return;
+        }
+
+        if ($strategy->shouldIndex($post)) {
+            $strategy->index($post);
+        } else {
             $strategy->deindex($post->ID);
         }
     }

@@ -412,7 +412,9 @@ add_action(
 
 ### 7.3 IndexingHooks
 
-`IndexingHooks` wires three WordPress actions to the registry during bootstrap.
+`IndexingHooks` wires WordPress actions to the registry during bootstrap and also exposes its own actions for external code.
+
+#### Hooks the plugin listens to
 
 | WordPress hook                       | When it fires                                     | What the plugin does                                                                                                                                       |
 | ------------------------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -421,6 +423,23 @@ add_action(
 | `before_delete_post`                 | Post permanently deleted                          | `deindex()`                                                                                                                                                |
 
 Priority 20 on `wp_after_insert_post` is intentional — it ensures all meta boxes have written their values before `shouldIndex()` reads them.
+
+#### Hooks the plugin exposes for external use
+
+External plugins and themes can trigger indexing operations without depending on any internal class:
+
+| Action hook                     | Parameter      | What it does                                                                                                                                                                        |
+| ------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `typesense_search/index_post`   | `int $post_id` | Resolves the strategy for the given post and runs the same `shouldIndex()` → `index()` / `deindex()` logic as `wp_after_insert_post`. The post must be published — no-op otherwise. |
+| `typesense_search/deindex_post` | `int $post_id` | Removes the document for the given post ID from the index. Safe to call even if the document does not exist.                                                                        |
+
+```php
+// Re-index a post after your plugin changes data that affects the index
+do_action('typesense_search/index_post', $post_id);
+
+// Explicitly remove a post from the index
+do_action('typesense_search/deindex_post', $post_id);
+```
 
 PDF attachments have their own lifecycle hooks (`add_attachment`, `edit_attachment`, `delete_attachment`) registered by `PdfIndexingStrategy::registerHooks()`.
 
@@ -961,9 +980,24 @@ add_filter(
 
 ### Actions
 
-| Hook                                           | Parameters                                                                                                                 | When                                                                                                                                                                                |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Municipio/TypesenseSearch/RegisterStrategies` | `IndexingRegistry $registry, TypesenseClientService $clientService, SettingsRepository $settings, LoggerInterface $logger` | After built-in strategies are registered, before `IndexingHooks` is constructed. Use to register custom WP or external strategies. Accept all 4 args: `add_action(..., ..., 10, 4)` |
+| Hook                                           | Parameters                                                                                                                 | When                                                                                                                                                                                                                    |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Municipio/TypesenseSearch/RegisterStrategies` | `IndexingRegistry $registry, TypesenseClientService $clientService, SettingsRepository $settings, LoggerInterface $logger` | After built-in strategies are registered, before `IndexingHooks` is constructed. Use to register custom WP or external strategies. Accept all 4 args: `add_action(..., ..., 10, 4)`                                     |
+| `typesense_search/index_post`                  | `int $post_id`                                                                                                             | Trigger (re-)indexing of a single published post from any external plugin or theme. Runs the full `shouldIndex()` → `index()` / `deindex()` logic. No-op if the post is not published or no strategy supports its type. |
+| `typesense_search/deindex_post`                | `int $post_id`                                                                                                             | Remove a single post's document from the Typesense index from any external plugin or theme. Safe to call even if the document does not exist.                                                                           |
+
+#### External triggering — usage examples
+
+```php
+// Re-index a post after your plugin changes data that should update the index.
+// The post must already be published — nothing happens for drafts etc.
+do_action('typesense_search/index_post', $post_id);
+
+// Explicitly remove a post from the index.
+do_action('typesense_search/deindex_post', $post_id);
+```
+
+Both hooks are wired in `IndexingHooks` during bootstrap, so they are available as soon as the plugin is active. Because `do_action()` on an unregistered hook is a silent no-op, calls made before the plugin loads are safe.
 
 ### Filters
 
