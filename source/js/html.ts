@@ -13,8 +13,15 @@ export type PlaceholderFn = (
 export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
   SEARCH_HIT_HEADING: (d, h) => {
     const snippet = h?.title?.snippet;
-    if (snippet) return { value: snippet, highlighted: true };
-    return String(d.title ?? "");
+    const text = snippet ?? String(d.title ?? "");
+    if (!isExternalDocument(d)) {
+      return snippet
+        ? { value: text, highlighted: true }
+        : text;
+    }
+    const icon =
+      ' <i class="fa-solid fa-up-right-from-square ts-external-link-icon" aria-hidden="true"></i>';
+    return { value: text + icon, highlighted: true };
   },
   SEARCH_HIT_SUBHEADING: (d) =>
     String(d.post_type_name ?? d.type_name ?? d.post_date_formatted ?? ""),
@@ -93,6 +100,48 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
     return { value: wrapped, highlighted: true } as const;
   },
 };
+
+function coerceBoolean(value: unknown): boolean | null {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["1", "true", "yes", "y", "on"].includes(normalized)) return true;
+    if (["0", "false", "no", "n", "off", ""].includes(normalized)) return false;
+  }
+  return null;
+}
+
+function resolveHitLink(d: HitDocument): string {
+  const permalink = String(d.permalink ?? "").trim();
+  if (permalink) return permalink;
+  return String(d.url ?? "").trim();
+}
+
+function isExternalByUrl(link: string): boolean {
+  if (!link || typeof window === "undefined") return false;
+
+  try {
+    const parsed = new URL(link, window.location.origin);
+    if (!["http:", "https:"].includes(parsed.protocol)) return false;
+    return parsed.origin !== window.location.origin;
+  } catch {
+    // Malformed URL or non-standard format: fail closed.
+    return false;
+  }
+}
+
+function isExternalDocument(d: HitDocument): boolean {
+  // Prefer explicit fields provided by indexers/extenders.
+  const explicit =
+    coerceBoolean(d.is_external) ??
+    coerceBoolean(d.isExternal) ??
+    coerceBoolean(d.external);
+  if (explicit !== null) return explicit;
+
+  // Legacy-safe fallback for older indexed documents.
+  return isExternalByUrl(resolveHitLink(d));
+}
 
 export function escapeAttr(str: string): string {
   return str

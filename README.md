@@ -874,6 +874,12 @@ Tokens are `{UPPER_SNAKE_CASE}` strings embedded in the template HTML. The JavaS
 | `{SEARCH_HIT_IMAGE_ALT}`     | `title`                  | Alt text for the featured image                   |
 | `{SEARCH_HIT_VALID_THROUGH}` | `validThrough`           | Job-posting expiry date (used by `jobposting`)    |
 
+When a hit is determined to be external, `{SEARCH_HIT_HEADING}` automatically appends an external-link icon (`fa-up-right-from-square`) after the title text. No template changes are needed.
+
+External detection is backward-compatible:
+- If the document contains `is_external` (or `isExternal` / `external`), that explicit value is used.
+- Otherwise the frontend falls back to comparing the hit URL origin with `window.location.origin`.
+
 ##### Custom tokens via `placeholderMappings` filter
 
 You can map additional token names to any field in the Typesense document:
