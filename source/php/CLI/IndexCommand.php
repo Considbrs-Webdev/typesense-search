@@ -201,31 +201,44 @@ class IndexCommand
                 $posts = get_posts($queryArgs);
 
                 foreach ($posts as $post) {
-                    $strategy = App::getRegistry()->resolve($post);
-                    if (!$strategy || !$strategy->shouldIndex($post)) {
-                        $skipped++;
-                        $progress->tick();
-                        if ($sleepUs > 0) {
-                            usleep($sleepUs);
+                    try {
+                        $strategy = App::getRegistry()->resolve($post);
+                        if (!$strategy || !$strategy->shouldIndex($post)) {
+                            $skipped++;
+                            $progress->tick();
+                            if ($sleepUs > 0) {
+                                usleep($sleepUs);
+                            }
+                            continue;
                         }
-                        continue;
-                    }
 
-                    if ($isDryRun) {
-                        $indexed++;
-                        $progress->tick();
-                        if ($sleepUs > 0) {
-                            usleep($sleepUs);
+                        if ($isDryRun) {
+                            $indexed++;
+                            $progress->tick();
+                            if ($sleepUs > 0) {
+                                usleep($sleepUs);
+                            }
+                            continue;
                         }
-                        continue;
-                    }
 
-                    $result = $strategy->index($post);
+                        $result = $strategy->index($post);
 
-                    if ($result) {
-                        $indexed++;
-                    } else {
+                        if ($result) {
+                            $indexed++;
+                        } else {
+                            $failed++;
+                            \WP_CLI::warning(sprintf(
+                                '    Failed to index post ID %d ("%s").',
+                                $post->ID,
+                                $post->post_title
+                            ));
+                        }
+                    } catch (\Throwable $e) {
                         $failed++;
+                        $this->logIndexingThrowable(
+                            sprintf('post %d', $post->ID),
+                            $e
+                        );
                         \WP_CLI::warning(sprintf(
                             '    Failed to index post ID %d ("%s").',
                             $post->ID,
@@ -298,23 +311,36 @@ class IndexCommand
                         $pdfs = get_posts($pdfQueryArgs);
 
                         foreach ($pdfs as $pdf) {
-                            if (!$pdfStrategy || $pdf->post_mime_type !== 'application/pdf') {
-                                $pdfSkipped++;
-                                $progress->tick();
-                                continue;
-                            }
+                            try {
+                                if (!$pdfStrategy || $pdf->post_mime_type !== 'application/pdf') {
+                                    $pdfSkipped++;
+                                    $progress->tick();
+                                    continue;
+                                }
 
-                            if ($isDryRun) {
-                                $pdfIndexed++;
-                                $progress->tick();
-                                continue;
-                            }
+                                if ($isDryRun) {
+                                    $pdfIndexed++;
+                                    $progress->tick();
+                                    continue;
+                                }
 
-                            $result = $pdfStrategy->index($pdf);
-                            if ($result) {
-                                $pdfIndexed++;
-                            } else {
+                                $result = $pdfStrategy->index($pdf);
+                                if ($result) {
+                                    $pdfIndexed++;
+                                } else {
+                                    $pdfFailed++;
+                                    \WP_CLI::warning(sprintf(
+                                        '    Failed to index PDF attachment ID %d ("%s").',
+                                        $pdf->ID,
+                                        $pdf->post_title
+                                    ));
+                                }
+                            } catch (\Throwable $e) {
                                 $pdfFailed++;
+                                $this->logIndexingThrowable(
+                                    sprintf('PDF attachment %d', $pdf->ID),
+                                    $e
+                                );
                                 \WP_CLI::warning(sprintf(
                                     '    Failed to index PDF attachment ID %d ("%s").',
                                     $pdf->ID,
@@ -1035,7 +1061,7 @@ class IndexCommand
                 $count = $strategy->syncAll();
                 \WP_CLI::log(sprintf('  ✓ %d document(s) indexed.', $count));
                 $totalIndexed += $count;
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 \WP_CLI::warning(sprintf('  ✗ "%s" failed: %s', $id, $e->getMessage()));
                 $totalFailed++;
             }
@@ -1142,13 +1168,26 @@ class IndexCommand
                 $count    = $strategy->syncAll();
                 $indexed += $count;
                 \WP_CLI::log(sprintf('    ✓ %d document(s) indexed.', $count));
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $failed++;
                 \WP_CLI::warning(sprintf('    ✗ "%s" failed: %s', $id, $e->getMessage()));
             }
         }
 
         return [$indexed, $failed];
+    }
+
+    /**
+     * Write unexpected per-document indexing failures to PHP's error log so
+     * the batch can continue while preserving enough context to debug later.
+     */
+    private function logIndexingThrowable(string $documentLabel, \Throwable $e): void
+    {
+        error_log(sprintf(
+            '[TypesenseSearch][cli] Document for %s could not be indexed: %s',
+            $documentLabel,
+            $e->getMessage()
+        ));
     }
 
     /**

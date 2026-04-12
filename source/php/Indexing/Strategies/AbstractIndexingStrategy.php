@@ -62,17 +62,17 @@ abstract class AbstractIndexingStrategy implements IndexingStrategyInterface
             return false;
         }
 
-        $document = $this->buildDocument($post);
-        if ($document === false) {
-            return false;
-        }
-
         try {
+            $document = $this->buildDocument($post);
+            if ($document === false) {
+                return false;
+            }
+
             $client->collections[$collectionName]->documents->upsert($document->toArray());
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error(sprintf(
-                '[TypesenseSearch][%s] Failed to index post %d: %s',
+                '[TypesenseSearch][%s] Document for post %d could not be indexed: %s',
                 $this->getIdentifier(),
                 $post->ID,
                 $e->getMessage()

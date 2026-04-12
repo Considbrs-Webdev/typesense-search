@@ -124,24 +124,28 @@ abstract class AbstractExternalIndexingStrategy implements ExternalIndexingStrat
         $indexed = 0;
 
         foreach ($this->fetchItems() as $item) {
-            $document = $this->buildDocument($item);
-
-            if ($document === false) {
-                $this->logger->warning(sprintf(
-                    '[TypesenseSearch][%s] buildDocument() returned false, skipping item.',
-                    $this->getIdentifier()
-                ));
-                continue;
-            }
-
             try {
+                $document = $this->buildDocument($item);
+
+                if ($document === false) {
+                    $this->logger->warning(sprintf(
+                        '[TypesenseSearch][%s] buildDocument() returned false, skipping item.',
+                        $this->getIdentifier()
+                    ));
+                    continue;
+                }
+
                 $client->collections[$collectionName]->documents->upsert($document->toArray());
                 $indexed++;
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
+                $documentId = isset($document) && $document instanceof IndexableDocument
+                    ? (string) $document->get('id')
+                    : $this->safeExternalId($item);
+
                 $this->logger->error(sprintf(
-                    '[TypesenseSearch][%s] Failed to index document "%s": %s',
+                    '[TypesenseSearch][%s] Document "%s" could not be indexed: %s',
                     $this->getIdentifier(),
-                    $document->get('id'),
+                    $documentId,
                     $e->getMessage()
                 ));
             }
@@ -217,5 +221,19 @@ abstract class AbstractExternalIndexingStrategy implements ExternalIndexingStrat
     protected function getSettings(): SettingsRepository
     {
         return $this->settings;
+    }
+
+    /**
+     * Best-effort helper for logging the external document ID even when
+     * buildDocument() failed before a full IndexableDocument existed.
+     */
+    private function safeExternalId(mixed $item): string
+    {
+        try {
+            $externalId = $this->getExternalId($item);
+            return $externalId !== '' ? $externalId : '(unknown)';
+        } catch (\Throwable $e) {
+            return '(unknown)';
+        }
     }
 }
