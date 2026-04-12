@@ -25,15 +25,15 @@
         "not dead"
     ],
     "devDependencies": {
-        "sass-embedded": "1.97.1",
-        "vite": "7.3.0",
-        "vite-config-factory": "1.0.1"
+        "sass-embedded": "^1.97.1",
+        "vite": "^7.3.0",
+        "vite-config-factory": "^1.0.1"
     },
     "browser": {
         "child_process": false
     },
     "dependencies": {
         "@awesome.me/webawesome": "^3.2.1",
-        "typesense": "github:typesense/typesense-js"
+        "typesense": "^3.0.4"
     }
 }
