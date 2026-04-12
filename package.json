@@ -34,6 +34,6 @@
     },
     "dependencies": {
         "@awesome.me/webawesome": "^3.2.1",
-        "typesense": "^3.0.4"
+        "typesense": "3.0.4"
     }
 }
