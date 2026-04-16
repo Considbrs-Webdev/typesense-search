@@ -57,6 +57,9 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
   SEARCH_HIT_IMAGE_URL: (d) => String(d.thumbnail ?? ""),
   SEARCH_HIT_IMAGE_ALT: (d) => String(d.thumbnail_alt ?? ""),
 
+  /** @deprecated Always empty. Old hit markup used this on a wrapping &lt;a&gt;; prefer a title link only. */
+  SEARCH_HIT_ARIA_LABEL: () => "",
+
   SEARCH_HIT_DATE: (d) => {
     if (d.post_date_formatted) return String(d.post_date_formatted);
     const ts = typeof d.date === "number" ? d.date : 0;
@@ -222,5 +225,7 @@ export function replacePlaceholders(
     }
     result = result.replaceAll(`{${key}}`, value);
   }
+  // Drop empty aria-label from templates that still use deprecated SEARCH_HIT_ARIA_LABEL.
+  result = result.replace(/\s+aria-label=(?:""|'')/gi, "");
   return result;
 }
