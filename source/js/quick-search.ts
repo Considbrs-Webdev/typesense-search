@@ -4,6 +4,7 @@
 
 import { createClient } from "./client";
 import type { TypesenseSearchConfig, SearchHit } from "./types";
+import { loadWebAwesomeLocale } from "./webawesome-locale";
 
 interface QuickSearchSelectorEntry {
   selector: string;
@@ -609,4 +610,6 @@ function init(): void {
   }
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+  void loadWebAwesomeLocale().then(() => init());
+});

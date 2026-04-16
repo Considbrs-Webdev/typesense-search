@@ -4,8 +4,8 @@
         'data-js-search-hit-template-image' => true
     ]
 ])
-    <a class="c-card c-card--size-md c-card--has-image c-card--action c-card--ratio-16-9" aria-label="{SEARCH_HIT_ARIA_LABEL}"
-        href="{SEARCH_HIT_LINK}" data-uid="69a08bfe862df">
+    <div class="c-card c-card--size-md c-card--has-image c-card--action c-card--ratio-16-9 ts-search-hit-card"
+        data-uid="69a08bfe862df">
         <div class="c-card__paint-container">
             <div class="c-card__image-container">
                 <figure class="c-image c-card__image c-image--cover">
@@ -21,7 +21,7 @@
                         <time class="c-date">{SEARCH_HIT_DATE}</time>
                     </div>
                     <h2 class="c-typography c-card__heading u-margin__y--0 c-typography__variant--h3">
-                        {SEARCH_HIT_HEADING}
+                        <a class="ts-search-hit-card__link" href="{SEARCH_HIT_LINK}">{SEARCH_HIT_HEADING}</a>
                     </h2>
                     <p class="c-typography c-card__content c-typography__variant--p u-margin__y--0">
                         {SEARCH_HIT_EXCERPT}
@@ -32,5 +32,5 @@
                 </div>
             </div>
         </div>
-    </a>
+    </div>
 @endelement

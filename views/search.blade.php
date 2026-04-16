@@ -6,7 +6,7 @@
     <section class="o-container u-margin__top--6">
         <div class="o-grid">
             <div class="o-grid-12">
-                <h1 class="ts-search__heading" hidden>
+                <h1 class="ts-search__heading">
                     {{ $lang->search }}
                 </h1>
             </div>
@@ -18,7 +18,7 @@
         <div class="o-grid">
             <div class="o-grid-12">
 
-                <form class="ts-search" method="get" action="{{ $homeUrl ?? '/' }}" hidden>
+                <form class="ts-search" method="get" action="{{ $homeUrl ?? '/' }}">
 
                     <div class="wa-stack wa-gap-xl">
 
@@ -32,9 +32,9 @@
                                 <div class="ts-main-filter">
                                     <div class="ts-search-row">
                                         <div class="ts-search-input-field">
-                                            <label class="ts-search-label"
-                                                for="ts-search-field">{{ $lang->searchLabel }}</label>
+                                            {{-- Web Awesome associates the accessible name via `label`; a plain <label for> does not reach the shadow input. --}}
                                             <wa-input id="ts-search-field" size="large"
+                                                label="{{ $lang->searchLabel }}"
                                                 placeholder="{{ $lang->searchPlaceholder }}" with-clear
                                                 data-js-search-page-search-input name="s">
                                             </wa-input>
@@ -59,14 +59,15 @@
 
                                     {{-- Summary sentence: "Din sökning X gav Y träffar" (populated by JS) --}}
                                     <p class="ts-search-summary" data-js-search-summary
-                                        data-lang-template="{{ $lang->searchSummaryTemplate }}" hidden></p>
+                                        data-lang-template="{{ $lang->searchSummaryTemplate }}" hidden
+                                        aria-live="polite" aria-atomic="true"></p>
 
                                     {{-- Count span: used internally by search.ts + as data source for summary --}}
                                     <span data-js-search-results-count data-lang-singular="{{ $lang->resultSingular }}"
                                         data-lang-plural="{{ $lang->resultPlural }}" hidden></span>
 
-                                    <div class="ts-search-results wa-stack" data-js-search-results>
-                                    </div>
+                                    <ol class="ts-search-results wa-stack" data-js-search-results role="list">
+                                    </ol>
                                 </div>
 
                                 <div class="wa-stack ts-no-hits-container" data-js-no-hits-container>
@@ -98,8 +99,9 @@
                                     </wa-select>
                                 @else
                                     <div class="ts-sort-section">
-                                        <h3 class="ts-sort-heading">{{ $lang->sortBy }}</h3>
-                                        <wa-radio-group value="relevance" data-js-sort>
+                                        <h3 id="ts-sort-heading" class="ts-sort-heading">{{ $lang->sortBy }}</h3>
+                                        <wa-radio-group value="relevance" data-js-sort
+                                            aria-labelledby="ts-sort-heading">
                                             <wa-radio value="relevance">{{ $lang->relevance }}</wa-radio>
                                             <wa-radio value="dateDesc">{{ $lang->dateDesc }}</wa-radio>
                                             <wa-radio value="dateAsc">{{ $lang->dateAsc }}</wa-radio>
@@ -117,7 +119,9 @@
 
                 </form>
 
-                <div class="ts-loader" data-js-loader></div>
+                <div class="ts-loader" data-js-loader role="status" aria-live="polite">
+                    <span class="ts-sr-only">{{ $lang->loadingSearch }}</span>
+                </div>
 
                 {{-- Backdrop overlay for mobile filter panel --}}
                 <div class="ts-filter-overlay" data-js-filter-overlay></div>

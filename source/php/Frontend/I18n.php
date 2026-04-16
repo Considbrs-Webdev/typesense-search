@@ -27,11 +27,16 @@ class I18n
             // search.ts – error state
             'searchError'      => __('Search failed. Please try again.', 'typesense-search'),
 
-            // html.ts – SEARCH_HIT_ARIA_LABEL
-            'readMore'         => __('Read more: ', 'typesense-search'),
+            // Web Awesome wa-input clear (override for Swedish; see webawesome-locale.ts)
+            'clearSearchField' => __('Clear search field', 'typesense-search'),
 
             // pagination.ts – nav aria-label
             'paginationLabel'  => __('Search result pages', 'typesense-search'),
+            'paginationPrevious' => __('Previous page', 'typesense-search'),
+            'paginationNext'     => __('Next page', 'typesense-search'),
+
+            // search page loader (role="status")
+            'loadingSearch'    => __('Loading search…', 'typesense-search'),
         ];
     }
 
@@ -87,8 +92,8 @@ class I18n
             // Facetting – row labels / placeholders
             'facetFieldLabel'      => __('Field', 'typesense-search'),
             'facetLabelLabel'      => __('Label', 'typesense-search'),
-            'facetLabelPlaceholder'=> __('e.g. Category', 'typesense-search'),
-            'facetPlaceholderLabel'=> __('Placeholder', 'typesense-search'),
+            'facetLabelPlaceholder' => __('e.g. Category', 'typesense-search'),
+            'facetPlaceholderLabel' => __('Placeholder', 'typesense-search'),
             'facetPlaceholderPh'   => __('e.g. All categories', 'typesense-search'),
             'facetDisplayAsLabel'  => __('Display as', 'typesense-search'),
             'facetOptDropdown'     => __('Dropdown', 'typesense-search'),
@@ -97,7 +102,7 @@ class I18n
 
             // Quick search tab
             'qsSelectorLabel'      => __('CSS selector', 'typesense-search'),
-            'qsSelectorPlaceholder'=> __('e.g. .site-header input[type=search]', 'typesense-search'),
+            'qsSelectorPlaceholder' => __('e.g. .site-header input[type=search]', 'typesense-search'),
             'removeSelector'       => __('Remove selector', 'typesense-search'),
             'qsPlacementLabel'     => __('Placement', 'typesense-search'),
             'qsPlacementDefault'   => __('Default (body)', 'typesense-search'),

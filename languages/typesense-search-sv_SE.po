@@ -382,15 +382,27 @@ msgstr "Stäng filter"
 msgid "Search failed. Please try again."
 msgstr "Sökningen misslyckades. Försök igen."
 
-#: source/php/Frontend/I18n.php:31
-msgid "Read more: "
-msgstr "Läs mer: "
-
 #: source/php/Frontend/I18n.php:34
 msgid "Search result pages"
 msgstr "Sökresultatsidor"
 
-#: source/php/Frontend/I18n.php:47
+#: source/php/Frontend/I18n.php:31
+msgid "Clear search field"
+msgstr "Rensa sökfältet"
+
+#: source/php/Frontend/I18n.php:35
+msgid "Previous page"
+msgstr "Föregående sida"
+
+#: source/php/Frontend/I18n.php:36
+msgid "Next page"
+msgstr "Nästa sida"
+
+#: source/php/Frontend/I18n.php:39
+msgid "Loading search…"
+msgstr "Laddar sökning…"
+
+#: source/php/Frontend/I18n.php:52
 msgid "See all results"
 msgstr "Se alla resultat"
 

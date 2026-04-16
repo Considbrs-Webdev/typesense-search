@@ -20,14 +20,19 @@ export interface TypesenseSearchConfig {
   debounceDelay?: number;
   highlightAffixNumTokens?: number;
   sortDisplay?: "radio" | "dropdown";
+  /** Web Awesome translation module key (e.g. `sv`); omit for English internals. */
+  webAwesomeLocale?: string | null;
 }
 
 export interface TypesenseI18n {
   resultSingular: string;
   resultPlural: string;
   searchError: string;
-  readMore: string;
+  clearSearchField: string;
   paginationLabel: string;
+  paginationPrevious: string;
+  paginationNext: string;
+  loadingSearch: string;
 }
 
 export interface TypesenseQuickSearchI18n {

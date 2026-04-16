@@ -180,7 +180,10 @@ export async function runSearch(
         if (paginationEl) paginationEl.innerHTML = "";
       } else {
         resultsEl.innerHTML = hits
-          .map((hit) => renderHit(hit, templates))
+          .map(
+            (hit) =>
+              `<li class="ts-search-results__item">${renderHit(hit, templates)}</li>`,
+          )
           .join("");
 
         if (paginationEl) {
@@ -227,7 +230,7 @@ export async function runSearch(
     console.error("[TypesenseSearch] Search error:", err);
     const errorMsg =
       window.typesenseI18n?.searchError ?? "Search failed. Please try again.";
-    resultsEl.innerHTML = `<p class="ts-search-error">${errorMsg}</p>`;
+    resultsEl.innerHTML = `<li class="ts-search-results__item" role="alert"><p class="ts-search-error">${errorMsg}</p></li>`;
     if (paginationEl) paginationEl.innerHTML = "";
     return null;
   }

@@ -14,6 +14,44 @@ class TypesenseConfig
 {
 	private SettingsRepository $settings;
 
+	/**
+	 * Map WordPress locale to a Web Awesome translation module (dist/translations/{key}.js).
+	 * Null means use built-in English strings for component internals.
+	 *
+	 * @return string|null
+	 */
+	private static function webAwesomeLocale(): ?string
+	{
+		$locale = get_locale();
+		$exact  = [
+			'sv_SE' => 'sv',
+			'en_GB' => 'en-gb',
+			'nb_NO' => 'nb',
+			'nn_NO' => 'nn',
+			'da_DK' => 'da',
+			'fi'    => 'fi',
+		];
+		if (isset($exact[$locale])) {
+			return $exact[$locale];
+		}
+		$lang = strtok($locale, '_') ?: $locale;
+		$byLanguage = [
+			'sv' => 'sv',
+			'da' => 'da',
+			'nb' => 'nb',
+			'nn' => 'nn',
+			'fi' => 'fi',
+			'de' => 'de',
+			'fr' => 'fr',
+			'es' => 'es',
+			'nl' => 'nl',
+			'pl' => 'pl',
+			'pt' => 'pt',
+			'it' => 'it',
+		];
+		return $byLanguage[$lang] ?? null;
+	}
+
 	public function __construct(SettingsRepository $settings)
 	{
 		$this->settings = $settings;
@@ -47,6 +85,7 @@ class TypesenseConfig
 			'highlightAffixNumTokens' => $this->settings->getHighlightAffixNumTokens(),
 			'truncator'               => sanitize_text_field($this->settings->getTruncator()),
 			'sortDisplay'             => $this->settings->getSortDisplay(),
+			'webAwesomeLocale'        => self::webAwesomeLocale(),
 		];
 
 		// Include configured facets (field, label, placeholder, display_as)

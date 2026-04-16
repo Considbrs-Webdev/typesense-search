@@ -1,12 +1,14 @@
 <template data-pagination-tmpl="prev">
-    <wa-button size="small" class="ts-pagination__btn-prev">
-        <wa-icon name="chevron-left" label="Previous"></wa-icon>
+    <wa-button size="small" class="ts-pagination__btn-prev" type="button">
+        <wa-icon slot="start" name="chevron-left" aria-hidden="true"></wa-icon>
+        <span class="ts-sr-only">{{ $lang->paginationPrevious }}</span>
     </wa-button>
 </template>
 
 <template data-pagination-tmpl="next">
-    <wa-button size="small" class="ts-pagination__btn-next">
-        <wa-icon name="chevron-right" label="Next"></wa-icon>
+    <wa-button size="small" class="ts-pagination__btn-next" type="button">
+        <wa-icon slot="start" name="chevron-right" aria-hidden="true"></wa-icon>
+        <span class="ts-sr-only">{{ $lang->paginationNext }}</span>
     </wa-button>
 </template>
 

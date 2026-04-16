@@ -9,6 +9,7 @@ import { createSearchRunner } from "./search";
 import { getHitTemplates } from "./templates";
 import { getUrlState, updateUrlState } from "./url-state";
 import { setupFacets, programmaticUpdates } from "./facets";
+import { loadWebAwesomeLocale } from "./webawesome-locale";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -17,9 +18,10 @@ import { setupFacets, programmaticUpdates } from "./facets";
 function resolveResultsEl(container: HTMLElement): HTMLElement {
   let el = container.querySelector<HTMLElement>("[data-js-search-results]");
   if (!el) {
-    el = document.createElement("div");
+    el = document.createElement("ol");
     el.className = "ts-search-results wa-stack";
     el.setAttribute("data-js-search-results", "");
+    el.setAttribute("role", "list");
     const form = container.querySelector("form");
     form ? form.after(el) : container.appendChild(el);
   }
@@ -48,10 +50,6 @@ function init(): void {
   );
   const resultsEl = resolveResultsEl(container);
   const loaderEl = container.querySelector<HTMLElement>("[data-js-loader]");
-  const searchFormEl = container.querySelector<HTMLElement>(".ts-search");
-  const searchHeadingEl = document.querySelector<HTMLElement>(
-    ".ts-search__heading",
-  );
 
   if (!inputEl) return;
 
@@ -63,6 +61,8 @@ function init(): void {
   const summaryEl = container.querySelector<HTMLElement>(
     "[data-js-search-summary]",
   );
+
+  container.setAttribute("aria-busy", "true");
 
   // ── Search ───────────────────────────────────────────────────────────────
 
@@ -80,50 +80,51 @@ function init(): void {
   );
 
   let isFirstSearch = true;
+
+  const finishFirstLoad = (): void => {
+    if (!isFirstSearch) return;
+    if (loaderEl) loaderEl.hidden = true;
+    container.removeAttribute("aria-busy");
+    isFirstSearch = false;
+  };
+
   const triggerSearch = (): void => {
-    search(getUrlState()).then((facetData) => {
-      facets.render(facetData);
+    search(getUrlState())
+      .then((facetData) => {
+        facets.render(facetData);
 
-      // Mirror count into the mobile sidebar panel
-      const countEl = container.querySelector<HTMLElement>(
-        "[data-js-search-results-count]",
-      );
-      const sidebarCountEl = container.querySelector<HTMLElement>(
-        "[data-js-sidebar-results-count]",
-      );
-      if (sidebarCountEl) {
-        sidebarCountEl.textContent = countEl?.textContent ?? "";
-      }
-
-      // Update the summary sentence below the search input.
-      // Template (set via data-lang-template on the element from PHP):
-      if (summaryEl) {
-        const { query } = getUrlState();
-        const countText = countEl?.textContent?.trim() ?? "";
-        const template = summaryEl.dataset.langTemplate ?? "";
-
-        if (query && countText && template) {
-          summaryEl.innerHTML = template
-            .replace("%1$s", query)
-            .replace("%2$s", countText);
-          summaryEl.hidden = false;
-        } else {
-          summaryEl.hidden = true;
+        // Mirror count into the mobile sidebar panel
+        const countEl = container.querySelector<HTMLElement>(
+          "[data-js-search-results-count]",
+        );
+        const sidebarCountEl = container.querySelector<HTMLElement>(
+          "[data-js-sidebar-results-count]",
+        );
+        if (sidebarCountEl) {
+          sidebarCountEl.textContent = countEl?.textContent ?? "";
         }
-      }
 
-      // Hide loader and show search interface after first search completes
-      if (isFirstSearch && loaderEl) {
-        loaderEl.hidden = true;
-        if (searchFormEl) {
-          searchFormEl.hidden = false;
+        // Update the summary sentence below the search input.
+        if (summaryEl) {
+          const { query } = getUrlState();
+          const countText = countEl?.textContent?.trim() ?? "";
+          const template = summaryEl.dataset.langTemplate ?? "";
+
+          if (query && countText && template) {
+            summaryEl.innerHTML = template
+              .replace("%1$s", query)
+              .replace("%2$s", countText);
+            summaryEl.hidden = false;
+          } else {
+            summaryEl.hidden = true;
+          }
         }
-        if (searchHeadingEl) {
-          searchHeadingEl.hidden = false;
-        }
-        isFirstSearch = false;
-      }
-    });
+
+        finishFirstLoad();
+      })
+      .catch(() => {
+        finishFirstLoad();
+      });
   };
 
   // ── URL → UI sync ────────────────────────────────────────────────────────
@@ -184,31 +185,6 @@ function init(): void {
     triggerSearch();
   });
 
-  // ── Breadcrumb navigation ────────────────────────────────────────────────
-  // Breadcrumb segments inside hit cards carry data-href instead of being
-  // real <a> tags (the whole card is already an <a>). We intercept clicks
-  // and keyboard activation here, prevent the card link from firing, and
-  // navigate to the breadcrumb URL instead.
-
-  resultsEl.addEventListener("click", (e) => {
-    const target = (e.target as Element).closest<HTMLElement>("[data-href]");
-    if (!target) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const href = target.dataset.href;
-    if (href) window.location.href = href;
-  });
-
-  resultsEl.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    const target = (e.target as Element).closest<HTMLElement>("[data-href]");
-    if (!target) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const href = target.dataset.href;
-    if (href) window.location.href = href;
-  });
-
   // ── Mobile filter panel (CSS slide-in) ─────────────────────────────────────────
 
   const filterToggleEl = container.querySelector<HTMLElement>(
@@ -242,21 +218,19 @@ function init(): void {
 
   // ── Boot ─────────────────────────────────────────────────────────────────
 
-  // Show loader initially
   if (loaderEl) {
     loaderEl.hidden = false;
-  }
-
-  // Hide search form and heading initially
-  if (searchFormEl) {
-    searchFormEl.hidden = true;
-  }
-  if (searchHeadingEl) {
-    searchHeadingEl.hidden = true;
   }
 
   syncUiFromUrl();
   triggerSearch();
 }
 
-document.addEventListener("DOMContentLoaded", init);
+async function boot(): Promise<void> {
+  await loadWebAwesomeLocale();
+  init();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  void boot();
+});

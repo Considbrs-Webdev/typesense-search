@@ -56,8 +56,6 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
   SEARCH_HIT_LINK: (d) => String(d.permalink ?? d.url ?? "#"),
   SEARCH_HIT_IMAGE_URL: (d) => String(d.thumbnail ?? ""),
   SEARCH_HIT_IMAGE_ALT: (d) => String(d.thumbnail_alt ?? ""),
-  SEARCH_HIT_ARIA_LABEL: (d) =>
-    `${window.typesenseI18n?.readMore ?? "Read more: "}${d.title ?? ""}`,
 
   SEARCH_HIT_DATE: (d) => {
     if (d.post_date_formatted) return String(d.post_date_formatted);
@@ -91,7 +89,7 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
         const inner = isLast ? safe : `<strong>${safe}</strong>`;
         const url = urls[idx];
         if (url) {
-          return `<span class="ts-breadcrumb-link" data-href="${escapeAttr(url)}" role="link" tabindex="0">${inner}</span>`;
+          return `<a href="${escapeAttr(url)}" class="ts-breadcrumb-link">${inner}</a>`;
         }
         return inner;
       })

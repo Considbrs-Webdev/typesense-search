@@ -55,6 +55,13 @@ function cloneTemplate(name: string): HTMLElement | null {
   );
 }
 
+function appendPaginationItem(list: HTMLElement, child: Node): void {
+  const li = document.createElement("li");
+  li.className = "ts-pagination__item";
+  li.appendChild(child);
+  list.appendChild(li);
+}
+
 export function renderPagination(
   el: HTMLElement,
   totalFound: number,
@@ -76,47 +83,47 @@ export function renderPagination(
   // -----------------------------------------------------------------------
   // Compact "X / Y" view shown on narrow screens via CSS only.
   // -----------------------------------------------------------------------
-  const compact = document.createElement("span");
+  const compact = document.createElement("ul");
   compact.className = "ts-pagination__compact";
 
   const prevCompact = cloneTemplate("prev");
   if (prevCompact) {
     prevCompact.dataset.page = String(currentPage - 1);
     if (prevDisabled) prevCompact.setAttribute("disabled", "");
-    compact.appendChild(prevCompact);
+    appendPaginationItem(compact, prevCompact);
   }
 
   const label = cloneTemplate("compact-label");
   if (label) {
     label.textContent = `${currentPage} / ${totalPages}`;
-    compact.appendChild(label);
+    appendPaginationItem(compact, label);
   }
 
   const nextCompact = cloneTemplate("next");
   if (nextCompact) {
     nextCompact.dataset.page = String(currentPage + 1);
     if (nextDisabled) nextCompact.setAttribute("disabled", "");
-    compact.appendChild(nextCompact);
+    appendPaginationItem(compact, nextCompact);
   }
 
   // -----------------------------------------------------------------------
   // Full numbered view hidden on narrow screens via CSS only.
   // -----------------------------------------------------------------------
-  const full = document.createElement("span");
+  const full = document.createElement("ul");
   full.className = "ts-pagination__full";
 
   const prevFull = cloneTemplate("prev");
   if (prevFull) {
     prevFull.dataset.page = String(currentPage - 1);
     if (prevDisabled) prevFull.setAttribute("disabled", "");
-    full.appendChild(prevFull);
+    appendPaginationItem(full, prevFull);
   }
 
   const pages = buildPageRange(currentPage, totalPages);
   pages.forEach((p) => {
     if (p === null) {
       const ellipsis = cloneTemplate("ellipsis");
-      if (ellipsis) full.appendChild(ellipsis);
+      if (ellipsis) appendPaginationItem(full, ellipsis);
       return;
     }
     const isActive = p === currentPage;
@@ -124,7 +131,12 @@ export function renderPagination(
     if (pageBtn) {
       pageBtn.dataset.page = String(p);
       pageBtn.textContent = String(p);
-      full.appendChild(pageBtn);
+      if (isActive) {
+        pageBtn.setAttribute("aria-current", "page");
+      } else {
+        pageBtn.removeAttribute("aria-current");
+      }
+      appendPaginationItem(full, pageBtn);
     }
   });
 
@@ -132,7 +144,7 @@ export function renderPagination(
   if (nextFull) {
     nextFull.dataset.page = String(currentPage + 1);
     if (nextDisabled) nextFull.setAttribute("disabled", "");
-    full.appendChild(nextFull);
+    appendPaginationItem(full, nextFull);
   }
 
   // Assemble and mount.

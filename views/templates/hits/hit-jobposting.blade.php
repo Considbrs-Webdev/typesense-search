@@ -4,8 +4,7 @@
         'data-js-search-hit-template-jobposting' => true
     ]
 ])
-    <a class="c-card c-card--size-md c-card--action" aria-label="{SEARCH_HIT_ARIA_LABEL}" href="{SEARCH_HIT_LINK}"
-        data-uid="69a08caed0d4a">
+    <div class="c-card c-card--size-md c-card--action ts-search-hit-card" data-uid="69a08caed0d4a">
         <div class="c-card__paint-container">
             <div class="c-card__body">
                 <div class="c-group c-group--vertical c-group--gap-1">
@@ -17,7 +16,7 @@
                         </span>
                     </div>
                     <h2 class="c-typography c-card__heading u-margin__y--0 c-typography__variant--h3">
-                        {SEARCH_HIT_HEADING}
+                        <a class="ts-search-hit-card__link" href="{SEARCH_HIT_LINK}">{SEARCH_HIT_HEADING}</a>
                     </h2>
                     <span class="c-typography c-typography__variant--meta u-margin__y--0">
                         <strong>{{ __('Valid through', 'typesense-search') }}</strong>: <time
@@ -29,5 +28,5 @@
                 </div>
             </div>
         </div>
-    </a>
+    </div>
 @endelement
