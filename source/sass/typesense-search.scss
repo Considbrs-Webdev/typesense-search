@@ -457,6 +457,17 @@
       opacity: 1;
     }
   }
+
+  // Chevron buttons: Web Awesome uses `width: auto` for `.is-icon-button:has(wa-icon)`, so
+  // left/right glyphs can get different widths; force a square matching control height.
+  .ts-pagination__btn-prev::part(base),
+  .ts-pagination__btn-next::part(base) {
+    box-sizing: border-box;
+    width: var(--wa-form-control-height);
+    min-width: var(--wa-form-control-height);
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 .ts-pagination__compact,
@@ -474,6 +485,7 @@
 .ts-pagination__item {
   display: flex;
   align-items: center;
+  margin-top: var(--base, 8px);
 }
 
 .ts-pagination__page-label {
