@@ -646,7 +646,7 @@ $ts-thumb-size: 18px;
 
   &__value {
     font-size: 28px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold, 700);
     color: $ts-text;
     line-height: 1.1;
     margin-bottom: 4px;
@@ -779,7 +779,7 @@ $ts-thumb-size: 18px;
 
   &__count {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold, 700);
     color: $ts-text;
     min-width: 40px;
     text-align: right;
