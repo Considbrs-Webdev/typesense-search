@@ -1,7 +1,7 @@
-import "@awesome.me/webawesome/dist/components/button/button";
-import "@awesome.me/webawesome/dist/components/button-group/button-group";
-import "@awesome.me/webawesome/dist/components/select/select";
-import "@awesome.me/webawesome/dist/components/option/option";
+import "@awesome.me/webawesome/dist/components/button/button.js";
+import "@awesome.me/webawesome/dist/components/button-group/button-group.js";
+import "@awesome.me/webawesome/dist/components/select/select.js";
+import "@awesome.me/webawesome/dist/components/option/option.js";
 
 import { getUrlState, updateUrlState } from "./url-state";
 import { escapeAttr, escapeText } from "./html";

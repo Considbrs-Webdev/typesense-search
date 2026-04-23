@@ -1,8 +1,8 @@
-import "@awesome.me/webawesome/dist/components/badge/badge";
-import "@awesome.me/webawesome/dist/components/icon/icon";
-import "@awesome.me/webawesome/dist/components/input/input";
-import "@awesome.me/webawesome/dist/components/radio-group/radio-group";
-import "@awesome.me/webawesome/dist/components/radio/radio";
+import "@awesome.me/webawesome/dist/components/badge/badge.js";
+import "@awesome.me/webawesome/dist/components/icon/icon.js";
+import "@awesome.me/webawesome/dist/components/input/input.js";
+import "@awesome.me/webawesome/dist/components/radio-group/radio-group.js";
+import "@awesome.me/webawesome/dist/components/radio/radio.js";
 
 import { createClient } from "./client";
 import { createSearchRunner } from "./search";
