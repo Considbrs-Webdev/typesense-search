@@ -227,5 +227,23 @@ export function replacePlaceholders(
   }
   // Drop empty aria-label from templates that still use deprecated SEARCH_HIT_ARIA_LABEL.
   result = result.replace(/\s+aria-label=(?:""|'')/gi, "");
+  result = removeEmptyMarkedElements(result);
   return result;
+}
+
+/**
+ * Remove elements marked with [data-js-hide-if-empty] when their visible text
+ * content is empty after all placeholder substitutions. Icon-only elements
+ * (e.g. <i aria-hidden>) carry no text, so they are treated as empty too.
+ */
+function removeEmptyMarkedElements(html: string): string {
+  if (typeof document === "undefined") return html;
+  const container = document.createElement("div");
+  container.innerHTML = html;
+  container.querySelectorAll("[data-js-hide-if-empty]").forEach((el) => {
+    if (!el.textContent?.trim()) {
+      el.remove();
+    }
+  });
+  return container.innerHTML;
 }

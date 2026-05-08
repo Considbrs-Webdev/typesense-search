@@ -898,6 +898,22 @@ add_filter(
 
 You can then use `{SEARCH_HIT_DEPARTMENT}` freely in any custom template.
 
+#### Optional rows: `data-js-hide-if-empty`
+
+After all placeholders are replaced, the front-end strips any element that has the attribute `data-js-hide-if-empty` when its **text content** is empty (after trimming). Use this when optional index fields might be missing, so you do not show orphan icons or empty meta lines.
+
+- The check uses `textContent`, so `<i aria-hidden="true">` and similar decorative nodes do not count as visible text.
+- Put the attribute on the wrapper that should disappear as a whole (for example one `<span>` around icon plus label).
+
+Example:
+
+```blade
+<span class="c-typography c-typography__variant--meta" data-js-hide-if-empty>
+    <i class="{SEARCH_HIT_PLACE_ICON}" aria-hidden="true"></i>
+    {SEARCH_HIT_PLACE}
+</span>
+```
+
 #### Mapping post types to templates
 
 By default all posts use the `default` template. Use the `postTypeToTemplate` filter to route specific post types to a different built-in or custom template:
