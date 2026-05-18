@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Indexing\Enrichers;
 
 use TypesenseSearch\Indexing\DocumentBuilder;
+use TypesenseSearch\Services\SettingsRepository;
 
 /**
  * Class ModularityEnricher
@@ -11,9 +12,15 @@ use TypesenseSearch\Indexing\DocumentBuilder;
  * field of the indexed document. This ensures that text inside modules is
  * discoverable through full-text search.
  *
- * Only active when the Modularity plugin is present. Modules that are hidden
- * or belong to disabled areas / post-type configurations are skipped, matching
- * the same logic used when rendering the front-end page.
+ * Only active when the Modularity plugin is present and the "Index Modularity
+ * content" setting is enabled. Modules that are hidden or belong to disabled
+ * areas / post-type configurations are skipped, matching the same logic used
+ * when rendering the front-end page.
+ *
+ * Additionally, only post types that have Modularity enabled (via the
+ * `enabled-post-types` key in the `modularity-options` option) will have
+ * module content appended. This list is cached once at construction time to
+ * avoid repeated database reads during bulk indexing runs.
  *
  * Hook: Municipio/TypesenseSearch/DocumentBuilder/build
  *
@@ -21,11 +28,26 @@ use TypesenseSearch\Indexing\DocumentBuilder;
  */
 class ModularityEnricher
 {
-    public function __construct()
+    /**
+     * Post-type slugs for which Modularity is enabled, cached at construction
+     * time from the `modularity-options` WordPress option.
+     *
+     * @var string[]
+     */
+    private array $enabledPostTypes = [];
+
+    public function __construct(private SettingsRepository $settings)
     {
         if (!$this->isInstalled()) {
             return;
         }
+
+        if (!$this->settings->isIndexModularityEnabled()) {
+            return;
+        }
+
+        $modularityOptions      = get_option('modularity-options', []);
+        $this->enabledPostTypes = (array) ($modularityOptions['enabled-post-types'] ?? []);
 
         add_filter(DocumentBuilder::FILTER_BUILD, [$this, 'appendModularityContent'], 10, 2);
     }
@@ -40,6 +62,10 @@ class ModularityEnricher
      */
     public function appendModularityContent(array $document, \WP_Post $post): array
     {
+        if (!empty($this->enabledPostTypes) && !in_array($post->post_type, $this->enabledPostTypes, true)) {
+            return $document;
+        }
+
         try {
             $modules = \Modularity\Editor::getPostModules($post->ID);
 
@@ -94,7 +120,7 @@ class ModularityEnricher
                     );
 
                     if (!empty($module_html)) {
-                        $modules_content .= ' ' . wp_strip_all_tags($module_html);
+                        $modules_content .= ' ' . $this->extractText($module_html);
                     }
                 }
             }
@@ -108,6 +134,27 @@ class ModularityEnricher
         }
 
         return $document;
+    }
+
+    /**
+     * Extract plain text from an HTML string without using strip_tags().
+     *
+     * PHP's strip_tags() implements a quote-state machine: an unmatched `"`
+     * inside a tag attribute (e.g. data-component="foo">) causes it to treat
+     * the following `>` as still inside a quoted string, silently swallowing
+     * all text until the next unquoted `>`. Modularity's rendered HTML
+     * contains such malformed attributes.
+     *
+     * The regex `/<[^>]*>/` has no quote-state tracking — it simply matches
+     * from `<` to the first `>`, so it handles those malformed tags correctly
+     * and is substantially faster than a full DOMDocument parse.
+     */
+    private function extractText(string $html): string
+    {
+        // Remove script/style blocks (same as wp_strip_all_tags).
+        $html = (string) preg_replace('@<(script|style)[^>]*?>.*?</\1>@si', '', $html);
+        // Strip all remaining tags without quote-state tracking.
+        return trim((string) preg_replace('/<[^>]*>/', ' ', $html));
     }
 
     /**

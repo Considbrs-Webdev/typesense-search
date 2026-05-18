@@ -86,7 +86,7 @@ class App {
         //   add_filter(DocumentBuilder::FILTER_BUILD, ...)
         //   add_filter(sprintf(DocumentBuilder::FILTER_BUILD_POST_TYPE, 'my_type'), ...)
         new Indexing\Enrichers\JobPostingEnricher();
-        new Indexing\Enrichers\ModularityEnricher();
+        new Indexing\Enrichers\ModularityEnricher($settings);
         new Indexing\Enrichers\PageEnricher();
 
         if (defined('WP_CLI') && constant('WP_CLI') === true) {
