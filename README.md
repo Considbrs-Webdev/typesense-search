@@ -14,7 +14,7 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 2. [Requirements](#2-requirements)
 3. [Installation](#3-installation)
 4. [Settings](#4-settings)
-   - [4.1 Environment variables](#41-environment-variables)
+   - [4.1 PHP constants](#41-php-constants)
    - [4.2 Connection tab](#42-connection-tab)
    - [4.3 Settings tab (content)](#43-settings-tab-content)
    - [4.4 Facetting tab](#44-facetting-tab)
@@ -81,21 +81,19 @@ The settings page is at **Settings → Typesense Search** and is split into six 
 
 ---
 
-### 4.1 Environment variables
+### 4.1 PHP constants
 
-All five connection settings can be defined in a `.env` file placed at the **root of the plugin directory** (`wp-content/plugins/typesense-search/.env`).
+All five connection settings can be overridden by defining PHP constants before WordPress loads the plugin. The recommended place is a dedicated config file included from `wp-config.php` (e.g. `wp-content/config/typesense.php`). This is the standard pattern in Municipio/Helsingborg-stad setups.
 
-When a value is present in `.env`:
+When a constant is defined:
 
-- It is used **instead of** whatever is stored in the WordPress database.
+- Its value is used **instead of** whatever is stored in the WordPress database.
 - The corresponding field in **Settings → Connection** is rendered **read-only** so it cannot accidentally be overwritten from the UI.
-- Any `save_settings` form submission that would change the value is silently a no-op.
+- Any form submission that would change the value is silently a no-op.
 
-This lets you store sensitive credentials (especially the Admin API key) in environment-specific configuration that is never committed to version control.
+#### Supported constants
 
-#### Supported variables
-
-| Variable                  | WordPress option                 | Description                                    |
+| Constant                  | WordPress option                 | Description                                    |
 | ------------------------- | -------------------------------- | ---------------------------------------------- |
 | `TYPESENSE_HOST`          | `typesense_search_remote`        | Full URL to the Typesense server               |
 | `TYPESENSE_FRONTEND_HOST` | `typesense_search_frontend_host` | Optional public host sent to the browser       |
@@ -105,22 +103,19 @@ This lets you store sensitive credentials (especially the Admin API key) in envi
 
 #### Setup
 
-1. Copy `.env.example` (found in the plugin root) to `.env`.
-2. Fill in the values you want to override.
-3. Make sure `.env` is listed in your `.gitignore` / `.deployignore` — it should **never** be committed.
+Create a config file (e.g. `wp-content/config/typesense.php`) and include it from `wp-config.php`:
 
-```ini
-# wp-content/plugins/typesense-search/.env
-TYPESENSE_HOST=https://search.example.com
-TYPESENSE_FRONTEND_HOST=
-TYPESENSE_COLLECTION=my-wordpress-site
-TYPESENSE_ADMIN_KEY=your-admin-key
-TYPESENSE_SEARCH_KEY=your-search-only-key
+```php
+<?php
+// wp-content/config/typesense.php
+define('TYPESENSE_HOST',       'https://search.example.com');
+define('TYPESENSE_COLLECTION', 'my-wordpress-site');
+define('TYPESENSE_ADMIN_KEY',  'your-admin-key');
+define('TYPESENSE_SEARCH_KEY', 'your-search-only-key');
+// define('TYPESENSE_FRONTEND_HOST', 'https://public.example.com'); // optional
 ```
 
-> **Quoting** — values may optionally be wrapped in single or double quotes; they are stripped automatically.  
-> **Comments** — lines starting with `#` are ignored.  
-> **Blank values** — a variable with an empty value (`TYPESENSE_FRONTEND_HOST=`) is treated as "not set" and the database option is used instead.
+> **Blank values** — a constant set to an empty string (`''`) is treated as "not set" and the database option is used instead.
 
 ---
 
@@ -877,6 +872,7 @@ Tokens are `{UPPER_SNAKE_CASE}` strings embedded in the template HTML. The JavaS
 When a hit is determined to be external, `{SEARCH_HIT_HEADING}` automatically appends an external-link icon (`fa-up-right-from-square`) after the title text. No template changes are needed.
 
 External detection is backward-compatible:
+
 - If the document contains `is_external` (or `isExternal` / `external`), that explicit value is used.
 - Otherwise the frontend falls back to comparing the hit URL origin with `window.location.origin`.
 

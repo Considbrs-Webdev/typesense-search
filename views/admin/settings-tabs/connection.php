@@ -1,17 +1,17 @@
 <?php
 use TypesenseSearch\Admin\Settings;
-use TypesenseSearch\EnvLoader;
+use TypesenseSearch\ConstantsLoader;
 
 if ($activeTab !== 'connection') {
     return;
 }
 
-// Determine which fields are locked via the .env file.
-$tsHostLocked         = EnvLoader::isDefinedInEnv(Settings::OPTION_REMOTE);
-$tsFrontendHostLocked = EnvLoader::isDefinedInEnv(Settings::OPTION_FRONTEND_HOST);
-$tsCollectionLocked   = EnvLoader::isDefinedInEnv(Settings::OPTION_INDEX_NAME);
-$tsAdminKeyLocked     = EnvLoader::isDefinedInEnv(Settings::OPTION_ADMIN_KEY);
-$tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
+// Determine which fields are locked via PHP constants.
+$tsHostLocked         = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_REMOTE);
+$tsFrontendHostLocked = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_FRONTEND_HOST);
+$tsCollectionLocked   = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_INDEX_NAME);
+$tsAdminKeyLocked     = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_ADMIN_KEY);
+$tsSearchKeyLocked    = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_SEARCH_KEY);
 ?>
 
 <div class="ts-settings__panel" id="ts-tab-connection">
@@ -25,7 +25,7 @@ $tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
 
                 <?php if ($tsHostLocked || $tsFrontendHostLocked || $tsCollectionLocked || $tsAdminKeyLocked || $tsSearchKeyLocked) : ?>
                 <div class="ts-notice ts-notice--env" style="margin:12px 0 0;padding:10px 14px;background:#e5f3fb;border-left:4px solid #0071a1;border-radius:2px;">
-                    <p style="margin:0;"><?php esc_html_e('One or more connection settings are defined in the plugin\'s .env file. Those fields are read-only and cannot be changed here. See the plugin README for details.', 'typesense-search'); ?></p>
+                    <p style="margin:0;"><?php esc_html_e('One or more connection settings are defined as PHP constants. Those fields are read-only and cannot be changed here. See the plugin README for details.', 'typesense-search'); ?></p>
                 </div>
                 <?php else : ?>
                 <div class="ts-notice" style="margin:12px 0 0;padding:10px 14px;background:#e5f3fb;border-left:4px solid #0071a1;border-radius:2px;">
@@ -33,7 +33,7 @@ $tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
                         <?php
                         printf(
                             /* translators: %s is a link to the plugin README */
-                            esc_html__('Connection settings can also be defined using environment variables in a .env file inside the plugin directory. %s', 'typesense-search'),
+                            esc_html__('Connection settings can also be defined as PHP constants in a config file. %s', 'typesense-search'),
                             '<a href="https://github.com/considbrs-webdev/typesense-search#environment-variables" target="_blank" rel="noopener noreferrer">' . esc_html__('See README for details.', 'typesense-search') . '</a>'
                         );
                         ?>
@@ -67,7 +67,7 @@ $tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
                         </p>
                         <?php if ($tsHostLocked) : ?>
                         <p id="ts-remote-env-note" class="ts-field__env-notice">
-                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via constant — read only.', 'typesense-search'); ?>
                         </p>
                         <?php endif; ?>
                     </div>
@@ -95,7 +95,7 @@ $tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
                         </p>
                         <?php if ($tsFrontendHostLocked) : ?>
                         <p id="ts-frontend-env-note" class="ts-field__env-notice">
-                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via constant — read only.', 'typesense-search'); ?>
                         </p>
                         <?php endif; ?>
                     </div>
@@ -124,7 +124,7 @@ $tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
                         </p>
                         <?php if ($tsCollectionLocked) : ?>
                         <p id="ts-index-name-env-note" class="ts-field__env-notice">
-                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via constant — read only.', 'typesense-search'); ?>
                         </p>
                         <?php endif; ?>
                     </div>
@@ -197,7 +197,7 @@ $tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
                                 type="password"
                                 id="ts-admin-key"
                                 name="<?php echo esc_attr(Settings::OPTION_ADMIN_KEY); ?>"
-                                value="<?php echo esc_attr(get_option(Settings::OPTION_ADMIN_KEY)); ?>"
+                                value="<?php echo $tsAdminKeyLocked ? esc_attr(str_repeat('•', 20)) : esc_attr(get_option(Settings::OPTION_ADMIN_KEY)); ?>"
                                 placeholder=""
                                 class="regular-text ts-field__input<?php echo $tsAdminKeyLocked ? ' ts-field__input--env-locked' : ''; ?>"
                                 spellcheck="false"
@@ -214,7 +214,7 @@ $tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
                         </p>
                         <?php if ($tsAdminKeyLocked) : ?>
                         <p id="ts-admin-key-env-note" class="ts-field__env-notice">
-                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via constant — read only.', 'typesense-search'); ?>
                         </p>
                         <?php endif; ?>
                     </div>
@@ -232,7 +232,7 @@ $tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
                                 type="password"
                                 id="ts-search-key"
                                 name="<?php echo esc_attr(Settings::OPTION_SEARCH_KEY); ?>"
-                                value="<?php echo esc_attr(get_option(Settings::OPTION_SEARCH_KEY)); ?>"
+                                value="<?php echo $tsSearchKeyLocked ? esc_attr(str_repeat('•', 20)) : esc_attr(get_option(Settings::OPTION_SEARCH_KEY)); ?>"
                                 placeholder=""
                                 class="regular-text ts-field__input<?php echo $tsSearchKeyLocked ? ' ts-field__input--env-locked' : ''; ?>"
                                 spellcheck="false"
@@ -249,7 +249,7 @@ $tsSearchKeyLocked    = EnvLoader::isDefinedInEnv(Settings::OPTION_SEARCH_KEY);
                         </p>
                         <?php if ($tsSearchKeyLocked) : ?>
                         <p id="ts-search-key-env-note" class="ts-field__env-notice">
-                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via .env — read only.', 'typesense-search'); ?>
+                            <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via constant — read only.', 'typesense-search'); ?>
                         </p>
                         <?php endif; ?>
 

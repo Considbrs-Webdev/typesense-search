@@ -27,8 +27,8 @@ class App {
 
     public function __construct() {
 
-        // Load .env overrides before anything reads options.
-        new EnvLoader();
+        // Load constant overrides before anything reads options.
+        new ConstantsLoader();
 
         // Build shared services once so every component uses the same instances.
         $settings      = new SettingsRepository();
