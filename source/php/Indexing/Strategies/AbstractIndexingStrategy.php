@@ -59,12 +59,22 @@ abstract class AbstractIndexingStrategy implements IndexingStrategyInterface
         $collectionName = $this->getCollectionName();
 
         if ($client === null || $collectionName === '') {
+            $this->logger->warning(sprintf(
+                '[TypesenseSearch][%s] Document for post %d could not be indexed because the Typesense client or collection is not configured.',
+                $this->getIdentifier(),
+                $post->ID
+            ));
             return false;
         }
 
         try {
             $document = $this->buildDocument($post);
             if ($document === false) {
+                $this->logger->warning(sprintf(
+                    '[TypesenseSearch][%s] Document for post %d could not be indexed because buildDocument() returned false.',
+                    $this->getIdentifier(),
+                    $post->ID
+                ));
                 return false;
             }
 

@@ -878,6 +878,183 @@ $ts-thumb-size: 18px;
   }
 }
 
+// ── Logging tab ───────────────────────────────────────────────────────────────
+
+.ts-log-card {
+  overflow: hidden;
+
+  .ts-settings__card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+.ts-log-clear {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+
+  &__spinner {
+    display: none;
+    animation: ts-spin 0.8s linear infinite;
+  }
+
+  &.is-loading {
+    cursor: wait;
+
+    .ts-log-clear__icon {
+      display: none;
+    }
+
+    .ts-log-clear__spinner {
+      display: block;
+    }
+  }
+}
+
+.ts-log-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-bottom: 1px solid $ts-bg;
+
+  @media (max-width: 720px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 18px 20px;
+    border-right: 1px solid $ts-bg;
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  &__value {
+    font-size: 18px;
+    font-weight: 700;
+    color: $ts-text;
+    line-height: 1.2;
+
+    &--success {
+      color: $ts-green;
+    }
+
+    &--error {
+      color: #d63638;
+    }
+
+    &--running {
+      color: $ts-blue;
+    }
+  }
+
+  &__label {
+    font-size: 11px;
+    color: $ts-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.ts-log-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding: 14px 24px;
+  color: $ts-muted;
+  font-size: 12px;
+  border-bottom: 1px solid $ts-bg;
+
+  strong {
+    color: $ts-text;
+  }
+}
+
+.ts-log-message {
+  margin: 0;
+  padding: 12px 24px;
+  color: $ts-muted;
+  border-bottom: 1px solid $ts-bg;
+  font-size: 13px;
+}
+
+.ts-log-empty {
+  margin: 0;
+  padding: 20px 24px;
+  color: $ts-green;
+  font-size: 13px;
+}
+
+.ts-log-table-wrap {
+  overflow-x: auto;
+}
+
+.ts-log-table {
+  border: none !important;
+
+  th,
+  td {
+    font-size: 12px;
+    vertical-align: top;
+  }
+
+  th:first-child,
+  td:first-child {
+    width: 150px;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    width: 80px;
+  }
+
+  th:nth-child(3),
+  td:nth-child(3) {
+    width: 190px;
+  }
+
+  th:nth-child(4),
+  td:nth-child(4) {
+    width: 100px;
+  }
+
+  code {
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 11px;
+  }
+}
+
+.ts-log-level {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+
+  &--error {
+    color: #8a2424;
+    background: #fcf0f1;
+  }
+
+  &--warning {
+    color: #5c3c00;
+    background: #fef7e0;
+  }
+}
+
 // ── Footer bar ────────────────────────────────────────────────────────────────
 
 // ── Facetting tab ──────────────────────────────────────────────────────────────

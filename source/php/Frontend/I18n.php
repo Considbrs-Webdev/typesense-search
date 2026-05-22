@@ -83,6 +83,9 @@ class I18n
             'reindexExternalTitle' => __('Managed by an external strategy — use WP-CLI to reindex.', 'typesense-search'),
             'externalBadge'        => __('External', 'typesense-search'),
 
+            // Logging
+            'confirmClearLog'      => __('Clear the indexing log?', 'typesense-search'),
+
             // Facetting – notices
             'couldNotLoadFields'   => __('Could not load facetable fields.', 'typesense-search'),
             'noFacetableFields'    => __('— No facetable fields found —', 'typesense-search'),

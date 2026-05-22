@@ -497,6 +497,41 @@ document.addEventListener('DOMContentLoaded', () => {
         statsRefreshBtn.addEventListener('click', loadStats);
     }
 
+    // ── Logging tab ───────────────────────────────────────────────────────────
+
+    const loggingPanel = document.getElementById('ts-tab-logging');
+
+    if (loggingPanel) {
+        const clearLogBtn = document.getElementById('ts-log-clear');
+
+        clearLogBtn?.addEventListener('click', async () => {
+            if (!confirm(i18n.confirmClearLog ?? 'Clear the indexing log?')) {
+                return;
+            }
+
+            setButtonLoading(clearLogBtn, true);
+
+            let data;
+            try {
+                data = await ajaxPost({
+                    action: tsSettings.actionClearLog,
+                    nonce:  tsSettings.nonceClearLog,
+                });
+            } catch (err) {
+                data = { success: false, data: { message: (i18n.requestFailed ?? 'Request failed: ') + err.message } };
+            } finally {
+                setButtonLoading(clearLogBtn, false);
+            }
+
+            if (data.success) {
+                window.location.reload();
+                return;
+            }
+
+            alert(data?.data?.message ?? (i18n.unknownError ?? 'Unknown error.'));
+        });
+    }
+
     // ── Facetting tab ─────────────────────────────────────────────────────────
 
     const facettingPanel = document.getElementById('ts-tab-facetting');

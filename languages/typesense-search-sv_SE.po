@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-05-21T09:16:07+00:00\n"
-"PO-Revision-Date: 2026-05-21 11:16+0200\n"
+"POT-Creation-Date: 2026-05-22T07:31:59+00:00\n"
+"PO-Revision-Date: 2026-05-22 09:28+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -14,8 +14,8 @@ msgstr ""
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
-#: typesense-search.php source/php/Admin/Settings.php:70
-#: source/php/Admin/Settings.php:71 views/admin/settings-page.php:25
+#: typesense-search.php source/php/Admin/Settings.php:71
+#: source/php/Admin/Settings.php:72 views/admin/settings-page.php:25
 msgid "Typesense Search"
 msgstr "Typesense-sök"
 
@@ -85,200 +85,211 @@ msgid "Statistics"
 msgstr "Statistik"
 
 #: source/php/Admin/Settings.php:53
+msgid "Logging"
+msgstr "Loggning"
+
+#: source/php/Admin/Settings.php:54
 msgid "Status"
 msgstr "Status"
 
-#: source/php/Admin/SettingsAjax.php:59 source/php/Admin/SettingsAjax.php:229
-#: source/php/Admin/SettingsAjax.php:318 source/php/Admin/SettingsAjax.php:373
-#: source/php/Admin/SettingsAjax.php:494 source/php/Admin/SettingsAjax.php:552
-#: source/php/Admin/SettingsAjax.php:711 source/php/Admin/SettingsAjax.php:758
+#: source/php/Admin/SettingsAjax.php:62 source/php/Admin/SettingsAjax.php:232
+#: source/php/Admin/SettingsAjax.php:321 source/php/Admin/SettingsAjax.php:376
+#: source/php/Admin/SettingsAjax.php:550 source/php/Admin/SettingsAjax.php:608
+#: source/php/Admin/SettingsAjax.php:767 source/php/Admin/SettingsAjax.php:814
+#: source/php/Admin/SettingsAjax.php:859
 msgid "Unauthorized."
 msgstr "Obehörig."
 
-#: source/php/Admin/SettingsAjax.php:68
+#: source/php/Admin/SettingsAjax.php:71
 msgid "Enter both a host URL and an Admin API key before testing."
 msgstr "Ange både en värd-URL och en Admin-API-nyckel innan du testar."
 
-#: source/php/Admin/SettingsAjax.php:76
+#: source/php/Admin/SettingsAjax.php:79
 msgid "The host value is not a valid URL."
 msgstr "Värdadressen är inte en giltig URL."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:98 source/php/Admin/SettingsAjax.php:593
+#: source/php/Admin/SettingsAjax.php:101 source/php/Admin/SettingsAjax.php:649
 msgid "Could not reach server: %s"
 msgstr "Kunde inte nå servern: %s"
 
-#: source/php/Admin/SettingsAjax.php:108 source/php/Admin/SettingsAjax.php:586
+#: source/php/Admin/SettingsAjax.php:111 source/php/Admin/SettingsAjax.php:642
 msgid "Server responded but reported an unhealthy status."
 msgstr "Servern svarade men rapporterade ett ohälsosamt status."
 
-#: source/php/Admin/SettingsAjax.php:119
+#: source/php/Admin/SettingsAjax.php:122
 msgid "Server is reachable, but the Admin API key was rejected."
 msgstr "Servern är nåbar, men Admin-API-nyckeln avvisades."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:127
+#: source/php/Admin/SettingsAjax.php:130
 msgid "Server is reachable, but key validation failed: %s"
 msgstr "Servern är nåbar, men validering av nyckeln misslyckades: %s"
 
-#: source/php/Admin/SettingsAjax.php:143
+#: source/php/Admin/SettingsAjax.php:146
 msgid ""
 "Connected successfully. Server is healthy and the Admin API key is valid."
 msgstr ""
 "Anslutningen lyckades. Servern är i gott skick och Admin-API-nyckeln är "
 "giltig."
 
-#: source/php/Admin/SettingsAjax.php:159
+#: source/php/Admin/SettingsAjax.php:162
 msgid "Collection name is required."
 msgstr "Ett samlingsnamn krävs."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:171 source/php/Admin/SettingsAjax.php:780
+#: source/php/Admin/SettingsAjax.php:174 source/php/Admin/SettingsAjax.php:836
 msgid "Could not create collection: %s"
 msgstr "Kunde inte skapa samling: %s"
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:181 source/php/Admin/SettingsAjax.php:790
+#: source/php/Admin/SettingsAjax.php:184 source/php/Admin/SettingsAjax.php:846
 msgid "Collection \"%s\" created successfully."
 msgstr "Samlingen \"%s\" skapades."
 
-#: source/php/Admin/SettingsAjax.php:197
+#: source/php/Admin/SettingsAjax.php:200
 msgid "Set a collection name before generating a search key."
 msgstr "Ange ett samlingsnamn innan du genererar en söknyckel."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:209
+#: source/php/Admin/SettingsAjax.php:212
 msgid "Could not generate search key: %s"
 msgstr "Kunde inte generera söknyckel: %s"
 
-#: source/php/Admin/SettingsAjax.php:217
+#: source/php/Admin/SettingsAjax.php:220
 msgid ""
 "Search key generated. It has been filled in below — save settings to keep it."
 msgstr ""
 "Söknyckel genererad. Den har fyllts i nedan — spara inställningarna för att "
 "behålla den."
 
-#: source/php/Admin/SettingsAjax.php:238 source/php/Admin/SettingsAjax.php:503
+#: source/php/Admin/SettingsAjax.php:241 source/php/Admin/SettingsAjax.php:559
 msgid ""
 "Connection settings are incomplete. Please configure the connection first."
 msgstr ""
 "Anslutningsinställningarna är ofullständiga. Konfigurera anslutningen först."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:297
+#: source/php/Admin/SettingsAjax.php:300
 msgid "Could not load statistics: %s"
 msgstr "Kunde inte läsa in statistik: %s"
 
-#: source/php/Admin/SettingsAjax.php:325 source/php/Admin/SettingsAjax.php:380
+#: source/php/Admin/SettingsAjax.php:328 source/php/Admin/SettingsAjax.php:383
 msgid "Post type is required."
 msgstr "Inläggstyp krävs."
 
-#: source/php/Admin/SettingsAjax.php:334
+#: source/php/Admin/SettingsAjax.php:337
 msgid "Connection settings are incomplete."
 msgstr "Anslutningsinställningarna är ofullständiga."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:347
+#: source/php/Admin/SettingsAjax.php:350
 msgid "Could not clear post type: %s"
 msgstr "Kunde inte rensa inläggstyp: %s"
 
 #. translators: 1: number of deleted docs, 2: post type slug
-#: source/php/Admin/SettingsAjax.php:357
+#: source/php/Admin/SettingsAjax.php:360
 msgid "Removed %1$d documents of type \"%2$s\" from the index."
 msgstr "Tog bort %1$d dokument av typen \"%2$s\" från indexet."
 
-#: source/php/Admin/SettingsAjax.php:400
+#. translators: %s: post type slug
+#: source/php/Admin/SettingsAjax.php:398
+msgid "Manual reindex: %s"
+msgstr "Manuell omindexering: %s"
+
+#: source/php/Admin/SettingsAjax.php:412 source/php/Admin/SettingsAjax.php:413
 msgid "PDF indexing strategy is not available."
 msgstr "PDF-indexeringsstrategi är inte tillgänglig."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:464
+#: source/php/Admin/SettingsAjax.php:500 source/php/Admin/SettingsAjax.php:507
 msgid "Reindex failed: %s"
 msgstr "Omindexering misslyckades: %s"
 
-#: source/php/Admin/SettingsAjax.php:474
+#. translators: 1: indexed count, 2: skipped count, 3: failed count, 4: post type slug
+#: source/php/Admin/SettingsAjax.php:520 source/php/Admin/SettingsAjax.php:530
 msgid "Reindexed \"%4$s\": %1$d indexed, %2$d skipped, %3$d failed."
 msgstr ""
 "Omindexerade \"%4$s\": %1$d indexerade, %2$d hoppades över, %3$d "
 "misslyckades."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:524
+#: source/php/Admin/SettingsAjax.php:580
 msgid "Could not fetch collection schema: %s"
 msgstr "Kunde inte hämta samlingens schema: %s"
 
-#: source/php/Admin/SettingsAjax.php:573
+#: source/php/Admin/SettingsAjax.php:629
 msgid "No host URL configured."
 msgstr "Ingen värd-URL konfigurerad."
 
-#: source/php/Admin/SettingsAjax.php:584
+#: source/php/Admin/SettingsAjax.php:640
 msgid "Server is reachable and healthy."
 msgstr "Servern är nåbar och i gott skick."
 
-#: source/php/Admin/SettingsAjax.php:603
+#: source/php/Admin/SettingsAjax.php:659
 msgid "No admin key configured."
 msgstr "Ingen admin-nyckel konfigurerad."
 
-#: source/php/Admin/SettingsAjax.php:609
+#: source/php/Admin/SettingsAjax.php:665
 msgid "Admin key is valid."
 msgstr "Admin-nyckeln är giltig."
 
-#: source/php/Admin/SettingsAjax.php:611
+#: source/php/Admin/SettingsAjax.php:667
 msgid "Admin key was rejected by the server."
 msgstr "Admin-nyckeln avvisades av servern."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:615
+#: source/php/Admin/SettingsAjax.php:671
 msgid "Admin key check failed: %s"
 msgstr "Kontroll av admin-nyckel misslyckades: %s"
 
-#: source/php/Admin/SettingsAjax.php:624
+#: source/php/Admin/SettingsAjax.php:680
 msgid "Cannot check — admin key is not valid."
 msgstr "Kan inte kontrollera — admin-nyckeln är inte giltig."
 
-#: source/php/Admin/SettingsAjax.php:626
+#: source/php/Admin/SettingsAjax.php:682
 msgid "No collection name configured."
 msgstr "Inget samlingsnamn konfigurerat."
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:634
+#: source/php/Admin/SettingsAjax.php:690
 msgid "Collection \"%s\" exists."
 msgstr "Samlingen \"%s\" finns."
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:640
+#: source/php/Admin/SettingsAjax.php:696
 msgid "Collection \"%s\" does not exist."
 msgstr "Samlingen \"%s\" finns inte."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:648
+#: source/php/Admin/SettingsAjax.php:704
 msgid "Collection check failed: %s"
 msgstr "Kontroll av samling misslyckades: %s"
 
-#: source/php/Admin/SettingsAjax.php:657
+#: source/php/Admin/SettingsAjax.php:713
 msgid "No search key configured."
 msgstr "Ingen söknyckel konfigurerad."
 
-#: source/php/Admin/SettingsAjax.php:660
+#: source/php/Admin/SettingsAjax.php:716
 msgid "No collection name configured — cannot test the search key."
 msgstr "Inget samlingsnamn konfigurerat — kan inte testa söknyckeln."
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:672
+#: source/php/Admin/SettingsAjax.php:728
 msgid "Search key works against collection \"%s\"."
 msgstr "Söknyckeln fungerar mot samlingen \"%s\"."
 
 #. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:678
+#: source/php/Admin/SettingsAjax.php:734
 msgid "Search key does not have access to collection \"%s\"."
 msgstr "Söknyckeln har inte åtkomst till samlingen \"%s\"."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:686
+#: source/php/Admin/SettingsAjax.php:742
 msgid "Search key check failed: %s"
 msgstr "Kontroll av söknyckel misslyckades: %s"
 
-#: source/php/Admin/SettingsAjax.php:721
+#: source/php/Admin/SettingsAjax.php:777
 msgid ""
 "Host, admin key, and collection name must all be saved before a new search "
 "key can be created."
@@ -287,21 +298,25 @@ msgstr ""
 "kan skapas."
 
 #. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:733
+#: source/php/Admin/SettingsAjax.php:789
 msgid "Could not create search key: %s"
 msgstr "Kunde inte skapa söknyckel: %s"
 
-#: source/php/Admin/SettingsAjax.php:743
+#: source/php/Admin/SettingsAjax.php:799
 msgid "New search key created and saved. The status checks should now pass."
 msgstr "Ny söknyckel skapad och sparad. Statuskontrollerna borde nu passera."
 
-#: source/php/Admin/SettingsAjax.php:768
+#: source/php/Admin/SettingsAjax.php:824
 msgid ""
 "Host, admin key, and collection name must all be saved before the collection "
 "can be created."
 msgstr ""
 "Värd, admin-nyckel och samlingsnamn måste vara sparade innan samlingen kan "
 "skapas."
+
+#: source/php/Admin/SettingsAjax.php:866
+msgid "Indexing log cleared."
+msgstr "Indexeringsloggen har rensats."
 
 #: source/php/Frontend/EnrichSearchTemplate.php:36
 msgid "Search"
@@ -455,14 +470,18 @@ msgid "External"
 msgstr "Extern"
 
 #: source/php/Frontend/I18n.php:87
+msgid "Clear the indexing log?"
+msgstr "Vill du rensa indexeringsloggen?"
+
+#: source/php/Frontend/I18n.php:90
 msgid "Could not load facetable fields."
 msgstr "Kunde inte läsa in filterbara fält."
 
-#: source/php/Frontend/I18n.php:88
+#: source/php/Frontend/I18n.php:91
 msgid "— No facetable fields found —"
 msgstr "— Inga filterbara fält hittades —"
 
-#: source/php/Frontend/I18n.php:89
+#: source/php/Frontend/I18n.php:92
 msgid ""
 "No facetable fields found in the collection schema. Make sure the collection "
 "exists and has fields with facet: true."
@@ -470,80 +489,80 @@ msgstr ""
 "Inga filterbara fält hittades i samlingens schema. Kontrollera att samlingen "
 "finns och har fält med facet: true."
 
-#: source/php/Frontend/I18n.php:90
+#: source/php/Frontend/I18n.php:93
 msgid "All facetable fields have already been added as facets."
 msgstr "Alla filterbara fält har redan lagts till som facetter."
 
-#: source/php/Frontend/I18n.php:93 views/admin/settings-tabs/facetting.php:30
+#: source/php/Frontend/I18n.php:96 views/admin/settings-tabs/facetting.php:30
 msgid "Field"
 msgstr "Fält"
 
-#: source/php/Frontend/I18n.php:94 views/admin/settings-tabs/facetting.php:46
+#: source/php/Frontend/I18n.php:97 views/admin/settings-tabs/facetting.php:46
 msgid "Label"
 msgstr "Etikett"
 
-#: source/php/Frontend/I18n.php:95 views/admin/settings-tabs/facetting.php:51
+#: source/php/Frontend/I18n.php:98 views/admin/settings-tabs/facetting.php:51
 msgid "e.g. Category"
 msgstr "t.ex. Kategori"
 
-#: source/php/Frontend/I18n.php:96 views/admin/settings-tabs/facetting.php:56
+#: source/php/Frontend/I18n.php:99 views/admin/settings-tabs/facetting.php:56
 msgid "Placeholder"
 msgstr "Platshållare"
 
-#: source/php/Frontend/I18n.php:97 views/admin/settings-tabs/facetting.php:61
+#: source/php/Frontend/I18n.php:100 views/admin/settings-tabs/facetting.php:61
 msgid "e.g. All categories"
 msgstr "t.ex. Alla kategorier"
 
-#: source/php/Frontend/I18n.php:98 views/admin/settings-tabs/facetting.php:66
+#: source/php/Frontend/I18n.php:101 views/admin/settings-tabs/facetting.php:66
 msgid "Display as"
 msgstr "Visa som"
 
-#: source/php/Frontend/I18n.php:99 views/admin/settings-tabs/content.php:237
+#: source/php/Frontend/I18n.php:102 views/admin/settings-tabs/content.php:237
 #: views/admin/settings-tabs/facetting.php:73
 msgid "Dropdown"
 msgstr "Rullista"
 
-#: source/php/Frontend/I18n.php:100 views/admin/settings-tabs/facetting.php:74
+#: source/php/Frontend/I18n.php:103 views/admin/settings-tabs/facetting.php:74
 msgid "Button group"
 msgstr "Knappgrupp"
 
-#: source/php/Frontend/I18n.php:101 views/admin/settings-tabs/facetting.php:80
+#: source/php/Frontend/I18n.php:104 views/admin/settings-tabs/facetting.php:80
 #: views/admin/settings-tabs/facetting.php:81
 msgid "Remove facet"
 msgstr "Ta bort facett"
 
-#: source/php/Frontend/I18n.php:104
+#: source/php/Frontend/I18n.php:107
 #: views/admin/settings-tabs/quick-search.php:98
 msgid "CSS selector"
 msgstr "CSS-selektor"
 
-#: source/php/Frontend/I18n.php:105
+#: source/php/Frontend/I18n.php:108
 #: views/admin/settings-tabs/quick-search.php:103
 msgid "e.g. .site-header input[type=search]"
 msgstr "t.ex. .site-header input[type=search]"
 
-#: source/php/Frontend/I18n.php:106
+#: source/php/Frontend/I18n.php:109
 #: views/admin/settings-tabs/quick-search.php:122
 #: views/admin/settings-tabs/quick-search.php:123
 msgid "Remove selector"
 msgstr "Ta bort selektor"
 
-#: source/php/Frontend/I18n.php:107
+#: source/php/Frontend/I18n.php:110
 #: views/admin/settings-tabs/quick-search.php:109
 msgid "Placement"
 msgstr "DOM-placering"
 
-#: source/php/Frontend/I18n.php:108
+#: source/php/Frontend/I18n.php:111
 #: views/admin/settings-tabs/quick-search.php:115
 msgid "Default (body)"
 msgstr "Standard (body)"
 
-#: source/php/Frontend/I18n.php:109
+#: source/php/Frontend/I18n.php:112
 #: views/admin/settings-tabs/quick-search.php:116
 msgid "Sibling"
 msgstr "Syskon"
 
-#: source/php/Frontend/I18n.php:110
+#: source/php/Frontend/I18n.php:113
 #: views/admin/settings-tabs/quick-search.php:134
 msgid "No selectors configured yet. Click \"Add selector\" to get started."
 msgstr ""
@@ -553,6 +572,14 @@ msgstr ""
 #: source/php/Indexing/Strategies/PdfIndexingStrategy.php:120
 msgid "PDF document"
 msgstr "PDF-dokument"
+
+#: source/php/Logger/IndexingLog.php:92
+msgid "WordPress save"
+msgstr "WordPress-sparning"
+
+#: source/php/Logger/IndexingLog.php:122
+msgid "A WordPress save indexing issue was logged."
+msgstr "Ett indexeringsproblem vid WordPress-sparning loggades."
 
 #: source/php/Typesense/ApiKey.php:39
 msgid ""
@@ -908,6 +935,94 @@ msgstr ""
 #: views/admin/settings-tabs/facetting.php:100
 msgid "Add facet"
 msgstr "Lägg till facett"
+
+#: views/admin/settings-tabs/logging.php:24
+msgid "No runs logged"
+msgstr "Inga körningar loggade"
+
+#: views/admin/settings-tabs/logging.php:28
+msgid "Running"
+msgstr "Körs"
+
+#: views/admin/settings-tabs/logging.php:32
+msgid "Completed with issues"
+msgstr "Slutförd med problem"
+
+#: views/admin/settings-tabs/logging.php:33
+msgid "Completed successfully"
+msgstr "Slutförd utan problem"
+
+#: views/admin/settings-tabs/logging.php:42
+msgid "Indexing log"
+msgstr "Indexeringslogg"
+
+#: views/admin/settings-tabs/logging.php:43
+msgid ""
+"Review the latest indexing run and any document-level issues that were "
+"captured while indexing."
+msgstr ""
+"Granska den senaste indexeringskörningen och eventuella problem på "
+"dokumentnivå som fångades upp under indexeringen."
+
+#: views/admin/settings-tabs/logging.php:49
+msgid "Clear log"
+msgstr "Rensa logg"
+
+#: views/admin/settings-tabs/logging.php:55
+msgid "No indexing activity has been logged yet."
+msgstr "Ingen indexeringsaktivitet har loggats ännu."
+
+#: views/admin/settings-tabs/logging.php:62
+msgid "Last run status"
+msgstr "Status för senaste körningen"
+
+#: views/admin/settings-tabs/logging.php:66
+msgid "Indexed"
+msgstr "Indexerade"
+
+#: views/admin/settings-tabs/logging.php:70
+msgid "Skipped"
+msgstr "Hoppades över"
+
+#: views/admin/settings-tabs/logging.php:74
+msgid "Failed"
+msgstr "Misslyckades"
+
+#: views/admin/settings-tabs/logging.php:79
+msgid "Started:"
+msgstr "Startade:"
+
+#: views/admin/settings-tabs/logging.php:80
+msgid "Finished:"
+msgstr "Avslutades:"
+
+#: views/admin/settings-tabs/logging.php:82
+msgid "Scope:"
+msgstr "Omfattning:"
+
+#: views/admin/settings-tabs/logging.php:91
+msgid "No document-level issues were logged for this run."
+msgstr "Inga problem på dokumentnivå loggades för den här körningen."
+
+#: views/admin/settings-tabs/logging.php:97
+msgid "Time"
+msgstr "Tid"
+
+#: views/admin/settings-tabs/logging.php:98
+msgid "Level"
+msgstr "Nivå"
+
+#: views/admin/settings-tabs/logging.php:99
+msgid "Document"
+msgstr "Dokument"
+
+#: views/admin/settings-tabs/logging.php:100
+msgid "Strategy"
+msgstr "Strategi"
+
+#: views/admin/settings-tabs/logging.php:101
+msgid "Issue"
+msgstr "Problem"
 
 #: views/admin/settings-tabs/quick-search.php:16
 msgid ""

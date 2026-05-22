@@ -5,6 +5,7 @@ namespace TypesenseSearch\CLI;
 use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\App;
 use TypesenseSearch\Helper\PdfToText;
+use TypesenseSearch\Logger\IndexingLog;
 use TypesenseSearch\Typesense\ClientFactory;
 
 /**
@@ -151,6 +152,10 @@ class IndexCommand
         $totalIndexed = 0;
         $totalSkipped = 0;
         $totalFailed  = 0;
+
+        if (!$isDryRun) {
+            IndexingLog::beginRun('cli', sprintf('WP-CLI index: %s', $indexScope));
+        }
 
         // ── Iterate per post type ────────────────────────────────────────────
         foreach ($enabledTypes as $postType) {
@@ -388,6 +393,19 @@ class IndexCommand
         $dryLabel = $isDryRun ? ' (dry run)' : '';
 
         if ($totalFailed > 0) {
+            if (!$isDryRun) {
+                IndexingLog::endRun([
+                    'indexed' => $totalIndexed,
+                    'skipped' => $totalSkipped,
+                    'failed'  => $totalFailed,
+                ], sprintf(
+                    'Finished%s: %d indexed, %d skipped, %d failed.',
+                    $dryLabel,
+                    $totalIndexed,
+                    $totalSkipped,
+                    $totalFailed
+                ));
+            }
             \WP_CLI::warning(sprintf(
                 'Finished%s: %d indexed, %d skipped, %d failed.',
                 $dryLabel,
@@ -396,6 +414,19 @@ class IndexCommand
                 $totalFailed
             ));
         } else {
+            if (!$isDryRun) {
+                IndexingLog::endRun([
+                    'indexed' => $totalIndexed,
+                    'skipped' => $totalSkipped,
+                    'failed'  => $totalFailed,
+                ], sprintf(
+                    'Finished%s: %d indexed, %d skipped, %d failed.',
+                    $dryLabel,
+                    $totalIndexed,
+                    $totalSkipped,
+                    $totalFailed
+                ));
+            }
             \WP_CLI::success(sprintf(
                 'Finished%s: %d indexed, %d skipped, %d failed.',
                 $dryLabel,
@@ -1054,6 +1085,11 @@ class IndexCommand
         $totalIndexed = 0;
         $totalFailed  = 0;
 
+        IndexingLog::beginRun('cli', sprintf(
+            'WP-CLI sync-external: %s',
+            implode(', ', array_keys($strategies))
+        ));
+
         foreach ($strategies as $id => $strategy) {
             \WP_CLI::log(sprintf('Syncing "%s"…', $id));
 
@@ -1063,11 +1099,24 @@ class IndexCommand
                 $totalIndexed += $count;
             } catch (\Throwable $e) {
                 \WP_CLI::warning(sprintf('  ✗ "%s" failed: %s', $id, $e->getMessage()));
+                IndexingLog::recordIssue('error', $e->getMessage(), [
+                    'strategy'       => $id,
+                    'document_label' => $id,
+                ]);
                 $totalFailed++;
             }
         }
 
         \WP_CLI::log('');
+        IndexingLog::endRun([
+            'indexed' => $totalIndexed,
+            'skipped' => 0,
+            'failed'  => $totalFailed,
+        ], sprintf(
+            'External sync finished: %d indexed, %d strategy/strategies failed.',
+            $totalIndexed,
+            $totalFailed
+        ));
 
         if ($totalFailed === 0) {
             \WP_CLI::success(sprintf(
@@ -1170,6 +1219,10 @@ class IndexCommand
                 \WP_CLI::log(sprintf('    ✓ %d document(s) indexed.', $count));
             } catch (\Throwable $e) {
                 $failed++;
+                IndexingLog::recordIssue('error', $e->getMessage(), [
+                    'strategy'       => $id,
+                    'document_label' => $id,
+                ]);
                 \WP_CLI::warning(sprintf('    ✗ "%s" failed: %s', $id, $e->getMessage()));
             }
         }
@@ -1188,6 +1241,11 @@ class IndexCommand
             $documentLabel,
             $e->getMessage()
         ));
+
+        IndexingLog::recordIssue('error', $e->getMessage(), [
+            'strategy'       => 'cli',
+            'document_label' => $documentLabel,
+        ]);
     }
 
     /**

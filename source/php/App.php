@@ -6,6 +6,7 @@ use TypesenseSearch\Indexing\IndexingRegistry;
 use TypesenseSearch\Indexing\Strategies\PdfIndexingStrategy;
 use TypesenseSearch\Indexing\Strategies\PostIndexingStrategy;
 use TypesenseSearch\Logger\ErrorLogLogger;
+use TypesenseSearch\Logger\IndexingLogLogger;
 use TypesenseSearch\Logger\LoggerInterface;
 use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Services\TypesenseClientService;
@@ -33,7 +34,7 @@ class App {
         // Build shared services once so every component uses the same instances.
         $settings      = new SettingsRepository();
         $clientService = new TypesenseClientService($settings);
-        $logger        = new ErrorLogLogger();
+        $logger        = new IndexingLogLogger(new ErrorLogLogger());
 
         // Load translations early so they're available in all components.
         add_action('init', fn() => load_plugin_textdomain(

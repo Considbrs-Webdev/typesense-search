@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Admin;
 
 use Typesense\Exceptions\RequestUnauthorized;
+use TypesenseSearch\Logger\IndexingLog;
 use TypesenseSearch\Typesense\ApiKey;
 use TypesenseSearch\Typesense\ClientFactory;
 use TypesenseSearch\Typesense\Collection;
@@ -29,6 +30,7 @@ class SettingsAjax
     public const AJAX_ACTION_CHECK_STATUS       = 'typesense_check_status';
     public const AJAX_ACTION_FIX_SEARCH_KEY      = 'typesense_fix_search_key';
     public const AJAX_ACTION_STATUS_CREATE_COL   = 'typesense_status_create_collection';
+    public const AJAX_ACTION_CLEAR_LOG           = 'typesense_clear_indexing_log';
 
     public function __construct()
     {
@@ -42,6 +44,7 @@ class SettingsAjax
         add_action('wp_ajax_' . self::AJAX_ACTION_CHECK_STATUS,       [$this, 'handleCheckStatus']);
         add_action('wp_ajax_' . self::AJAX_ACTION_FIX_SEARCH_KEY,     [$this, 'handleFixSearchKey']);
         add_action('wp_ajax_' . self::AJAX_ACTION_STATUS_CREATE_COL,  [$this, 'handleStatusCreateCollection']);
+        add_action('wp_ajax_' . self::AJAX_ACTION_CLEAR_LOG,          [$this, 'handleClearLog']);
     }
 
     // ── Shared helpers ────────────────────────────────────────────────────────
@@ -390,6 +393,11 @@ class SettingsAjax
         $skipped  = 0;
         $failed   = 0;
         $registry = \TypesenseSearch\App::getRegistry();
+        IndexingLog::beginRun('admin', sprintf(
+            /* translators: %s: post type slug */
+            __('Manual reindex: %s', 'typesense-search'),
+            $postType
+        ));
 
         try {
             if ($postType === 'attachment') {
@@ -397,6 +405,11 @@ class SettingsAjax
                 $strategy = $registry->get('pdf');
 
                 if ($strategy === null) {
+                    IndexingLog::endRun([
+                        'indexed' => 0,
+                        'skipped' => 0,
+                        'failed'  => 1,
+                    ], __('PDF indexing strategy is not available.', 'typesense-search'));
                     wp_send_json_error(['message' => __('PDF indexing strategy is not available.', 'typesense-search')]);
                     return;
                 }
@@ -417,12 +430,21 @@ class SettingsAjax
                     ]);
 
                     foreach ($posts as $post) {
-                        if (!$strategy->shouldIndex($post)) {
-                            $skipped++;
-                            continue;
-                        }
+                        try {
+                            if (!$strategy->shouldIndex($post)) {
+                                $skipped++;
+                                continue;
+                            }
 
-                        $strategy->index($post) ? $indexed++ : $failed++;
+                            $strategy->index($post) ? $indexed++ : $failed++;
+                        } catch (\Throwable $e) {
+                            $failed++;
+                            IndexingLog::recordIssue('error', $e->getMessage(), [
+                                'strategy'       => 'pdf',
+                                'document_id'    => (string) $post->ID,
+                                'document_label' => sprintf('%s (#%d)', (string) $post->post_title, $post->ID),
+                            ]);
+                        }
                     }
 
                     $offset += $batchSize;
@@ -444,20 +466,41 @@ class SettingsAjax
                     ]);
 
                     foreach ($posts as $post) {
-                        $strategy = $registry->resolve($post);
+                        $strategy = null;
 
-                        if (!$strategy || !$strategy->shouldIndex($post)) {
-                            $skipped++;
-                            continue;
+                        try {
+                            $strategy = $registry->resolve($post);
+
+                            if (!$strategy || !$strategy->shouldIndex($post)) {
+                                $skipped++;
+                                continue;
+                            }
+
+                            $strategy->index($post) ? $indexed++ : $failed++;
+                        } catch (\Throwable $e) {
+                            $failed++;
+                            IndexingLog::recordIssue('error', $e->getMessage(), [
+                                'strategy'       => $strategy ? $strategy->getIdentifier() : $postType,
+                                'document_id'    => (string) $post->ID,
+                                'document_label' => sprintf('%s (#%d)', (string) $post->post_title, $post->ID),
+                            ]);
                         }
-
-                        $strategy->index($post) ? $indexed++ : $failed++;
                     }
 
                     $offset += $batchSize;
                 } while (count($posts) === $batchSize);
             }
         } catch (\Exception $e) {
+            IndexingLog::endRun([
+                'indexed' => $indexed,
+                'skipped' => $skipped,
+                'failed'  => max(1, $failed),
+            ], sprintf(
+                /* translators: %s: error message */
+                __('Reindex failed: %s', 'typesense-search'),
+                $e->getMessage()
+            ));
+
             wp_send_json_error([
                 'message' => sprintf(
                     /* translators: %s: error message */
@@ -467,6 +510,19 @@ class SettingsAjax
             ]);
             return;
         }
+
+        IndexingLog::endRun([
+            'indexed' => $indexed,
+            'skipped' => $skipped,
+            'failed'  => $failed,
+        ], sprintf(
+            /* translators: 1: indexed count, 2: skipped count, 3: failed count, 4: post type slug */
+            __('Reindexed "%4$s": %1$d indexed, %2$d skipped, %3$d failed.', 'typesense-search'),
+            $indexed,
+            $skipped,
+            $failed,
+            $postType
+        ));
 
         wp_send_json_success([
             /* translators: 1: indexed count, 2: skipped count, 3: failed count, 4: post type slug */
@@ -790,6 +846,24 @@ class SettingsAjax
                 __('Collection "%s" created successfully.', 'typesense-search'),
                 $collectionName
             ),
+        ]);
+    }
+
+    // ── 10. Clear indexing log ───────────────────────────────────────────────
+
+    public function handleClearLog(): void
+    {
+        check_ajax_referer(self::AJAX_ACTION_CLEAR_LOG, 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Unauthorized.', 'typesense-search')], 403);
+            return;
+        }
+
+        IndexingLog::clear();
+
+        wp_send_json_success([
+            'message' => __('Indexing log cleared.', 'typesense-search'),
         ]);
     }
 }

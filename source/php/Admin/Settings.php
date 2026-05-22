@@ -50,6 +50,7 @@ class Settings
             'facetting'    => __('Facetting', 'typesense-search'),
             'quick-search' => __('Quick search', 'typesense-search'),
             'statistics'   => __('Statistics', 'typesense-search'),
+            'logging'      => __('Logging', 'typesense-search'),
             'status'       => __('Status', 'typesense-search'),
         ];
     }
@@ -232,6 +233,8 @@ class Settings
                 'actionFixSearchKey'   => SettingsAjax::AJAX_ACTION_FIX_SEARCH_KEY,
                 'nonceStatusCreateCol' => wp_create_nonce(SettingsAjax::AJAX_ACTION_STATUS_CREATE_COL),
                 'actionStatusCreateCol'=> SettingsAjax::AJAX_ACTION_STATUS_CREATE_COL,
+                'nonceClearLog'        => wp_create_nonce(SettingsAjax::AJAX_ACTION_CLEAR_LOG),
+                'actionClearLog'       => SettingsAjax::AJAX_ACTION_CLEAR_LOG,
             ]);
         }
     }
