@@ -84,7 +84,7 @@ class DocumentBuilder
             $thumbnail = (string) get_the_post_thumbnail_url($post->ID, 'medium');
         }
 
-        $dateTimestamp = (int) strtotime((string) $post->post_date_gmt);
+        $dateTimestamp = (int) strtotime((string) (!empty($post->post_modified_gmt) ? $post->post_modified_gmt : $post->post_date_gmt));
 
         $document = [
             'id'                  => (string) $post->ID,
