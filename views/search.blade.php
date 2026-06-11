@@ -7,7 +7,7 @@
         <div class="o-grid">
             <div class="o-grid-12">
                 <h1 class="ts-search__heading">
-                    {{ $lang->search }}
+                    {{ $lang->searchTitle }}
                 </h1>
             </div>
         </div>
