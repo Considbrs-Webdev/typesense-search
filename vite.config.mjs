@@ -1,4 +1,5 @@
 import { createViteConfig } from "vite-config-factory";
+import { mergeConfig } from "vite";
 
 const entries = {
     'css/typesense-search':  './source/sass/typesense-search.scss',
@@ -9,7 +10,11 @@ const entries = {
     'js/quick-search':       './source/js/quick-search.ts',
 };
 
-export default createViteConfig(entries, {
+const config = createViteConfig(entries, {
     outDir: "assets/dist",
     manifestFile: "manifest.json",
+});
+
+export default (env) => mergeConfig(config(env), {
+    base: "./",
 });

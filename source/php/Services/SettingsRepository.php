@@ -104,6 +104,22 @@ class SettingsRepository
         return in_array($raw, ['radio', 'dropdown'], true) ? $raw : 'radio';
     }
 
+    public function getQueryByWeights(): string
+    {
+        $weights = array_merge(
+            Settings::getDefaultQueryByWeights(),
+            (array) get_option(Settings::OPTION_QUERY_BY_WEIGHTS, [])
+        );
+
+        $queryByOrder = ['title', 'excerpt', 'content', 'extra_terms', 'type_name'];
+        $values = array_map(
+            static fn (string $field): int => min(5, max(1, (int) ($weights[$field] ?? 1))),
+            $queryByOrder
+        );
+
+        return implode(',', $values);
+    }
+
     // ── Facets ───────────────────────────────────────────────────────────────
 
     /**

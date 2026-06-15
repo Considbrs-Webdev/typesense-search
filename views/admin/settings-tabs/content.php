@@ -247,6 +247,47 @@ if ($activeTab !== 'content') {
 
         <div class="ts-settings__card">
             <div class="ts-settings__card-header">
+                <h2><?php esc_html_e('Search field weights', 'typesense-search'); ?></h2>
+                <p><?php esc_html_e('Control how much each search field contributes to result relevance.', 'typesense-search'); ?></p>
+            </div>
+
+            <div class="ts-settings__fields">
+                <?php
+                $queryByWeights = array_merge(
+                    Settings::getDefaultQueryByWeights(),
+                    (array) get_option(Settings::OPTION_QUERY_BY_WEIGHTS, [])
+                );
+                ?>
+                <?php foreach (Settings::getSearchWeightFields() as $field => $label) : ?>
+                <div class="ts-field">
+                    <div class="ts-field__label">
+                        <?php echo esc_html($label); ?>
+                    </div>
+                    <div class="ts-field__body">
+                        <div class="ts-weight-scale" role="radiogroup" aria-label="<?php echo esc_attr($label); ?>">
+                            <?php for ($weight = 1; $weight <= 5; $weight++) : ?>
+                            <?php $inputId = sprintf('ts-query-weight-%s-%d', $field, $weight); ?>
+                            <label class="ts-weight-scale__option" for="<?php echo esc_attr($inputId); ?>">
+                                <input
+                                    type="radio"
+                                    id="<?php echo esc_attr($inputId); ?>"
+                                    name="<?php echo esc_attr(Settings::OPTION_QUERY_BY_WEIGHTS); ?>[<?php echo esc_attr($field); ?>]"
+                                    value="<?php echo esc_attr($weight); ?>"
+                                    <?php checked($weight, (int) ($queryByWeights[$field] ?? 1)); ?>
+                                    class="ts-weight-scale__input"
+                                />
+                                <span class="ts-weight-scale__label"><?php echo esc_html((string) $weight); ?></span>
+                            </label>
+                            <?php endfor; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <div class="ts-settings__card">
+            <div class="ts-settings__card-header">
                 <h2><?php esc_html_e('Post types', 'typesense-search'); ?></h2>
                 <p><?php esc_html_e('Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results.', 'typesense-search'); ?></p>
                 <?php if (!$pdfToTextAvailable) : ?>

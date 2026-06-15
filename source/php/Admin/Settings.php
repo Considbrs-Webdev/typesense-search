@@ -36,6 +36,7 @@ class Settings
     public const OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS = 'typesense_search_highlight_affix_num_tokens';
     public const OPTION_TRUNCATOR = 'typesense_search_truncator';
     public const OPTION_SORT_DISPLAY = 'typesense_search_sort_display';
+    public const OPTION_QUERY_BY_WEIGHTS = 'typesense_search_query_by_weights';
 
     public const OPTION_QUICK_SEARCH_ENABLED        = 'typesense_quick_search_enabled';
     public const OPTION_QUICK_SEARCH_SELECTORS      = 'typesense_quick_search_selectors';
@@ -143,6 +144,12 @@ class Settings
                 return in_array($v, ['radio', 'dropdown'], true) ? (string) $v : 'radio';
             },
             'default'           => 'radio',
+        ]);
+
+        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_QUERY_BY_WEIGHTS, [
+            'type'              => 'array',
+            'sanitize_callback' => [$this, 'sanitizeQueryByWeights'],
+            'default'           => self::getDefaultQueryByWeights(),
         ]);
         
         register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_INDEX_PDF, [
@@ -275,6 +282,53 @@ class Settings
         }
 
         return array_map('sanitize_key', $value);
+    }
+
+    /**
+     * Return the searchable fields in settings display order.
+     *
+     * @return array<string, string>
+     */
+    public static function getSearchWeightFields(): array
+    {
+        return [
+            'title'       => __('Title', 'typesense-search'),
+            'excerpt'     => __('Excerpt', 'typesense-search'),
+            'content'     => __('Content', 'typesense-search'),
+            'type_name'   => __('Content type name', 'typesense-search'),
+            'extra_terms' => __('Extra search terms', 'typesense-search'),
+        ];
+    }
+
+    /**
+     * Return query_by_weights defaults keyed by searchable field.
+     *
+     * @return array<string, int>
+     */
+    public static function getDefaultQueryByWeights(): array
+    {
+        return array_fill_keys(array_keys(self::getSearchWeightFields()), 1);
+    }
+
+    /**
+     * Sanitize query_by_weights values before saving.
+     *
+     * @return array<string, int>
+     */
+    public function sanitizeQueryByWeights(mixed $value): array
+    {
+        $weights = self::getDefaultQueryByWeights();
+
+        if (!is_array($value)) {
+            return $weights;
+        }
+
+        foreach (array_keys($weights) as $field) {
+            $weight = absint($value[$field] ?? 1);
+            $weights[$field] = min(5, max(1, $weight));
+        }
+
+        return $weights;
     }
 
     /**

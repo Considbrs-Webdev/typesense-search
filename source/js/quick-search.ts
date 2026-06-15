@@ -5,6 +5,7 @@
 import { createClient } from "./client";
 import type { TypesenseSearchConfig, SearchHit } from "./types";
 import { loadWebAwesomeLocale } from "./webawesome-locale";
+import { getQueryByWeights, INFIX, QUERY_BY } from "./search-params";
 
 interface QuickSearchSelectorEntry {
   selector: string;
@@ -439,13 +440,15 @@ function attachQuickSearch(
       return;
     }
     try {
+      const queryByWeights = getQueryByWeights(config);
       const response = await (client as NonNullable<typeof client>)
         .collections(config.collection)
         .documents()
         .search({
           q: query,
-          query_by: "title,excerpt,content,extra_terms,type_name",
-          infix: "always,off,off,always,off",
+          query_by: QUERY_BY,
+          infix: INFIX,
+          ...(queryByWeights ? { query_by_weights: queryByWeights } : {}),
           per_page: hitsPerPage,
         });
       currentHits = (response.hits as SearchHit[]) ?? [];

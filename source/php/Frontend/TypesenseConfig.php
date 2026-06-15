@@ -83,6 +83,7 @@ class TypesenseConfig
 			'debounce'                => $this->settings->isDebounceEnabled(),
 			'debounceDelay'           => $this->settings->getDebounceDelay(),
 			'highlightAffixNumTokens' => $this->settings->getHighlightAffixNumTokens(),
+			'queryByWeights'          => $this->settings->getQueryByWeights(),
 			'truncator'               => sanitize_text_field($this->settings->getTruncator()),
 			'sortDisplay'             => $this->settings->getSortDisplay(),
 			'webAwesomeLocale'        => self::webAwesomeLocale(),
@@ -174,4 +175,3 @@ class TypesenseConfig
 		}
 	}
 }
-

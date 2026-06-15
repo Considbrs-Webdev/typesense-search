@@ -276,6 +276,64 @@ $ts-thumb-size: 18px;
   }
 }
 
+.ts-weight-scale {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  padding: 2px;
+  border: 1px solid $ts-border;
+  border-radius: $ts-radius;
+  background: $ts-bg;
+
+  &__option {
+    display: inline-flex;
+    cursor: pointer;
+  }
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 30px;
+    border-radius: calc($ts-radius - 1px);
+    color: $ts-muted;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    transition:
+      background-color 0.15s,
+      color 0.15s,
+      box-shadow 0.15s;
+  }
+
+  &__input:checked + &__label {
+    background: $ts-blue;
+    color: #fff;
+  }
+
+  &__input:focus-visible + &__label {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px $ts-blue;
+  }
+
+  &__option:hover &__label {
+    color: $ts-text;
+  }
+
+  &__option:hover &__input:checked + &__label {
+    color: #fff;
+  }
+}
+
 // ── Toggle list (content tab) ─────────────────────────────────────────────────
 
 .ts-toggle-list {

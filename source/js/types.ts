@@ -19,6 +19,7 @@ export interface TypesenseSearchConfig {
   debounce?: boolean;
   debounceDelay?: number;
   highlightAffixNumTokens?: number;
+  queryByWeights?: string;
   sortDisplay?: "radio" | "dropdown";
   /** Web Awesome translation module key (e.g. `sv`); omit for English internals. */
   webAwesomeLocale?: string | null;
