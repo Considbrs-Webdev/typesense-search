@@ -288,6 +288,22 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
         $ancestors = get_post_ancestors($parent);
         $topPost   = !empty($ancestors) ? get_post((int) end($ancestors)) : $parent;
 
-        return $topPost ? (string) $topPost->post_title : '';
+        if (!$topPost || self::isExcludedAsSection($topPost)) {
+            return '';
+        }
+
+        return (string) $topPost->post_title;
+    }
+
+    /**
+     * Check whether a page should be hidden from the section facet.
+     *
+     * @param \WP_Post $post
+     * @return bool
+     */
+    private static function isExcludedAsSection(\WP_Post $post): bool
+    {
+        return $post->post_type === 'page'
+            && get_post_meta($post->ID, MetaBox::META_EXCLUDE_AS_SECTION, true) === '1';
     }
 }

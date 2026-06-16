@@ -17,15 +17,17 @@ namespace TypesenseSearch\Admin;
  * and regular form submit).
  *
  * Exposed meta keys:
- *   MetaBox::META_EXCLUDE      (_typesense_exclude)      — '1' = excluded from index
- *   MetaBox::META_EXTRA_TERMS  (_typesense_extra_terms)  — additional search terms string
+ *   MetaBox::META_EXCLUDE             (_typesense_exclude)             — '1' = excluded from index
+ *   MetaBox::META_EXCLUDE_AS_SECTION  (_typesense_exclude_as_section)  — '1' = not used as a section
+ *   MetaBox::META_EXTRA_TERMS         (_typesense_extra_terms)         — additional search terms string
  *
  * @package TypesenseSearch\Admin
  */
 class MetaBox
 {
-    public const META_EXCLUDE     = '_typesense_exclude';
-    public const META_EXTRA_TERMS = '_typesense_extra_terms';
+    public const META_EXCLUDE            = '_typesense_exclude';
+    public const META_EXCLUDE_AS_SECTION = '_typesense_exclude_as_section';
+    public const META_EXTRA_TERMS        = '_typesense_extra_terms';
 
     private const NONCE_ACTION = 'typesense_metabox_save';
     private const NONCE_FIELD  = '_typesense_metabox_nonce';
@@ -78,8 +80,9 @@ class MetaBox
     {
         wp_nonce_field(self::NONCE_ACTION, self::NONCE_FIELD);
 
-        $exclude    = get_post_meta($post->ID, self::META_EXCLUDE, true) === '1';
-        $extraTerms = (string) get_post_meta($post->ID, self::META_EXTRA_TERMS, true);
+        $exclude          = get_post_meta($post->ID, self::META_EXCLUDE, true) === '1';
+        $excludeAsSection = get_post_meta($post->ID, self::META_EXCLUDE_AS_SECTION, true) === '1';
+        $extraTerms       = (string) get_post_meta($post->ID, self::META_EXTRA_TERMS, true);
         ?>
 
         <style>
@@ -90,6 +93,7 @@ class MetaBox
         .ts-metabox__label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
         .ts-metabox__textarea { margin-top: 4px; min-height: 72px; resize: vertical; }
         .ts-metabox__description { margin-top: 6px; color: #666; font-size: 12px; line-height: 1.3; }
+        .ts-metabox__description--section { margin-bottom: 12px; }
         .ts-metabox input[type="checkbox"] { width: 16px; height: 16px; margin: 0; }
         </style>
 
@@ -107,6 +111,24 @@ class MetaBox
                     <?php esc_html_e('Exclude from search index', 'typesense-search'); ?>
                 </span>
             </label>
+
+            <?php if ($post->post_type === 'page') : ?>
+                <label class="ts-metabox__row ts-metabox__row--checkbox">
+                    <input
+                        type="checkbox"
+                        name="<?php echo esc_attr(self::META_EXCLUDE_AS_SECTION); ?>"
+                        id="ts-exclude-as-section"
+                        value="1"
+                        <?php checked($excludeAsSection); ?>
+                    />
+                    <span class="ts-metabox__checkbox-label">
+                        <?php esc_html_e('Exclude as search section', 'typesense-search'); ?>
+                    </span>
+                </label>
+                <p class="ts-metabox__description ts-metabox__description--section">
+                    <?php esc_html_e('Prevents this page from being used as the section label for itself and descendant pages when it is the top page in the page tree.', 'typesense-search'); ?>
+                </p>
+            <?php endif; ?>
 
             <div class="ts-metabox__row">
                 <label for="ts-extra-terms" class="ts-metabox__label">
@@ -157,6 +179,18 @@ class MetaBox
         // ── Exclude flag ──────────────────────────────────────────────────────
         $exclude = isset($_POST[self::META_EXCLUDE]) && $_POST[self::META_EXCLUDE] === '1' ? '1' : '0';
         update_post_meta($postId, self::META_EXCLUDE, $exclude);
+
+        // ── Exclude as section flag (pages only) ───────────────────────────
+        if ($post->post_type === 'page') {
+            $previousExcludeAsSection = get_post_meta($postId, self::META_EXCLUDE_AS_SECTION, true) === '1';
+            $excludeAsSection = isset($_POST[self::META_EXCLUDE_AS_SECTION]) && $_POST[self::META_EXCLUDE_AS_SECTION] === '1' ? '1' : '0';
+
+            update_post_meta($postId, self::META_EXCLUDE_AS_SECTION, $excludeAsSection);
+
+            if ($previousExcludeAsSection !== ($excludeAsSection === '1')) {
+                do_action('typesense_search/section_exclusion_changed', $postId);
+            }
+        }
 
         // ── Extra search terms ────────────────────────────────────────────────
         $extraTerms = sanitize_textarea_field(wp_unslash($_POST[self::META_EXTRA_TERMS] ?? ''));

@@ -59,6 +59,11 @@ class IndexingHooks
         //   do_action('typesense_search/deindex_post', $post_id);
         add_action('typesense_search/index_post', [$this, 'onExternalIndexPost']);
         add_action('typesense_search/deindex_post', [$this, 'onPostDeindexed']);
+
+        // Fired by the admin metabox when a page's section-exclusion flag
+        // changes. Descendant pages and PDFs derive their section from this
+        // ancestor, so they need to be rebuilt too.
+        add_action('typesense_search/section_exclusion_changed', [$this, 'onSectionExclusionChanged']);
     }
 
     /**
@@ -175,6 +180,41 @@ class IndexingHooks
         }
     }
 
+    /**
+     * Re-index descendant pages and attached PDFs after a top page is included
+     * or excluded as a search section.
+     *
+     * @param int $postId WordPress post ID.
+     */
+    public function onSectionExclusionChanged(int $postId): void
+    {
+        $post = get_post($postId);
+        if (!$post || $post->post_type !== 'page' || !empty(get_post_ancestors($post))) {
+            return;
+        }
+
+        $descendants = get_pages([
+            'child_of'    => $postId,
+            'post_status' => 'publish',
+            'sort_column' => 'menu_order',
+        ]);
+
+        foreach ($descendants as $descendant) {
+            $strategy = $this->registry->resolve($descendant);
+            if ($strategy === null) {
+                continue;
+            }
+
+            if ($strategy->shouldIndex($descendant)) {
+                $strategy->index($descendant);
+            } else {
+                $strategy->deindex($descendant->ID);
+            }
+
+            $this->cascadePdfReindex($descendant->ID);
+        }
+    }
+
     // ── Helpers ────────────────────────────────────────────────────────────
 
     /**
@@ -192,4 +232,3 @@ class IndexingHooks
         }
     }
 }
-

@@ -2,6 +2,7 @@
 
 namespace TypesenseSearch\Indexing\Enrichers;
 
+use TypesenseSearch\Admin\MetaBox;
 use TypesenseSearch\Indexing\DocumentBuilder;
 
 /**
@@ -73,10 +74,24 @@ class PageEnricher
             : $post;
 
         if ($topMostParentPost) {
-            $document['top_most_parent'] = (string) $topMostParentPost->post_title;
+            $document['top_most_parent'] = $this->isExcludedAsSection($topMostParentPost)
+                ? ''
+                : (string) $topMostParentPost->post_title;
         }
 
         return $document;
+    }
+
+    /**
+     * Check whether a page should be hidden from the section facet.
+     *
+     * @param \WP_Post $post
+     * @return bool
+     */
+    private function isExcludedAsSection(\WP_Post $post): bool
+    {
+        return $post->post_type === 'page'
+            && get_post_meta($post->ID, MetaBox::META_EXCLUDE_AS_SECTION, true) === '1';
     }
 
     /**

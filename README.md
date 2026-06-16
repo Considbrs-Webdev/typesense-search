@@ -176,12 +176,13 @@ Checks whether the current configuration is valid and the collection exists. Can
 
 ## 5. Per-post controls
 
-Every indexed post type records two meta fields, managed via a meta box visible in the post editor.
+Every indexed post type records meta fields, managed via a meta box visible in the post editor.
 
-| Meta key                 | Constant                    | Effect                                                                                                                             |
-| ------------------------ | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `_typesense_exclude`     | `MetaBox::META_EXCLUDE`     | Set to `'1'` to prevent this post from being indexed (or to remove it from the index if already present)                           |
-| `_typesense_extra_terms` | `MetaBox::META_EXTRA_TERMS` | Free-text field included in the indexed document, allowing keywords that don't appear in the post body to influence search ranking |
+| Meta key                         | Constant                              | Effect                                                                                                                                                           |
+| -------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_typesense_exclude`             | `MetaBox::META_EXCLUDE`               | Set to `'1'` to prevent this post from being indexed (or to remove it from the index if already present)                                                         |
+| `_typesense_exclude_as_section`  | `MetaBox::META_EXCLUDE_AS_SECTION`    | Pages only. Set to `'1'` to prevent a top-level page from being used as the `top_most_parent` section for itself, descendant pages, and attached PDFs            |
+| `_typesense_extra_terms`         | `MetaBox::META_EXTRA_TERMS`           | Free-text field included in the indexed document, allowing keywords that don't appear in the post body to influence search ranking                                |
 
 The `_typesense_exclude` flag is honoured by all built-in strategies. Custom strategies should check it in their `shouldIndex()` implementation if the same per-post control is desired.
 

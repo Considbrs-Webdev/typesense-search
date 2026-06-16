@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-15T14:58:29+00:00\n"
+"POT-Creation-Date: 2026-06-16T13:05:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -42,25 +42,33 @@ msgstr ""
 msgid "https://github.com/considbrs-webdev"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:63
+#: source/php/Admin/MetaBox.php:65
 msgid "Search settings"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:107
-#: source/php/Admin/MetaBox.php:196
+#: source/php/Admin/MetaBox.php:110
+#: source/php/Admin/MetaBox.php:229
 msgid "Exclude from search index"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:113
+#: source/php/Admin/MetaBox.php:124
+msgid "Exclude as search section"
+msgstr ""
+
+#: source/php/Admin/MetaBox.php:128
+msgid "Prevents this page from being used as the section label for itself and descendant pages when it is the top page in the page tree."
+msgstr ""
+
+#: source/php/Admin/MetaBox.php:134
 #: source/php/Admin/Settings.php:299
 msgid "Extra search terms"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:120
+#: source/php/Admin/MetaBox.php:141
 msgid "Keywords, synonyms or alternate phrasings…"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:123
+#: source/php/Admin/MetaBox.php:144
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
