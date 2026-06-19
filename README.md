@@ -145,6 +145,25 @@ The admin key is kept server-side. The search key is the only credential exposed
 | Debounce delay           | `typesense_search_debounce_delay`             | Milliseconds to wait after the last keystroke before firing a query (default: 300)                      |
 | Highlight context tokens | `typesense_search_highlight_affix_num_tokens` | Number of words shown around a highlighted match in search snippets (default: 15)                       |
 | Truncation string        | `typesense_search_truncator`                  | The string appended to truncated excerpts (default: `[...]`)                                            |
+| Search field weights     | `typesense_search_query_by_weights`           | Relevance weight for each configured search field (1-5; defaults to 1 for every field)                  |
+
+#### Search field weights
+
+Use the **Search field weights** card to control how strongly each indexed field
+contributes to result relevance. Each field has an independent scale from `1`
+(lowest) to `5` (highest):
+
+| Admin label        | Typesense field |
+| ------------------ | --------------- |
+| Title              | `title`         |
+| Excerpt            | `excerpt`       |
+| Content            | `content`       |
+| Content type name  | `type_name`     |
+| Extra search terms | `extra_terms`   |
+
+The plugin passes the configured values to both full and quick searches as
+Typesense's `query_by_weights` parameter. Typesense reads those values in the
+same order as `query_by`: `title,excerpt,content,extra_terms,type_name`.
 
 ### 4.4 Facetting tab
 
@@ -185,6 +204,11 @@ Every indexed post type records meta fields, managed via a meta box visible in t
 | `_typesense_extra_terms`         | `MetaBox::META_EXTRA_TERMS`           | Free-text field included in the indexed document, allowing keywords that don't appear in the post body to influence search ranking                                |
 
 The `_typesense_exclude` flag is honoured by all built-in strategies. Custom strategies should check it in their `shouldIndex()` implementation if the same per-post control is desired.
+
+The `_typesense_exclude_as_section` flag keeps the page indexed, but clears its
+`top_most_parent` value when the page is the top-level page in its tree. When
+the setting is changed, the plugin re-indexes published descendant pages and
+their attached PDFs so their section facets update immediately.
 
 ---
 
