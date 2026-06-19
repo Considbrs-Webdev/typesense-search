@@ -29,5 +29,6 @@
         "allow-plugins": {
             "php-http/discovery": false
         }
-    }
+    },
+    "version": "1.0.0"
 }
