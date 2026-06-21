@@ -125,7 +125,7 @@ if ($activeTab !== 'quick-search') {
                                 class="ts-qs-selector-row__mobile-behavior-select"
                             >
                                 <option value="regular" <?php selected($mobileBehavior, 'regular'); ?>><?php esc_html_e('Regular behavior', 'typesense-search'); ?></option>
-                                <option value="overlay" <?php selected($mobileBehavior, 'overlay'); ?>><?php esc_html_e('Open in overlay', 'typesense-search'); ?></option>
+                                <option value="overlay" <?php selected($mobileBehavior, 'overlay'); ?>><?php esc_html_e('Open in modal', 'typesense-search'); ?></option>
                             </select>
                         </div>
                         <button

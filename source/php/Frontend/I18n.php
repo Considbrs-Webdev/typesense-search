@@ -117,7 +117,7 @@ class I18n
             'qsPlacementSibling'   => __('Sibling', 'typesense-search'),
             'qsMobileBehaviorLabel' => __('Mobile behavior', 'typesense-search'),
             'qsMobileBehaviorRegular' => __('Regular behavior', 'typesense-search'),
-            'qsMobileBehaviorOverlay' => __('Open in overlay', 'typesense-search'),
+            'qsMobileBehaviorOverlay' => __('Open in modal', 'typesense-search'),
             'qsNoSelectors'        => __('No selectors configured yet. Click "Add selector" to get started.', 'typesense-search'),
         ];
     }

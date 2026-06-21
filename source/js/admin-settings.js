@@ -874,7 +874,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <label class="ts-qs-selector-row__label" for="ts-qs-mobile-behavior-${index}">${escAttrQs(i18n.qsMobileBehaviorLabel ?? 'Mobile behavior')}</label>
                     <select id="ts-qs-mobile-behavior-${index}" name="${escAttrQs(optName)}[${index}][mobile_behavior]" class="ts-qs-selector-row__mobile-behavior-select">
                         <option value="regular">${escAttrQs(i18n.qsMobileBehaviorRegular ?? 'Regular behavior')}</option>
-                        <option value="overlay">${escAttrQs(i18n.qsMobileBehaviorOverlay ?? 'Open in overlay')}</option>
+                        <option value="overlay">${escAttrQs(i18n.qsMobileBehaviorOverlay ?? 'Open in modal')}</option>
                     </select>
                 </div>
                 <button
