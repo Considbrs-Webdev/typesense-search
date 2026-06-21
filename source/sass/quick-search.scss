@@ -225,3 +225,161 @@ a.ts-qs-footer {
     color: var(--ts-qs-footer-hover-color, inherit);
   }
 }
+
+// ── Mobile overlay ──────────────────────────────────────────────────────────
+// The native dialog supplies the modal semantics and focus containment. The
+// search field is intentionally the first interactive element in the panel.
+
+.ts-quick-search-overlay {
+  width: 100dvw;
+  min-width: 0;
+  max-width: 100dvw;
+  inset: 0;
+  height: 100dvh;
+  min-height: 0;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+
+  &::backdrop {
+    background: rgba(0, 0, 0, 0.52);
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    background: var(--ts-qs-overlay-bg, var(--ts-qs-bg, #fff));
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  &__close {
+    display: inline-grid;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    place-items: center;
+    font-size: 2rem;
+    line-height: 1;
+    color: inherit;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+  }
+
+  &__hint {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  &__form {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  &__field {
+    align-self: start;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 12px;
+  }
+
+  &__field .c-field__inner {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  &__field .c-field__input {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  &__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  &__results {
+    min-height: 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  &__submit {
+    margin-top: 12px;
+  }
+
+  .ts-quick-search--overlay {
+    position: static;
+    min-width: 0;
+    width: 100%;
+    max-height: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .ts-qs-results,
+  .ts-qs-item {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+html.ts-quick-search-overlay-open,
+body.ts-quick-search-overlay-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}

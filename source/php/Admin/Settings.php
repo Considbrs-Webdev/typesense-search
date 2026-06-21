@@ -351,9 +351,13 @@ class Settings
                 continue;
             }
             $sibling = !empty($item['sibling']);
+            $mobileBehavior = ($item['mobile_behavior'] ?? '') === 'overlay' || !empty($item['mobile_overlay'])
+                ? 'overlay'
+                : 'regular';
             $result[] = [
-                'selector' => $selector,
-                'sibling'  => $sibling,
+                'selector'        => $selector,
+                'sibling'         => $sibling,
+                'mobile_behavior' => $mobileBehavior,
             ];
         }
 

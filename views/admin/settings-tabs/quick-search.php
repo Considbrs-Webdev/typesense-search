@@ -116,6 +116,18 @@ if ($activeTab !== 'quick-search') {
                                 <option value="1" <?php selected($isSibling, true); ?>><?php esc_html_e('Sibling', 'typesense-search'); ?></option>
                             </select>
                         </div>
+                        <div class="ts-qs-selector-row__field">
+                            <label class="ts-qs-selector-row__label" for="ts-qs-mobile-behavior-<?php echo esc_attr($index); ?>"><?php esc_html_e('Mobile behavior', 'typesense-search'); ?></label>
+                            <?php $mobileBehavior = (($entry['mobile_behavior'] ?? '') === 'overlay' || !empty($entry['mobile_overlay'])) ? 'overlay' : 'regular'; ?>
+                            <select
+                                id="ts-qs-mobile-behavior-<?php echo esc_attr($index); ?>"
+                                name="<?php echo esc_attr(Settings::OPTION_QUICK_SEARCH_SELECTORS); ?>[<?php echo esc_attr($index); ?>][mobile_behavior]"
+                                class="ts-qs-selector-row__mobile-behavior-select"
+                            >
+                                <option value="regular" <?php selected($mobileBehavior, 'regular'); ?>><?php esc_html_e('Regular behavior', 'typesense-search'); ?></option>
+                                <option value="overlay" <?php selected($mobileBehavior, 'overlay'); ?>><?php esc_html_e('Open in overlay', 'typesense-search'); ?></option>
+                            </select>
+                        </div>
                         <button
                             type="button"
                             class="button ts-qs-selector-row__remove"

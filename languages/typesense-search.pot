@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-16T13:05:33+00:00\n"
+"POT-Creation-Date: 2026-06-20T22:42:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -46,29 +46,29 @@ msgstr ""
 msgid "Search settings"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:110
-#: source/php/Admin/MetaBox.php:229
+#: source/php/Admin/MetaBox.php:111
+#: source/php/Admin/MetaBox.php:230
 msgid "Exclude from search index"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:124
+#: source/php/Admin/MetaBox.php:125
 msgid "Exclude as search section"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:128
+#: source/php/Admin/MetaBox.php:129
 msgid "Prevents this page from being used as the section label for itself and descendant pages when it is the top page in the page tree."
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:134
+#: source/php/Admin/MetaBox.php:135
 #: source/php/Admin/Settings.php:299
 msgid "Extra search terms"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:141
+#: source/php/Admin/MetaBox.php:142
 msgid "Keywords, synonyms or alternate phrasings…"
 msgstr ""
 
-#: source/php/Admin/MetaBox.php:144
+#: source/php/Admin/MetaBox.php:145
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
@@ -85,6 +85,7 @@ msgid "Facetting"
 msgstr ""
 
 #: source/php/Admin/Settings.php:52
+#: source/php/Frontend/I18n.php:54
 #: views/admin/settings-tabs/quick-search.php:15
 msgid "Quick search"
 msgstr ""
@@ -340,6 +341,8 @@ msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:36
 #: source/php/Frontend/EnrichSearchTemplate.php:37
+#: source/php/Frontend/I18n.php:57
+#: source/php/Frontend/I18n.php:58
 msgid "Search"
 msgstr ""
 
@@ -436,154 +439,177 @@ msgstr ""
 msgid "No hits for your search term"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:66
+#: source/php/Frontend/I18n.php:55
+msgid "Search suggestions open in this dialog. Press Escape or use the close button to return to the page."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:56
+msgid "Close quick search"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:71
 msgid "OK"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:67
+#: source/php/Frontend/I18n.php:72
 msgid "Unknown error."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:68
+#: source/php/Frontend/I18n.php:73
 msgid "Error."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:70
+#: source/php/Frontend/I18n.php:75
 msgid "Request failed: "
 msgstr ""
 
-#: source/php/Frontend/I18n.php:73
+#: source/php/Frontend/I18n.php:78
 msgid "Pie chart showing document distribution"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:74
+#: source/php/Frontend/I18n.php:79
 msgid "documents"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:78
+#: source/php/Frontend/I18n.php:83
 msgid "Remove all \"%s\" documents from the Typesense index? This cannot be undone."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:79
+#: source/php/Frontend/I18n.php:84
 msgid "Clear"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:81
+#: source/php/Frontend/I18n.php:86
 msgid "Re-index all \"%s\" documents? Existing entries will be re-processed and overwritten."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:82
+#: source/php/Frontend/I18n.php:87
 msgid "Reindex"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:83
+#: source/php/Frontend/I18n.php:88
 msgid "Managed by an external strategy — use WP-CLI to reindex."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:84
+#: source/php/Frontend/I18n.php:89
 msgid "External"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:87
+#: source/php/Frontend/I18n.php:92
 msgid "Clear the indexing log?"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:90
+#: source/php/Frontend/I18n.php:95
 msgid "Could not load facetable fields."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:91
+#: source/php/Frontend/I18n.php:96
 msgid "— No facetable fields found —"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:92
+#: source/php/Frontend/I18n.php:97
 msgid "No facetable fields found in the collection schema. Make sure the collection exists and has fields with facet: true."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:93
+#: source/php/Frontend/I18n.php:98
 msgid "All facetable fields have already been added as facets."
 msgstr ""
 
-#: source/php/Frontend/I18n.php:96
+#: source/php/Frontend/I18n.php:101
 #: views/admin/settings-tabs/facetting.php:30
 msgid "Field"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:97
+#: source/php/Frontend/I18n.php:102
 #: views/admin/settings-tabs/facetting.php:46
 msgid "Label"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:98
+#: source/php/Frontend/I18n.php:103
 #: views/admin/settings-tabs/facetting.php:51
 msgid "e.g. Category"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:99
+#: source/php/Frontend/I18n.php:104
 #: views/admin/settings-tabs/facetting.php:56
 msgid "Placeholder"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:100
+#: source/php/Frontend/I18n.php:105
 #: views/admin/settings-tabs/facetting.php:61
 msgid "e.g. All categories"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:101
+#: source/php/Frontend/I18n.php:106
 #: views/admin/settings-tabs/facetting.php:66
 msgid "Display as"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:102
+#: source/php/Frontend/I18n.php:107
 #: views/admin/settings-tabs/content.php:237
 #: views/admin/settings-tabs/facetting.php:73
 msgid "Dropdown"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:103
+#: source/php/Frontend/I18n.php:108
 #: views/admin/settings-tabs/facetting.php:74
 msgid "Button group"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:104
+#: source/php/Frontend/I18n.php:109
 #: views/admin/settings-tabs/facetting.php:80
 #: views/admin/settings-tabs/facetting.php:81
 msgid "Remove facet"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:107
+#: source/php/Frontend/I18n.php:112
 #: views/admin/settings-tabs/quick-search.php:98
 msgid "CSS selector"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:108
+#: source/php/Frontend/I18n.php:113
 #: views/admin/settings-tabs/quick-search.php:103
 msgid "e.g. .site-header input[type=search]"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:109
-#: views/admin/settings-tabs/quick-search.php:122
-#: views/admin/settings-tabs/quick-search.php:123
+#: source/php/Frontend/I18n.php:114
+#: views/admin/settings-tabs/quick-search.php:134
+#: views/admin/settings-tabs/quick-search.php:135
 msgid "Remove selector"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:110
+#: source/php/Frontend/I18n.php:115
 #: views/admin/settings-tabs/quick-search.php:109
 msgid "Placement"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:111
+#: source/php/Frontend/I18n.php:116
 #: views/admin/settings-tabs/quick-search.php:115
 msgid "Default (body)"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:112
+#: source/php/Frontend/I18n.php:117
 #: views/admin/settings-tabs/quick-search.php:116
 msgid "Sibling"
 msgstr ""
 
-#: source/php/Frontend/I18n.php:113
-#: views/admin/settings-tabs/quick-search.php:134
+#: source/php/Frontend/I18n.php:118
+#: views/admin/settings-tabs/quick-search.php:120
+msgid "Mobile behavior"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:119
+#: views/admin/settings-tabs/quick-search.php:127
+msgid "Regular behavior"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:120
+#: views/admin/settings-tabs/quick-search.php:128
+msgid "Open in overlay"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:121
+#: views/admin/settings-tabs/quick-search.php:146
 msgid "No selectors configured yet. Click \"Add selector\" to get started."
 msgstr ""
 
@@ -726,7 +752,7 @@ msgstr ""
 #: views/admin/settings-tabs/connection.php:274
 #: views/admin/settings-tabs/content.php:372
 #: views/admin/settings-tabs/facetting.php:105
-#: views/admin/settings-tabs/quick-search.php:146
+#: views/admin/settings-tabs/quick-search.php:158
 msgid "Save settings"
 msgstr ""
 
@@ -986,7 +1012,7 @@ msgstr ""
 msgid "Add one or more CSS selectors that match the search inputs you want to enhance with quick search autocomplete."
 msgstr ""
 
-#: views/admin/settings-tabs/quick-search.php:141
+#: views/admin/settings-tabs/quick-search.php:153
 msgid "Add selector"
 msgstr ""
 

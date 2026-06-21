@@ -1347,7 +1347,8 @@ $ts-thumb-size: 18px;
     }
   }
 
-  &__sibling-select {
+  &__sibling-select,
+  &__mobile-behavior-select {
     font-size: 13px !important;
     height: 36px !important;
     padding: 0 10px !important;
