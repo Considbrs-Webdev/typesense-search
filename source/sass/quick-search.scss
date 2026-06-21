@@ -335,6 +335,8 @@ a.ts-qs-footer {
   &__field .c-field__input {
     min-width: 0;
     max-width: 100%;
+    // Safari zooms text inputs below 16px when focused on iPhone.
+    font-size: 16px;
   }
 
   &__label {

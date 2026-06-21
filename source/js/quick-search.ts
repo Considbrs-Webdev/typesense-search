@@ -827,10 +827,11 @@ function attachMobileOverlayQuickSearch(
     document.documentElement.classList.add("ts-quick-search-overlay-open");
     document.body.classList.add("ts-quick-search-overlay-open");
     dialog.showModal();
-    requestAnimationFrame(() => {
-      overlayInput.focus({ preventScroll: true });
-      overlayInput.dispatchEvent(new Event("input", { bubbles: true }));
-    });
+    // iOS only opens the virtual keyboard when focus happens inside the same
+    // user-initiated event that opened the dialog. Deferring this to an
+    // animation frame leaves the field focused but keeps the keyboard hidden.
+    overlayInput.focus({ preventScroll: true });
+    overlayInput.dispatchEvent(new Event("input", { bubbles: true }));
   });
 
   overlayInput.addEventListener("input", () => {
