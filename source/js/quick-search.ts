@@ -804,10 +804,10 @@ function attachMobileOverlayQuickSearch(
     });
   };
 
-  const restoreFocus = () => {
+  const defocusOpener = () => {
     syncOpenerSemantics();
     suppressOpenerFocus = true;
-    input.focus({ preventScroll: true });
+    input.blur();
     requestAnimationFrame(() => {
       suppressOpenerFocus = false;
     });
@@ -846,7 +846,7 @@ function attachMobileOverlayQuickSearch(
     event.preventDefault();
     closeOverlay();
   });
-  dialog.addEventListener("close", restoreFocus);
+  dialog.addEventListener("close", defocusOpener);
   dialog.addEventListener("close", () => {
     document.documentElement.classList.remove("ts-quick-search-overlay-open");
     document.body.classList.remove("ts-quick-search-overlay-open");
