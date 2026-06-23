@@ -293,7 +293,11 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
         $ancestors = get_post_ancestors($parent);
         $topPost   = !empty($ancestors) ? get_post((int) end($ancestors)) : $parent;
 
-        if (!$topPost || !self::isIndexablePage($topPost) || self::isExcludedAsSection($topPost)) {
+        if (!$topPost
+            || $topPost->post_type !== 'page'
+            || !PostIndexingStrategy::isIndexable($topPost)
+            || self::isExcludedAsSection($topPost)
+        ) {
             return '';
         }
 
@@ -312,23 +316,4 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
             && get_post_meta($post->ID, MetaBox::META_EXCLUDE_AS_SECTION, true) === '1';
     }
 
-    /**
-     * Check whether a page qualifies for normal post indexing.
-     *
-     * Mirrors PostIndexingStrategy::shouldIndex() so PDFs do not retain a
-     * section whose top-level page is disabled, unpublished, or excluded from
-     * the index.
-     *
-     * @param \WP_Post $post
-     * @return bool
-     */
-    private static function isIndexablePage(\WP_Post $post): bool
-    {
-        $isIndexable = $post->post_type === 'page'
-            && Settings::isPostTypeEnabled($post->post_type)
-            && $post->post_status === 'publish'
-            && get_post_meta($post->ID, MetaBox::META_EXCLUDE, true) !== '1';
-
-        return (bool) apply_filters(PostIndexingStrategy::FILTER_SHOULD_INDEX, $isIndexable, $post);
-    }
 }
