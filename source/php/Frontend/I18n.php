@@ -51,6 +51,11 @@ class I18n
         return [
             'seeAllResults' => __('See all results', 'typesense-search'),
             'noResults'     => __('No hits for your search term', 'typesense-search'),
+            'dialogTitle'   => __('Quick search', 'typesense-search'),
+            'dialogHint'    => __('Search suggestions open in this dialog. Press Escape or use the close button to return to the page.', 'typesense-search'),
+            'closeDialog'   => __('Close quick search', 'typesense-search'),
+            'searchLabel'   => __('Search', 'typesense-search'),
+            'submitSearch'  => __('Search', 'typesense-search'),
         ];
     }
 
@@ -110,6 +115,9 @@ class I18n
             'qsPlacementLabel'     => __('Placement', 'typesense-search'),
             'qsPlacementDefault'   => __('Default (body)', 'typesense-search'),
             'qsPlacementSibling'   => __('Sibling', 'typesense-search'),
+            'qsMobileBehaviorLabel' => __('Mobile behavior', 'typesense-search'),
+            'qsMobileBehaviorRegular' => __('Regular behavior', 'typesense-search'),
+            'qsMobileBehaviorOverlay' => __('Open in modal', 'typesense-search'),
             'qsNoSelectors'        => __('No selectors configured yet. Click "Add selector" to get started.', 'typesense-search'),
         ];
     }

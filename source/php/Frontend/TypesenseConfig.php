@@ -160,8 +160,9 @@ class TypesenseConfig
 						return null;
 					}
 					return [
-						'selector' => $selector,
-						'sibling'  => !empty($s['sibling']),
+						'selector'       => $selector,
+						'sibling'        => !empty($s['sibling']),
+						'mobileOverlay'  => ($s['mobile_behavior'] ?? '') === 'overlay' || !empty($s['mobile_overlay']),
 					];
 				},
 				$this->settings->getQuickSearchSelectors(),

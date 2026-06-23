@@ -180,7 +180,7 @@ Quick search is a lightweight search overlay that attaches to any element on the
 | Setting             | Option key                             | Description                                                                                                                                                 |
 | ------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Enable quick search | `typesense_quick_search_enabled`       | Toggle the feature on or off                                                                                                                                |
-| CSS selectors       | `typesense_quick_search_selectors`     | One or more CSS selectors the overlay binds to. Each entry has `selector` and `sibling` (bool — place the widget next to the element rather than inside it) |
+| CSS selectors       | `typesense_quick_search_selectors`     | One or more CSS selectors the overlay binds to. Each entry has `selector`, `sibling` (bool — place the widget next to the element rather than inside it), and `mobile_behavior` (`regular` or `overlay`; the latter opens an accessible dialog on screens up to 767px wide) |
 | Results per page    | `typesense_quick_search_hits_per_page` | Number of results shown in the overlay (default: 5)                                                                                                         |
 
 ### 4.6 Statistics tab

@@ -140,7 +140,7 @@ class SettingsRepository
     }
 
     /**
-     * @return array<int, array{selector: string, sibling: bool}>
+     * @return array<int, array{selector: string, sibling: bool, mobile_behavior?: 'regular'|'overlay'}>
      */
     public function getQuickSearchSelectors(): array
     {

@@ -39,6 +39,11 @@ export interface TypesenseI18n {
 export interface TypesenseQuickSearchI18n {
   seeAllResults: string;
   noResults?: string;
+  dialogTitle?: string;
+  dialogHint?: string;
+  closeDialog?: string;
+  searchLabel?: string;
+  submitSearch?: string;
 }
 
 declare global {

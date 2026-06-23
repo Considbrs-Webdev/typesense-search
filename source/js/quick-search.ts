@@ -10,6 +10,7 @@ import { getQueryByWeights, INFIX, QUERY_BY } from "./search-params";
 interface QuickSearchSelectorEntry {
   selector: string;
   sibling: boolean;
+  mobileOverlay?: boolean;
 }
 
 interface QuickSearchConfig {
@@ -25,6 +26,18 @@ declare global {
 const DEFAULT_HITS = 5;
 const ITEM_CLASS = "ts-qs-item";
 const FOOTER_CLASS = "ts-qs-footer";
+const MOBILE_OVERLAY_QUERY = "(max-width: 767px)";
+
+interface QuickSearchOptions {
+  sibling?: boolean;
+  /** Places the results inside a modal's available result area. */
+  container?: HTMLElement;
+  /** Uses the original field's form when building the "See all results" URL. */
+  searchUrlInput?: HTMLInputElement;
+  /** Lets a responsive variant temporarily disable this instance. */
+  isEnabled?: () => boolean;
+  responsiveQuery?: MediaQueryList;
+}
 
 // ---------------------------------------------------------------------------
 // Positioning helper (fixed, using viewport coords)
@@ -64,9 +77,18 @@ function attachQuickSearch(
   hitsPerPage: number,
   anchor: HTMLElement,
   input: HTMLInputElement,
-  sibling: boolean = false,
+  options: QuickSearchOptions = {},
 ): void {
   if (!client) return;
+
+  const {
+    sibling = false,
+    container,
+    searchUrlInput,
+    isEnabled = () => true,
+    responsiveQuery,
+  } = options;
+  const isOverlay = Boolean(container);
 
   const dropdown = document.createElement("div");
   const dropdownId = `ts-qs-dropdown-${Math.random().toString(36).slice(2, 8)}`;
@@ -77,7 +99,10 @@ function attachQuickSearch(
   dropdown.setAttribute("aria-live", "polite");
   dropdown.hidden = true;
 
-  if (sibling) {
+  if (container) {
+    dropdown.classList.add("ts-quick-search--overlay");
+    container.appendChild(dropdown);
+  } else if (sibling) {
     // Inject as a sibling so the dropdown inherits the parent element's
     // stacking context (useful when the input is inside a dialog where
     // z-index alone cannot place the dropdown above the overlay).
@@ -137,7 +162,8 @@ function attachQuickSearch(
   // ── Build search-page URL (mirrors form GET submission) ───────────────────
 
   function buildSearchUrl(): string {
-    const form = input.closest("form");
+    const formInput = searchUrlInput ?? input;
+    const form = formInput.closest("form");
     if (form && (form.method || "get").toLowerCase() === "get") {
       const url = new URL(
         form.action || window.location.href,
@@ -150,18 +176,20 @@ function attachQuickSearch(
       return url.toString();
     }
     const url = new URL(window.location.href);
-    url.searchParams.set("s", input.value);
+    url.searchParams.set("s", formInput.value);
     return url.toString();
   }
 
   // ── Open / close ─────────────────────────────────────────────────────────
 
   function open(): void {
-    if (isOpen) return;
+    if (isOpen || !isEnabled()) return;
     isOpen = true;
     dropdown.hidden = false;
     input.setAttribute("aria-expanded", "true");
-    if (sibling) {
+    if (isOverlay) {
+      // The overlay's layout keeps the field at the top and owns the width.
+    } else if (sibling) {
       positionDropdownSibling(anchor, dropdown);
     } else {
       positionDropdown(anchor, dropdown);
@@ -282,8 +310,9 @@ function attachQuickSearch(
     if (!itemHeight) return;
 
     const footerHeight = footerEl.offsetHeight;
-    const anchorRect = anchor.getBoundingClientRect();
-    const available = window.innerHeight - anchorRect.bottom - 8;
+    const available = isOverlay
+      ? (container?.getBoundingClientRect().height ?? 0)
+      : window.innerHeight - anchor.getBoundingClientRect().bottom - 8;
     const spaceForItems = Math.max(itemHeight, available - footerHeight);
 
     const newVisible = Math.min(
@@ -435,6 +464,10 @@ function attachQuickSearch(
   // ── Search ────────────────────────────────────────────────────────────────
 
   async function runSearch(query: string): Promise<void> {
+    if (!isEnabled()) {
+      close();
+      return;
+    }
     if (!query.trim()) {
       close();
       return;
@@ -463,6 +496,10 @@ function attachQuickSearch(
   // ── Input events ──────────────────────────────────────────────────────────
 
   input.addEventListener("input", () => {
+    if (!isEnabled()) {
+      close();
+      return;
+    }
     clearTimeout(debounceTimer);
     const q = input.value;
     if (!q.trim()) {
@@ -478,6 +515,7 @@ function attachQuickSearch(
   // ── Re-open on focus with cached results ─────────────────────────────────
 
   input.addEventListener("focus", () => {
+    if (!isEnabled()) return;
     if (!isOpen && currentHits.length > 0) {
       open();
       requestAnimationFrame(() => calibrate());
@@ -487,7 +525,7 @@ function attachQuickSearch(
   // ── Keyboard navigation ───────────────────────────────────────────────────
 
   input.addEventListener("keydown", (e) => {
-    if (!isOpen) return;
+    if (!isOpen || !isEnabled()) return;
     const count = currentHits.length + (footerEl ? 1 : 0);
     if (!count) return;
 
@@ -524,7 +562,7 @@ function attachQuickSearch(
   // ── Tab lock (document-level capture) ────────────────────────────────────
 
   function tabLock(e: KeyboardEvent): void {
-    if (!isOpen || e.key !== "Tab") return;
+    if (!isOpen || !isEnabled() || e.key !== "Tab") return;
     e.preventDefault();
     const count = currentHits.length + (footerEl ? 1 : 0);
     if (!count) return;
@@ -562,7 +600,13 @@ function attachQuickSearch(
 
   const reposition = () => {
     if (!isOpen) return;
-    if (sibling) {
+    if (!isEnabled()) {
+      close();
+      return;
+    }
+    if (isOverlay) {
+      // The overlay remains in normal flow; only the result window changes.
+    } else if (sibling) {
       positionDropdownSibling(anchor, dropdown);
     } else {
       positionDropdown(anchor, dropdown);
@@ -572,6 +616,247 @@ function attachQuickSearch(
   };
   window.addEventListener("scroll", reposition, { passive: true });
   window.addEventListener("resize", reposition, { passive: true });
+  responsiveQuery?.addEventListener("change", () => {
+    if (!isEnabled()) close();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Mobile overlay
+// ---------------------------------------------------------------------------
+
+function attachMobileOverlayQuickSearch(
+  client: ReturnType<typeof createClient>,
+  config: TypesenseSearchConfig,
+  hitsPerPage: number,
+  input: HTMLInputElement,
+): void {
+  const mediaQuery = window.matchMedia(MOBILE_OVERLAY_QUERY);
+  const dialog = document.createElement("dialog");
+  const dialogId = `ts-qs-dialog-${Math.random().toString(36).slice(2, 8)}`;
+  const titleId = `${dialogId}-title`;
+  const hintId = `${dialogId}-hint`;
+
+  dialog.className = "ts-quick-search-overlay";
+  dialog.id = dialogId;
+  dialog.setAttribute("aria-labelledby", titleId);
+  dialog.setAttribute("aria-describedby", hintId);
+
+  const panel = document.createElement("div");
+  panel.className = "ts-quick-search-overlay__panel";
+  dialog.appendChild(panel);
+
+  const header = document.createElement("div");
+  header.className = "ts-quick-search-overlay__header";
+  panel.appendChild(header);
+
+  const title = document.createElement("h2");
+  title.id = titleId;
+  title.className = "ts-quick-search-overlay__title";
+  title.textContent =
+    window.typesenseQuickSearchI18n?.dialogTitle ?? "Quick search";
+  header.appendChild(title);
+
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "ts-quick-search-overlay__close";
+  closeButton.setAttribute(
+    "aria-label",
+    window.typesenseQuickSearchI18n?.closeDialog ?? "Close quick search",
+  );
+  closeButton.innerHTML = '<span aria-hidden="true">×</span>';
+  header.appendChild(closeButton);
+
+  const hint = document.createElement("p");
+  hint.id = hintId;
+  hint.className = "ts-quick-search-overlay__hint";
+  hint.textContent =
+    window.typesenseQuickSearchI18n?.dialogHint ??
+    "Search suggestions open in this dialog. Press Escape or use the close button to return to the page.";
+  panel.appendChild(hint);
+
+  // Follow Municipio's standard search-modal structure. The source field may
+  // live in different components, so relying on its surrounding markup makes
+  // the overlay fragile and can introduce duplicate IDs.
+  const sourceForm = input.closest("form");
+  const overlayForm = document.createElement("form");
+  overlayForm.className = "c-form ts-quick-search-overlay__form";
+  overlayForm.method = sourceForm?.method || "get";
+  overlayForm.action = sourceForm?.action || window.location.href;
+  overlayForm.noValidate = sourceForm?.noValidate ?? false;
+
+  // Retain the original form's successful values (for example a post-type
+  // filter) while the overlay supplies its own search field.
+  if (sourceForm) {
+    new FormData(sourceForm).forEach((value, name) => {
+      if (name === input.name || value instanceof File) return;
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = name;
+      hidden.value = String(value);
+      overlayForm.appendChild(hidden);
+    });
+  }
+
+  const originalInputId = input.id;
+  const originalLabel = Array.from(
+    document.querySelectorAll<HTMLLabelElement>("label[for]"),
+  ).find((label) => label.htmlFor === originalInputId);
+  const fieldLabel =
+    input.getAttribute("aria-label") ??
+    originalLabel?.textContent?.trim() ??
+    input.placeholder ??
+    window.typesenseQuickSearchI18n?.searchLabel ??
+    "Search";
+
+  const overlayField = document.createElement("div");
+  overlayField.className = "c-field c-field--search c-field--lg c-field--radius-md ts-quick-search-overlay__field";
+  const overlayInputId = `ts-qs-overlay-input-${Math.random().toString(36).slice(2, 8)}`;
+
+  const label = document.createElement("label");
+  label.className = "c-field__label ts-quick-search-overlay__label";
+  label.htmlFor = overlayInputId;
+  label.textContent = fieldLabel;
+
+  const fieldInner = document.createElement("div");
+  fieldInner.className = "c-field__inner";
+
+  const fieldIcon = document.createElement("span");
+  fieldIcon.className = "c-field__icon";
+  fieldIcon.setAttribute("aria-hidden", "true");
+  fieldIcon.innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>';
+
+  const overlayInput = document.createElement("input");
+  overlayInput.className = "c-field__input";
+  overlayInput.id = overlayInputId;
+  overlayInput.type = "search";
+  overlayInput.name = input.name || "s";
+  overlayInput.placeholder = input.placeholder;
+  overlayInput.autocomplete = input.autocomplete || "off";
+  overlayInput.required = input.required;
+  overlayInput.inputMode = input.inputMode;
+  if (input.maxLength > 0) overlayInput.maxLength = input.maxLength;
+  if (input.minLength > 0) overlayInput.minLength = input.minLength;
+  if (input.pattern) overlayInput.pattern = input.pattern;
+
+  const focusStyler = document.createElement("span");
+  focusStyler.className = "c-field_focus-styler";
+  focusStyler.setAttribute("aria-hidden", "true");
+
+  fieldInner.append(fieldIcon, overlayInput, focusStyler);
+  overlayField.append(label, fieldInner);
+  overlayForm.appendChild(overlayField);
+
+  const resultsContainer = document.createElement("div");
+  resultsContainer.className = "ts-quick-search-overlay__results";
+  overlayForm.appendChild(resultsContainer);
+
+  const submitButton = document.createElement("button");
+  submitButton.type = "submit";
+  submitButton.className = "c-button c-button--default c-button--lg ts-quick-search-overlay__submit";
+  submitButton.textContent =
+    window.typesenseQuickSearchI18n?.submitSearch ?? "Search";
+  submitButton.setAttribute("aria-label", submitButton.textContent);
+  overlayForm.appendChild(submitButton);
+
+  overlayForm.addEventListener("submit", () => {
+    input.value = overlayInput.value;
+  });
+
+  panel.appendChild(overlayForm);
+  document.body.appendChild(dialog);
+
+  attachQuickSearch(client, config, hitsPerPage, overlayInput, overlayInput, {
+    container: resultsContainer,
+    searchUrlInput: input,
+  });
+
+  let suppressOpenerFocus = false;
+  const desktopAria = new Map(
+    ["aria-haspopup", "aria-controls", "aria-expanded"].map((attribute) => [
+      attribute,
+      input.getAttribute(attribute),
+    ]),
+  );
+
+  const closeOverlay = () => {
+    if (!dialog.open) return;
+    // Native dialogs restore focus as part of close(). Mark this before that
+    // happens so the original field's focus listener cannot immediately reopen.
+    suppressOpenerFocus = true;
+    dialog.close();
+  };
+
+  const syncOpenerSemantics = () => {
+    if (mediaQuery.matches) {
+      input.setAttribute("aria-haspopup", "dialog");
+      input.setAttribute("aria-controls", dialogId);
+      if (!dialog.open) input.setAttribute("aria-expanded", "false");
+      return;
+    }
+
+    desktopAria.forEach((value, attribute) => {
+      if (value === null) {
+        input.removeAttribute(attribute);
+      } else {
+        input.setAttribute(attribute, value);
+      }
+    });
+  };
+
+  const defocusOpener = () => {
+    syncOpenerSemantics();
+    suppressOpenerFocus = true;
+    input.blur();
+    requestAnimationFrame(() => {
+      suppressOpenerFocus = false;
+    });
+  };
+
+  syncOpenerSemantics();
+
+  input.addEventListener("focus", () => {
+    if (suppressOpenerFocus) {
+      suppressOpenerFocus = false;
+      return;
+    }
+    if (!mediaQuery.matches || dialog.open) return;
+
+    input.setAttribute("aria-expanded", "true");
+    overlayInput.value = input.value;
+    document.documentElement.classList.add("ts-quick-search-overlay-open");
+    document.body.classList.add("ts-quick-search-overlay-open");
+    dialog.showModal();
+    // iOS only opens the virtual keyboard when focus happens inside the same
+    // user-initiated event that opened the dialog. Deferring this to an
+    // animation frame leaves the field focused but keeps the keyboard hidden.
+    overlayInput.focus({ preventScroll: true });
+    overlayInput.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  overlayInput.addEventListener("input", () => {
+    input.value = overlayInput.value;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  closeButton.addEventListener("click", closeOverlay);
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) closeOverlay();
+  });
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeOverlay();
+  });
+  dialog.addEventListener("close", defocusOpener);
+  dialog.addEventListener("close", () => {
+    document.documentElement.classList.remove("ts-quick-search-overlay-open");
+    document.body.classList.remove("ts-quick-search-overlay-open");
+  });
+
+  mediaQuery.addEventListener("change", () => {
+    if (!mediaQuery.matches) closeOverlay();
+    syncOpenerSemantics();
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -591,7 +876,7 @@ function init(): void {
   const hitsPerPage = config.quickSearchHitsPerPage ?? DEFAULT_HITS;
 
   for (const entry of qsConfig.selectors) {
-    const { selector, sibling } = entry;
+    const { selector, sibling, mobileOverlay } = entry;
     const el = document.querySelector<HTMLElement>(selector);
     if (!el) continue;
 
@@ -609,7 +894,17 @@ function init(): void {
     }
 
     if (!input) continue;
-    attachQuickSearch(client, config, hitsPerPage, anchor, input, sibling);
+    if (mobileOverlay) {
+      const mobileQuery = window.matchMedia(MOBILE_OVERLAY_QUERY);
+      attachQuickSearch(client, config, hitsPerPage, anchor, input, {
+        sibling,
+        isEnabled: () => !mobileQuery.matches,
+        responsiveQuery: mobileQuery,
+      });
+      attachMobileOverlayQuickSearch(client, config, hitsPerPage, input);
+    } else {
+      attachQuickSearch(client, config, hitsPerPage, anchor, input, { sibling });
+    }
   }
 }
 
