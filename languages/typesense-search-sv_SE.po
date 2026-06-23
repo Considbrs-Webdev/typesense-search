@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Typesense Search 1.1.0\n"
+"Project-Id-Version: Typesense Search 1.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
 "POT-Creation-Date: 2026-06-21T09:06:04+00:00\n"
 "PO-Revision-Date: 2026-06-16 15:06+0200\n"

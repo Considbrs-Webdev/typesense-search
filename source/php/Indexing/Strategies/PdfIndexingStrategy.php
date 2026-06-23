@@ -268,7 +268,12 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
     }
 
     /**
-     * Resolve the title of the top-most ancestor page for an attachment.
+     * Resolve the title of the top-most indexable ancestor page for an
+     * attachment.
+     *
+     * Only attachments uploaded directly to a page inherit a section. This
+     * prevents attachments uploaded to Modularity modules (or other post
+     * types) from incorrectly using those objects as their top-most parent.
      *
      * @param \WP_Post $attachment
      * @return string
@@ -281,14 +286,14 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
         }
 
         $parent = get_post($parentId);
-        if (!$parent) {
+        if (!$parent || $parent->post_type !== 'page') {
             return '';
         }
 
         $ancestors = get_post_ancestors($parent);
         $topPost   = !empty($ancestors) ? get_post((int) end($ancestors)) : $parent;
 
-        if (!$topPost || self::isExcludedAsSection($topPost)) {
+        if (!$topPost || !self::isIndexablePage($topPost) || self::isExcludedAsSection($topPost)) {
             return '';
         }
 
@@ -305,5 +310,25 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
     {
         return $post->post_type === 'page'
             && get_post_meta($post->ID, MetaBox::META_EXCLUDE_AS_SECTION, true) === '1';
+    }
+
+    /**
+     * Check whether a page qualifies for normal post indexing.
+     *
+     * Mirrors PostIndexingStrategy::shouldIndex() so PDFs do not retain a
+     * section whose top-level page is disabled, unpublished, or excluded from
+     * the index.
+     *
+     * @param \WP_Post $post
+     * @return bool
+     */
+    private static function isIndexablePage(\WP_Post $post): bool
+    {
+        $isIndexable = $post->post_type === 'page'
+            && Settings::isPostTypeEnabled($post->post_type)
+            && $post->post_status === 'publish'
+            && get_post_meta($post->ID, MetaBox::META_EXCLUDE, true) !== '1';
+
+        return (bool) apply_filters(PostIndexingStrategy::FILTER_SHOULD_INDEX, $isIndexable, $post);
     }
 }

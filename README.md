@@ -552,7 +552,7 @@ Additional PDF document field:
 
 | Field             | Source                                                             |
 | ----------------- | ------------------------------------------------------------------ |
-| `top_most_parent` | Title of the top-level ancestor of the page the PDF is attached to |
+| `top_most_parent` | Title of the top-level ancestor when the PDF is attached directly to a page and that ancestor qualifies for indexing; otherwise empty |
 
 ### 7.8 DocumentBuilder and the filter chain
 
