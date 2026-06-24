@@ -254,6 +254,120 @@ if ($activeTab !== 'advanced-settings') {
         </div>
         <?php } ?>
 
+        <div class="ts-settings__card" id="ts-search-statistics-settings">
+            <div class="ts-settings__card-header">
+                <h2><?php esc_html_e('Search statistics', 'typesense-search'); ?></h2>
+                <p><?php esc_html_e('Record completed searches in WordPress to identify content gaps and popular search terms. Each normalised term is stored only once per anonymous browser session.', 'typesense-search'); ?></p>
+            </div>
+
+            <div class="ts-settings__fields">
+                <div class="ts-field">
+                    <div class="ts-field__label"><?php esc_html_e('Enable search logging', 'typesense-search'); ?></div>
+                    <div class="ts-field__body">
+                        <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_SEARCH_LOGGING_ENABLED); ?>" value="0" />
+                        <label for="ts-search-logging-enabled" class="ts-toggle">
+                            <input
+                                type="checkbox"
+                                id="ts-search-logging-enabled"
+                                name="<?php echo esc_attr(Settings::OPTION_SEARCH_LOGGING_ENABLED); ?>"
+                                value="1"
+                                <?php checked(1, (int) get_option(Settings::OPTION_SEARCH_LOGGING_ENABLED, 0)); ?>
+                                class="ts-toggle__input"
+                            />
+                            <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
+                            <span class="ts-toggle__status"><span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span><span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="ts-field">
+                    <div class="ts-field__label"><?php esc_html_e('Dashboard widgets', 'typesense-search'); ?></div>
+                    <div class="ts-field__body">
+                        <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS); ?>" value="0" />
+                        <label for="ts-search-statistics-dashboard-widgets" class="ts-toggle">
+                            <input
+                                type="checkbox"
+                                id="ts-search-statistics-dashboard-widgets"
+                                name="<?php echo esc_attr(Settings::OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS); ?>"
+                                value="1"
+                                <?php checked(1, (int) get_option(Settings::OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS, 1)); ?>
+                                class="ts-toggle__input"
+                            />
+                            <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
+                            <span class="ts-toggle__status"><span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span><span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span></span>
+                        </label>
+                        <p class="ts-field__description"><?php esc_html_e('Register Latest searches, Failed searches, and Popular searches widgets on the WordPress dashboard.', 'typesense-search'); ?></p>
+                    </div>
+                </div>
+
+                <div class="ts-field">
+                    <div class="ts-field__label"><?php esc_html_e('Require statistics consent', 'typesense-search'); ?></div>
+                    <div class="ts-field__body">
+                        <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_SEARCH_LOGGING_REQUIRE_CONSENT); ?>" value="0" />
+                        <label for="ts-search-statistics-require-consent" class="ts-toggle">
+                            <input
+                                type="checkbox"
+                                id="ts-search-statistics-require-consent"
+                                name="<?php echo esc_attr(Settings::OPTION_SEARCH_LOGGING_REQUIRE_CONSENT); ?>"
+                                value="1"
+                                <?php checked(1, (int) get_option(Settings::OPTION_SEARCH_LOGGING_REQUIRE_CONSENT, 0)); ?>
+                                class="ts-toggle__input"
+                            />
+                            <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
+                            <span class="ts-toggle__status"><span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span><span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span></span>
+                        </label>
+                        <p class="ts-field__description"><?php esc_html_e('When enabled, no search term or session storage is created until your consent platform explicitly grants statistics consent.', 'typesense-search'); ?></p>
+                    </div>
+                </div>
+
+                <div id="ts-search-statistics-consent-integration" class="ts-search-statistics-info"<?php echo (int) get_option(Settings::OPTION_SEARCH_LOGGING_REQUIRE_CONSENT, 0) ? '' : ' hidden'; ?>>
+                    <h3><?php esc_html_e('Connect your consent platform', 'typesense-search'); ?></h3>
+                    <p><?php esc_html_e('Run this on every page containing a search field when Pressidium Cookie Consent, Cookiebot, or another consent platform grants or withdraws statistics consent. Run it before search logging is allowed to start.', 'typesense-search'); ?></p>
+                    <pre><code>function setTypesenseSearchStatisticsConsent(granted) {
+  window.typesenseSearchStatisticsConsent = granted === true;
+  window.dispatchEvent(new CustomEvent('typesense-search:statistics-consent', {
+    detail: { granted: granted === true }
+  }));
+}
+
+// Call this from your consent platform callback:
+setTypesenseSearchStatisticsConsent(true);</code></pre>
+                    <p><?php esc_html_e('Replace the final example with the boolean consent value from your platform. The plugin treats consent as denied until it receives true. When false is sent, pending logging stops and the plugin removes its session storage.', 'typesense-search'); ?></p>
+                </div>
+
+                <div class="ts-field">
+                    <label for="ts-search-statistics-delay" class="ts-field__label"><?php esc_html_e('Search registration delay (seconds)', 'typesense-search'); ?></label>
+                    <div class="ts-field__body">
+                        <input type="number" id="ts-search-statistics-delay" name="<?php echo esc_attr(Settings::OPTION_SEARCH_LOGGING_DELAY_SECONDS); ?>" value="<?php echo esc_attr(get_option(Settings::OPTION_SEARCH_LOGGING_DELAY_SECONDS, 1)); ?>" class="small-text ts-field__input" min="0" max="30" step="1" />
+                        <p class="ts-field__description"><?php esc_html_e('How long a completed query must remain unchanged before it is recorded. This is independent of the search-result debounce setting.', 'typesense-search'); ?></p>
+                    </div>
+                </div>
+
+                <div class="ts-field">
+                    <label for="ts-search-statistics-minimum-characters" class="ts-field__label"><?php esc_html_e('Minimum search-term characters', 'typesense-search'); ?></label>
+                    <div class="ts-field__body">
+                        <input type="number" id="ts-search-statistics-minimum-characters" name="<?php echo esc_attr(Settings::OPTION_SEARCH_LOGGING_MINIMUM_CHARACTERS); ?>" value="<?php echo esc_attr(get_option(Settings::OPTION_SEARCH_LOGGING_MINIMUM_CHARACTERS, 3)); ?>" class="small-text ts-field__input" min="1" max="50" step="1" />
+                        <p class="ts-field__description"><?php esc_html_e('Shorter queries are searched normally but are not included in statistics.', 'typesense-search'); ?></p>
+                    </div>
+                </div>
+
+                <div class="ts-field">
+                    <label for="ts-search-statistics-retention-days" class="ts-field__label"><?php esc_html_e('Statistics retention (days)', 'typesense-search'); ?></label>
+                    <div class="ts-field__body">
+                        <input type="number" id="ts-search-statistics-retention-days" name="<?php echo esc_attr(Settings::OPTION_SEARCH_STATISTICS_RETENTION_DAYS); ?>" value="<?php echo esc_attr(get_option(Settings::OPTION_SEARCH_STATISTICS_RETENTION_DAYS, 90)); ?>" class="small-text ts-field__input" min="1" max="3650" step="1" />
+                        <p class="ts-field__description"><?php esc_html_e('Search terms and anonymous session hashes older than this are permanently deleted.', 'typesense-search'); ?></p>
+                    </div>
+                </div>
+
+                <div class="ts-search-statistics-info ts-search-statistics-info--retention">
+                    <h3><?php esc_html_e('Automatic cleanup', 'typesense-search'); ?></h3>
+                    <p><?php esc_html_e('A daily WordPress cron event removes expired statistics. Ensure WP-Cron runs reliably, or call the command below from your server cron.', 'typesense-search'); ?></p>
+                    <pre><code>wp typesense prune-search-statistics</code></pre>
+                    <p><?php esc_html_e('Alternatively, run the scheduled event with “wp cron event run typesense_search_prune_statistics”. The command uses the retention period set above.', 'typesense-search'); ?></p>
+                </div>
+            </div>
+        </div>
+
         <script>
         (function () {
             var mode = document.getElementById('ts-truncator-mode');
@@ -261,6 +375,8 @@ if ($activeTab !== 'advanced-settings') {
             var custom = document.getElementById('ts-truncator-custom');
             var debounce = document.getElementById('ts-debounce');
             var delayField = document.getElementById('ts-debounce-delay-field');
+            var requireStatisticsConsent = document.getElementById('ts-search-statistics-require-consent');
+            var consentIntegration = document.getElementById('ts-search-statistics-consent-integration');
             var predefined = { brackets: '[...]', ellipsis: '…', none: 'none' };
 
             if (mode && hidden && custom) {
@@ -280,6 +396,12 @@ if ($activeTab !== 'advanced-settings') {
 
             if (debounce && delayField) {
                 debounce.addEventListener('change', function () { delayField.hidden = !this.checked; });
+            }
+
+            if (requireStatisticsConsent && consentIntegration) {
+                requireStatisticsConsent.addEventListener('change', function () {
+                    consentIntegration.hidden = !this.checked;
+                });
             }
         }());
         </script>

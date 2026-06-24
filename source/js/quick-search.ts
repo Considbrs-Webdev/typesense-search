@@ -6,6 +6,7 @@ import { createClient } from "./client";
 import type { TypesenseSearchConfig, SearchHit } from "./types";
 import { loadWebAwesomeLocale } from "./webawesome-locale";
 import { getQueryByWeights, INFIX, QUERY_BY } from "./search-params";
+import { createSearchStatisticsTracker } from "./search-statistics";
 
 interface QuickSearchSelectorEntry {
   selector: string;
@@ -132,6 +133,8 @@ function attachQuickSearch(
   let isOpen = false;
   let debounceTimer: ReturnType<typeof setTimeout>;
   let lastSearchedQuery = "";
+  let latestRequestId = 0;
+  const searchStatistics = createSearchStatisticsTracker(config.searchLogging);
 
   // Windowing
   let windowStart = 0; // index of first visible hit in the current slice
@@ -242,6 +245,7 @@ function attachQuickSearch(
     item.addEventListener("mouseenter", () => setActive(hitIndex));
     item.addEventListener("click", (e) => {
       e.preventDefault();
+      searchStatistics.flush();
       window.location.href = url;
     });
 
@@ -438,6 +442,7 @@ function attachQuickSearch(
     );
     footerEl.addEventListener("click", (e) => {
       e.preventDefault();
+      searchStatistics.flush();
       window.location.href = buildSearchUrl();
     });
 
@@ -472,6 +477,7 @@ function attachQuickSearch(
       close();
       return;
     }
+    const requestId = ++latestRequestId;
     try {
       const queryByWeights = getQueryByWeights(config);
       const response = await (client as NonNullable<typeof client>)
@@ -484,8 +490,10 @@ function attachQuickSearch(
           ...(queryByWeights ? { query_by_weights: queryByWeights } : {}),
           per_page: hitsPerPage,
         });
+      if (requestId !== latestRequestId) return;
       currentHits = (response.hits as SearchHit[]) ?? [];
       lastSearchedQuery = query;
+      searchStatistics.track(query, response.found ?? 0, "quick");
       render(currentHits);
     } catch (e) {
       console.error("[TypesenseQuickSearch]", e);
@@ -500,6 +508,8 @@ function attachQuickSearch(
       close();
       return;
     }
+    // Invalidate an in-flight response as soon as the user changes the term.
+    latestRequestId++;
     clearTimeout(debounceTimer);
     const q = input.value;
     if (!q.trim()) {

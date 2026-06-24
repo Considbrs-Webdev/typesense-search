@@ -9,15 +9,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-24T21:08:02+00:00\n"
+"POT-Creation-Date: 2026-06-24T23:04:02+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
 #: typesense-search.php
-#: source/php/Admin/Settings.php:72
-#: source/php/Admin/Settings.php:73
+#: source/php/Admin/Settings.php:79
+#: source/php/Admin/Settings.php:80
 #: views/admin/settings-page.php:25
 msgid "Typesense Search"
 msgstr ""
@@ -60,7 +60,7 @@ msgid "Prevents this page from being used as the section label for itself and de
 msgstr ""
 
 #: source/php/Admin/MetaBox.php:135
-#: source/php/Admin/Settings.php:299
+#: source/php/Admin/Settings.php:336
 msgid "Extra search terms"
 msgstr ""
 
@@ -72,49 +72,158 @@ msgstr ""
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
-#: source/php/Admin/Settings.php:49
-msgid "Typesense Connection"
+#: source/php/Admin/SearchLogListTable.php:36
+#: source/php/SearchStatistics/DashboardWidgets.php:53
+#: source/php/SearchStatistics/DashboardWidgets.php:78
+msgid "Term"
 msgstr ""
 
-#: source/php/Admin/Settings.php:50
-msgid "Settings"
+#: source/php/Admin/SearchLogListTable.php:38
+msgid "Date"
 msgstr ""
 
-#: source/php/Admin/Settings.php:51
-msgid "Advanced settings"
+#: source/php/Admin/SearchLogListTable.php:39
+msgid "When last searched"
 msgstr ""
 
-#: source/php/Admin/Settings.php:52
+#: source/php/Admin/SearchLogListTable.php:40
+msgid "Context"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:44
+#: source/php/SearchStatistics/DashboardWidgets.php:54
+msgid "Hits"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:48
+#: source/php/Admin/SearchLogListTable.php:95
+msgid "Searches"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:73
+msgid "All"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:74
+msgid "With hits"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:75
+msgid "Without hits"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:96
+msgid "Grouped by term"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:182
+msgid "Delete"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:211
+msgid "No searches found."
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:226
+msgid "Filter by context"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:228
+msgid "All contexts"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:229
+#: source/php/Admin/SearchLogListTable.php:241
+#: views/admin/settings-tabs/statistics.php:120
+msgid "Normal search"
+msgstr ""
+
+#: source/php/Admin/SearchLogListTable.php:230
+#: source/php/Admin/SearchLogListTable.php:240
+#: source/php/Admin/Settings.php:59
 #: source/php/Frontend/I18n.php:54
 #: views/admin/settings-tabs/quick-search.php:15
+#: views/admin/settings-tabs/statistics.php:120
 msgid "Quick search"
 msgstr ""
 
-#: source/php/Admin/Settings.php:53
+#: source/php/Admin/SearchLogListTable.php:232
+#: source/php/Frontend/EnrichSearchTemplate.php:50
+msgid "Filter"
+msgstr ""
+
+#: source/php/Admin/SearchLogPage.php:23
+#: source/php/Admin/SearchLogPage.php:24
+#: source/php/Admin/SearchLogPage.php:61
+msgid "Search log"
+msgstr ""
+
+#: source/php/Admin/SearchLogPage.php:35
+msgid "Searches per page"
+msgstr ""
+
+#: source/php/Admin/SearchLogPage.php:62
+msgid "Each row represents one normalised search term per anonymous browser session. Repeated searches in the same session update when it was last searched without increasing the count."
+msgstr ""
+
+#: source/php/Admin/SearchLogPage.php:65
+msgid "%d search was deleted."
+msgid_plural "%d searches were deleted."
+msgstr[0] ""
+msgstr[1] ""
+
+#: source/php/Admin/SearchLogPage.php:79
+msgid "Search terms"
+msgstr ""
+
+#: source/php/Admin/SearchStatisticsActions.php:22
+msgid "You are not allowed to clear search statistics."
+msgstr ""
+
+#. translators: %d: number of deleted statistics rows
+#: source/php/Admin/SearchStatisticsActions.php:33
+msgid "%d search statistic was deleted."
+msgid_plural "%d search statistics were deleted."
+msgstr[0] ""
+msgstr[1] ""
+
+#: source/php/Admin/Settings.php:56
+msgid "Typesense Connection"
+msgstr ""
+
+#: source/php/Admin/Settings.php:57
+msgid "Settings"
+msgstr ""
+
+#: source/php/Admin/Settings.php:58
+msgid "Advanced settings"
+msgstr ""
+
+#: source/php/Admin/Settings.php:60
 msgid "Statistics"
 msgstr ""
 
-#: source/php/Admin/Settings.php:54
+#: source/php/Admin/Settings.php:61
 msgid "Logging"
 msgstr ""
 
-#: source/php/Admin/Settings.php:55
+#: source/php/Admin/Settings.php:62
 msgid "Status"
 msgstr ""
 
-#: source/php/Admin/Settings.php:295
+#: source/php/Admin/Settings.php:332
 msgid "Title"
 msgstr ""
 
-#: source/php/Admin/Settings.php:296
+#: source/php/Admin/Settings.php:333
 msgid "Excerpt"
 msgstr ""
 
-#: source/php/Admin/Settings.php:297
+#: source/php/Admin/Settings.php:334
 msgid "Content"
 msgstr ""
 
-#: source/php/Admin/Settings.php:298
+#: source/php/Admin/Settings.php:335
 msgid "Content type name"
 msgstr ""
 
@@ -360,8 +469,11 @@ msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:41
 #: source/php/Frontend/I18n.php:24
+#: views/admin/settings-tabs/statistics.php:120
 msgid "%d result"
-msgstr ""
+msgid_plural "%d results"
+msgstr[0] ""
+msgstr[1] ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:42
 #: source/php/Frontend/I18n.php:25
@@ -394,10 +506,6 @@ msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:49
 msgid "Date Descending"
-msgstr ""
-
-#: source/php/Frontend/EnrichSearchTemplate.php:50
-msgid "Filter"
 msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:51
@@ -625,6 +733,45 @@ msgstr ""
 msgid "A WordPress save indexing issue was logged."
 msgstr ""
 
+#: source/php/SearchStatistics/DashboardWidgets.php:23
+#: views/admin/settings-tabs/statistics.php:112
+msgid "Latest searches"
+msgstr ""
+
+#: source/php/SearchStatistics/DashboardWidgets.php:24
+#: views/admin/settings-tabs/statistics.php:127
+msgid "Failed searches"
+msgstr ""
+
+#: source/php/SearchStatistics/DashboardWidgets.php:25
+#: views/admin/settings-tabs/statistics.php:139
+msgid "Popular searches"
+msgstr ""
+
+#: source/php/SearchStatistics/DashboardWidgets.php:35
+#: views/admin/settings-tabs/statistics.php:129
+msgid "No failed searches yet."
+msgstr ""
+
+#: source/php/SearchStatistics/DashboardWidgets.php:40
+#: source/php/SearchStatistics/DashboardWidgets.php:47
+#: views/admin/settings-tabs/statistics.php:114
+#: views/admin/settings-tabs/statistics.php:141
+msgid "No searches recorded yet."
+msgstr ""
+
+#: source/php/SearchStatistics/DashboardWidgets.php:55
+msgid "When"
+msgstr ""
+
+#: source/php/SearchStatistics/DashboardWidgets.php:62
+msgid "ago"
+msgstr ""
+
+#: source/php/SearchStatistics/DashboardWidgets.php:79
+msgid "Sessions"
+msgstr ""
+
 #: source/php/Typesense/ApiKey.php:39
 msgid "Key was created but no value was returned. Please check your Typesense dashboard."
 msgstr ""
@@ -710,6 +857,9 @@ msgid "Debounce search"
 msgstr ""
 
 #: views/admin/settings-tabs/advanced-settings.php:223
+#: views/admin/settings-tabs/advanced-settings.php:278
+#: views/admin/settings-tabs/advanced-settings.php:297
+#: views/admin/settings-tabs/advanced-settings.php:317
 #: views/admin/settings-tabs/quick-search.php:42
 #: views/admin/settings-tabs/settings.php:84
 #: views/admin/settings-tabs/settings.php:138
@@ -718,6 +868,9 @@ msgid "On"
 msgstr ""
 
 #: views/admin/settings-tabs/advanced-settings.php:224
+#: views/admin/settings-tabs/advanced-settings.php:278
+#: views/admin/settings-tabs/advanced-settings.php:297
+#: views/admin/settings-tabs/advanced-settings.php:317
 #: views/admin/settings-tabs/quick-search.php:43
 #: views/admin/settings-tabs/settings.php:85
 #: views/admin/settings-tabs/settings.php:139
@@ -737,7 +890,84 @@ msgstr ""
 msgid "How long to wait after the user stops typing before firing the search request."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:287
+#: views/admin/settings-tabs/advanced-settings.php:259
+#: views/admin/settings-tabs/statistics.php:89
+msgid "Search statistics"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:260
+msgid "Record completed searches in WordPress to identify content gaps and popular search terms. Each normalised term is stored only once per anonymous browser session."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:265
+msgid "Enable search logging"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:284
+msgid "Dashboard widgets"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:299
+msgid "Register Latest searches, Failed searches, and Popular searches widgets on the WordPress dashboard."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:304
+msgid "Require statistics consent"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:319
+msgid "When enabled, no search term or session storage is created until your consent platform explicitly grants statistics consent."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:324
+msgid "Connect your consent platform"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:325
+msgid "Run this on every page containing a search field when Pressidium Cookie Consent, Cookiebot, or another consent platform grants or withdraws statistics consent. Run it before search logging is allowed to start."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:335
+msgid "Replace the final example with the boolean consent value from your platform. The plugin treats consent as denied until it receives true. When false is sent, pending logging stops and the plugin removes its session storage."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:339
+msgid "Search registration delay (seconds)"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:342
+msgid "How long a completed query must remain unchanged before it is recorded. This is independent of the search-result debounce setting."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:347
+msgid "Minimum search-term characters"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:350
+msgid "Shorter queries are searched normally but are not included in statistics."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:355
+msgid "Statistics retention (days)"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:358
+msgid "Search terms and anonymous session hashes older than this are permanently deleted."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:363
+msgid "Automatic cleanup"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:364
+msgid "A daily WordPress cron event removes expired statistics. Ensure WP-Cron runs reliably, or call the command below from your server cron."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:366
+msgid "Alternatively, run the scheduled event with “wp cron event run typesense_search_prune_statistics”. The command uses the retention period set above."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:409
 #: views/admin/settings-tabs/connection.php:274
 #: views/admin/settings-tabs/quick-search.php:158
 #: views/admin/settings-tabs/settings.php:182
@@ -1028,37 +1258,64 @@ msgstr ""
 msgid "PDF files"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:12
+#: views/admin/settings-tabs/statistics.php:19
 msgid "Index overview"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:13
+#: views/admin/settings-tabs/statistics.php:20
 msgid "Live snapshot of what is currently stored in your Typesense collection. Use the clear buttons to remove all documents of a specific post type, or the reindex buttons to re-process and overwrite them."
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:18
+#: views/admin/settings-tabs/statistics.php:25
 msgid "Refresh"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:24
+#: views/admin/settings-tabs/statistics.php:31
 msgid "Dismiss"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:33
+#: views/admin/settings-tabs/statistics.php:40
 msgid "Loading statistics…"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:49
+#: views/admin/settings-tabs/statistics.php:56
 msgid "total documents"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:53
+#: views/admin/settings-tabs/statistics.php:60
 msgid "post types indexed"
 msgstr ""
 
-#: views/admin/settings-tabs/statistics.php:57
+#: views/admin/settings-tabs/statistics.php:64
 msgid "collection"
 msgstr ""
+
+#: views/admin/settings-tabs/statistics.php:90
+msgid "Searches are recorded locally in WordPress. Counts represent unique anonymous browser sessions per normalised search term during the configured retention period."
+msgstr ""
+
+#: views/admin/settings-tabs/statistics.php:93
+msgid "Clear all stored search statistics? This cannot be undone."
+msgstr ""
+
+#: views/admin/settings-tabs/statistics.php:96
+msgid "Clear statistics"
+msgstr ""
+
+#: views/admin/settings-tabs/statistics.php:103
+msgid "Search logging is disabled. Enable it in Advanced settings to start collecting statistics."
+msgstr ""
+
+#: views/admin/settings-tabs/statistics.php:108
+msgid "unique session searches retained"
+msgstr ""
+
+#: views/admin/settings-tabs/statistics.php:133
+#: views/admin/settings-tabs/statistics.php:145
+msgid "%d unique session"
+msgid_plural "%d unique sessions"
+msgstr[0] ""
+msgstr[1] ""
 
 #: views/admin/settings-tabs/status.php:11
 msgid "Connection &amp; key status"

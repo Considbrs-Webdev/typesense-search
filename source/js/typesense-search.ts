@@ -10,6 +10,7 @@ import { getHitTemplates } from "./templates";
 import { getUrlState, updateUrlState } from "./url-state";
 import { setupFacets, programmaticUpdates } from "./facets";
 import { loadWebAwesomeLocale } from "./webawesome-locale";
+import { createSearchStatisticsTracker } from "./search-statistics";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -56,6 +57,7 @@ function init(): void {
   const client = createClient(config);
   const templates = getHitTemplates(container);
   if (!client) return;
+  const searchStatistics = createSearchStatisticsTracker(config.searchLogging);
 
   const facets = setupFacets(config.facets ?? []);
   const summaryEl = container.querySelector<HTMLElement>(
@@ -77,6 +79,7 @@ function init(): void {
       updateUrlState({ page });
       container.scrollIntoView({ behavior: "smooth", block: "start" });
     },
+    (query, found) => searchStatistics.track(query, found, "regular"),
   );
 
   let isFirstSearch = true;

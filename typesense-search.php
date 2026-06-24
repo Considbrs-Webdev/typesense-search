@@ -28,5 +28,8 @@ if (file_exists(TYPESENSESEARCH_PATH . 'vendor/autoload.php')) {
     require_once TYPESENSESEARCH_PATH . 'vendor/autoload.php';
 }
 
+register_activation_hook(__FILE__, [\TypesenseSearch\SearchStatistics\Retention::class, 'activate']);
+register_deactivation_hook(__FILE__, [\TypesenseSearch\SearchStatistics\Retention::class, 'deactivate']);
+
 // Start application
 new TypesenseSearch\App();

@@ -6,6 +6,8 @@ use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\App;
 use TypesenseSearch\Helper\PdfToText;
 use TypesenseSearch\Logger\IndexingLog;
+use TypesenseSearch\SearchStatistics\Repository as SearchStatisticsRepository;
+use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\ClientFactory;
 
 /**
@@ -29,6 +31,117 @@ use TypesenseSearch\Typesense\ClientFactory;
  */
 class IndexCommand
 {
+    public function __construct(
+        private SettingsRepository $settings,
+        private SearchStatisticsRepository $searchStatistics
+    ) {
+    }
+
+    /**
+     * Remove search-statistics rows that are older than the configured
+     * retention period.
+     *
+     * ## OPTIONS
+     *
+     * [--days=<days>]
+     * : Override the retention period configured in Advanced settings.
+     *
+     * ## EXAMPLES
+     *
+     *   # Prune according to the configured retention period.
+     *   wp typesense prune-search-statistics
+     *
+     *   # Prune entries older than 30 days.
+     *   wp typesense prune-search-statistics --days=30
+     *
+     * @subcommand prune-search-statistics
+     * @when after_wp_load
+     *
+     * @param array<int,string> $args Positional arguments (unused).
+     * @param array<string,string> $assocArgs Named arguments.
+     */
+    public function pruneSearchStatistics(array $args, array $assocArgs): void
+    {
+        $days = \WP_CLI\Utils\get_flag_value($assocArgs, 'days', $this->settings->getSearchStatisticsRetentionDays());
+        $days = max(1, (int) $days);
+        $deleted = $this->searchStatistics->prune($days);
+
+        \WP_CLI::success(sprintf(
+            'Deleted %d search statistic%s older than %d day%s.',
+            $deleted,
+            $deleted === 1 ? '' : 's',
+            $days,
+            $days === 1 ? '' : 's'
+        ));
+    }
+
+    /**
+     * Add sample search-log entries for testing pagination and filters.
+     *
+     * ## OPTIONS
+     *
+     * [--count=<number>]
+     * : Number of sample entries to add. Defaults to 100.
+     *
+     * [--repeat-percent=<percentage>]
+     * : Percentage of entries that reuse one of the sample terms. Defaults to
+     *   70. The remaining entries use unique suffixed terms. Values are
+     *   clamped between 0 and 100.
+     *
+     * ## EXAMPLES
+     *
+     *   # Add enough entries to exercise the second page of the log.
+     *   wp typesense populate-search-log --count=50
+     *
+     *   # Add 100 entries, 80% of which reuse the sample terms.
+     *   wp typesense populate-search-log --count=100 --repeat-percent=80
+     *
+     * @subcommand populate-search-log
+     * @when after_wp_load
+     *
+     * @param array<int,string> $args Positional arguments (unused).
+     * @param array<string,string> $assocArgs Named arguments.
+     */
+    public function populateSearchLog(array $args, array $assocArgs): void
+    {
+        $count = min(10000, max(1, (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'count', 100)));
+        $repeatPercent = min(100, max(0, (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'repeat-percent', 70)));
+        $terms = [
+            'bygglov',
+            'förskola',
+            'parkering',
+            'återvinning',
+            'fritidsaktiviteter',
+            'bostadsanpassning',
+            'bibliotek',
+            'lediga jobb',
+            'serveringstillstånd',
+            'snöröjning',
+        ];
+        $created = 0;
+
+        for ($index = 0; $index < $count; $index++) {
+            $baseTerm = $terms[$index % count($terms)];
+            $term = ($index % 100) < $repeatPercent
+                ? $baseTerm
+                : $baseTerm . ' test ' . $index;
+            $sessionId = str_replace('-', '', wp_generate_uuid4());
+            $found = $index % 7 === 0 ? 0 : (($index % 200) + 1);
+            $surface = $index % 3 === 0 ? 'quick' : 'regular';
+
+            if ($this->searchStatistics->record($term, $found, $surface, $sessionId)) {
+                $created++;
+            }
+        }
+
+        \WP_CLI::success(sprintf(
+            'Added %d sample search-log entr%s (%d%% repeated terms).',
+            $created,
+            $created === 1 ? 'y' : 'ies',
+            $repeatPercent
+        ));
+    }
+
     /**
      * Index all published posts for the post types enabled in plugin settings.
      *

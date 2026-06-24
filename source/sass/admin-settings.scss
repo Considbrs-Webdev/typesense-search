@@ -213,6 +213,141 @@ $ts-thumb-size: 18px;
   padding: 4px 0;
 }
 
+.ts-search-statistics-info {
+  margin: 0 24px 16px 244px;
+  padding: 14px 16px;
+  color: $ts-muted;
+  background: #f0f6fc;
+  border-left: 3px solid $ts-blue;
+  font-size: 13px;
+  line-height: 1.5;
+
+  h3 {
+    margin: 0 0 6px;
+    color: $ts-text;
+    font-size: 13px;
+  }
+
+  p {
+    margin: 8px 0;
+  }
+
+  pre {
+    overflow-x: auto;
+    margin: 10px 0;
+    padding: 10px;
+    color: $ts-text;
+    background: #fff;
+    border: 1px solid #dcdcde;
+  }
+
+  &--retention {
+    margin-bottom: 20px;
+  }
+}
+
+.ts-search-statistics-card {
+  .ts-settings__card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+.ts-search-statistics-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 16px 24px;
+  border-bottom: 1px solid $ts-bg;
+
+  strong {
+    color: $ts-blue;
+    font-size: 24px;
+  }
+
+  span {
+    color: $ts-muted;
+    font-size: 13px;
+  }
+}
+
+.ts-search-statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  section {
+    min-width: 0;
+    padding: 18px 20px;
+    border-right: 1px solid $ts-bg;
+
+    &:last-child {
+      border-right: 0;
+    }
+  }
+
+  h3 {
+    margin: 0 0 12px;
+    color: $ts-text;
+    font-size: 13px;
+  }
+
+  p {
+    margin: 0;
+    color: $ts-muted;
+    font-size: 13px;
+  }
+}
+
+.ts-search-statistics-list,
+.typesense-search-dashboard-list {
+  margin: 0;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 0;
+    border-bottom: 1px solid $ts-bg;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  strong {
+    overflow: hidden;
+    color: $ts-text;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    color: $ts-muted;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 782px) {
+  .ts-search-statistics-info {
+    margin-left: 16px;
+  }
+
+  .ts-search-statistics-grid {
+    grid-template-columns: 1fr;
+
+    section {
+      border-right: 0;
+      border-bottom: 1px solid $ts-bg;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+  }
+}
+
 .ts-field {
   display: grid;
   grid-template-columns: 200px 1fr;

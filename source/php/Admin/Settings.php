@@ -38,6 +38,13 @@ class Settings
     public const OPTION_SORT_DISPLAY = 'typesense_search_sort_display';
     public const OPTION_QUERY_BY_WEIGHTS = 'typesense_search_query_by_weights';
 
+    public const OPTION_SEARCH_LOGGING_ENABLED = 'typesense_search_logging_enabled';
+    public const OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS = 'typesense_search_logging_dashboard_widgets';
+    public const OPTION_SEARCH_LOGGING_REQUIRE_CONSENT = 'typesense_search_logging_require_consent';
+    public const OPTION_SEARCH_LOGGING_DELAY_SECONDS = 'typesense_search_logging_delay_seconds';
+    public const OPTION_SEARCH_LOGGING_MINIMUM_CHARACTERS = 'typesense_search_logging_minimum_characters';
+    public const OPTION_SEARCH_STATISTICS_RETENTION_DAYS = 'typesense_search_statistics_retention_days';
+
     public const OPTION_QUICK_SEARCH_ENABLED        = 'typesense_quick_search_enabled';
     public const OPTION_QUICK_SEARCH_SELECTORS      = 'typesense_quick_search_selectors';
     public const OPTION_QUICK_SEARCH_HITS_PER_PAGE  = 'typesense_quick_search_hits_per_page';
@@ -150,6 +157,36 @@ class Settings
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitizeQueryByWeights'],
             'default'           => self::getDefaultQueryByWeights(),
+        ]);
+
+        foreach ([
+            self::OPTION_SEARCH_LOGGING_ENABLED,
+            self::OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS,
+            self::OPTION_SEARCH_LOGGING_REQUIRE_CONSENT,
+        ] as $option) {
+            register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, $option, [
+                'type'              => 'integer',
+                'sanitize_callback' => 'absint',
+                'default'           => $option === self::OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS ? 1 : 0,
+            ]);
+        }
+
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_SEARCH_LOGGING_DELAY_SECONDS, [
+            'type'              => 'integer',
+            'sanitize_callback' => static fn (mixed $value): int => min(30, max(0, absint($value))),
+            'default'           => 1,
+        ]);
+
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_SEARCH_LOGGING_MINIMUM_CHARACTERS, [
+            'type'              => 'integer',
+            'sanitize_callback' => static fn (mixed $value): int => min(50, max(1, absint($value))),
+            'default'           => 3,
+        ]);
+
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_SEARCH_STATISTICS_RETENTION_DAYS, [
+            'type'              => 'integer',
+            'sanitize_callback' => static fn (mixed $value): int => min(3650, max(1, absint($value))),
+            'default'           => 90,
         ]);
         
         register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_INDEX_PDF, [
