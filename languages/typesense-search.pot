@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Typesense Search 1.1.1\n"
+"Project-Id-Version: Typesense Search 1.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-24T23:04:02+00:00\n"
+"POT-Creation-Date: 2026-06-24T23:26:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -154,7 +154,7 @@ msgstr ""
 
 #: source/php/Admin/SearchLogPage.php:23
 #: source/php/Admin/SearchLogPage.php:24
-#: source/php/Admin/SearchLogPage.php:61
+#: source/php/Admin/SearchLogPage.php:64
 msgid "Search log"
 msgstr ""
 
@@ -162,17 +162,27 @@ msgstr ""
 msgid "Searches per page"
 msgstr ""
 
-#: source/php/Admin/SearchLogPage.php:62
+#: source/php/Admin/SearchLogPage.php:65
 msgid "Each row represents one normalised search term per anonymous browser session. Repeated searches in the same session update when it was last searched without increasing the count."
 msgstr ""
 
-#: source/php/Admin/SearchLogPage.php:65
+#: source/php/Admin/SearchLogPage.php:67
+#: views/admin/settings-tabs/statistics.php:93
+msgid "Clear all stored search statistics? This cannot be undone."
+msgstr ""
+
+#: source/php/Admin/SearchLogPage.php:71
+#: views/admin/settings-tabs/statistics.php:96
+msgid "Clear statistics"
+msgstr ""
+
+#: source/php/Admin/SearchLogPage.php:79
 msgid "%d search was deleted."
 msgid_plural "%d searches were deleted."
 msgstr[0] ""
 msgstr[1] ""
 
-#: source/php/Admin/SearchLogPage.php:79
+#: source/php/Admin/SearchLogPage.php:93
 msgid "Search terms"
 msgstr ""
 
@@ -181,7 +191,7 @@ msgid "You are not allowed to clear search statistics."
 msgstr ""
 
 #. translators: %d: number of deleted statistics rows
-#: source/php/Admin/SearchStatisticsActions.php:33
+#: source/php/Admin/SearchStatisticsActions.php:56
 msgid "%d search statistic was deleted."
 msgid_plural "%d search statistics were deleted."
 msgstr[0] ""
@@ -1292,14 +1302,6 @@ msgstr ""
 
 #: views/admin/settings-tabs/statistics.php:90
 msgid "Searches are recorded locally in WordPress. Counts represent unique anonymous browser sessions per normalised search term during the configured retention period."
-msgstr ""
-
-#: views/admin/settings-tabs/statistics.php:93
-msgid "Clear all stored search statistics? This cannot be undone."
-msgstr ""
-
-#: views/admin/settings-tabs/statistics.php:96
-msgid "Clear statistics"
 msgstr ""
 
 #: views/admin/settings-tabs/statistics.php:103

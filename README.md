@@ -16,11 +16,12 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 4. [Settings](#4-settings)
    - [4.1 PHP constants](#41-php-constants)
    - [4.2 Connection tab](#42-connection-tab)
-   - [4.3 Settings tab (content)](#43-settings-tab-content)
-   - [4.4 Facetting tab](#44-facetting-tab)
+   - [4.3 Settings tab](#43-settings-tab)
+   - [4.4 Advanced settings tab](#44-advanced-settings-tab)
    - [4.5 Quick search tab](#45-quick-search-tab)
    - [4.6 Statistics tab](#46-statistics-tab)
-   - [4.7 Status tab](#47-status-tab)
+   - [4.7 Logging tab](#47-logging-tab)
+   - [4.8 Status tab](#48-status-tab)
 5. [Per-post controls](#5-per-post-controls)
 6. [WP-CLI commands](#6-wp-cli-commands)
 7. [How indexing works](#7-how-indexing-works)
@@ -48,6 +49,7 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 - Automatically indexes WordPress posts (any post type), pages, and PDF files into a single Typesense collection whenever content is published, updated, unpublished, trashed, or deleted.
 - Provides a configurable search page UI (Instantsearch-based) that supports faceting, pagination, hit highlighting, and result truncation.
 - Provides a **quick-search** overlay that attaches to configurable CSS selectors on the front-end.
+- Can record privacy-conscious local search statistics for both the full search page and quick search, with dashboard widgets and a searchable log under **Tools → Search log**.
 - Exposes WP-CLI commands for bulk indexing, dry-run previews, and index maintenance.
 - Is designed to be extended: add fields to existing documents via WordPress filters, write custom indexing strategies for new content types, or index content from **external sources** (APIs, feeds, third-party systems) alongside WordPress content.
 
@@ -77,7 +79,7 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 
 ## 4. Settings
 
-The settings page is at **Settings → Typesense Search** and is split into six tabs.
+The settings page is at **Settings → Typesense Search** and is split into seven tabs.
 
 ---
 
@@ -133,19 +135,20 @@ These settings tell the plugin how to reach your Typesense instance.
 
 The admin key is kept server-side. The search key is the only credential exposed to the browser.
 
-### 4.3 Settings tab (content)
+### 4.3 Settings tab
 
-| Setting                  | Option key                                    | Description                                                                                             |
-| ------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Post types               | `typesense_search_post_types`                 | Which public post types to index. Stored as an array of post-type slugs                                 |
-| Index Modularity content | `typesense_index_modularity_content`          | Whether to also index content from [Modularity](https://github.com/helsingborg-stad/Modularity) modules |
-| Index PDF files          | `typesense_search_index_pdf`                  | Enable PDF indexing via `pdftotext`. Requires the binary to be installed                                |
-| Results per page         | `typesense_search_hits_per_page`              | Number of search hits shown per page on the full search results page (default: 10)                      |
-| Debounce search          | `typesense_search_debounce`                   | Whether to debounce search-as-you-type queries                                                          |
-| Debounce delay           | `typesense_search_debounce_delay`             | Milliseconds to wait after the last keystroke before firing a query (default: 300)                      |
-| Highlight context tokens | `typesense_search_highlight_affix_num_tokens` | Number of words shown around a highlighted match in search snippets (default: 15)                       |
-| Truncation string        | `typesense_search_truncator`                  | The string appended to truncated excerpts (default: `[...]`)                                            |
-| Search field weights     | `typesense_search_query_by_weights`           | Relevance weight for each configured search field (1-5; defaults to 1 for every field)                  |
+| Setting                  | Option key                               | Description                                                                                             |
+| ------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Post types               | `typesense_search_post_types`            | Which public post types to index. Stored as an array of post-type slugs                                 |
+| Index Modularity content | `typesense_index_modularity_content`     | Whether to also index content from [Modularity](https://github.com/helsingborg-stad/Modularity) modules |
+| Index PDF files          | `typesense_search_index_pdf`             | Enable PDF indexing via `pdftotext`. Requires the binary to be installed                                |
+| Results per page         | `typesense_search_hits_per_page`         | Number of search hits shown per page on the full search results page (default: 10)                      |
+| Sort control style       | `typesense_search_sort_display`          | Show sort options as radio buttons or a dropdown                                                        |
+
+### 4.4 Advanced settings tab
+
+This tab collects the detailed search controls: facets, search-field weights,
+highlight context, truncation, debounce behavior, and search statistics.
 
 #### Search field weights
 
@@ -165,13 +168,51 @@ The plugin passes the configured values to both full and quick searches as
 Typesense's `query_by_weights` parameter. Typesense reads those values in the
 same order as `query_by`: `title,excerpt,content,extra_terms,type_name`.
 
-### 4.4 Facetting tab
+#### Facets
 
 Configure which fields can be used as facets in the search UI.
 
 | Setting | Option key                | Description                                                                                                                                                |
 | ------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Facets  | `typesense_search_facets` | Array of facet definitions. Each entry has: `field` (Typesense field name), `label` (UI label), `placeholder`, `display_as` (`dropdown` or `button_group`) |
+
+#### Search statistics
+
+Search statistics are optional and stored in a local WordPress table; no
+Typesense server analytics are required. A completed query is recorded at most
+once per normalised term and anonymous browser session. The same mechanism is
+used by the full search page and quick search.
+
+| Setting | Option key | Description |
+| ------- | ---------- | ----------- |
+| Enable search logging | `typesense_search_logging_enabled` | Enables local search-statistics collection. |
+| Dashboard widgets | `typesense_search_logging_dashboard_widgets` | Adds Latest searches, Failed searches, and Popular searches widgets to the WordPress dashboard. |
+| Require statistics consent | `typesense_search_logging_require_consent` | Requires explicit client-side consent before the plugin creates session storage or records terms. Disabled by default. |
+| Search registration delay | `typesense_search_logging_delay_seconds` | Seconds a completed query must remain unchanged before it is recorded (default: 1). Independent of search debounce. |
+| Minimum search-term characters | `typesense_search_logging_minimum_characters` | Shorter terms are searched but not logged (default: 3). |
+| Statistics retention | `typesense_search_statistics_retention_days` | Days to retain terms and anonymous session hashes (default: 90). |
+
+When consent is required, call the following from the consent platform's
+initial-state callback and whenever that state changes. Existing trackers use
+the event to start or stop logging; sending `false` also clears the plugin's
+session storage.
+
+```js
+function setTypesenseSearchStatisticsConsent(granted) {
+  window.typesenseSearchStatisticsConsent = granted === true;
+  window.dispatchEvent(new CustomEvent('typesense-search:statistics-consent', {
+    detail: { granted: granted === true }
+  }));
+}
+```
+
+Expired statistics are removed by a daily WP-Cron event. Ensure WP-Cron runs
+reliably, or schedule `wp typesense prune-search-statistics` from server cron.
+
+The **Statistics** tab shows a search-statistics overview and can clear the
+stored data. **Tools → Search log** provides paginated event rows, filters for
+results and context, sortable date/hit columns, bulk deletion, and a grouped
+term view with unique-session totals.
 
 ### 4.5 Quick search tab
 
@@ -185,9 +226,16 @@ Quick search is a lightweight search overlay that attaches to any element on the
 
 ### 4.6 Statistics tab
 
-Read-only overview of the Typesense collection: document count and index size. Uses the admin API key to query Typesense directly from the browser via an AJAX proxy.
+Shows a live overview of the Typesense collection, including document count and
+index size, and provides search-statistics summaries when logging is enabled.
+The collection overview uses the admin API key through an AJAX proxy.
 
-### 4.7 Status tab
+### 4.7 Logging tab
+
+Shows the latest indexing run and document-level issues captured while
+indexing. The log can be cleared from this tab.
+
+### 4.8 Status tab
 
 Checks whether the current configuration is valid and the collection exists. Can create the collection if it is missing.
 
@@ -241,6 +289,13 @@ wp typesense index --include-pdf
 # Also run all external strategies after indexing posts
 wp typesense index --include-external --yes
 
+# Index only PDF attachments
+wp typesense index --only-pdf --yes
+
+# Index only external strategies, or one named strategy
+wp typesense index --only-external --yes
+wp typesense index --only-external=pitea-eservice --yes
+
 # Slow down the progress bar for visual debugging
 wp typesense index --dry-run --sleep=200
 ```
@@ -252,6 +307,8 @@ wp typesense index --dry-run --sleep=200
 | `--dry-run`           | Resolve strategies and check `shouldIndex()` but do not write to Typesense       |
 | `--include-pdf`       | Also index PDF attachments via `pdftotext` (requires the binary to be installed) |
 | `--include-external`  | After indexing posts (and PDFs), also run all registered external strategies     |
+| `--only-pdf`          | Index only PDF attachments. Cannot be combined with `--post-type` or `--only-external` |
+| `--only-external[=<identifier>]` | Index only external strategies; optionally target one identifier. Cannot be combined with `--post-type` or `--only-pdf` |
 | `--yes`               | Skip the confirmation prompt                                                     |
 | `--sleep=<ms>`        | Sleep after each post in milliseconds (useful for development)                   |
 
@@ -337,6 +394,46 @@ wp typesense clear --only-external=pitea-eservice --yes
 | `--only-external[=<identifier>]` | Clear **only** external strategy documents. Without a value, all strategies are targeted. With a value (e.g. `--only-external=pitea-eservice`), only that strategy's documents are removed. Cannot be combined with `--post-type` or `--only-pdf` |
 | `--yes`                          | Skip the confirmation prompt                                                                                                                                                                                                                      |
 | `--sleep=<ms>`                   | Sleep between post-type operations in milliseconds                                                                                                                                                                                                |
+
+---
+
+### `wp typesense prune-search-statistics`
+
+Removes local search-statistics rows older than the configured retention
+period. This is the same cleanup performed by the daily WP-Cron event.
+
+```bash
+# Use the retention period from Advanced settings
+wp typesense prune-search-statistics
+
+# Remove statistics older than 30 days
+wp typesense prune-search-statistics --days=30
+```
+
+| Flag | Description |
+| ---- | ----------- |
+| `--days=<days>` | Override the retention period configured in Advanced settings. |
+
+---
+
+### `wp typesense populate-search-log`
+
+Adds sample local search-log entries for development and testing. Each entry
+uses a unique session; by default, 70% reuse a small term pool so grouped and
+popular-search views have meaningful counts.
+
+```bash
+# Add 100 sample entries (70% repeated terms)
+wp typesense populate-search-log
+
+# Add 100 entries, 80% of which reuse the sample terms
+wp typesense populate-search-log --count=100 --repeat-percent=80
+```
+
+| Flag | Description |
+| ---- | ----------- |
+| `--count=<number>` | Number of sample entries to add (default: 100; maximum: 10,000). |
+| `--repeat-percent=<percentage>` | Percentage of entries that reuse a sample term (default: 70; clamped to 0–100). |
 
 ---
 
