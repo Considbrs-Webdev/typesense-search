@@ -3,6 +3,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    const sectionSelect = document.querySelector('[data-js-settings-section-select]');
+    if (sectionSelect) {
+        sectionSelect.addEventListener('change', () => {
+            window.location.href = sectionSelect.value;
+        });
+    }
+
 
     // Strings passed from PHP via wp_localize_script('typesense-search-admin', 'tsAdminI18n', ...)
     const i18n = window.tsAdminI18n ?? {};
@@ -182,13 +189,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ── Unsaved-changes guard on content tab ─────────────────────────────────
-    const contentForm = document.querySelector('#ts-tab-content form');
-    if (contentForm) {
+    // ── Unsaved-changes guard on settings tab ─────────────────────────────────
+    const settingsForm = document.querySelector('#ts-tab-settings form');
+    if (settingsForm) {
         let isDirty = false;
 
-        contentForm.addEventListener('change', () => { isDirty = true; });
-        contentForm.addEventListener('submit', () => { isDirty = false; });
+        settingsForm.addEventListener('change', () => { isDirty = true; });
+        settingsForm.addEventListener('submit', () => { isDirty = false; });
 
         window.addEventListener('beforeunload', (e) => {
             if (!isDirty) return;
@@ -532,9 +539,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ── Facetting tab ─────────────────────────────────────────────────────────
+    // ── Advanced settings: facets ─────────────────────────────────────────────
 
-    const facettingPanel = document.getElementById('ts-tab-facetting');
+    const facettingPanel = document.getElementById('ts-tab-advanced-settings');
 
     if (facettingPanel) {
         const facetList    = document.getElementById('ts-facet-list');

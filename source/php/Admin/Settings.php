@@ -19,7 +19,7 @@ class Settings
 
     public const OPTION_GROUP_CONNECTION   = 'typesense_search_connection';
     public const OPTION_GROUP_CONTENT      = 'typesense_search_content';
-    public const OPTION_GROUP_FACETS       = 'typesense_search_facetting';
+    public const OPTION_GROUP_ADVANCED_SETTINGS = 'typesense_search_advanced_settings';
     public const OPTION_GROUP_QUICK_SEARCH = 'typesense_search_quick_search';
 
     public const OPTION_REMOTE     = 'typesense_search_remote';
@@ -48,7 +48,7 @@ class Settings
         return [
             'connection'   => __('Typesense Connection', 'typesense-search'),
             'content'      => __('Settings', 'typesense-search'),
-            'facetting'    => __('Facetting', 'typesense-search'),
+            'advanced-settings' => __('Advanced settings', 'typesense-search'),
             'quick-search' => __('Quick search', 'typesense-search'),
             'statistics'   => __('Statistics', 'typesense-search'),
             'logging'      => __('Logging', 'typesense-search'),
@@ -108,13 +108,13 @@ class Settings
             'default'           => 0,
         ]);
 
-        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_DEBOUNCE, [
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_DEBOUNCE, [
             'type'              => 'integer',
             'sanitize_callback' => 'absint',
             'default'           => 1,
         ]);
 
-        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_DEBOUNCE_DELAY, [
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_DEBOUNCE_DELAY, [
             'type'              => 'integer',
             'sanitize_callback' => 'absint',
             'default'           => 300,
@@ -126,13 +126,13 @@ class Settings
             'default'           => 10,
         ]);
 
-        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS, [
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_HIGHLIGHT_AFFIX_NUM_TOKENS, [
             'type'              => 'integer',
             'sanitize_callback' => 'absint',
             'default'           => 15,
         ]);
 
-        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_TRUNCATOR, [
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_TRUNCATOR, [
             'type'              => 'string',
             'sanitize_callback' => 'sanitize_text_field',
             'default'           => '[...]',
@@ -146,7 +146,7 @@ class Settings
             'default'           => 'radio',
         ]);
 
-        register_setting(self::OPTION_GROUP_CONTENT, self::OPTION_QUERY_BY_WEIGHTS, [
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_QUERY_BY_WEIGHTS, [
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitizeQueryByWeights'],
             'default'           => self::getDefaultQueryByWeights(),
@@ -158,7 +158,7 @@ class Settings
             'default'           => 0,
         ]);
 
-        register_setting(self::OPTION_GROUP_FACETS, self::OPTION_FACETS, [
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_FACETS, [
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitizeFacets'],
             'default'           => [],

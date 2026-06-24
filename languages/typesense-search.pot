@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-21T09:06:04+00:00\n"
+"POT-Creation-Date: 2026-06-24T21:08:02+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -81,7 +81,7 @@ msgid "Settings"
 msgstr ""
 
 #: source/php/Admin/Settings.php:51
-msgid "Facetting"
+msgid "Advanced settings"
 msgstr ""
 
 #: source/php/Admin/Settings.php:52
@@ -516,49 +516,49 @@ msgid "All facetable fields have already been added as facets."
 msgstr ""
 
 #: source/php/Frontend/I18n.php:101
-#: views/admin/settings-tabs/facetting.php:30
+#: views/admin/settings-tabs/advanced-settings.php:32
 msgid "Field"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:102
-#: views/admin/settings-tabs/facetting.php:46
+#: views/admin/settings-tabs/advanced-settings.php:48
 msgid "Label"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:103
-#: views/admin/settings-tabs/facetting.php:51
+#: views/admin/settings-tabs/advanced-settings.php:53
 msgid "e.g. Category"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:104
-#: views/admin/settings-tabs/facetting.php:56
+#: views/admin/settings-tabs/advanced-settings.php:58
 msgid "Placeholder"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:105
-#: views/admin/settings-tabs/facetting.php:61
+#: views/admin/settings-tabs/advanced-settings.php:63
 msgid "e.g. All categories"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:106
-#: views/admin/settings-tabs/facetting.php:66
+#: views/admin/settings-tabs/advanced-settings.php:68
 msgid "Display as"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:107
-#: views/admin/settings-tabs/content.php:237
-#: views/admin/settings-tabs/facetting.php:73
+#: views/admin/settings-tabs/advanced-settings.php:75
+#: views/admin/settings-tabs/settings.php:54
 msgid "Dropdown"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:108
-#: views/admin/settings-tabs/facetting.php:74
+#: views/admin/settings-tabs/advanced-settings.php:76
 msgid "Button group"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:109
-#: views/admin/settings-tabs/facetting.php:80
-#: views/admin/settings-tabs/facetting.php:81
+#: views/admin/settings-tabs/advanced-settings.php:82
+#: views/admin/settings-tabs/advanced-settings.php:83
 msgid "Remove facet"
 msgstr ""
 
@@ -635,6 +635,113 @@ msgstr ""
 
 #: views/admin/settings-page.php:35
 msgid "Settings sections"
+msgstr ""
+
+#: views/admin/settings-page.php:59
+msgid "Select a settings section"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:17
+msgid "Facets"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:18
+msgid "Define which fields can be used to filter search results. Each facet maps a Typesense field to a human-readable label and an optional placeholder shown in the UI."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:94
+msgid "No facets configured yet. Click \"Add facet\" to get started."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:102
+msgid "Add facet"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:109
+msgid "Search field weights"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:110
+msgid "Control how much each search field contributes to result relevance."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:149
+msgid "Search result behavior"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:150
+msgid "Fine-tune highlighting, snippet truncation, and the timing of search requests."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:156
+msgid "Highlight context tokens"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:170
+msgid "Number of tokens (words) to include before and after each highlighted match in search result snippets. Higher values show more context around matches."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:177
+msgid "Snippet truncator"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:188
+msgid "Brackets (e.g. [...] )"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:189
+msgid "Ellipsis (e.g. … )"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:190
+msgid "None (no truncation marker)"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:191
+msgid "Custom"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:203
+msgid "Select any of the predefined markers, or choose 'Custom' to enter your own."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:209
+msgid "Debounce search"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:223
+#: views/admin/settings-tabs/quick-search.php:42
+#: views/admin/settings-tabs/settings.php:84
+#: views/admin/settings-tabs/settings.php:138
+#: views/admin/settings-tabs/settings.php:169
+msgid "On"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:224
+#: views/admin/settings-tabs/quick-search.php:43
+#: views/admin/settings-tabs/settings.php:85
+#: views/admin/settings-tabs/settings.php:139
+#: views/admin/settings-tabs/settings.php:170
+msgid "Off"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:228
+msgid "When enabled, search results are fetched only after the user pauses typing (debounced). When disabled, results appear immediately on every keystroke."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:235
+msgid "Debounce delay (ms)"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:249
+msgid "How long to wait after the user stops typing before firing the search request."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:287
+#: views/admin/settings-tabs/connection.php:274
+#: views/admin/settings-tabs/quick-search.php:158
+#: views/admin/settings-tabs/settings.php:182
+msgid "Save settings"
 msgstr ""
 
 #: views/admin/settings-tabs/connection.php:23
@@ -747,157 +854,6 @@ msgstr ""
 
 #: views/admin/settings-tabs/connection.php:260
 msgid "Generate search key"
-msgstr ""
-
-#: views/admin/settings-tabs/connection.php:274
-#: views/admin/settings-tabs/content.php:372
-#: views/admin/settings-tabs/facetting.php:105
-#: views/admin/settings-tabs/quick-search.php:158
-msgid "Save settings"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:15
-msgid "General settings"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:16
-msgid "Basic configuration for Typesense search behavior."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:22
-msgid "Hits per page"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:35
-msgid "Number of search results to display per page."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:42
-msgid "Index Modularity content"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:60
-#: views/admin/settings-tabs/content.php:91
-#: views/admin/settings-tabs/content.php:328
-#: views/admin/settings-tabs/content.php:359
-#: views/admin/settings-tabs/quick-search.php:42
-msgid "On"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:61
-#: views/admin/settings-tabs/content.php:92
-#: views/admin/settings-tabs/content.php:329
-#: views/admin/settings-tabs/content.php:360
-#: views/admin/settings-tabs/quick-search.php:43
-msgid "Off"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:66
-msgid "When enabled, content that is added via Modularity modules will be included in the Typesense index. If disabled, content placed in module slots like sidebars will not be indexed for search."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:73
-msgid "Debounce search"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:97
-msgid "When enabled, search results are fetched only after the user pauses typing (debounced). When disabled, results appear immediately on every keystroke."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:103
-msgid "Debounce delay (ms)"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:117
-msgid "How long to wait after the user stops typing before firing the search request."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:134
-msgid "Highlight context tokens"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:148
-msgid "Number of tokens (words) to include before and after each highlighted match in search result snippets. Higher values show more context around matches."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:155
-msgid "Snippet truncator"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:169
-msgid "Brackets (e.g. [...] )"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:170
-msgid "Ellipsis (e.g. … )"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:171
-msgid "None (no truncation marker)"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:172
-msgid "Custom"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:187
-msgid "Select any of the predefined markers, or choose 'Custom' to enter your own."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:225
-msgid "Sort control style"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:234
-msgid "Radio buttons"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:241
-msgid "How the sort options are displayed on the search page. \"Radio buttons\" shows inline options; \"Dropdown\" uses a select element like the facet filters."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:250
-msgid "Search field weights"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:251
-msgid "Control how much each search field contributes to result relevance."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:291
-msgid "Post types"
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:292
-msgid "Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:295
-msgid "PDF indexing requires the pdftotext binary to be installed on the server."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:302
-msgid "No public post types found."
-msgstr ""
-
-#: views/admin/settings-tabs/content.php:341
-msgid "PDF files"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:15
-msgid "Facets"
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:16
-msgid "Define which fields can be used to filter search results. Each facet maps a Typesense field to a human-readable label and an optional placeholder shown in the UI."
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:92
-msgid "No facets configured yet. Click \"Add facet\" to get started."
-msgstr ""
-
-#: views/admin/settings-tabs/facetting.php:100
-msgid "Add facet"
 msgstr ""
 
 #: views/admin/settings-tabs/logging.php:24
@@ -1014,6 +970,62 @@ msgstr ""
 
 #: views/admin/settings-tabs/quick-search.php:153
 msgid "Add selector"
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:15
+msgid "General settings"
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:16
+msgid "Basic configuration for Typesense search behavior."
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:22
+msgid "Hits per page"
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:35
+msgid "Number of search results to display per page."
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:42
+msgid "Sort control style"
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:51
+msgid "Radio buttons"
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:58
+msgid "How the sort options are displayed on the search page. \"Radio buttons\" shows inline options; \"Dropdown\" uses a select element like the facet filters."
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:66
+msgid "Index Modularity content"
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:90
+msgid "When enabled, content that is added via Modularity modules will be included in the Typesense index. If disabled, content placed in module slots like sidebars will not be indexed for search."
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:101
+msgid "Post types"
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:102
+msgid "Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results."
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:105
+msgid "PDF indexing requires the pdftotext binary to be installed on the server."
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:112
+msgid "No public post types found."
+msgstr ""
+
+#: views/admin/settings-tabs/settings.php:151
+msgid "PDF files"
 msgstr ""
 
 #: views/admin/settings-tabs/statistics.php:12
