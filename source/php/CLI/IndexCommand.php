@@ -67,6 +67,19 @@ class IndexCommand
      * : After indexing posts (and optionally PDFs), also run all registered
      *   external strategies. Equivalent to appending `wp typesense sync-external`.
      *
+     * [--only-pdf]
+     * : Index ONLY PDF attachments from the media library; skips the post-type
+     *   loop and the external-strategies step entirely. Requires pdftotext to be
+     *   available on the server. Cannot be combined with --post-type or
+     *   --only-external.
+     *
+     * [--only-external[=<identifier>]]
+     * : Index ONLY documents from external strategies; skips the post-type loop
+     *   and the PDF step entirely. When given without a value, all registered
+     *   external strategies are run. When given with an identifier (e.g.
+     *   --only-external=pitea-eservice), only that strategy is run. Cannot be
+     *   combined with --post-type or --only-pdf.
+     *
      * ## EXAMPLES
      *
      *   wp typesense index
@@ -76,6 +89,9 @@ class IndexCommand
      *   wp typesense index --include-pdf
      *   wp typesense index --dry-run --sleep=200
      *   wp typesense index --include-external --yes
+     *   wp typesense index --only-pdf --yes
+     *   wp typesense index --only-external --yes
+     *   wp typesense index --only-external=pitea-eservice --yes
      *
      * @subcommand index
      * @when after_wp_load
@@ -92,18 +108,35 @@ class IndexCommand
         $sleepUs         = (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'sleep', 0) * 1000;
         $includePdf      = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
         $includeExternal = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-external', false);
+        $onlyPdf         = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'only-pdf', false);
+        // false = not set | true = all external | string = specific identifier
+        $onlyExternal    = \WP_CLI\Utils\get_flag_value($assocArgs, 'only-external', false);
+
+        // ── Mutual exclusivity ───────────────────────────────────────────────
+        if ($onlyPdf && $onlyExternal !== false) {
+            \WP_CLI::error('--only-pdf and --only-external are mutually exclusive.');
+        }
+        if ($onlyPdf && \WP_CLI\Utils\get_flag_value($assocArgs, 'post-type', null) !== null) {
+            \WP_CLI::error('--only-pdf cannot be combined with --post-type.');
+        }
+        if ($onlyExternal !== false && \WP_CLI\Utils\get_flag_value($assocArgs, 'post-type', null) !== null) {
+            \WP_CLI::error('--only-external cannot be combined with --post-type.');
+        }
 
         // ── Resolve post types ──────────────────────────────────────────────
-        $enabledTypes   = $this->resolvePostTypes($assocArgs);
-        $enabledObjects = Settings::getIndexablePostTypes();
-
-        if (empty($enabledTypes)) {
-            \WP_CLI::error(
-                'No post types are enabled for indexing. ' .
-                'Enable at least one on the Typesense Search settings page, ' .
-                'or pass --post-type=<type>.'
-            );
+        if (!$onlyPdf && $onlyExternal === false) {
+            $enabledTypes = $this->resolvePostTypes($assocArgs);
+            if (empty($enabledTypes)) {
+                \WP_CLI::error(
+                    'No post types are enabled for indexing. ' .
+                    'Enable at least one on the Typesense Search settings page, ' .
+                    'or pass --post-type=<type>.'
+                );
+            }
+        } else {
+            $enabledTypes = [];
         }
+        $enabledObjects = Settings::getIndexablePostTypes();
 
         // ── Dry-run banner ──────────────────────────────────────────────────
         if ($isDryRun) {
@@ -111,17 +144,26 @@ class IndexCommand
         }
 
         // ── Confirmation ────────────────────────────────────────────────────
-        $indexScope = sprintf(
-            '%s%s%s',
-            implode(', ', $enabledTypes),
-            $includePdf ? ' and PDF attachments' : '',
-            $includeExternal ? ' and external strategies' : ''
-        );
+        if ($onlyPdf) {
+            $indexScope = 'PDF attachments only';
+        } elseif ($onlyExternal !== false) {
+            $extId      = is_string($onlyExternal) && $onlyExternal !== '' ? $onlyExternal : null;
+            $indexScope = $extId !== null
+                ? sprintf('external strategy "%s" only', $extId)
+                : 'external strategies only';
+        } else {
+            $indexScope = sprintf(
+                '%s%s%s',
+                implode(', ', $enabledTypes),
+                $includePdf ? ' and PDF attachments' : '',
+                $includeExternal ? ' and external strategies' : ''
+            );
+        }
 
         if (!$isDryRun && !$skipYes) {
             \WP_CLI::confirm(
                 sprintf(
-                    'This will index posts of type(s): %s. Continue?',
+                    'This will index: %s. Continue?',
                     $indexScope
                 )
             );
@@ -135,18 +177,20 @@ class IndexCommand
 
         $grandTotal = array_sum($totalsByType);
 
-        if ($grandTotal === 0) {
+        if ($grandTotal === 0 && !$onlyPdf && $onlyExternal === false) {
             \WP_CLI::success('No published posts found for the selected post types.');
             return;
         }
 
-        \WP_CLI::log(
-            sprintf(
-                'Found %d published post(s) across %d post type(s).',
-                $grandTotal,
-                count($enabledTypes)
-            )
-        );
+        if ($grandTotal > 0) {
+            \WP_CLI::log(
+                sprintf(
+                    'Found %d published post(s) across %d post type(s).',
+                    $grandTotal,
+                    count($enabledTypes)
+                )
+            );
+        }
 
         // ── Counters ────────────────────────────────────────────────────────
         $totalIndexed = 0;
@@ -276,7 +320,7 @@ class IndexCommand
         }
 
         // ── PDF attachments ──────────────────────────────────────────────────
-        if ($includePdf) {
+        if ($onlyPdf || $includePdf) {
             if (!PdfToText::isAvailable()) {
                 \WP_CLI::warning('--include-pdf skipped: pdftotext binary is not available on this server.');
             } else {
@@ -380,10 +424,11 @@ class IndexCommand
         }
 
         // ── External strategies ────────────────────────────────────────────────
-        if ($includeExternal) {
+        if ($includeExternal || $onlyExternal !== false) {
+            $extTargetId = is_string($onlyExternal) && $onlyExternal !== '' ? $onlyExternal : null;
             \WP_CLI::log('');
             \WP_CLI::log('Running external strategies…');
-            [$extIndexed, $extFailed] = $this->runExternalSync($isDryRun);
+            [$extIndexed, $extFailed] = $this->runExternalSync($isDryRun, $extTargetId);
             $totalIndexed += $extIndexed;
             $totalFailed  += $extFailed;
         }
@@ -659,7 +704,7 @@ class IndexCommand
      * [--yes]
      * : Skip the confirmation prompt.
      *
- * [--include-pdf]
+     * [--include-pdf]
      * : Also clear PDF attachment documents (type=attachment) from the index.
      *   Combined with post-type clearing, not exclusive.
      *
@@ -1188,18 +1233,34 @@ class IndexCommand
     /**
      * Run all registered external strategies and return [totalIndexed, totalFailed].
      *
-     * Used by commands that support --include-external. Prints per-strategy
-     * log lines but does not print a final summary (the caller does that).
+     * Used by commands that support --include-external / --only-external. Prints
+     * per-strategy log lines but does not print a final summary (the caller does that).
      *
+     * @param bool        $isDryRun
+     * @param string|null $targetId  When non-null, only the strategy with this
+     *                               identifier is run.
      * @return array{int, int}
      */
-    private function runExternalSync(bool $isDryRun): array
+    private function runExternalSync(bool $isDryRun, ?string $targetId = null): array
     {
         $strategies = App::getRegistry()->allExternal();
 
         if (empty($strategies)) {
             \WP_CLI::log('  No external strategies registered — skipping.');
             return [0, 0];
+        }
+
+        if ($targetId !== null) {
+            if (!isset($strategies[$targetId])) {
+                $available = implode(', ', array_keys($strategies));
+                \WP_CLI::error(sprintf(
+                    'Unknown external strategy "%s". Available: %s',
+                    $targetId,
+                    $available ?: 'none registered'
+                ));
+                return [0, 0]; // unreachable after error
+            }
+            $strategies = [$targetId => $strategies[$targetId]];
         }
 
         $indexed = 0;
