@@ -21,8 +21,17 @@ export interface TypesenseSearchConfig {
   highlightAffixNumTokens?: number;
   queryByWeights?: string;
   sortDisplay?: "radio" | "dropdown";
+  searchLogging?: SearchStatisticsConfig;
   /** Web Awesome translation module key (e.g. `sv`); omit for English internals. */
   webAwesomeLocale?: string | null;
+}
+
+export interface SearchStatisticsConfig {
+  enabled: boolean;
+  requireConsent: boolean;
+  delayMs: number;
+  minimumChars: number;
+  endpoint: string;
 }
 
 export interface TypesenseI18n {
@@ -51,6 +60,7 @@ declare global {
     typesenseConfig?: TypesenseSearchConfig;
     typesenseI18n?: TypesenseI18n;
     typesenseQuickSearchI18n?: TypesenseQuickSearchI18n;
+    typesenseSearchStatisticsConsent?: boolean;
   }
 }
 

@@ -10,6 +10,11 @@ use TypesenseSearch\Logger\IndexingLogLogger;
 use TypesenseSearch\Logger\LoggerInterface;
 use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Services\TypesenseClientService;
+use TypesenseSearch\SearchStatistics\Database as SearchStatisticsDatabase;
+use TypesenseSearch\SearchStatistics\DashboardWidgets;
+use TypesenseSearch\SearchStatistics\Repository as SearchStatisticsRepository;
+use TypesenseSearch\SearchStatistics\RestController as SearchStatisticsRestController;
+use TypesenseSearch\SearchStatistics\Retention as SearchStatisticsRetention;
 
 /**
  * Class App
@@ -57,6 +62,17 @@ class App {
         new Frontend\EnrichSearchTemplate();
         new Frontend\TypesenseConfig($settings);
 
+        // Search statistics live in WordPress and are independent from the
+        // Typesense index. Keep their schema and retention lifecycle active
+        // even when logging is currently switched off.
+        add_action('plugins_loaded', [SearchStatisticsDatabase::class, 'maybeMigrate']);
+        $searchStatistics = new SearchStatisticsRepository();
+        new SearchStatisticsRestController($settings, $searchStatistics);
+        new SearchStatisticsRetention($settings, $searchStatistics);
+        new DashboardWidgets($settings, $searchStatistics);
+        new Admin\SearchStatisticsActions($searchStatistics);
+        new Admin\SearchLogPage($searchStatistics);
+
         // ── Indexing: build registry with strategies ────────────────────────
         // Register more specific strategies first — the registry evaluates
         // them in order and the first match wins.
@@ -91,7 +107,7 @@ class App {
         new Indexing\Enrichers\PageEnricher();
 
         if (defined('WP_CLI') && constant('WP_CLI') === true) {
-            \WP_CLI::add_command('typesense', CLI\IndexCommand::class);
+            \WP_CLI::add_command('typesense', new CLI\IndexCommand($settings, $searchStatistics));
         }
     }
 

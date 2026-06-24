@@ -26,7 +26,7 @@ $ts-thumb-size: 18px;
 // ── Page shell ────────────────────────────────────────────────────────────────
 
 .ts-settings {
-  max-width: 860px;
+  max-width: 1000px;
 
   &__title {
     display: flex;
@@ -58,6 +58,8 @@ $ts-thumb-size: 18px;
     gap: 4px;
     border-bottom: 1px solid $ts-border;
     margin-bottom: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 
     .nav-tab {
       display: inline-flex;
@@ -91,6 +93,15 @@ $ts-thumb-size: 18px;
         }
       }
     }
+  }
+
+  &__section-picker {
+    display: none;
+  }
+
+  &__section-select {
+    width: 100%;
+    max-width: none;
   }
 
   // ── Panel ─────────────────────────────────────────────────────────────────
@@ -178,10 +189,163 @@ $ts-thumb-size: 18px;
   }
 }
 
+@media (max-width: 1120px) {
+  .ts-settings {
+    &__tabs {
+      display: none;
+    }
+
+    &__section-picker {
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    &__panel > form > &__card {
+      border-top: 1px solid $ts-border;
+      border-radius: $ts-radius;
+    }
+  }
+}
+
 // ── Form fields ───────────────────────────────────────────────────────────────
 
 .ts-settings__fields {
   padding: 4px 0;
+}
+
+.ts-search-statistics-info {
+  margin: 0 24px 16px 244px;
+  padding: 14px 16px;
+  color: $ts-muted;
+  background: #f0f6fc;
+  border-left: 3px solid $ts-blue;
+  font-size: 13px;
+  line-height: 1.5;
+
+  h3 {
+    margin: 0 0 6px;
+    color: $ts-text;
+    font-size: 13px;
+  }
+
+  p {
+    margin: 8px 0;
+  }
+
+  pre {
+    overflow-x: auto;
+    margin: 10px 0;
+    padding: 10px;
+    color: $ts-text;
+    background: #fff;
+    border: 1px solid #dcdcde;
+  }
+
+  &--retention {
+    margin-bottom: 20px;
+  }
+}
+
+.ts-search-statistics-card {
+  .ts-settings__card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+.ts-search-statistics-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 16px 24px;
+  border-bottom: 1px solid $ts-bg;
+
+  strong {
+    color: $ts-blue;
+    font-size: 24px;
+  }
+
+  span {
+    color: $ts-muted;
+    font-size: 13px;
+  }
+}
+
+.ts-search-statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  section {
+    min-width: 0;
+    padding: 18px 20px;
+    border-right: 1px solid $ts-bg;
+
+    &:last-child {
+      border-right: 0;
+    }
+  }
+
+  h3 {
+    margin: 0 0 12px;
+    color: $ts-text;
+    font-size: 13px;
+  }
+
+  p {
+    margin: 0;
+    color: $ts-muted;
+    font-size: 13px;
+  }
+}
+
+.ts-search-statistics-list,
+.typesense-search-dashboard-list {
+  margin: 0;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 0;
+    border-bottom: 1px solid $ts-bg;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  strong {
+    overflow: hidden;
+    color: $ts-text;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    color: $ts-muted;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 782px) {
+  .ts-search-statistics-info {
+    margin-left: 16px;
+  }
+
+  .ts-search-statistics-grid {
+    grid-template-columns: 1fr;
+
+    section {
+      border-right: 0;
+      border-bottom: 1px solid $ts-bg;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+  }
 }
 
 .ts-field {
@@ -269,6 +433,7 @@ $ts-thumb-size: 18px;
     color: $ts-muted;
     margin: 0;
     line-height: 1.5;
+    max-width: 600px;
   }
 
   &__env-notice {
@@ -322,7 +487,9 @@ $ts-thumb-size: 18px;
   }
 
   &__input:focus-visible + &__label {
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px $ts-blue;
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 4px $ts-blue;
   }
 
   &__option:hover &__label {

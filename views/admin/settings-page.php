@@ -53,9 +53,23 @@ $pageUrl = admin_url('options-general.php?page=' . Settings::PAGE_SLUG);
             </a>
         <?php endforeach; ?>
     </nav>
+
+    <div class="ts-settings__section-picker">
+        <label class="screen-reader-text" for="ts-settings-section-select">
+            <?php esc_html_e('Select a settings section', 'typesense-search'); ?>
+        </label>
+        <select id="ts-settings-section-select" class="ts-settings__section-select" data-js-settings-section-select>
+            <?php foreach ($tabs as $slug => $label) : ?>
+                <option value="<?php echo esc_url($pageUrl . '&tab=' . $slug); ?>" <?php selected($activeTab, $slug); ?>>
+                    <?php echo esc_html($label); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
     <?php include __DIR__ . '/settings-tabs/connection.php'; ?>
-    <?php include __DIR__ . '/settings-tabs/content.php'; ?>
-    <?php include __DIR__ . '/settings-tabs/facetting.php'; ?>
+    <?php include __DIR__ . '/settings-tabs/settings.php'; ?>
+    <?php include __DIR__ . '/settings-tabs/advanced-settings.php'; ?>
     <?php include __DIR__ . '/settings-tabs/quick-search.php'; ?>
     <?php include __DIR__ . '/settings-tabs/statistics.php'; ?>
     <?php include __DIR__ . '/settings-tabs/logging.php'; ?>

@@ -6,6 +6,8 @@ use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\App;
 use TypesenseSearch\Helper\PdfToText;
 use TypesenseSearch\Logger\IndexingLog;
+use TypesenseSearch\SearchStatistics\Repository as SearchStatisticsRepository;
+use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\ClientFactory;
 
 /**
@@ -29,6 +31,117 @@ use TypesenseSearch\Typesense\ClientFactory;
  */
 class IndexCommand
 {
+    public function __construct(
+        private SettingsRepository $settings,
+        private SearchStatisticsRepository $searchStatistics
+    ) {
+    }
+
+    /**
+     * Remove search-statistics rows that are older than the configured
+     * retention period.
+     *
+     * ## OPTIONS
+     *
+     * [--days=<days>]
+     * : Override the retention period configured in Advanced settings.
+     *
+     * ## EXAMPLES
+     *
+     *   # Prune according to the configured retention period.
+     *   wp typesense prune-search-statistics
+     *
+     *   # Prune entries older than 30 days.
+     *   wp typesense prune-search-statistics --days=30
+     *
+     * @subcommand prune-search-statistics
+     * @when after_wp_load
+     *
+     * @param array<int,string> $args Positional arguments (unused).
+     * @param array<string,string> $assocArgs Named arguments.
+     */
+    public function pruneSearchStatistics(array $args, array $assocArgs): void
+    {
+        $days = \WP_CLI\Utils\get_flag_value($assocArgs, 'days', $this->settings->getSearchStatisticsRetentionDays());
+        $days = max(1, (int) $days);
+        $deleted = $this->searchStatistics->prune($days);
+
+        \WP_CLI::success(sprintf(
+            'Deleted %d search statistic%s older than %d day%s.',
+            $deleted,
+            $deleted === 1 ? '' : 's',
+            $days,
+            $days === 1 ? '' : 's'
+        ));
+    }
+
+    /**
+     * Add sample search-log entries for testing pagination and filters.
+     *
+     * ## OPTIONS
+     *
+     * [--count=<number>]
+     * : Number of sample entries to add. Defaults to 100.
+     *
+     * [--repeat-percent=<percentage>]
+     * : Percentage of entries that reuse one of the sample terms. Defaults to
+     *   70. The remaining entries use unique suffixed terms. Values are
+     *   clamped between 0 and 100.
+     *
+     * ## EXAMPLES
+     *
+     *   # Add enough entries to exercise the second page of the log.
+     *   wp typesense populate-search-log --count=50
+     *
+     *   # Add 100 entries, 80% of which reuse the sample terms.
+     *   wp typesense populate-search-log --count=100 --repeat-percent=80
+     *
+     * @subcommand populate-search-log
+     * @when after_wp_load
+     *
+     * @param array<int,string> $args Positional arguments (unused).
+     * @param array<string,string> $assocArgs Named arguments.
+     */
+    public function populateSearchLog(array $args, array $assocArgs): void
+    {
+        $count = min(10000, max(1, (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'count', 100)));
+        $repeatPercent = min(100, max(0, (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'repeat-percent', 70)));
+        $terms = [
+            'bygglov',
+            'förskola',
+            'parkering',
+            'återvinning',
+            'fritidsaktiviteter',
+            'bostadsanpassning',
+            'bibliotek',
+            'lediga jobb',
+            'serveringstillstånd',
+            'snöröjning',
+        ];
+        $created = 0;
+
+        for ($index = 0; $index < $count; $index++) {
+            $baseTerm = $terms[$index % count($terms)];
+            $term = ($index % 100) < $repeatPercent
+                ? $baseTerm
+                : $baseTerm . ' test ' . $index;
+            $sessionId = str_replace('-', '', wp_generate_uuid4());
+            $found = $index % 7 === 0 ? 0 : (($index % 200) + 1);
+            $surface = $index % 3 === 0 ? 'quick' : 'regular';
+
+            if ($this->searchStatistics->record($term, $found, $surface, $sessionId)) {
+                $created++;
+            }
+        }
+
+        \WP_CLI::success(sprintf(
+            'Added %d sample search-log entr%s (%d%% repeated terms).',
+            $created,
+            $created === 1 ? 'y' : 'ies',
+            $repeatPercent
+        ));
+    }
+
     /**
      * Index all published posts for the post types enabled in plugin settings.
      *
@@ -67,6 +180,19 @@ class IndexCommand
      * : After indexing posts (and optionally PDFs), also run all registered
      *   external strategies. Equivalent to appending `wp typesense sync-external`.
      *
+     * [--only-pdf]
+     * : Index ONLY PDF attachments from the media library; skips the post-type
+     *   loop and the external-strategies step entirely. Requires pdftotext to be
+     *   available on the server. Cannot be combined with --post-type or
+     *   --only-external.
+     *
+     * [--only-external[=<identifier>]]
+     * : Index ONLY documents from external strategies; skips the post-type loop
+     *   and the PDF step entirely. When given without a value, all registered
+     *   external strategies are run. When given with an identifier (e.g.
+     *   --only-external=pitea-eservice), only that strategy is run. Cannot be
+     *   combined with --post-type or --only-pdf.
+     *
      * ## EXAMPLES
      *
      *   wp typesense index
@@ -76,6 +202,9 @@ class IndexCommand
      *   wp typesense index --include-pdf
      *   wp typesense index --dry-run --sleep=200
      *   wp typesense index --include-external --yes
+     *   wp typesense index --only-pdf --yes
+     *   wp typesense index --only-external --yes
+     *   wp typesense index --only-external=pitea-eservice --yes
      *
      * @subcommand index
      * @when after_wp_load
@@ -92,18 +221,35 @@ class IndexCommand
         $sleepUs         = (int) \WP_CLI\Utils\get_flag_value($assocArgs, 'sleep', 0) * 1000;
         $includePdf      = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-pdf', false);
         $includeExternal = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-external', false);
+        $onlyPdf         = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'only-pdf', false);
+        // false = not set | true = all external | string = specific identifier
+        $onlyExternal    = \WP_CLI\Utils\get_flag_value($assocArgs, 'only-external', false);
+
+        // ── Mutual exclusivity ───────────────────────────────────────────────
+        if ($onlyPdf && $onlyExternal !== false) {
+            \WP_CLI::error('--only-pdf and --only-external are mutually exclusive.');
+        }
+        if ($onlyPdf && \WP_CLI\Utils\get_flag_value($assocArgs, 'post-type', null) !== null) {
+            \WP_CLI::error('--only-pdf cannot be combined with --post-type.');
+        }
+        if ($onlyExternal !== false && \WP_CLI\Utils\get_flag_value($assocArgs, 'post-type', null) !== null) {
+            \WP_CLI::error('--only-external cannot be combined with --post-type.');
+        }
 
         // ── Resolve post types ──────────────────────────────────────────────
-        $enabledTypes   = $this->resolvePostTypes($assocArgs);
-        $enabledObjects = Settings::getIndexablePostTypes();
-
-        if (empty($enabledTypes)) {
-            \WP_CLI::error(
-                'No post types are enabled for indexing. ' .
-                'Enable at least one on the Typesense Search settings page, ' .
-                'or pass --post-type=<type>.'
-            );
+        if (!$onlyPdf && $onlyExternal === false) {
+            $enabledTypes = $this->resolvePostTypes($assocArgs);
+            if (empty($enabledTypes)) {
+                \WP_CLI::error(
+                    'No post types are enabled for indexing. ' .
+                    'Enable at least one on the Typesense Search settings page, ' .
+                    'or pass --post-type=<type>.'
+                );
+            }
+        } else {
+            $enabledTypes = [];
         }
+        $enabledObjects = Settings::getIndexablePostTypes();
 
         // ── Dry-run banner ──────────────────────────────────────────────────
         if ($isDryRun) {
@@ -111,17 +257,26 @@ class IndexCommand
         }
 
         // ── Confirmation ────────────────────────────────────────────────────
-        $indexScope = sprintf(
-            '%s%s%s',
-            implode(', ', $enabledTypes),
-            $includePdf ? ' and PDF attachments' : '',
-            $includeExternal ? ' and external strategies' : ''
-        );
+        if ($onlyPdf) {
+            $indexScope = 'PDF attachments only';
+        } elseif ($onlyExternal !== false) {
+            $extId      = is_string($onlyExternal) && $onlyExternal !== '' ? $onlyExternal : null;
+            $indexScope = $extId !== null
+                ? sprintf('external strategy "%s" only', $extId)
+                : 'external strategies only';
+        } else {
+            $indexScope = sprintf(
+                '%s%s%s',
+                implode(', ', $enabledTypes),
+                $includePdf ? ' and PDF attachments' : '',
+                $includeExternal ? ' and external strategies' : ''
+            );
+        }
 
         if (!$isDryRun && !$skipYes) {
             \WP_CLI::confirm(
                 sprintf(
-                    'This will index posts of type(s): %s. Continue?',
+                    'This will index: %s. Continue?',
                     $indexScope
                 )
             );
@@ -135,18 +290,20 @@ class IndexCommand
 
         $grandTotal = array_sum($totalsByType);
 
-        if ($grandTotal === 0) {
+        if ($grandTotal === 0 && !$onlyPdf && $onlyExternal === false) {
             \WP_CLI::success('No published posts found for the selected post types.');
             return;
         }
 
-        \WP_CLI::log(
-            sprintf(
-                'Found %d published post(s) across %d post type(s).',
-                $grandTotal,
-                count($enabledTypes)
-            )
-        );
+        if ($grandTotal > 0) {
+            \WP_CLI::log(
+                sprintf(
+                    'Found %d published post(s) across %d post type(s).',
+                    $grandTotal,
+                    count($enabledTypes)
+                )
+            );
+        }
 
         // ── Counters ────────────────────────────────────────────────────────
         $totalIndexed = 0;
@@ -276,7 +433,7 @@ class IndexCommand
         }
 
         // ── PDF attachments ──────────────────────────────────────────────────
-        if ($includePdf) {
+        if ($onlyPdf || $includePdf) {
             if (!PdfToText::isAvailable()) {
                 \WP_CLI::warning('--include-pdf skipped: pdftotext binary is not available on this server.');
             } else {
@@ -380,10 +537,11 @@ class IndexCommand
         }
 
         // ── External strategies ────────────────────────────────────────────────
-        if ($includeExternal) {
+        if ($includeExternal || $onlyExternal !== false) {
+            $extTargetId = is_string($onlyExternal) && $onlyExternal !== '' ? $onlyExternal : null;
             \WP_CLI::log('');
             \WP_CLI::log('Running external strategies…');
-            [$extIndexed, $extFailed] = $this->runExternalSync($isDryRun);
+            [$extIndexed, $extFailed] = $this->runExternalSync($isDryRun, $extTargetId);
             $totalIndexed += $extIndexed;
             $totalFailed  += $extFailed;
         }
@@ -659,7 +817,7 @@ class IndexCommand
      * [--yes]
      * : Skip the confirmation prompt.
      *
- * [--include-pdf]
+     * [--include-pdf]
      * : Also clear PDF attachment documents (type=attachment) from the index.
      *   Combined with post-type clearing, not exclusive.
      *
@@ -1188,18 +1346,34 @@ class IndexCommand
     /**
      * Run all registered external strategies and return [totalIndexed, totalFailed].
      *
-     * Used by commands that support --include-external. Prints per-strategy
-     * log lines but does not print a final summary (the caller does that).
+     * Used by commands that support --include-external / --only-external. Prints
+     * per-strategy log lines but does not print a final summary (the caller does that).
      *
+     * @param bool        $isDryRun
+     * @param string|null $targetId  When non-null, only the strategy with this
+     *                               identifier is run.
      * @return array{int, int}
      */
-    private function runExternalSync(bool $isDryRun): array
+    private function runExternalSync(bool $isDryRun, ?string $targetId = null): array
     {
         $strategies = App::getRegistry()->allExternal();
 
         if (empty($strategies)) {
             \WP_CLI::log('  No external strategies registered — skipping.');
             return [0, 0];
+        }
+
+        if ($targetId !== null) {
+            if (!isset($strategies[$targetId])) {
+                $available = implode(', ', array_keys($strategies));
+                \WP_CLI::error(sprintf(
+                    'Unknown external strategy "%s". Available: %s',
+                    $targetId,
+                    $available ?: 'none registered'
+                ));
+                return [0, 0]; // unreachable after error
+            }
+            $strategies = [$targetId => $strategies[$targetId]];
         }
 
         $indexed = 0;

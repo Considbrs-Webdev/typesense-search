@@ -120,6 +120,38 @@ class SettingsRepository
         return implode(',', $values);
     }
 
+    // ── Search statistics ──────────────────────────────────────────────────
+
+    public function isSearchLoggingEnabled(): bool
+    {
+        return (bool) get_option(Settings::OPTION_SEARCH_LOGGING_ENABLED, 0);
+    }
+
+    public function areSearchStatisticsDashboardWidgetsEnabled(): bool
+    {
+        return (bool) get_option(Settings::OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS, 1);
+    }
+
+    public function doesSearchLoggingRequireConsent(): bool
+    {
+        return (bool) get_option(Settings::OPTION_SEARCH_LOGGING_REQUIRE_CONSENT, 0);
+    }
+
+    public function getSearchLoggingDelayMilliseconds(): int
+    {
+        return min(30000, max(0, (int) get_option(Settings::OPTION_SEARCH_LOGGING_DELAY_SECONDS, 1) * 1000));
+    }
+
+    public function getSearchLoggingMinimumCharacters(): int
+    {
+        return min(50, max(1, (int) get_option(Settings::OPTION_SEARCH_LOGGING_MINIMUM_CHARACTERS, 3)));
+    }
+
+    public function getSearchStatisticsRetentionDays(): int
+    {
+        return min(3650, max(1, (int) get_option(Settings::OPTION_SEARCH_STATISTICS_RETENTION_DAYS, 90)));
+    }
+
     // ── Facets ───────────────────────────────────────────────────────────────
 
     /**

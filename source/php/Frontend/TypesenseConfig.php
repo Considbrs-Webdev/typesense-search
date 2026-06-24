@@ -89,6 +89,16 @@ class TypesenseConfig
 			'webAwesomeLocale'        => self::webAwesomeLocale(),
 		];
 
+		if ($this->settings->isSearchLoggingEnabled()) {
+			$config['searchLogging'] = [
+				'enabled'       => true,
+				'requireConsent' => $this->settings->doesSearchLoggingRequireConsent(),
+				'delayMs'       => $this->settings->getSearchLoggingDelayMilliseconds(),
+				'minimumChars'  => $this->settings->getSearchLoggingMinimumCharacters(),
+				'endpoint'      => esc_url_raw(rest_url(\TypesenseSearch\SearchStatistics\RestController::REST_NAMESPACE . \TypesenseSearch\SearchStatistics\RestController::REST_ROUTE)),
+			];
+		}
+
 		// Include configured facets (field, label, placeholder, display_as)
 		$facets = [];
 		foreach ($this->settings->getFacets() as $f) {

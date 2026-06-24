@@ -54,7 +54,10 @@ export function createSearchRunner(
   paginationEl: HTMLElement | null,
   facetFields: string[],
   onPageChange: (page: number) => void,
+  onSearchComplete?: (query: string, found: number) => void,
 ): (state: UrlState) => Promise<FacetData | null> {
+  let latestRequestId = 0;
+
   return (state: UrlState) =>
     runSearch(
       client,
@@ -65,6 +68,9 @@ export function createSearchRunner(
       paginationEl,
       facetFields,
       onPageChange,
+      onSearchComplete,
+      ++latestRequestId,
+      () => latestRequestId,
     );
 }
 
@@ -77,6 +83,9 @@ export async function runSearch(
   paginationEl: HTMLElement | null,
   facetFields: string[],
   onPageChange: (page: number) => void,
+  onSearchComplete?: (query: string, found: number) => void,
+  requestId?: number,
+  getLatestRequestId?: () => number,
 ): Promise<FacetData | null> {
   const q = state.query.trim() || "*";
   const hasQuery = !!state.query.trim();
@@ -160,8 +169,15 @@ export async function runSearch(
       ...facetPromises,
     ]);
 
+    if (requestId !== undefined && getLatestRequestId && requestId !== getLatestRequestId()) {
+      return null;
+    }
+
     if (shouldSearch && response) {
       const hits = (response.hits ?? []) as SearchHit[];
+      if (hasQuery) {
+        onSearchComplete?.(state.query, response.found ?? 0);
+      }
 
       const resultsContainer = resultsEl.closest<HTMLElement>(
         "[data-js-search-results-container]",

@@ -62,6 +62,20 @@ class PostIndexingStrategy extends AbstractIndexingStrategy
      */
     public function shouldIndex(\WP_Post $post): bool
     {
+        return self::isIndexable($post);
+    }
+
+    /**
+     * Determine whether a post qualifies for normal post indexing.
+     *
+     * This is shared by dependent strategies that need to respect the same
+     * post-type, status, exclusion-meta, and filter-based eligibility rules.
+     *
+     * @param \WP_Post $post
+     * @return bool
+     */
+    public static function isIndexable(\WP_Post $post): bool
+    {
         $result = Settings::isPostTypeEnabled($post->post_type)
             && $post->post_status === 'publish'
             && get_post_meta($post->ID, MetaBox::META_EXCLUDE, true) !== '1';

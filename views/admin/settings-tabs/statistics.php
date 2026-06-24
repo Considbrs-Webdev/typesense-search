@@ -1,7 +1,14 @@
 <?php
+use TypesenseSearch\Admin\SearchStatisticsActions;
+use TypesenseSearch\Admin\Settings;
+use TypesenseSearch\SearchStatistics\Repository;
+
 if ($activeTab !== 'statistics') {
     return;
 }
+
+$searchStatisticsEnabled = (bool) get_option(Settings::OPTION_SEARCH_LOGGING_ENABLED, 0);
+$searchStatistics = $searchStatisticsEnabled ? (new Repository())->getWidgetData() : null;
 ?>
 
 <div class="ts-settings__panel" id="ts-tab-statistics">
@@ -76,6 +83,73 @@ if ($activeTab !== 'statistics') {
         </div>
     </div>
 
+    <div class="ts-settings__card ts-search-statistics-card">
+        <div class="ts-settings__card-header">
+            <div class="ts-stats-card__header-text">
+                <h2><?php esc_html_e('Search statistics', 'typesense-search'); ?></h2>
+                <p><?php esc_html_e('Searches are recorded locally in WordPress. Counts represent unique anonymous browser sessions per normalised search term during the configured retention period.', 'typesense-search'); ?></p>
+            </div>
+            <?php if ($searchStatisticsEnabled) : ?>
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" onsubmit="return confirm('<?php echo esc_js(__('Clear all stored search statistics? This cannot be undone.', 'typesense-search')); ?>');">
+                    <input type="hidden" name="action" value="<?php echo esc_attr(SearchStatisticsActions::CLEAR_ACTION); ?>" />
+                    <?php wp_nonce_field(SearchStatisticsActions::CLEAR_ACTION); ?>
+                    <button type="submit" class="button button-secondary"><?php esc_html_e('Clear statistics', 'typesense-search'); ?></button>
+                </form>
+            <?php endif; ?>
+        </div>
+
+        <?php if (!$searchStatisticsEnabled) : ?>
+            <p class="ts-settings__empty">
+                <?php esc_html_e('Search logging is disabled. Enable it in Advanced settings to start collecting statistics.', 'typesense-search'); ?>
+            </p>
+        <?php else : ?>
+            <div class="ts-search-statistics-summary">
+                <strong><?php echo esc_html(number_format_i18n((int) $searchStatistics['total'])); ?></strong>
+                <span><?php esc_html_e('unique session searches retained', 'typesense-search'); ?></span>
+            </div>
+            <div class="ts-search-statistics-grid">
+                <section>
+                    <h3><?php esc_html_e('Latest searches', 'typesense-search'); ?></h3>
+                    <?php if (empty($searchStatistics['latest'])) : ?>
+                        <p><?php esc_html_e('No searches recorded yet.', 'typesense-search'); ?></p>
+                    <?php else : ?>
+                        <ul class="ts-search-statistics-list">
+                            <?php foreach ($searchStatistics['latest'] as $row) : ?>
+                                <li>
+                                    <strong><?php echo esc_html((string) $row['query_text']); ?></strong>
+                                    <span><?php echo esc_html(sprintf(_n('%d result', '%d results', (int) $row['found'], 'typesense-search'), (int) $row['found'])); ?> · <?php echo esc_html($row['surface'] === 'quick' ? __('Quick search', 'typesense-search') : __('Normal search', 'typesense-search')); ?></span>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                </section>
+                <section>
+                    <h3><?php esc_html_e('Failed searches', 'typesense-search'); ?></h3>
+                    <?php if (empty($searchStatistics['failed'])) : ?>
+                        <p><?php esc_html_e('No failed searches yet.', 'typesense-search'); ?></p>
+                    <?php else : ?>
+                        <ol class="ts-search-statistics-list">
+                            <?php foreach ($searchStatistics['failed'] as $row) : ?>
+                                <li><strong><?php echo esc_html((string) $row['query_text']); ?></strong><span><?php echo esc_html(sprintf(_n('%d unique session', '%d unique sessions', (int) $row['count'], 'typesense-search'), (int) $row['count'])); ?></span></li>
+                            <?php endforeach; ?>
+                        </ol>
+                    <?php endif; ?>
+                </section>
+                <section>
+                    <h3><?php esc_html_e('Popular searches', 'typesense-search'); ?></h3>
+                    <?php if (empty($searchStatistics['popular'])) : ?>
+                        <p><?php esc_html_e('No searches recorded yet.', 'typesense-search'); ?></p>
+                    <?php else : ?>
+                        <ol class="ts-search-statistics-list">
+                            <?php foreach ($searchStatistics['popular'] as $row) : ?>
+                                <li><strong><?php echo esc_html((string) $row['query_text']); ?></strong><span><?php echo esc_html(sprintf(_n('%d unique session', '%d unique sessions', (int) $row['count'], 'typesense-search'), (int) $row['count'])); ?></span></li>
+                            <?php endforeach; ?>
+                        </ol>
+                    <?php endif; ?>
+                </section>
+            </div>
+        <?php endif; ?>
+    </div>
 
 
 </div>
