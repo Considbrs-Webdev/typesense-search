@@ -95,8 +95,9 @@ class RestController
         $phrase = sanitize_text_field((string) ($body['phrase'] ?? ''));
         $matchType = sanitize_key((string) ($body['match_type'] ?? 'exact'));
         $postIds = is_array($body['post_ids'] ?? null) ? (array) $body['post_ids'] : [];
+        $enabled = !array_key_exists('enabled', $body) || (bool) $body['enabled'];
 
-        $saved = $this->repository->save($id ?: null, $phrase, $matchType, $postIds);
+        $saved = $this->repository->save($id ?: null, $phrase, $matchType, $postIds, $enabled);
         if (is_wp_error($saved)) {
             $this->sendNoCacheHeaders();
             return $saved;

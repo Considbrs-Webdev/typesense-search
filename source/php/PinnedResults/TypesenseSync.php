@@ -28,7 +28,8 @@ class TypesenseSync
         }
 
         $setName = $this->curationSetName($collectionName);
-        $items = array_values(array_map(fn (array $rule): array => $this->ruleToCurationItem($rule), $rules));
+        $enabledRules = array_values(array_filter($rules, static fn (array $rule): bool => ($rule['enabled'] ?? true) !== false));
+        $items = array_values(array_map(fn (array $rule): array => $this->ruleToCurationItem($rule), $enabledRules));
 
         $curationResponse = $this->request('PUT', "{$remote}/curation_sets/" . rawurlencode($setName), $adminKey, [
             'items' => $items,

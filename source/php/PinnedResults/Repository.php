@@ -43,7 +43,7 @@ class Repository
      * @param array<int, int|string> $postIds
      * @return array<string, mixed>|\WP_Error
      */
-    public function save(?int $id, string $phrase, string $matchType, array $postIds): array|\WP_Error
+    public function save(?int $id, string $phrase, string $matchType, array $postIds, bool $enabled = true): array|\WP_Error
     {
         global $wpdb;
 
@@ -79,7 +79,10 @@ class Repository
             'phrase'            => $phrase,
             'normalized_phrase' => $normalized,
             'match_type'        => $matchType,
-            'items'             => wp_json_encode(array_values($postIds)),
+            'items'             => wp_json_encode([
+                'enabled'  => $enabled,
+                'post_ids' => array_values($postIds),
+            ]),
             'sync_status'       => 'pending',
             'sync_error'        => null,
         ];
@@ -190,14 +193,21 @@ class Repository
      */
     private function formatRule(array $row): array
     {
-        $postIds = json_decode((string) ($row['items'] ?? '[]'), true);
-        $postIds = is_array($postIds) ? $this->cleanPostIds($postIds) : [];
+        $items = json_decode((string) ($row['items'] ?? '[]'), true);
+        $enabled = true;
+        if (is_array($items) && array_key_exists('post_ids', $items)) {
+            $enabled = !array_key_exists('enabled', $items) || (bool) $items['enabled'];
+            $postIds = is_array($items['post_ids'] ?? null) ? $this->cleanPostIds($items['post_ids']) : [];
+        } else {
+            $postIds = is_array($items) ? $this->cleanPostIds($items) : [];
+        }
 
         return [
             'id'                => (int) $row['id'],
             'phrase'            => (string) $row['phrase'],
             'normalized_phrase' => (string) $row['normalized_phrase'],
             'match_type'        => (string) $row['match_type'],
+            'enabled'           => $enabled,
             'post_ids'          => $postIds,
             'posts'             => $this->hydratePosts($postIds),
             'sync_status'       => (string) $row['sync_status'],
