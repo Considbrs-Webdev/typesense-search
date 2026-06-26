@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Admin;
 
 use TypesenseSearch\Helper\CacheBust;
+use TypesenseSearch\Frontend\I18n;
 use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\ServerCapabilities;
 
@@ -67,6 +68,7 @@ class PinnedResultsPage
             wp_localize_script('typesense-search-pinned-results', 'tsPinnedResults', [
                 'restUrl' => esc_url_raw(rest_url('typesense-search/v1/pinned-results')),
                 'nonce'   => wp_create_nonce('wp_rest'),
+                'i18n'    => I18n::pinnedResultsStrings(),
             ]);
         }
     }

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-06-24T23:26:50+00:00\n"
+"POT-Creation-Date: 2026-06-26T18:47:35+00:00\n"
 "PO-Revision-Date: 2026-06-16 15:06+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -15,8 +15,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Plugin Name of the plugin
-#: typesense-search.php source/php/Admin/Settings.php:79
-#: source/php/Admin/Settings.php:80 views/admin/settings-page.php:25
+#: typesense-search.php source/php/Admin/Settings.php:81
+#: source/php/Admin/Settings.php:82 views/admin/settings-page.php:26
 msgid "Typesense Search"
 msgstr "Typesense-sök"
 
@@ -60,7 +60,7 @@ msgstr ""
 "Förhindrar att den här sidan används som sektionsetikett för sig själv och "
 "underordnade sidor när den är den översta sidan i sidträdet."
 
-#: source/php/Admin/MetaBox.php:135 source/php/Admin/Settings.php:336
+#: source/php/Admin/MetaBox.php:135 source/php/Admin/Settings.php:347
 msgid "Extra search terms"
 msgstr "Extra söktermer"
 
@@ -75,6 +75,18 @@ msgid ""
 msgstr ""
 "Ytterligare ord eller fraser som ska matcha detta inlägg i sökningen, även "
 "om de inte förekommer i innehållet."
+
+#: source/php/Admin/PinnedResultsPage.php:30 source/php/Frontend/I18n.php:136
+msgid "Pinned search results"
+msgstr "Fästa sökresultat"
+
+#: source/php/Admin/PinnedResultsPage.php:31 source/php/Frontend/I18n.php:145
+msgid "Pinned results"
+msgstr "Fästa resultat"
+
+#: source/php/Admin/PinnedResultsPage.php:83
+msgid "Pinned results are not available."
+msgstr "Fästa resultat är inte tillgängliga."
 
 #: source/php/Admin/SearchLogListTable.php:36
 #: source/php/SearchStatistics/DashboardWidgets.php:53
@@ -143,7 +155,7 @@ msgid "Normal search"
 msgstr "Vanlig sökning"
 
 #: source/php/Admin/SearchLogListTable.php:230
-#: source/php/Admin/SearchLogListTable.php:240 source/php/Admin/Settings.php:59
+#: source/php/Admin/SearchLogListTable.php:240 source/php/Admin/Settings.php:61
 #: source/php/Frontend/I18n.php:54
 #: views/admin/settings-tabs/quick-search.php:15
 #: views/admin/settings-tabs/statistics.php:120
@@ -205,43 +217,43 @@ msgid_plural "%d search statistics were deleted."
 msgstr[0] "%d sökstatistikpost togs bort."
 msgstr[1] "%d sökstatistikposter togs bort."
 
-#: source/php/Admin/Settings.php:56
+#: source/php/Admin/Settings.php:58
 msgid "Typesense Connection"
 msgstr "Anslutning"
 
-#: source/php/Admin/Settings.php:57
+#: source/php/Admin/Settings.php:59
 msgid "Settings"
 msgstr "Inställningar"
 
-#: source/php/Admin/Settings.php:58
+#: source/php/Admin/Settings.php:60
 msgid "Advanced settings"
 msgstr "Avancerade inställningar"
 
-#: source/php/Admin/Settings.php:60
+#: source/php/Admin/Settings.php:62
 msgid "Statistics"
 msgstr "Statistik"
 
-#: source/php/Admin/Settings.php:61
+#: source/php/Admin/Settings.php:63
 msgid "Logging"
 msgstr "Loggning"
 
-#: source/php/Admin/Settings.php:62
+#: source/php/Admin/Settings.php:64
 msgid "Status"
 msgstr "Status"
 
-#: source/php/Admin/Settings.php:332
+#: source/php/Admin/Settings.php:343
 msgid "Title"
 msgstr "Titel"
 
-#: source/php/Admin/Settings.php:333
+#: source/php/Admin/Settings.php:344
 msgid "Excerpt"
 msgstr "Utdrag"
 
-#: source/php/Admin/Settings.php:334
+#: source/php/Admin/Settings.php:345
 msgid "Content"
 msgstr "Innehåll"
 
-#: source/php/Admin/Settings.php:335
+#: source/php/Admin/Settings.php:346
 msgid "Content type name"
 msgstr "Innehållstypens namn"
 
@@ -758,6 +770,182 @@ msgstr ""
 "Inga selektorer är konfigurerade ännu. Klicka på “Lägg till selektor” för "
 "att komma igång."
 
+#: source/php/Frontend/I18n.php:133
+msgid "Missing pinned results configuration."
+msgstr "Konfiguration för fästa resultat saknas."
+
+#: source/php/Frontend/I18n.php:134
+msgid "Loading pinned searches..."
+msgstr "Laddar fästa sökningar..."
+
+#: source/php/Frontend/I18n.php:135
+msgid "Could not load pinned results."
+msgstr "Kunde inte läsa in fästa resultat."
+
+#: source/php/Frontend/I18n.php:137
+msgid "Add pinned search"
+msgstr "Lägg till fäst sökning"
+
+#: source/php/Frontend/I18n.php:138
+msgid "Sync to Typesense"
+msgstr "Synka till Typesense"
+
+#: source/php/Frontend/I18n.php:139
+msgid "Syncing..."
+msgstr "Synkar..."
+
+#: source/php/Frontend/I18n.php:140
+msgid "Search pinned searches..."
+msgstr "Sök bland fästa sökningar..."
+
+#: source/php/Frontend/I18n.php:141
+msgid "No pinned searches yet."
+msgstr "Inga fästa sökningar ännu."
+
+#: source/php/Frontend/I18n.php:142
+msgid "No pinned searches match your filter."
+msgstr "Inga fästa sökningar matchar ditt filter."
+
+#: source/php/Frontend/I18n.php:143
+msgid "Search phrase"
+msgstr "Sökfras"
+
+#: source/php/Frontend/I18n.php:144
+msgid "Match type"
+msgstr "Matchningstyp"
+
+#: source/php/Frontend/I18n.php:146
+msgid "Sync status"
+msgstr "Synkstatus"
+
+#: source/php/Frontend/I18n.php:147
+msgid "item"
+msgstr "objekt"
+
+#: source/php/Frontend/I18n.php:148
+msgid "items"
+msgstr "objekt"
+
+#: source/php/Frontend/I18n.php:149
+msgid "New"
+msgstr "Ny"
+
+#: source/php/Frontend/I18n.php:150
+msgid "Synced"
+msgstr "Synkad"
+
+#: source/php/Frontend/I18n.php:151
+msgid "Error"
+msgstr "Fel"
+
+#: source/php/Frontend/I18n.php:152
+msgid "Pending"
+msgstr "Väntar"
+
+#: source/php/Frontend/I18n.php:153
+msgid "Disabled"
+msgstr "Inaktiverad"
+
+#: source/php/Frontend/I18n.php:154
+msgid "Exact"
+msgstr "Exakt"
+
+#: source/php/Frontend/I18n.php:155
+msgid "Contains"
+msgstr "Innehåller"
+
+#: source/php/Frontend/I18n.php:156
+msgid "New pinned search"
+msgstr "Ny fäst sökning"
+
+#: source/php/Frontend/I18n.php:157
+msgid "Pinned search"
+msgstr "Fäst sökning"
+
+#: source/php/Frontend/I18n.php:158
+msgid "Enabled"
+msgstr "Aktiverad"
+
+#: source/php/Frontend/I18n.php:159
+msgid "Search posts to add..."
+msgstr "Sök efter inlägg att lägga till..."
+
+#: source/php/Frontend/I18n.php:160
+msgid "Searching..."
+msgstr "Söker..."
+
+#: source/php/Frontend/I18n.php:161
+msgid "No results found."
+msgstr "Inga resultat hittades."
+
+#: source/php/Frontend/I18n.php:162
+msgid "Drag to reorder"
+msgstr "Dra för att ändra ordning"
+
+#: source/php/Frontend/I18n.php:163
+msgid "Remove result"
+msgstr "Ta bort resultat"
+
+#: source/php/Frontend/I18n.php:164
+msgid "Search for posts below and add the results you want to pin."
+msgstr "Sök efter inlägg nedan och lägg till resultaten du vill fästa."
+
+#: source/php/Frontend/I18n.php:165
+msgid "Save changes"
+msgstr "Spara ändringar"
+
+#: source/php/Frontend/I18n.php:166
+msgid "Saving..."
+msgstr "Sparar..."
+
+#: source/php/Frontend/I18n.php:167
+msgid "Saved"
+msgstr "Sparad"
+
+#: source/php/Frontend/I18n.php:168
+msgid "Delete pinned search"
+msgstr "Ta bort fäst sökning"
+
+#: source/php/Frontend/I18n.php:169
+msgid "Delete this pinned search?"
+msgstr "Ta bort den här fästa sökningen?"
+
+#: source/php/Frontend/I18n.php:170 source/php/PinnedResults/Repository.php:56
+msgid "Add a search phrase before saving."
+msgstr "Lägg till en sökfras innan du sparar."
+
+#: source/php/Frontend/I18n.php:171
+msgid "Add at least one pinned result before saving."
+msgstr "Lägg till minst ett fäst resultat innan du sparar."
+
+#: source/php/Frontend/I18n.php:172
+msgid "Pinned search saved. Sync to Typesense when you are ready."
+msgstr "Fäst sökning sparad. Synka till Typesense när du är redo."
+
+#: source/php/Frontend/I18n.php:173
+msgid "Could not save pinned search."
+msgstr "Kunde inte spara fäst sökning."
+
+#: source/php/Frontend/I18n.php:174
+msgid "Pinned search deleted. Sync to Typesense to apply the change."
+msgstr "Fäst sökning borttagen. Synka till Typesense för att tillämpa ändringen."
+
+#: source/php/Frontend/I18n.php:175
+msgid "Could not delete pinned search."
+msgstr "Kunde inte ta bort fäst sökning."
+
+#: source/php/Frontend/I18n.php:176
+msgid "Pinned searches synced."
+msgstr "Fästa sökningar synkades."
+
+#: source/php/Frontend/I18n.php:177
+msgid "Could not sync pinned searches."
+msgstr "Kunde inte synka fästa sökningar."
+
+#: source/php/Frontend/I18n.php:178
+msgid "Could not search posts."
+msgstr "Kunde inte söka efter inlägg."
+
 #: source/php/Indexing/Strategies/PdfIndexingStrategy.php:120
 msgid "PDF document"
 msgstr "PDF-dokument"
@@ -769,6 +957,33 @@ msgstr "WordPress-sparning"
 #: source/php/Logger/IndexingLog.php:122
 msgid "A WordPress save indexing issue was logged."
 msgstr "Ett indexeringsproblem vid WordPress-sparning loggades."
+
+#: source/php/PinnedResults/Repository.php:60
+msgid "Add at least one result to pin."
+msgstr "Lägg till minst ett resultat att fästa."
+
+#: source/php/PinnedResults/Repository.php:72
+msgid "A pinned result rule already exists for this phrase."
+msgstr "Det finns redan en regel för fästa resultat för den här frasen."
+
+#: source/php/PinnedResults/RestController.php:167
+msgid ""
+"Pinned results are not enabled or this Typesense server does not support "
+"curation sets."
+msgstr ""
+"Fästa resultat är inte aktiverade eller så har den här Typesense-servern "
+"inte stöd för kureringsuppsättningar."
+
+#: source/php/PinnedResults/TypesenseSync.php:27
+msgid "Typesense connection settings are incomplete."
+msgstr "Anslutningsinställningarna är ofullständiga."
+
+#. translators: %d: number of pinned-result rules
+#: source/php/PinnedResults/TypesenseSync.php:61
+msgid "Synced %d pinned result rule."
+msgid_plural "Synced %d pinned result rules."
+msgstr[0] "Synkade %d regel för fästa resultat."
+msgstr[1] "Synkade %d regler för fästa resultat."
 
 #: source/php/SearchStatistics/DashboardWidgets.php:23
 #: views/admin/settings-tabs/statistics.php:112
@@ -817,18 +1032,22 @@ msgstr ""
 "Nyckeln skapades men inget värde returnerades. Kontrollera din Typesense-"
 "panel."
 
-#: views/admin/settings-page.php:29
+#: views/admin/pinned-results-page.php:14
+msgid "Loading pinned results..."
+msgstr "Laddar fästa resultat..."
+
+#: views/admin/settings-page.php:30
 msgid ""
 "Configure your Typesense server connection and choose which content to index."
 msgstr ""
 "Konfigurera anslutningen till din Typesense-server och välj vilket innehåll "
 "som ska indexeras."
 
-#: views/admin/settings-page.php:35
+#: views/admin/settings-page.php:36
 msgid "Settings sections"
 msgstr "Inställningssektioner"
 
-#: views/admin/settings-page.php:59
+#: views/admin/settings-page.php:60
 msgid "Select a settings section"
 msgstr "Välj en inställningssektion"
 
@@ -920,9 +1139,10 @@ msgid "Debounce search"
 msgstr "Fördröjd sökning"
 
 #: views/admin/settings-tabs/advanced-settings.php:223
-#: views/admin/settings-tabs/advanced-settings.php:278
-#: views/admin/settings-tabs/advanced-settings.php:297
-#: views/admin/settings-tabs/advanced-settings.php:317
+#: views/admin/settings-tabs/advanced-settings.php:270
+#: views/admin/settings-tabs/advanced-settings.php:305
+#: views/admin/settings-tabs/advanced-settings.php:324
+#: views/admin/settings-tabs/advanced-settings.php:344
 #: views/admin/settings-tabs/quick-search.php:42
 #: views/admin/settings-tabs/settings.php:84
 #: views/admin/settings-tabs/settings.php:138
@@ -931,9 +1151,10 @@ msgid "On"
 msgstr "På"
 
 #: views/admin/settings-tabs/advanced-settings.php:224
-#: views/admin/settings-tabs/advanced-settings.php:278
-#: views/admin/settings-tabs/advanced-settings.php:297
-#: views/admin/settings-tabs/advanced-settings.php:317
+#: views/admin/settings-tabs/advanced-settings.php:271
+#: views/admin/settings-tabs/advanced-settings.php:305
+#: views/admin/settings-tabs/advanced-settings.php:324
+#: views/admin/settings-tabs/advanced-settings.php:344
 #: views/admin/settings-tabs/quick-search.php:43
 #: views/admin/settings-tabs/settings.php:85
 #: views/admin/settings-tabs/settings.php:139
@@ -962,12 +1183,25 @@ msgstr ""
 "Hur länge man ska vänta efter att användaren slutar skriva innan sökningen "
 "utförs."
 
-#: views/admin/settings-tabs/advanced-settings.php:259
+#: views/admin/settings-tabs/advanced-settings.php:256
+msgid "Enable pinned results"
+msgstr "Aktivera fästa resultat"
+
+#: views/admin/settings-tabs/advanced-settings.php:275
+msgid ""
+"Enable curated search rules that can pin selected results for specific "
+"search phrases. After saving, manage them from Settings > Pinned results."
+msgstr ""
+"Aktivera kurerade sökregler som kan fästa valda resultat för specifika "
+"sökfraser. Efter att du har sparat hanterar du dem under Inställningar > "
+"Fästa resultat."
+
+#: views/admin/settings-tabs/advanced-settings.php:286
 #: views/admin/settings-tabs/statistics.php:89
 msgid "Search statistics"
 msgstr "Sökstatistik"
 
-#: views/admin/settings-tabs/advanced-settings.php:260
+#: views/admin/settings-tabs/advanced-settings.php:287
 msgid ""
 "Record completed searches in WordPress to identify content gaps and popular "
 "search terms. Each normalised term is stored only once per anonymous browser "
@@ -977,15 +1211,15 @@ msgstr ""
 "innehållsluckor och populära söktermer. Varje normaliserad term lagras bara "
 "en gång per anonym webbläsarsession."
 
-#: views/admin/settings-tabs/advanced-settings.php:265
+#: views/admin/settings-tabs/advanced-settings.php:292
 msgid "Enable search logging"
 msgstr "Aktivera sökloggning"
 
-#: views/admin/settings-tabs/advanced-settings.php:284
+#: views/admin/settings-tabs/advanced-settings.php:311
 msgid "Dashboard widgets"
 msgstr "Adminpanelwidgetar"
 
-#: views/admin/settings-tabs/advanced-settings.php:299
+#: views/admin/settings-tabs/advanced-settings.php:326
 msgid ""
 "Register Latest searches, Failed searches, and Popular searches widgets on "
 "the WordPress dashboard."
@@ -993,11 +1227,11 @@ msgstr ""
 "Registrera widgetarna Senaste sökningar, Misslyckade sökningar och Populära "
 "sökningar på WordPress adminpanel."
 
-#: views/admin/settings-tabs/advanced-settings.php:304
+#: views/admin/settings-tabs/advanced-settings.php:331
 msgid "Require statistics consent"
 msgstr "Kräv samtycke för statistik"
 
-#: views/admin/settings-tabs/advanced-settings.php:319
+#: views/admin/settings-tabs/advanced-settings.php:346
 msgid ""
 "When enabled, no search term or session storage is created until your "
 "consent platform explicitly grants statistics consent."
@@ -1005,11 +1239,11 @@ msgstr ""
 "När detta är aktiverat skapas ingen sökterm eller sessionslagring förrän din "
 "samtyckesplattform uttryckligen godkänner statistik."
 
-#: views/admin/settings-tabs/advanced-settings.php:324
+#: views/admin/settings-tabs/advanced-settings.php:351
 msgid "Connect your consent platform"
 msgstr "Anslut din samtyckesplattform"
 
-#: views/admin/settings-tabs/advanced-settings.php:325
+#: views/admin/settings-tabs/advanced-settings.php:352
 msgid ""
 "Run this on every page containing a search field when Pressidium Cookie "
 "Consent, Cookiebot, or another consent platform grants or withdraws "
@@ -1019,7 +1253,7 @@ msgstr ""
 "Consent, Cookiebot eller en annan samtyckesplattform godkänner eller "
 "återkallar samtycke för statistik. Kör det innan sökloggningen får starta."
 
-#: views/admin/settings-tabs/advanced-settings.php:335
+#: views/admin/settings-tabs/advanced-settings.php:362
 msgid ""
 "Replace the final example with the boolean consent value from your platform. "
 "The plugin treats consent as denied until it receives true. When false is "
@@ -1030,11 +1264,11 @@ msgstr ""
 "När false skickas stoppas väntande loggning och tillägget tar bort sin "
 "sessionslagring."
 
-#: views/admin/settings-tabs/advanced-settings.php:339
+#: views/admin/settings-tabs/advanced-settings.php:366
 msgid "Search registration delay (seconds)"
 msgstr "Fördröjning innan sökning registreras (sekunder)"
 
-#: views/admin/settings-tabs/advanced-settings.php:342
+#: views/admin/settings-tabs/advanced-settings.php:369
 msgid ""
 "How long a completed query must remain unchanged before it is recorded. This "
 "is independent of the search-result debounce setting."
@@ -1042,31 +1276,31 @@ msgstr ""
 "Hur länge en slutförd sökning måste vara oförändrad innan den registreras. "
 "Detta är oberoende av inställningen för fördröjd sökning."
 
-#: views/admin/settings-tabs/advanced-settings.php:347
+#: views/admin/settings-tabs/advanced-settings.php:374
 msgid "Minimum search-term characters"
 msgstr "Minsta antal tecken i sökterm"
 
-#: views/admin/settings-tabs/advanced-settings.php:350
+#: views/admin/settings-tabs/advanced-settings.php:377
 msgid ""
 "Shorter queries are searched normally but are not included in statistics."
 msgstr "Kortare sökningar hanteras normalt men ingår inte i statistiken."
 
-#: views/admin/settings-tabs/advanced-settings.php:355
+#: views/admin/settings-tabs/advanced-settings.php:382
 msgid "Statistics retention (days)"
 msgstr "Lagringstid för statistik (dagar)"
 
-#: views/admin/settings-tabs/advanced-settings.php:358
+#: views/admin/settings-tabs/advanced-settings.php:385
 msgid ""
 "Search terms and anonymous session hashes older than this are permanently "
 "deleted."
 msgstr ""
 "Söktermer och anonyma sessionshashar som är äldre än detta raderas permanent."
 
-#: views/admin/settings-tabs/advanced-settings.php:363
+#: views/admin/settings-tabs/advanced-settings.php:390
 msgid "Automatic cleanup"
 msgstr "Automatisk rensning"
 
-#: views/admin/settings-tabs/advanced-settings.php:364
+#: views/admin/settings-tabs/advanced-settings.php:391
 msgid ""
 "A daily WordPress cron event removes expired statistics. Ensure WP-Cron runs "
 "reliably, or call the command below from your server cron."
@@ -1074,7 +1308,7 @@ msgstr ""
 "En daglig WordPress-cronhändelse tar bort utgången statistik. Säkerställ att "
 "WP-Cron körs tillförlitligt eller anropa kommandot nedan från serverns cron."
 
-#: views/admin/settings-tabs/advanced-settings.php:366
+#: views/admin/settings-tabs/advanced-settings.php:393
 msgid ""
 "Alternatively, run the scheduled event with “wp cron event run "
 "typesense_search_prune_statistics”. The command uses the retention period "
@@ -1083,7 +1317,7 @@ msgstr ""
 "Du kan också köra den schemalagda händelsen med “wp cron event run "
 "typesense_search_prune_statistics”. Kommandot använder lagringstiden ovan."
 
-#: views/admin/settings-tabs/advanced-settings.php:409
+#: views/admin/settings-tabs/advanced-settings.php:436
 #: views/admin/settings-tabs/connection.php:274
 #: views/admin/settings-tabs/quick-search.php:158
 #: views/admin/settings-tabs/settings.php:182

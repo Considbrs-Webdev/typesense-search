@@ -9,16 +9,16 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-24T23:26:50+00:00\n"
+"POT-Creation-Date: 2026-06-26T18:47:35+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
 #: typesense-search.php
-#: source/php/Admin/Settings.php:79
-#: source/php/Admin/Settings.php:80
-#: views/admin/settings-page.php:25
+#: source/php/Admin/Settings.php:81
+#: source/php/Admin/Settings.php:82
+#: views/admin/settings-page.php:26
 msgid "Typesense Search"
 msgstr ""
 
@@ -60,7 +60,7 @@ msgid "Prevents this page from being used as the section label for itself and de
 msgstr ""
 
 #: source/php/Admin/MetaBox.php:135
-#: source/php/Admin/Settings.php:336
+#: source/php/Admin/Settings.php:347
 msgid "Extra search terms"
 msgstr ""
 
@@ -70,6 +70,20 @@ msgstr ""
 
 #: source/php/Admin/MetaBox.php:145
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
+msgstr ""
+
+#: source/php/Admin/PinnedResultsPage.php:30
+#: source/php/Frontend/I18n.php:136
+msgid "Pinned search results"
+msgstr ""
+
+#: source/php/Admin/PinnedResultsPage.php:31
+#: source/php/Frontend/I18n.php:145
+msgid "Pinned results"
+msgstr ""
+
+#: source/php/Admin/PinnedResultsPage.php:83
+msgid "Pinned results are not available."
 msgstr ""
 
 #: source/php/Admin/SearchLogListTable.php:36
@@ -140,7 +154,7 @@ msgstr ""
 
 #: source/php/Admin/SearchLogListTable.php:230
 #: source/php/Admin/SearchLogListTable.php:240
-#: source/php/Admin/Settings.php:59
+#: source/php/Admin/Settings.php:61
 #: source/php/Frontend/I18n.php:54
 #: views/admin/settings-tabs/quick-search.php:15
 #: views/admin/settings-tabs/statistics.php:120
@@ -197,43 +211,43 @@ msgid_plural "%d search statistics were deleted."
 msgstr[0] ""
 msgstr[1] ""
 
-#: source/php/Admin/Settings.php:56
+#: source/php/Admin/Settings.php:58
 msgid "Typesense Connection"
 msgstr ""
 
-#: source/php/Admin/Settings.php:57
+#: source/php/Admin/Settings.php:59
 msgid "Settings"
 msgstr ""
 
-#: source/php/Admin/Settings.php:58
+#: source/php/Admin/Settings.php:60
 msgid "Advanced settings"
 msgstr ""
 
-#: source/php/Admin/Settings.php:60
+#: source/php/Admin/Settings.php:62
 msgid "Statistics"
 msgstr ""
 
-#: source/php/Admin/Settings.php:61
+#: source/php/Admin/Settings.php:63
 msgid "Logging"
 msgstr ""
 
-#: source/php/Admin/Settings.php:62
+#: source/php/Admin/Settings.php:64
 msgid "Status"
 msgstr ""
 
-#: source/php/Admin/Settings.php:332
+#: source/php/Admin/Settings.php:343
 msgid "Title"
 msgstr ""
 
-#: source/php/Admin/Settings.php:333
+#: source/php/Admin/Settings.php:344
 msgid "Excerpt"
 msgstr ""
 
-#: source/php/Admin/Settings.php:334
+#: source/php/Admin/Settings.php:345
 msgid "Content"
 msgstr ""
 
-#: source/php/Admin/Settings.php:335
+#: source/php/Admin/Settings.php:346
 msgid "Content type name"
 msgstr ""
 
@@ -731,6 +745,183 @@ msgstr ""
 msgid "No selectors configured yet. Click \"Add selector\" to get started."
 msgstr ""
 
+#: source/php/Frontend/I18n.php:133
+msgid "Missing pinned results configuration."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:134
+msgid "Loading pinned searches..."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:135
+msgid "Could not load pinned results."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:137
+msgid "Add pinned search"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:138
+msgid "Sync to Typesense"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:139
+msgid "Syncing..."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:140
+msgid "Search pinned searches..."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:141
+msgid "No pinned searches yet."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:142
+msgid "No pinned searches match your filter."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:143
+msgid "Search phrase"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:144
+msgid "Match type"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:146
+msgid "Sync status"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:147
+msgid "item"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:148
+msgid "items"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:149
+msgid "New"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:150
+msgid "Synced"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:151
+msgid "Error"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:152
+msgid "Pending"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:153
+msgid "Disabled"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:154
+msgid "Exact"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:155
+msgid "Contains"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:156
+msgid "New pinned search"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:157
+msgid "Pinned search"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:158
+msgid "Enabled"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:159
+msgid "Search posts to add..."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:160
+msgid "Searching..."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:161
+msgid "No results found."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:162
+msgid "Drag to reorder"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:163
+msgid "Remove result"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:164
+msgid "Search for posts below and add the results you want to pin."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:165
+msgid "Save changes"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:166
+msgid "Saving..."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:167
+msgid "Saved"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:168
+msgid "Delete pinned search"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:169
+msgid "Delete this pinned search?"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:170
+#: source/php/PinnedResults/Repository.php:56
+msgid "Add a search phrase before saving."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:171
+msgid "Add at least one pinned result before saving."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:172
+msgid "Pinned search saved. Sync to Typesense when you are ready."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:173
+msgid "Could not save pinned search."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:174
+msgid "Pinned search deleted. Sync to Typesense to apply the change."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:175
+msgid "Could not delete pinned search."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:176
+msgid "Pinned searches synced."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:177
+msgid "Could not sync pinned searches."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:178
+msgid "Could not search posts."
+msgstr ""
+
 #: source/php/Indexing/Strategies/PdfIndexingStrategy.php:120
 msgid "PDF document"
 msgstr ""
@@ -742,6 +933,29 @@ msgstr ""
 #: source/php/Logger/IndexingLog.php:122
 msgid "A WordPress save indexing issue was logged."
 msgstr ""
+
+#: source/php/PinnedResults/Repository.php:60
+msgid "Add at least one result to pin."
+msgstr ""
+
+#: source/php/PinnedResults/Repository.php:72
+msgid "A pinned result rule already exists for this phrase."
+msgstr ""
+
+#: source/php/PinnedResults/RestController.php:167
+msgid "Pinned results are not enabled or this Typesense server does not support curation sets."
+msgstr ""
+
+#: source/php/PinnedResults/TypesenseSync.php:27
+msgid "Typesense connection settings are incomplete."
+msgstr ""
+
+#. translators: %d: number of pinned-result rules
+#: source/php/PinnedResults/TypesenseSync.php:61
+msgid "Synced %d pinned result rule."
+msgid_plural "Synced %d pinned result rules."
+msgstr[0] ""
+msgstr[1] ""
 
 #: source/php/SearchStatistics/DashboardWidgets.php:23
 #: views/admin/settings-tabs/statistics.php:112
@@ -786,15 +1000,19 @@ msgstr ""
 msgid "Key was created but no value was returned. Please check your Typesense dashboard."
 msgstr ""
 
-#: views/admin/settings-page.php:29
+#: views/admin/pinned-results-page.php:14
+msgid "Loading pinned results..."
+msgstr ""
+
+#: views/admin/settings-page.php:30
 msgid "Configure your Typesense server connection and choose which content to index."
 msgstr ""
 
-#: views/admin/settings-page.php:35
+#: views/admin/settings-page.php:36
 msgid "Settings sections"
 msgstr ""
 
-#: views/admin/settings-page.php:59
+#: views/admin/settings-page.php:60
 msgid "Select a settings section"
 msgstr ""
 
@@ -867,9 +1085,10 @@ msgid "Debounce search"
 msgstr ""
 
 #: views/admin/settings-tabs/advanced-settings.php:223
-#: views/admin/settings-tabs/advanced-settings.php:278
-#: views/admin/settings-tabs/advanced-settings.php:297
-#: views/admin/settings-tabs/advanced-settings.php:317
+#: views/admin/settings-tabs/advanced-settings.php:270
+#: views/admin/settings-tabs/advanced-settings.php:305
+#: views/admin/settings-tabs/advanced-settings.php:324
+#: views/admin/settings-tabs/advanced-settings.php:344
 #: views/admin/settings-tabs/quick-search.php:42
 #: views/admin/settings-tabs/settings.php:84
 #: views/admin/settings-tabs/settings.php:138
@@ -878,9 +1097,10 @@ msgid "On"
 msgstr ""
 
 #: views/admin/settings-tabs/advanced-settings.php:224
-#: views/admin/settings-tabs/advanced-settings.php:278
-#: views/admin/settings-tabs/advanced-settings.php:297
-#: views/admin/settings-tabs/advanced-settings.php:317
+#: views/admin/settings-tabs/advanced-settings.php:271
+#: views/admin/settings-tabs/advanced-settings.php:305
+#: views/admin/settings-tabs/advanced-settings.php:324
+#: views/admin/settings-tabs/advanced-settings.php:344
 #: views/admin/settings-tabs/quick-search.php:43
 #: views/admin/settings-tabs/settings.php:85
 #: views/admin/settings-tabs/settings.php:139
@@ -900,84 +1120,92 @@ msgstr ""
 msgid "How long to wait after the user stops typing before firing the search request."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:259
+#: views/admin/settings-tabs/advanced-settings.php:256
+msgid "Enable pinned results"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:275
+msgid "Enable curated search rules that can pin selected results for specific search phrases. After saving, manage them from Settings > Pinned results."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced-settings.php:286
 #: views/admin/settings-tabs/statistics.php:89
 msgid "Search statistics"
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:260
+#: views/admin/settings-tabs/advanced-settings.php:287
 msgid "Record completed searches in WordPress to identify content gaps and popular search terms. Each normalised term is stored only once per anonymous browser session."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:265
+#: views/admin/settings-tabs/advanced-settings.php:292
 msgid "Enable search logging"
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:284
+#: views/admin/settings-tabs/advanced-settings.php:311
 msgid "Dashboard widgets"
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:299
+#: views/admin/settings-tabs/advanced-settings.php:326
 msgid "Register Latest searches, Failed searches, and Popular searches widgets on the WordPress dashboard."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:304
+#: views/admin/settings-tabs/advanced-settings.php:331
 msgid "Require statistics consent"
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:319
+#: views/admin/settings-tabs/advanced-settings.php:346
 msgid "When enabled, no search term or session storage is created until your consent platform explicitly grants statistics consent."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:324
+#: views/admin/settings-tabs/advanced-settings.php:351
 msgid "Connect your consent platform"
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:325
+#: views/admin/settings-tabs/advanced-settings.php:352
 msgid "Run this on every page containing a search field when Pressidium Cookie Consent, Cookiebot, or another consent platform grants or withdraws statistics consent. Run it before search logging is allowed to start."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:335
+#: views/admin/settings-tabs/advanced-settings.php:362
 msgid "Replace the final example with the boolean consent value from your platform. The plugin treats consent as denied until it receives true. When false is sent, pending logging stops and the plugin removes its session storage."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:339
+#: views/admin/settings-tabs/advanced-settings.php:366
 msgid "Search registration delay (seconds)"
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:342
+#: views/admin/settings-tabs/advanced-settings.php:369
 msgid "How long a completed query must remain unchanged before it is recorded. This is independent of the search-result debounce setting."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:347
+#: views/admin/settings-tabs/advanced-settings.php:374
 msgid "Minimum search-term characters"
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:350
+#: views/admin/settings-tabs/advanced-settings.php:377
 msgid "Shorter queries are searched normally but are not included in statistics."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:355
+#: views/admin/settings-tabs/advanced-settings.php:382
 msgid "Statistics retention (days)"
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:358
+#: views/admin/settings-tabs/advanced-settings.php:385
 msgid "Search terms and anonymous session hashes older than this are permanently deleted."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:363
+#: views/admin/settings-tabs/advanced-settings.php:390
 msgid "Automatic cleanup"
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:364
+#: views/admin/settings-tabs/advanced-settings.php:391
 msgid "A daily WordPress cron event removes expired statistics. Ensure WP-Cron runs reliably, or call the command below from your server cron."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:366
+#: views/admin/settings-tabs/advanced-settings.php:393
 msgid "Alternatively, run the scheduled event with “wp cron event run typesense_search_prune_statistics”. The command uses the retention period set above."
 msgstr ""
 
-#: views/admin/settings-tabs/advanced-settings.php:409
+#: views/admin/settings-tabs/advanced-settings.php:436
 #: views/admin/settings-tabs/connection.php:274
 #: views/admin/settings-tabs/quick-search.php:158
 #: views/admin/settings-tabs/settings.php:182
