@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Typesense;
 
 use Typesense\Client;
+use TypesenseSearch\Admin\Settings;
 use Typesense\Exceptions\ObjectNotFound;
 
 /**
@@ -65,6 +66,13 @@ class Collection
                 ['name' => '.*',        'type' => 'auto'],
             ],
         ];
+
+        if (
+            (bool) get_option(Settings::OPTION_PINNED_RESULTS_ENABLED, 0)
+            && ServerCapabilities::supportsCurationSets()
+        ) {
+            $schema['curation_sets'] = ['wordpress-pinned-results-' . $collectionName];
+        }
 
         /**
          * Filters the Typesense collection schema before the collection is created.
