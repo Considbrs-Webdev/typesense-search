@@ -120,6 +120,11 @@ class SettingsRepository
         return implode(',', $values);
     }
 
+    public function isPinnedResultsEnabled(): bool
+    {
+        return (bool) get_option(Settings::OPTION_PINNED_RESULTS_ENABLED, 0);
+    }
+
     // ── Search statistics ──────────────────────────────────────────────────
 
     public function isSearchLoggingEnabled(): bool

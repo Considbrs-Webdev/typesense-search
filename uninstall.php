@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Remove only the local search-statistics data when WordPress uninstalls the
- * plugin. This file is intentionally self-contained so it can run after the
- * normal plugin bootstrap is unavailable.
+ * Remove local plugin data when WordPress uninstalls the plugin. This file is
+ * intentionally self-contained so it can run after the normal plugin bootstrap
+ * is unavailable.
  */
 
 if (!defined('WP_UNINSTALL_PLUGIN')) {
@@ -22,8 +22,13 @@ function typesense_search_uninstall_statistics_for_site(?int $blogId = null): vo
     $table = $wpdb->prefix . 'typesense_search_events';
     $wpdb->query("DROP TABLE IF EXISTS {$table}"); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+    $pinnedResultsTable = $wpdb->prefix . 'typesense_pinned_results';
+    $wpdb->query("DROP TABLE IF EXISTS {$pinnedResultsTable}"); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
     foreach ([
         'typesense_search_statistics_db_version',
+        'typesense_search_pinned_results_db_version',
+        'typesense_search_pinned_results_enabled',
         'typesense_search_logging_enabled',
         'typesense_search_logging_dashboard_widgets',
         'typesense_search_logging_require_consent',

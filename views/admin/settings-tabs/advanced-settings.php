@@ -10,7 +10,7 @@ if ($activeTab !== 'advanced-settings') {
     <form method="post" action="options.php">
         <?php settings_fields(Settings::OPTION_GROUP_ADVANCED_SETTINGS); ?>
 
-        <?php typesense_search_render_search_result_behavior(); ?>
+        <?php typesense_search_render_search_result_behavior(!empty($supportsPinnedResults)); ?>
 
         <div class="ts-settings__card">
             <div class="ts-settings__card-header">
@@ -143,7 +143,7 @@ if ($activeTab !== 'advanced-settings') {
             </div>
         </div>
 
-        <?php function typesense_search_render_search_result_behavior(): void { ?>
+        <?php function typesense_search_render_search_result_behavior(bool $supportsPinnedResults): void { ?>
         <div class="ts-settings__card">
             <div class="ts-settings__card-header">
                 <h2><?php esc_html_e('Search result behavior', 'typesense-search'); ?></h2>
@@ -250,6 +250,33 @@ if ($activeTab !== 'advanced-settings') {
                         </p>
                     </div>
                 </div>
+
+                <?php if ($supportsPinnedResults) : ?>
+                <div class="ts-field">
+                    <div class="ts-field__label"><?php esc_html_e('Enable pinned results', 'typesense-search'); ?></div>
+                    <div class="ts-field__body">
+                        <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_PINNED_RESULTS_ENABLED); ?>" value="0" />
+                        <label for="ts-pinned-results-enabled" class="ts-toggle">
+                            <input
+                                type="checkbox"
+                                id="ts-pinned-results-enabled"
+                                name="<?php echo esc_attr(Settings::OPTION_PINNED_RESULTS_ENABLED); ?>"
+                                value="1"
+                                <?php checked(1, (int) get_option(Settings::OPTION_PINNED_RESULTS_ENABLED, 0)); ?>
+                                class="ts-toggle__input"
+                            />
+                            <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
+                            <span class="ts-toggle__status">
+                                <span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span>
+                                <span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span>
+                            </span>
+                        </label>
+                        <p class="ts-field__description">
+                            <?php esc_html_e('Enable curated search rules that can pin selected results for specific search phrases. After saving, manage them from Settings > Pinned results.', 'typesense-search'); ?>
+                        </p>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php } ?>

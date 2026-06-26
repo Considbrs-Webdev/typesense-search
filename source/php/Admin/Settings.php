@@ -5,6 +5,7 @@ namespace TypesenseSearch\Admin;
 use TypesenseSearch\Helper\CacheBust;
 use TypesenseSearch\Helper\PdfToText;
 use TypesenseSearch\Frontend\I18n;
+use TypesenseSearch\Typesense\ServerCapabilities;
 
 /**
  * Class Settings
@@ -37,6 +38,7 @@ class Settings
     public const OPTION_TRUNCATOR = 'typesense_search_truncator';
     public const OPTION_SORT_DISPLAY = 'typesense_search_sort_display';
     public const OPTION_QUERY_BY_WEIGHTS = 'typesense_search_query_by_weights';
+    public const OPTION_PINNED_RESULTS_ENABLED = 'typesense_search_pinned_results_enabled';
 
     public const OPTION_SEARCH_LOGGING_ENABLED = 'typesense_search_logging_enabled';
     public const OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS = 'typesense_search_logging_dashboard_widgets';
@@ -157,6 +159,12 @@ class Settings
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitizeQueryByWeights'],
             'default'           => self::getDefaultQueryByWeights(),
+        ]);
+
+        register_setting(self::OPTION_GROUP_ADVANCED_SETTINGS, self::OPTION_PINNED_RESULTS_ENABLED, [
+            'type'              => 'integer',
+            'sanitize_callback' => [$this, 'sanitizePinnedResultsEnabled'],
+            'default'           => 0,
         ]);
 
         foreach ([
@@ -305,6 +313,9 @@ class Settings
         $quickSearchEnabled       = (int) get_option(self::OPTION_QUICK_SEARCH_ENABLED, 0);
         $quickSearchSelectors     = (array) get_option(self::OPTION_QUICK_SEARCH_SELECTORS, []);
         $quickSearchHitsPerPage   = (int) get_option(self::OPTION_QUICK_SEARCH_HITS_PER_PAGE, 5);
+        $supportsPinnedResults    = $activeTab === 'advanced-settings'
+            ? ServerCapabilities::supportsCurationSets()
+            : false;
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';
     }
@@ -366,6 +377,15 @@ class Settings
         }
 
         return $weights;
+    }
+
+    public function sanitizePinnedResultsEnabled(mixed $value): int
+    {
+        if (!ServerCapabilities::supportsCurationSets()) {
+            return 0;
+        }
+
+        return absint($value) ? 1 : 0;
     }
 
     /**
