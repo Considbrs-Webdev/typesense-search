@@ -121,4 +121,61 @@ class I18n
             'qsNoSelectors'        => __('No selectors configured yet. Click "Add selector" to get started.', 'typesense-search'),
         ];
     }
+
+    /**
+     * Returns translatable strings for the pinned-results admin app.
+     *
+     * @return array<string, string>
+     */
+    public static function pinnedResultsStrings(): array
+    {
+        return [
+            'missingConfig'              => __('Missing pinned results configuration.', 'typesense-search'),
+            'loadingPinnedSearches'      => __('Loading pinned searches...', 'typesense-search'),
+            'couldNotLoadPinnedResults'  => __('Could not load pinned results.', 'typesense-search'),
+            'pinnedSearchResults'        => __('Pinned search results', 'typesense-search'),
+            'addPinnedSearch'            => __('Add pinned search', 'typesense-search'),
+            'syncToTypesense'            => __('Sync to Typesense', 'typesense-search'),
+            'syncing'                    => __('Syncing...', 'typesense-search'),
+            'searchPinnedSearches'       => __('Search pinned searches...', 'typesense-search'),
+            'noPinnedSearches'           => __('No pinned searches yet.', 'typesense-search'),
+            'noFilteredPinnedSearches'   => __('No pinned searches match your filter.', 'typesense-search'),
+            'searchPhrase'               => __('Search phrase', 'typesense-search'),
+            'matchType'                  => __('Match type', 'typesense-search'),
+            'pinnedResults'              => __('Pinned results', 'typesense-search'),
+            'syncStatus'                 => __('Sync status', 'typesense-search'),
+            'itemSingular'               => __('item', 'typesense-search'),
+            'itemPlural'                 => __('items', 'typesense-search'),
+            'newStatus'                  => __('New', 'typesense-search'),
+            'syncedStatus'               => __('Synced', 'typesense-search'),
+            'errorStatus'                => __('Error', 'typesense-search'),
+            'pendingStatus'              => __('Pending', 'typesense-search'),
+            'disabledStatus'             => __('Disabled', 'typesense-search'),
+            'exact'                      => __('Exact', 'typesense-search'),
+            'contains'                   => __('Contains', 'typesense-search'),
+            'newPinnedSearch'            => __('New pinned search', 'typesense-search'),
+            'pinnedSearch'               => __('Pinned search', 'typesense-search'),
+            'enabled'                    => __('Enabled', 'typesense-search'),
+            'searchPostsToAdd'           => __('Search posts to add...', 'typesense-search'),
+            'searching'                  => __('Searching...', 'typesense-search'),
+            'noResultsFound'             => __('No results found.', 'typesense-search'),
+            'dragToReorder'              => __('Drag to reorder', 'typesense-search'),
+            'removeResult'               => __('Remove result', 'typesense-search'),
+            'emptyPinnedResultsHelp'     => __('Search for posts below and add the results you want to pin.', 'typesense-search'),
+            'saveChanges'                => __('Save changes', 'typesense-search'),
+            'saving'                     => __('Saving...', 'typesense-search'),
+            'saved'                      => __('Saved', 'typesense-search'),
+            'deletePinnedSearch'         => __('Delete pinned search', 'typesense-search'),
+            'confirmDeletePinnedSearch'  => __('Delete this pinned search?', 'typesense-search'),
+            'emptyPhraseError'           => __('Add a search phrase before saving.', 'typesense-search'),
+            'emptyPinnedResultsError'    => __('Add at least one pinned result before saving.', 'typesense-search'),
+            'savedNotice'                => __('Pinned search saved. Sync to Typesense when you are ready.', 'typesense-search'),
+            'saveError'                  => __('Could not save pinned search.', 'typesense-search'),
+            'deletedNotice'              => __('Pinned search deleted. Sync to Typesense to apply the change.', 'typesense-search'),
+            'deleteError'                => __('Could not delete pinned search.', 'typesense-search'),
+            'syncSuccess'                => __('Pinned searches synced.', 'typesense-search'),
+            'syncError'                  => __('Could not sync pinned searches.', 'typesense-search'),
+            'postSearchError'            => __('Could not search posts.', 'typesense-search'),
+        ];
+    }
 }

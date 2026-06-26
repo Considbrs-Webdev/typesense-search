@@ -15,6 +15,10 @@ use TypesenseSearch\SearchStatistics\DashboardWidgets;
 use TypesenseSearch\SearchStatistics\Repository as SearchStatisticsRepository;
 use TypesenseSearch\SearchStatistics\RestController as SearchStatisticsRestController;
 use TypesenseSearch\SearchStatistics\Retention as SearchStatisticsRetention;
+use TypesenseSearch\PinnedResults\Database as PinnedResultsDatabase;
+use TypesenseSearch\PinnedResults\Repository as PinnedResultsRepository;
+use TypesenseSearch\PinnedResults\RestController as PinnedResultsRestController;
+use TypesenseSearch\PinnedResults\TypesenseSync as PinnedResultsTypesenseSync;
 
 /**
  * Class App
@@ -56,6 +60,7 @@ class App {
         new Admin\Settings();
         new Admin\SettingsAjax();
         new Admin\MetaBox();
+        new Admin\PinnedResultsPage($settings);
 
         // Frontend components
         new Frontend\Assets();
@@ -72,6 +77,10 @@ class App {
         new DashboardWidgets($settings, $searchStatistics);
         new Admin\SearchStatisticsActions($searchStatistics);
         new Admin\SearchLogPage($searchStatistics);
+
+        add_action('plugins_loaded', [PinnedResultsDatabase::class, 'maybeMigrate']);
+        $pinnedResults = new PinnedResultsRepository();
+        new PinnedResultsRestController($settings, $pinnedResults, new PinnedResultsTypesenseSync($settings));
 
         // ── Indexing: build registry with strategies ────────────────────────
         // Register more specific strategies first — the registry evaluates

@@ -11,6 +11,7 @@
  *  @var array[]       $facets               Saved facet entries (field, label, placeholder).
  *  @var int           $quickSearchEnabled   Whether quick search is enabled (1/0).
  *  @var array[]       $quickSearchSelectors Saved CSS selector entries.
+ *  @var bool          $supportsPinnedResults Whether the Typesense server supports curation sets.
  */
 
 use TypesenseSearch\Admin\Settings;

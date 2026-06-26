@@ -18,10 +18,11 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
    - [4.2 Connection tab](#42-connection-tab)
    - [4.3 Settings tab](#43-settings-tab)
    - [4.4 Advanced settings tab](#44-advanced-settings-tab)
-   - [4.5 Quick search tab](#45-quick-search-tab)
-   - [4.6 Statistics tab](#46-statistics-tab)
-   - [4.7 Logging tab](#47-logging-tab)
-   - [4.8 Status tab](#48-status-tab)
+   - [4.5 Pinned results page](#45-pinned-results-page)
+   - [4.6 Quick search tab](#46-quick-search-tab)
+   - [4.7 Statistics tab](#47-statistics-tab)
+   - [4.8 Logging tab](#48-logging-tab)
+   - [4.9 Status tab](#49-status-tab)
 5. [Per-post controls](#5-per-post-controls)
 6. [WP-CLI commands](#6-wp-cli-commands)
 7. [How indexing works](#7-how-indexing-works)
@@ -49,6 +50,7 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 - Automatically indexes WordPress posts (any post type), pages, and PDF files into a single Typesense collection whenever content is published, updated, unpublished, trashed, or deleted.
 - Provides a configurable search page UI (Instantsearch-based) that supports faceting, pagination, hit highlighting, and result truncation.
 - Provides a **quick-search** overlay that attaches to configurable CSS selectors on the front-end.
+- Can manage **pinned search results** for specific search phrases using Typesense curation sets (Typesense 30+).
 - Can record privacy-conscious local search statistics for both the full search page and quick search, with dashboard widgets and a searchable log under **Tools → Search log**.
 - Exposes WP-CLI commands for bulk indexing, dry-run previews, and index maintenance.
 - Is designed to be extended: add fields to existing documents via WordPress filters, write custom indexing strategies for new content types, or index content from **external sources** (APIs, feeds, third-party systems) alongside WordPress content.
@@ -61,7 +63,7 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 | ------------------ | ----------------------------------------------- |
 | WordPress          | 5.6+ (`wp_after_insert_post` hook)              |
 | PHP                | 8.1+ (union types, `readonly`, named arguments) |
-| Typesense server   | Any self-hosted instance or Typesense Cloud     |
+| Typesense server   | Any self-hosted instance or Typesense Cloud. Pinned results require Typesense 30+ curation sets |
 | `pdftotext` binary | Optional — required only for PDF indexing       |
 | WP-CLI             | Optional — required only for CLI commands       |
 
@@ -214,7 +216,36 @@ stored data. **Tools → Search log** provides paginated event rows, filters for
 results and context, sortable date/hit columns, bulk deletion, and a grouped
 term view with unique-session totals.
 
-### 4.5 Quick search tab
+#### Pinned results
+
+When the connected Typesense server supports curation sets (Typesense 30+), the
+Advanced settings tab shows an **Enable pinned results** toggle. This feature is
+off by default. After it is enabled and the settings are saved, the plugin adds
+a separate **Settings → Pinned results** admin page for managing the rules.
+
+### 4.5 Pinned results page
+
+Pinned results let editors promote selected posts for specific search phrases
+without changing the post title, content, excerpt, or extra search terms. Each
+rule contains:
+
+- A search phrase.
+- A match type: **Exact** for the phrase itself, or **Contains** for any query
+  containing the phrase.
+- An enabled/disabled state.
+- One or more posts, ordered by the position they should occupy in the search
+  results.
+
+Rules are stored locally in WordPress until an administrator syncs them to
+Typesense. Syncing writes the rules to a Typesense curation set and attaches
+that set to the configured collection. The manager is only available when both
+conditions are met:
+
+- **Enable pinned results** is turned on in Advanced settings.
+- The connected Typesense server supports curation sets, which requires
+  Typesense 30 or later.
+
+### 4.6 Quick search tab
 
 Quick search is a lightweight search overlay that attaches to any element on the page.
 
@@ -224,18 +255,18 @@ Quick search is a lightweight search overlay that attaches to any element on the
 | CSS selectors       | `typesense_quick_search_selectors`     | One or more CSS selectors the overlay binds to. Each entry has `selector`, `sibling` (bool — place the widget next to the element rather than inside it), and `mobile_behavior` (`regular` or `overlay`; the latter opens an accessible dialog on screens up to 767px wide) |
 | Results per page    | `typesense_quick_search_hits_per_page` | Number of results shown in the overlay (default: 5)                                                                                                         |
 
-### 4.6 Statistics tab
+### 4.7 Statistics tab
 
 Shows a live overview of the Typesense collection, including document count and
 index size, and provides search-statistics summaries when logging is enabled.
 The collection overview uses the admin API key through an AJAX proxy.
 
-### 4.7 Logging tab
+### 4.8 Logging tab
 
 Shows the latest indexing run and document-level issues captured while
 indexing. The log can be cleared from this tab.
 
-### 4.8 Status tab
+### 4.9 Status tab
 
 Checks whether the current configuration is valid and the collection exists. Can create the collection if it is missing.
 
