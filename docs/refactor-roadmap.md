@@ -41,6 +41,13 @@ the plugin clearer feature-level boundaries.
 
 Work in PR-sized batches. Each batch should leave the plugin fully functional.
 
+**PR 0 — Test infrastructure only**
+
+- Add PHPUnit, Brain Monkey, Mockery, `phpunit.xml.dist`, `tests/bootstrap.php`,
+  and Composer test scripts.
+- Keep this separate from structural file splits. It is enough moving parts to
+  deserve its own small PR.
+
 **PR 1 — Pure cleanup, zero behavioral risk (items 1, 5, 6, 13)**
 
 - Rename uninstall helper.
@@ -54,6 +61,8 @@ Work in PR-sized batches. Each batch should leave the plugin fully functional.
 - Split `CLI/IndexCommand.php` into subcommands or action classes.
 - Both files are 36 K and 63 K respectively and carry the most day-to-day
   churn risk.
+- Depends on PR 0 so characterization tests can be added before and during the
+  split.
 
 **PR 3 — Bootstrap and settings restructure (items 2, 3)**
 
@@ -656,7 +665,8 @@ Split by subcommand or action:
 
 ```text
 source/php/CLI/IndexCommand.php    (entry point, registers subcommands)
-source/php/CLI/Actions/ReindexAction.php
+source/php/CLI/Actions/IndexAction.php
+source/php/CLI/Actions/RebuildAction.php
 source/php/CLI/Actions/ClearAction.php
 source/php/CLI/Actions/StatusAction.php
 source/php/CLI/Actions/RepairAction.php
@@ -674,7 +684,8 @@ method names exactly — let the actual code drive the split, not this document.
 ```bash
 php -l source/php/CLI/IndexCommand.php
 wp typesense --help          # confirm commands still register
-wp typesense reindex --dry-run
+wp typesense index --dry-run
+wp typesense rebuild --dry-run --skip-index
 ```
 
 ## 17. Frontend/I18n.php Is Unusually Large
@@ -793,7 +804,7 @@ Instead test the shared helper methods (nonce checks, permission checks,
 JSON response shape) if they are extracted during the split.
 
 **`CLI/IndexCommand.php`** — focus on argument validation and subcommand
-registration, not the full reindex flow. WP-CLI has a test mode via
+registration, not the full indexing/rebuild flow. WP-CLI has a test mode via
 `WP_CLI::set_logger()` that captures output without running a real site.
 
 #### Before PR 3 — Characterization tests for Settings and App
@@ -830,8 +841,10 @@ $this->assertSame(500, $repo->getDebounceDelay());
 // Rule that was never synced → delete should not touch other rules
 ```
 
-These tests pin the current (buggy) behavior now, then serve as the acceptance
-test when item 9's fix is applied in a separate PR.
+Prefer writing these as desired-behavior tests in the PR that fixes item 9. If
+characterization tests are needed before a broader refactor, mark the current
+all-rules-pending behavior as temporary and replace it with the desired tests
+when applying the behavior fix. Do not permanently lock in the known bug.
 
 **Database migration guards** — that `maybeMigrate()` is a no-op when the
 stored version matches `DB_VERSION`. This guards against bootstrap regressions
@@ -856,8 +869,8 @@ in CI, not in production.
 - **Full AJAX handler integration** — the request/response cycle depends on
   WordPress internals that are hard to stub cleanly. Test the logic inside the
   handler, not the handler itself.
-- **Full reindex flow against a real Typesense server** — this belongs in an
-  end-to-end suite, not unit tests. Out of scope for now.
+- **Full indexing/rebuild flow against a real Typesense server** — this
+  belongs in an end-to-end suite, not unit tests. Out of scope for now.
 - **WordPress core behavior** — trust `add_action`, `get_option`, etc. to work.
   Only test your own code.
 
@@ -880,6 +893,26 @@ Add to `composer.json`:
 
 And add a CI step (GitHub Actions or equivalent) that runs `composer test` on
 every pull request.
+
+## PR 0 — Test Infrastructure
+
+Foundation work for the later refactor PRs.
+
+1. Add PHPUnit, Brain Monkey, and Mockery as dev dependencies.
+2. Add `phpunit.xml.dist`.
+3. Add `tests/bootstrap.php` and a base test case.
+4. Add Composer scripts for running the test suite.
+5. Add the first small tests around `SettingsRepository` getters or another
+   low-dependency class to prove the setup works.
+
+Suggested verification:
+
+```bash
+composer test
+./vendor/bin/phpunit
+```
+
+Keep this PR focused. Do not split large production files in the same PR.
 
 ## PR 1 — Pure Cleanup
 
@@ -911,8 +944,8 @@ Then manually visit:
 Moderate risk — these are large rewrites but behavior should be identical.
 Items: 7, 16.
 
-If the PHPUnit setup from the Testing Strategy section does not yet exist,
-set it up as part of this PR before splitting the files.
+Depends on PR 0. Do not combine test infrastructure setup and large file splits
+unless there is a strong reason.
 
 1. Write characterization tests for any shared helpers in `SettingsAjax.php`
    (nonce/permission checks, JSON response helpers).
@@ -933,7 +966,8 @@ composer test
 php -l source/php/Admin/Ajax/*.php
 php -l source/php/CLI/Actions/*.php
 wp typesense --help
-wp typesense reindex --dry-run
+wp typesense index --dry-run
+wp typesense rebuild --dry-run --skip-index
 ```
 
 Manually trigger each admin-ajax action from the settings page UI.
