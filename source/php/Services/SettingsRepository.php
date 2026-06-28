@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Services;
 
 use TypesenseSearch\Admin\Settings;
+use TypesenseSearch\Helper\PdfToText;
 
 /**
  * Class SettingsRepository
@@ -186,5 +187,42 @@ class SettingsRepository
     public function getQuickSearchHitsPerPage(): int
     {
         return max(1, (int) get_option(Settings::OPTION_QUICK_SEARCH_HITS_PER_PAGE, 5));
+    }
+
+    // ── Environment helpers ─────────────────────────────────────────────────
+    // These do not read stored options; they inspect the server environment or
+    // the active plugin list. Kept static so existing static call sites can
+    // migrate without requiring a SettingsRepository instance.
+
+    /**
+     * Return all public, indexable post types (excluding attachments).
+     *
+     * @return \WP_Post_Type[]
+     */
+    public static function getIndexablePostTypes(): array
+    {
+        $postTypes = get_post_types(['public' => true], 'objects');
+        unset($postTypes['attachment']);
+
+        return $postTypes;
+    }
+
+    /**
+     * Check whether the pdftotext binary is available on the server.
+     *
+     * Delegates to {@see PdfToText::isAvailable()} — use that class directly
+     * when you also need the binary path or text extraction.
+     */
+    public static function isPdfToTextAvailable(): bool
+    {
+        return PdfToText::isAvailable();
+    }
+
+    /**
+     * Check whether the Modularity plugin is available.
+     */
+    public static function isModularityAvailable(): bool
+    {
+        return class_exists('\\Modularity\\App');
     }
 }

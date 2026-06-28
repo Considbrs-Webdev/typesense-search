@@ -2,30 +2,24 @@
 
 namespace TypesenseSearch;
 
+use TypesenseSearch\Bootstrap\AdminFeature;
+use TypesenseSearch\Bootstrap\CliFeature;
+use TypesenseSearch\Bootstrap\FrontendFeature;
+use TypesenseSearch\Bootstrap\IndexingFeature;
+use TypesenseSearch\Bootstrap\PinnedResultsFeature;
+use TypesenseSearch\Bootstrap\SearchStatisticsFeature;
 use TypesenseSearch\Indexing\IndexingRegistry;
-use TypesenseSearch\Indexing\Strategies\PdfIndexingStrategy;
-use TypesenseSearch\Indexing\Strategies\PostIndexingStrategy;
 use TypesenseSearch\Logger\ErrorLogLogger;
 use TypesenseSearch\Logger\IndexingLogLogger;
-use TypesenseSearch\Logger\LoggerInterface;
 use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Services\TypesenseClientService;
-use TypesenseSearch\SearchStatistics\Database as SearchStatisticsDatabase;
-use TypesenseSearch\SearchStatistics\DashboardWidgets;
-use TypesenseSearch\SearchStatistics\Repository as SearchStatisticsRepository;
-use TypesenseSearch\SearchStatistics\RestController as SearchStatisticsRestController;
-use TypesenseSearch\SearchStatistics\Retention as SearchStatisticsRetention;
-use TypesenseSearch\PinnedResults\Database as PinnedResultsDatabase;
-use TypesenseSearch\PinnedResults\Repository as PinnedResultsRepository;
-use TypesenseSearch\PinnedResults\RestController as PinnedResultsRestController;
-use TypesenseSearch\PinnedResults\TypesenseSync as PinnedResultsTypesenseSync;
 
 /**
  * Class App
- * 
+ *
  * Main application bootstrap class.
  * Initialize your plugin components here.
- * 
+ *
  * @package TypesenseSearch
  */
 class App {
@@ -56,68 +50,20 @@ class App {
 
         new ACF\Fields();
 
-        // Admin UI components
-        new Admin\Settings();
-        new Admin\SettingsAjax();
-        new Admin\MetaBox();
-        new Admin\PinnedResultsPage($settings);
+        (new AdminFeature($settings))->register();
 
-        // Frontend components
-        new Frontend\Assets();
-        new Frontend\EnrichSearchTemplate();
-        new Frontend\TypesenseConfig($settings);
+        (new FrontendFeature($settings))->register();
 
-        // Search statistics live in WordPress and are independent from the
-        // Typesense index. Keep their schema and retention lifecycle active
-        // even when logging is currently switched off.
-        add_action('plugins_loaded', [SearchStatisticsDatabase::class, 'maybeMigrate']);
-        $searchStatistics = new SearchStatisticsRepository();
-        new SearchStatisticsRestController($settings, $searchStatistics);
-        new SearchStatisticsRetention($settings, $searchStatistics);
-        new DashboardWidgets($settings, $searchStatistics);
-        new Admin\SearchStatisticsActions($searchStatistics);
-        new Admin\SearchLogPage($searchStatistics);
+        $statsFeature = new SearchStatisticsFeature($settings);
+        $statsFeature->register();
 
-        add_action('plugins_loaded', [PinnedResultsDatabase::class, 'maybeMigrate']);
-        $pinnedResults = new PinnedResultsRepository();
-        new PinnedResultsRestController($settings, $pinnedResults, new PinnedResultsTypesenseSync($settings));
+        (new PinnedResultsFeature($settings))->register();
 
-        // ── Indexing: build registry with strategies ────────────────────────
-        // Register more specific strategies first — the registry evaluates
-        // them in order and the first match wins.
-        self::$registry = new IndexingRegistry();
-        self::$registry->register(new PdfIndexingStrategy($clientService, $settings, $logger));
-        self::$registry->register(new PostIndexingStrategy($clientService, $settings, $logger));
+        $indexingFeature = new IndexingFeature($settings, $clientService, $logger);
+        $indexingFeature->register();
+        self::$registry = $indexingFeature->getRegistry();
 
-        /**
-         * Fires after the built-in indexing strategies are registered,
-         * allowing external plugins and themes to add their own strategies
-         * without modifying the core plugin.
-         *
-         * @param IndexingRegistry $registry The shared strategy registry.
-         *
-         * Example:
-         *   add_action('Municipio/TypesenseSearch/RegisterStrategies',
-         *       function (IndexingRegistry $registry, TypesenseClientService $clientService, SettingsRepository $settings, LoggerInterface $logger): void {
-         *           $registry->register(new MyCustomProductStrategy($clientService, $settings, $logger));
-         *       }, 10, 4);
-         */
-        do_action('Municipio/TypesenseSearch/RegisterStrategies', self::$registry, $clientService, $settings, $logger);
-
-        new Indexing\IndexingHooks(self::$registry);
-
-        // ── Document enrichers ──────────────────────────────────────────────
-        // These hook into DocumentBuilder's filter chain to add fields to
-        // specific post types. External code can do the same via:
-        //   add_filter(DocumentBuilder::FILTER_BUILD, ...)
-        //   add_filter(sprintf(DocumentBuilder::FILTER_BUILD_POST_TYPE, 'my_type'), ...)
-        new Indexing\Enrichers\JobPostingEnricher();
-        new Indexing\Enrichers\ModularityEnricher($settings);
-        new Indexing\Enrichers\PageEnricher();
-
-        if (defined('WP_CLI') && constant('WP_CLI') === true) {
-            \WP_CLI::add_command('typesense', new CLI\IndexCommand($settings, $searchStatistics));
-        }
+        (new CliFeature($settings, $statsFeature->getRepository()))->register();
     }
 
     /**
