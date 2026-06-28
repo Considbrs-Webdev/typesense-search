@@ -43,4 +43,45 @@ class RepositoryTest extends TestCase
 
         self::assertFalse((new Repository())->delete(42));
     }
+
+    /**
+     * Item 9 — intended behavior after the sync-state fix.
+     *
+     * When a rule that was never pushed to Typesense (synced_at IS NULL) is
+     * deleted, the remaining rules should not be marked pending because
+     * Typesense's curation sets were never affected by that rule.
+     *
+     * The current implementation does not make this distinction: it always calls
+     * markAllPending() on any successful delete. This test documents the target
+     * behavior and will be un-skipped once item 9 is implemented.
+     *
+     * Expected implementation change: delete() should fetch the rule first and
+     * only call markAllPending() when synced_at is not null.
+     */
+    public function test_delete_of_never_synced_rule_does_not_mark_remaining_rules_pending(): void
+    {
+        $this->markTestIncomplete(
+            'Item 9: Repository::delete() must check synced_at before calling markAllPending(). ' .
+            'Remove this skip and implement the guard in Repository::delete().'
+        );
+
+        global $wpdb;
+
+        $wpdb = Mockery::mock();
+        $wpdb->prefix = 'wp_';
+        // The fixed implementation must read the rule before deleting it.
+        $wpdb->shouldReceive('prepare')->andReturnArg(0);
+        $wpdb->shouldReceive('get_row')
+            ->once()
+            ->andReturn((object) ['id' => 7, 'synced_at' => null]);
+        $wpdb->shouldReceive('delete')
+            ->once()
+            ->with(Database::tableName(), ['id' => 7], ['%d'])
+            ->andReturn(1);
+        // markAllPending() must NOT be called — Typesense was never told about
+        // this rule so the other curation sets are still correct.
+        $wpdb->shouldNotReceive('query');
+
+        self::assertTrue((new Repository())->delete(7));
+    }
 }
