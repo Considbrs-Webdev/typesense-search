@@ -32,7 +32,8 @@
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
-        "test:coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text"
+        "test:coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text",
+        "test:dox": "vendor/bin/phpunit --testdox"
     },
     "require": {
         "typesense/typesense-php": "^6.0"
