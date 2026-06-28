@@ -52,27 +52,33 @@ Work in PR-sized batches. Each batch should leave the plugin fully functional.
 - The suite currently has one intentionally incomplete test documenting the
   desired future pinned-results sync-state fix from item 9.
 
-**PR 1 — Pure cleanup, zero behavioral risk (items 1, 5, 6, 13)**
+**PR 1 — Pure cleanup, zero behavioral risk (items 1, 5, 6, 13) (done)**
 
-- Rename uninstall helper.
-- Extract advanced-settings view partial.
-- Move inline JavaScript to the asset pipeline.
-- Remove the empty `AcfFields/` directory.
+- Renamed uninstall helper to `typesense_search_uninstall_data_for_site()`.
+- Extracted search-result behavior card to `views/admin/settings-tabs/advanced/search-result-behavior.php`.
+- Moved inline JavaScript into `source/js/admin-settings.js`.
+- Removed empty `source/php/AcfFields/` directory.
+- Softened `SettingsRepository` docblock.
 
-**PR 2 — Large-file splits (items 7, 16)**
+**PR 2 — Large-file splits (items 7, 16) (done)**
 
-- Split `SettingsAjax.php` by action group.
-- Split `CLI/IndexCommand.php` into subcommands or action classes.
-- Both files are 36 K and 63 K respectively and carry the most day-to-day
-  churn risk.
-- Depends on PR 0 so characterization tests can be added before and during the
-  split.
+- `SettingsAjax.php` (36 K) split into 6 action classes under `source/php/Admin/Ajax/`
+  plus a shared `AjaxHelpers` trait. `SettingsAjax.php` is now a thin wiring class
+  that holds the AJAX action name constants.
+- `IndexCommand.php` (63 K) split into 5 action classes under `source/php/CLI/Actions/`.
+  `IndexCommand.php` is now a thin delegator.
+- Added characterization tests: `AjaxHelpersTest` (9 tests), `IndexCommandTest` (23 tests).
 
-**PR 3 — Bootstrap and settings restructure (items 2, 3)**
+**PR 3 — Bootstrap and settings restructure (items 2, 3) (done)**
 
-- Split `App.php` into feature bootstrap classes.
-- Split `Settings.php` by responsibility.
-- These touch wiring rather than behavior, but the diff will be large.
+- `App.php` split into 6 feature bootstrap classes under `source/php/Bootstrap/`.
+  `App::getRegistry()` unchanged.
+- `Settings.php` split into `OptionKeys`, `Sanitizers` (trait), `SettingsPage`,
+  `SettingsRegistry` under `source/php/Admin/Settings/`. `Settings extends OptionKeys`
+  so all `Settings::OPTION_*` call sites are unchanged.
+- Static helpers (`getIndexablePostTypes`, `isPdfToTextAvailable`, `isModularityAvailable`)
+  moved to `SettingsRepository` with delegate stubs kept on `Settings`.
+- 60 tests total, 96 assertions, 1 intentionally incomplete.
 
 **PR 4 — Option access and Typesense API (items 4, 8)**
 
