@@ -41,12 +41,16 @@ the plugin clearer feature-level boundaries.
 
 Work in PR-sized batches. Each batch should leave the plugin fully functional.
 
-**PR 0 — Test infrastructure only**
+**PR 0 — Test infrastructure only (done)**
 
-- Add PHPUnit, Brain Monkey, Mockery, `phpunit.xml.dist`, `tests/bootstrap.php`,
-  and Composer test scripts.
-- Keep this separate from structural file splits. It is enough moving parts to
-  deserve its own small PR.
+- Added PHPUnit, Brain Monkey, Mockery, `phpunit.xml.dist`,
+  `tests/bootstrap.php`, a base test case, Composer test scripts, and a
+  GitHub Actions workflow.
+- Added initial characterization tests for settings sanitizers,
+  `SettingsRepository`, `DocumentBuilder`, pinned-result delete behavior, and
+  database migration guards.
+- The suite currently has one intentionally incomplete test documenting the
+  desired future pinned-results sync-state fix from item 9.
 
 **PR 1 — Pure cleanup, zero behavioral risk (items 1, 5, 6, 13)**
 
@@ -726,71 +730,46 @@ giving ongoing confidence when new features are added. Both are worth investing
 in, and the two goals reinforce each other — a test written to guard a refactor
 stays useful forever.
 
-### Setup
+### Current Setup
 
-There is currently no PHPUnit setup in this plugin. The recommended minimal
-stack for a WordPress plugin:
+PR 0 has been completed. The plugin now has a fast PHPUnit unit-test setup that
+does not bootstrap WordPress:
 
-```
-composer require --dev \
-  yoast/phpunit-polyfills \
-  brain/monkey \
-  mockery/mockery
-```
+- `phpunit.xml.dist`
+- `tests/bootstrap.php`
+- `tests/TestCase.php`
+- `tests/Unit/...`
+- Composer scripts: `composer test`, `composer test:dox`, and
+  `composer test:coverage`
+- GitHub Actions workflow: `.github/workflows/test.yml`
 
-- **`yoast/phpunit-polyfills`** — keeps tests running across PHPUnit versions.
-- **`Brain\Monkey`** — lets you stub and assert WordPress functions
-  (`get_option`, `wp_remote_get`, `add_action`, etc.) without a full WordPress
-  install.
-- **`Mockery`** — class mocking, pulled in by Brain\Monkey anyway.
+The current stack is:
 
-A minimal `phpunit.xml.dist` in the plugin root:
+- **`phpunit/phpunit`** — test runner.
+- **`Brain\Monkey`** — stubs and asserts WordPress functions such as
+  `get_option`, `apply_filters`, and `sanitize_text_field`.
+- **`Mockery`** — object mocks, especially for `$wpdb`.
 
-```xml
-<?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="tests/bootstrap.php"
-         colors="true">
-  <testsuites>
-    <testsuite name="unit">
-      <directory>tests/Unit</directory>
-    </testsuite>
-  </testsuites>
-</phpunit>
-```
+The plugin now explicitly requires PHP 8.3:
 
-A minimal `tests/bootstrap.php`:
+- Composer: `"php": ">=8.3"`
+- WordPress plugin header: `Requires PHP: 8.3`
 
-```php
-<?php
-require_once __DIR__ . '/../vendor/autoload.php';
-```
+The GitHub Actions workflow runs `composer test` on PHP 8.3 and PHP 8.4 for
+pushes and pull requests targeting `dev` or `main`.
 
-Brain\Monkey is set up/torn down per test via its trait:
+Current tests cover:
 
-```php
-use Brain\Monkey;
-use Brain\Monkey\Functions;
-use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+- Settings sanitizers.
+- `SettingsRepository` defaults, coercion, clamping, and query-weight ordering.
+- `DocumentBuilder` document shape and public filter hooks.
+- `PinnedResults\Repository::delete()` current delete behavior.
+- Database `maybeMigrate()` guards when the installed version is current.
 
-abstract class TestCase extends \PHPUnit\Framework\TestCase
-{
-    use MockeryPHPUnitIntegration;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        Monkey\setUp();
-    }
-
-    protected function tearDown(): void
-    {
-        Monkey\tearDown();
-        parent::tearDown();
-    }
-}
-```
+There is one intentionally incomplete test for the desired future item 9
+behavior: deleting a never-synced pinned-result rule should not mark all
+remaining rules pending. Leave it incomplete until item 9 is implemented, then
+remove the incomplete marker and make the behavior real.
 
 ### What To Test And When
 
@@ -809,28 +788,10 @@ registration, not the full indexing/rebuild flow. WP-CLI has a test mode via
 
 #### Before PR 3 — Characterization tests for Settings and App
 
-**Settings sanitizers** — pure-ish functions that take raw POST input and
-return clean values. Easy to test with no WordPress mocking needed beyond
-`sanitize_text_field` and similar:
-
-```php
-Functions\stubs(['sanitize_text_field', 'absint', 'sanitize_key']);
-
-$result = Settings::sanitizeDebounceDelay('abc');
-$this->assertSame(300, $result); // falls back to default
-```
-
-**`SettingsRepository` getters** — stub `get_option` for each getter and
-assert the typed return value. These will survive all four PRs intact:
-
-```php
-Functions\expect('get_option')
-    ->with(Settings::OPTION_DEBOUNCE_DELAY, Mockery::any())
-    ->andReturn('500');
-
-$repo = new SettingsRepository();
-$this->assertSame(500, $repo->getDebounceDelay());
-```
+Initial tests already cover `Settings` sanitizers and `SettingsRepository`
+getters. Before splitting `Settings.php` or `App.php`, add focused tests for
+any newly touched sanitizer, registration method, or bootstrap hook that is not
+already covered.
 
 #### Before or during PR 4 — Behavior tests for PinnedResults and sync state
 
@@ -846,9 +807,10 @@ characterization tests are needed before a broader refactor, mark the current
 all-rules-pending behavior as temporary and replace it with the desired tests
 when applying the behavior fix. Do not permanently lock in the known bug.
 
-**Database migration guards** — that `maybeMigrate()` is a no-op when the
-stored version matches `DB_VERSION`. This guards against bootstrap regressions
-from PR 3.
+**Database migration guards** — the current tests verify that `maybeMigrate()`
+is a no-op when the stored version matches `DB_VERSION`. If future migrations
+add versioned branches, add tests for the branch conditions before changing the
+schema code.
 
 #### For new features — Write tests first
 
@@ -877,42 +839,42 @@ in CI, not in production.
 ### Running Tests
 
 ```bash
-composer test          # add to composer.json scripts
-./vendor/bin/phpunit
+composer test
+composer test:dox
+composer test:coverage
 ./vendor/bin/phpunit --filter SettingsRepository
 ```
 
-Add to `composer.json`:
+Use `composer test` for the normal pass/fail check. Use `composer test:dox` when
+you want readable behavior names. Use `composer test:coverage` when Xdebug
+coverage is available and you want to inspect which production files are
+exercised.
 
-```json
-"scripts": {
-  "test": "phpunit",
-  "test:unit": "phpunit --testsuite unit"
-}
-```
-
-And add a CI step (GitHub Actions or equivalent) that runs `composer test` on
-every pull request.
-
-## PR 0 — Test Infrastructure
+## PR 0 — Test Infrastructure (Done)
 
 Foundation work for the later refactor PRs.
 
-1. Add PHPUnit, Brain Monkey, and Mockery as dev dependencies.
-2. Add `phpunit.xml.dist`.
-3. Add `tests/bootstrap.php` and a base test case.
-4. Add Composer scripts for running the test suite.
-5. Add the first small tests around `SettingsRepository` getters or another
-   low-dependency class to prove the setup works.
+Completed:
 
-Suggested verification:
+1. Added PHPUnit, Brain Monkey, and Mockery as dev dependencies.
+2. Added `phpunit.xml.dist`.
+3. Added `tests/bootstrap.php`, a base test case, and a minimal WordPress
+   upgrade fixture.
+4. Added Composer scripts for running the test suite, TestDox output, and
+   coverage.
+5. Added GitHub Actions for PHP 8.3 and PHP 8.4.
+6. Added first characterization tests around low-dependency and refactor-prone
+   behavior.
+
+Verification:
 
 ```bash
 composer test
 ./vendor/bin/phpunit
 ```
 
-Keep this PR focused. Do not split large production files in the same PR.
+PR 0 intentionally did not split large production files. Keep adding tests
+alongside later PRs when a refactor touches uncovered behavior.
 
 ## PR 1 — Pure Cleanup
 
