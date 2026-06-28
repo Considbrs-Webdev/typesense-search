@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TypesenseSearch\Tests\Unit\Admin;
 
+use Brain\Monkey\Functions;
 use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\Tests\TestCase;
 
@@ -104,5 +105,36 @@ class SettingsSanitizersTest extends TestCase
                 'invalid',
             ])
         );
+    }
+
+    /**
+     * When Typesense is not configured (OPTION_REMOTE is empty), the server
+     * version cannot be determined, so sanitizePinnedResultsEnabled must always
+     * return 0 regardless of the submitted value.
+     */
+    public function test_sanitize_pinned_results_enabled_returns_zero_when_server_has_no_version(): void
+    {
+        // Stub get_option to return '' so ServerCapabilities::getServerVersion()
+        // exits early and supportsCurationSets() returns false.
+        Functions\when('get_option')->justReturn('');
+
+        self::assertSame(0, $this->settings->sanitizePinnedResultsEnabled(1));
+        self::assertSame(0, $this->settings->sanitizePinnedResultsEnabled(0));
+    }
+
+    public function test_get_default_query_by_weights_returns_one_for_all_fields(): void
+    {
+        $defaults = Settings::getDefaultQueryByWeights();
+
+        self::assertSame(['title', 'excerpt', 'content', 'type_name', 'extra_terms'], array_keys($defaults));
+        self::assertSame([1, 1, 1, 1, 1], array_values($defaults));
+    }
+
+    public function test_get_search_weight_fields_returns_expected_keys(): void
+    {
+        $fields = Settings::getSearchWeightFields();
+
+        self::assertSame(['title', 'excerpt', 'content', 'type_name', 'extra_terms'], array_keys($fields));
+        self::assertContainsOnly('string', $fields);
     }
 }
