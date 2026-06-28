@@ -12,7 +12,10 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require-dev": {
-        "php-stubs/wp-cli-stubs": "^2.0"
+        "brain/monkey": "^2.6",
+        "mockery/mockery": "^1.6",
+        "php-stubs/wp-cli-stubs": "^2.0",
+        "phpunit/phpunit": "^9.6"
     },
     "suggest": {
         "helsingborg-stad/municipio": "^6.0.0"
@@ -21,6 +24,16 @@
         "psr-4": {
             "TypesenseSearch\\": "source/php/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TypesenseSearch\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test:coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text",
+        "test:dox": "vendor/bin/phpunit --testdox"
     },
     "require": {
         "typesense/typesense-php": "^6.0"
