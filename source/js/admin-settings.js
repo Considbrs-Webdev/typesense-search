@@ -1103,4 +1103,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ── Advanced settings: truncator mode ───────────────────────────────────
+    const truncatorMode   = document.getElementById('ts-truncator-mode');
+    const truncatorHidden = document.getElementById('ts-truncator');
+    const truncatorCustom = document.getElementById('ts-truncator-custom');
+    const predefined = { brackets: '[...]', ellipsis: '…', none: 'none' };
+
+    if (truncatorMode && truncatorHidden && truncatorCustom) {
+        function updateTruncator() {
+            if (truncatorMode.value === 'custom') {
+                truncatorCustom.hidden = false;
+                truncatorHidden.value = truncatorCustom.value || truncatorHidden.value || predefined.brackets;
+            } else {
+                truncatorCustom.hidden = true;
+                truncatorHidden.value = predefined[truncatorMode.value] || predefined.brackets;
+            }
+        }
+        truncatorMode.addEventListener('change', updateTruncator);
+        truncatorCustom.addEventListener('input', () => { truncatorHidden.value = truncatorCustom.value || predefined.brackets; });
+        updateTruncator();
+    }
+
+    // ── Advanced settings: debounce delay visibility ─────────────────────────
+    const debounceToggle = document.getElementById('ts-debounce');
+    const debounceDelayField = document.getElementById('ts-debounce-delay-field');
+
+    if (debounceToggle && debounceDelayField) {
+        debounceToggle.addEventListener('change', function () { debounceDelayField.hidden = !this.checked; });
+    }
+
+    // ── Advanced settings: statistics consent integration visibility ──────────
+    const requireStatisticsConsent = document.getElementById('ts-search-statistics-require-consent');
+    const consentIntegration = document.getElementById('ts-search-statistics-consent-integration');
+
+    if (requireStatisticsConsent && consentIntegration) {
+        requireStatisticsConsent.addEventListener('change', function () {
+            consentIntegration.hidden = !this.checked;
+        });
+    }
+
 });

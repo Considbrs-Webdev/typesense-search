@@ -7,10 +7,9 @@ use TypesenseSearch\Admin\Settings;
 /**
  * Class SettingsRepository
  *
- * Centralised, type-safe access to every WordPress option used by the plugin.
- * All get_option() calls for plugin settings are consolidated here so that
- * defaults, type coercions, and validation live in one place rather than being
- * scattered across strategies, frontend classes, and CLI commands.
+ * Centralised, type-safe access to plugin WordPress options used at runtime.
+ * Defaults, type coercions, and validation live here for behaviour-critical
+ * settings. Settings views and form rendering may still read options directly.
  *
  * @package TypesenseSearch\Services
  */

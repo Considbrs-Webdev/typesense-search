@@ -11,7 +11,7 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 }
 
 /** @param int|null $blogId */
-function typesense_search_uninstall_statistics_for_site(?int $blogId = null): void
+function typesense_search_uninstall_data_for_site(?int $blogId = null): void
 {
     global $wpdb;
 
@@ -48,8 +48,8 @@ function typesense_search_uninstall_statistics_for_site(?int $blogId = null): vo
 if (is_multisite()) {
     $siteIds = get_sites(['fields' => 'ids', 'number' => 0]);
     foreach ($siteIds as $siteId) {
-        typesense_search_uninstall_statistics_for_site((int) $siteId);
+        typesense_search_uninstall_data_for_site((int) $siteId);
     }
 } else {
-    typesense_search_uninstall_statistics_for_site();
+    typesense_search_uninstall_data_for_site();
 }
