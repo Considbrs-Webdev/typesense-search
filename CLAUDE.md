@@ -46,10 +46,10 @@ WordPress plugin bootstrapped in `typesense-search.php` → `new App()`.
 
 Vite entry points (`vite.config.mjs`) compile to `assets/dist/`. Four JS bundles:
 
-- `typesense-search.ts` — frontend search UI
+- `typesense-search.ts` — frontend search UI (modules under `source/js/typesense-search/`)
 - `admin-settings.ts` — settings page (thin entry + section modules under `source/js/admin-settings/`)
 - `pinned-results-admin.ts` — pinned results page (thin entry + modules under `source/js/pinned-results/`)
-- `quick-search.ts` — frontend quick-search overlay (not an admin page; left as a single file)
+- `quick-search.ts` — frontend quick-search overlay (shares modules from `source/js/typesense-search/`)
 
 Shared admin utilities live in `source/js/admin/` — import from there, don't copy. Named exports only; factory functions, not classes.
 

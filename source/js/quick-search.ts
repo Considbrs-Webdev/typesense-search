@@ -2,11 +2,11 @@
 // Quick search – instant autocomplete for arbitrary input fields
 // ---------------------------------------------------------------------------
 
-import { createClient } from "./client";
-import type { TypesenseSearchConfig, SearchHit } from "./types";
-import { loadWebAwesomeLocale } from "./webawesome-locale";
-import { getQueryByWeights, INFIX, QUERY_BY } from "./search-params";
-import { createSearchStatisticsTracker } from "./search-statistics";
+import { createClient } from "./typesense-search/client";
+import type { TypesenseSearchConfig, SearchHit } from "./typesense-search/types";
+import { loadWebAwesomeLocale } from "./typesense-search/webawesome-locale";
+import { getQueryByWeights, INFIX, QUERY_BY } from "./typesense-search/search-params";
+import { createSearchStatisticsTracker } from "./typesense-search/search-statistics";
 
 interface QuickSearchSelectorEntry {
   selector: string;

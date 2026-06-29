@@ -4,13 +4,13 @@ import "@awesome.me/webawesome/dist/components/input/input.js";
 import "@awesome.me/webawesome/dist/components/radio-group/radio-group.js";
 import "@awesome.me/webawesome/dist/components/radio/radio.js";
 
-import { createClient } from "./client";
-import { createSearchRunner } from "./search";
-import { getHitTemplates } from "./templates";
-import { getUrlState, updateUrlState } from "./url-state";
-import { setupFacets, programmaticUpdates } from "./facets";
-import { loadWebAwesomeLocale } from "./webawesome-locale";
-import { createSearchStatisticsTracker } from "./search-statistics";
+import { createClient } from "./typesense-search/client";
+import { createSearchRunner } from "./typesense-search/search";
+import { getHitTemplates } from "./typesense-search/templates";
+import { getUrlState, updateUrlState } from "./typesense-search/url-state";
+import { setupFacets, programmaticUpdates } from "./typesense-search/facets";
+import { loadWebAwesomeLocale } from "./typesense-search/webawesome-locale";
+import { createSearchStatisticsTracker } from "./typesense-search/search-statistics";
 
 // ---------------------------------------------------------------------------
 // Helpers
