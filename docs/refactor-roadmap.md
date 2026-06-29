@@ -80,12 +80,20 @@ Work in PR-sized batches. Each batch should leave the plugin fully functional.
   moved to `SettingsRepository` with delegate stubs kept on `Settings`.
 - 60 tests total, 96 assertions, 1 intentionally incomplete.
 
-**PR 4 — Option access and Typesense API (items 4, 8)**
+**PR 4 — Option access and Typesense API (items 4, 8) (done)**
 
-- Route plugin option reads through `SettingsRepository` in runtime classes.
-- Introduce the `AdminApi` wrapper.
-- Items 7 and 8 are coupled: the AJAX split (PR 2) makes injecting `AdminApi`
-  much cleaner, so do PR 2 first.
+- Created `Typesense/AdminApi.php` — centralises all raw `wp_remote_*`
+  calls (previously split across `TypesenseSync::request()` and
+  `ServerCapabilities::getServerVersion()`).
+- `ServerCapabilities::getServerVersion()` delegates to `AdminApi`; static
+  cache behaviour preserved for existing callers.
+- `ClientFactory::fromSettings(SettingsRepository)` added for injected callers.
+- All 5 Ajax action classes, `SettingsAjax`, `MetaBox`, `EnrichSearchTemplate`,
+  `PinnedResults\Repository`, `PdfIndexingStrategy`, `ClearAction`, and
+  `RebuildAction` receive `SettingsRepository` via constructor.
+- `Settings::isPostTypeEnabled()` updated to delegate to `SettingsRepository`.
+- Bootstrap classes and `IndexCommand` updated to wire the new dependencies.
+- 67 tests total, 107 assertions, 1 intentionally incomplete.
 
 **Later / as needed (items 9, 10, 12, 14, 15, 17)**
 
