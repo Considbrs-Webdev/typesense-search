@@ -19,8 +19,8 @@ class AdminFeature
     public function register(): void
     {
         new Admin\Settings();
-        new Admin\SettingsAjax();
-        new Admin\MetaBox();
+        new Admin\SettingsAjax($this->settings);
+        new Admin\MetaBox($this->settings);
         new Admin\PinnedResultsPage($this->settings);
     }
 }

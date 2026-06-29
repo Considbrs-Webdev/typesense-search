@@ -19,7 +19,7 @@ class FrontendFeature
     public function register(): void
     {
         new Frontend\Assets();
-        new Frontend\EnrichSearchTemplate();
+        new Frontend\EnrichSearchTemplate($this->settings);
         new Frontend\TypesenseConfig($this->settings);
     }
 }

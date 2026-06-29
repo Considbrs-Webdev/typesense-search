@@ -2,8 +2,8 @@
 
 namespace TypesenseSearch\Admin\Ajax;
 
-use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\Admin\SettingsAjax;
+use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\ClientFactory;
 
 /**
@@ -18,6 +18,10 @@ class FacetActions
 {
     use AjaxHelpers;
 
+    public function __construct(private readonly SettingsRepository $settings)
+    {
+    }
+
     public function register(): void
     {
         add_action('wp_ajax_' . SettingsAjax::AJAX_ACTION_GET_FACET_FIELDS, [$this, 'handleGetFacetFields']);
@@ -29,9 +33,9 @@ class FacetActions
     {
         $this->requirePermission(SettingsAjax::AJAX_ACTION_GET_FACET_FIELDS);
 
-        $remote         = (string) get_option(Settings::OPTION_REMOTE, '');
-        $adminKey       = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
-        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+        $remote         = $this->settings->getRemote();
+        $adminKey       = $this->settings->getAdminKey();
+        $collectionName = $this->settings->getCollectionName();
 
         if (empty($remote) || empty($adminKey) || empty($collectionName)) {
             wp_send_json_error(['message' => __('Connection settings are incomplete. Please configure the connection first.', 'typesense-search')]);

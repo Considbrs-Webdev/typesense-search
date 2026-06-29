@@ -3,7 +3,6 @@
 namespace TypesenseSearch\Indexing\Strategies;
 
 use TypesenseSearch\Admin\MetaBox;
-use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\Helper\ExcerptHelper;
 use TypesenseSearch\Helper\PdfToText;
 use TypesenseSearch\Indexing\IndexableDocument;
@@ -78,7 +77,7 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
             return false;
         }
 
-        return self::isActive()
+        return $this->isActive()
             && $post->post_type === 'attachment'
             && $post->post_mime_type === 'application/pdf';
     }
@@ -149,7 +148,7 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
      */
     public function onAddAttachment(int $attachmentId): void
     {
-        if (!self::isActive()) {
+        if (!$this->isActive()) {
             return;
         }
 
@@ -168,7 +167,7 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
      */
     public function onEditAttachment(int $attachmentId): void
     {
-        if (!self::isActive()) {
+        if (!$this->isActive()) {
             return;
         }
 
@@ -204,7 +203,7 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
      */
     public function reindexAttachedPdfs(int $postId): void
     {
-        if (!self::isActive()) {
+        if (!$this->isActive()) {
             return;
         }
 
@@ -228,9 +227,9 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
      * Return true when PDF indexing is both enabled in settings AND the
      * pdftotext binary is available on the server.
      */
-    public static function isActive(): bool
+    private function isActive(): bool
     {
-        return (bool) get_option(Settings::OPTION_INDEX_PDF, 0)
+        return $this->settings->isIndexPdfEnabled()
             && PdfToText::isAvailable();
     }
 

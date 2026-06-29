@@ -2,6 +2,8 @@
 
 namespace TypesenseSearch\Admin;
 
+use TypesenseSearch\Services\SettingsRepository;
+
 /**
  * Class MetaBox
  *
@@ -32,7 +34,7 @@ class MetaBox
     private const NONCE_ACTION = 'typesense_metabox_save';
     private const NONCE_FIELD  = '_typesense_metabox_nonce';
 
-    public function __construct()
+    public function __construct(private readonly SettingsRepository $settings)
     {
         add_action('add_meta_boxes', [$this, 'register']);
         add_action('save_post',      [$this, 'save'], 10, 2);
@@ -42,7 +44,7 @@ class MetaBox
         // and the full edit page; edit_attachment fires from both save paths.
         // Priority 5 ensures the meta is written before IndexingHooks::onEditAttachment
         // (priority 10) reads it to make the index/deindex decision.
-        if ((bool) get_option(Settings::OPTION_INDEX_PDF, 0)) {
+        if ($this->settings->isIndexPdfEnabled()) {
             add_filter('attachment_fields_to_edit', [$this, 'addAttachmentFields'], 10, 2);
             add_action('edit_attachment',           [$this, 'saveAttachmentFields'], 5);
         }
@@ -57,7 +59,7 @@ class MetaBox
      */
     public function register(): void
     {
-        $enabledPostTypes = (array) get_option(Settings::OPTION_POST_TYPES, []);
+        $enabledPostTypes = $this->settings->getEnabledPostTypes();
 
         foreach ($enabledPostTypes as $postType) {
             add_meta_box(

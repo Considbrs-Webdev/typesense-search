@@ -2,8 +2,8 @@
 
 namespace TypesenseSearch\CLI\Actions;
 
-use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\App;
+use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\ClientFactory;
 
 /**
@@ -17,6 +17,9 @@ use TypesenseSearch\Typesense\ClientFactory;
  */
 class ClearAction
 {
+    public function __construct(private readonly SettingsRepository $settings)
+    {
+    }
     /**
      * Run the clear operation.
      *
@@ -48,8 +51,8 @@ class ClearAction
         }
 
         // ── Client + collection name ─────────────────────────────────────────
-        $client         = ClientFactory::fromOptions();
-        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+        $client         = ClientFactory::fromSettings($this->settings);
+        $collectionName = $this->settings->getCollectionName();
 
         if ($client === null || $collectionName === '') {
             \WP_CLI::error('Typesense connection is not configured. Check the plugin settings page.');
@@ -109,7 +112,7 @@ class ClearAction
         // $operations is a list of post-type strings, or [null] for "clear all".
         // Empty when --only-pdf or --only-external is set — loop won't execute.
         $operations     = $clearAll ? [null] : $postTypes;
-        $enabledObjects = Settings::getIndexablePostTypes();
+        $enabledObjects = SettingsRepository::getIndexablePostTypes();
         $totalDeleted   = 0;
 
         foreach ($operations as $postType) {
@@ -304,10 +307,10 @@ class ClearAction
     {
         if ($rawArg === null) {
             // Default: all types that are enabled in settings.
-            $all = array_keys(Settings::getIndexablePostTypes());
+            $all = array_keys(SettingsRepository::getIndexablePostTypes());
             return array_values(array_filter(
                 $all,
-                fn(string $type) => Settings::isPostTypeEnabled($type)
+                fn(string $type) => $this->settings->isPostTypeEnabled($type)
             ));
         }
 

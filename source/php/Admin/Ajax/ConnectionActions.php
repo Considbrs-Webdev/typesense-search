@@ -3,8 +3,8 @@
 namespace TypesenseSearch\Admin\Ajax;
 
 use Typesense\Exceptions\RequestUnauthorized;
-use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\Admin\SettingsAjax;
+use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\ClientFactory;
 use TypesenseSearch\Typesense\Collection;
 
@@ -20,6 +20,10 @@ use TypesenseSearch\Typesense\Collection;
 class ConnectionActions
 {
     use AjaxHelpers;
+
+    public function __construct(private readonly SettingsRepository $settings)
+    {
+    }
 
     public function register(): void
     {
@@ -110,10 +114,10 @@ class ConnectionActions
     {
         $this->requirePermission(SettingsAjax::AJAX_ACTION_CHECK_STATUS);
 
-        $remote         = (string) get_option(Settings::OPTION_REMOTE, '');
-        $adminKey       = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
-        $searchKey      = (string) get_option(Settings::OPTION_SEARCH_KEY, '');
-        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+        $remote         = $this->settings->getRemote();
+        $adminKey       = $this->settings->getAdminKey();
+        $searchKey      = $this->settings->getSearchKey();
+        $collectionName = $this->settings->getCollectionName();
 
         $result = [
             'connection'        => ['ok' => false, 'message' => ''],

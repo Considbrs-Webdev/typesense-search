@@ -3,14 +3,14 @@
 namespace TypesenseSearch\Frontend;
 
 use stdClass;
-use TypesenseSearch\Admin\Settings;
+use TypesenseSearch\Services\SettingsRepository;
 
 /**
  * Enrich view data for the search template with translations and templates
  */
 class EnrichSearchTemplate
 {
-	public function __construct()
+	public function __construct(private readonly SettingsRepository $settings)
 	{
 		add_filter('Municipio/Template/viewData', [$this, 'addTypesenseViewData'], 10, 1);
 	}
@@ -57,8 +57,7 @@ class EnrichSearchTemplate
 		$data['lang'] = (object)$lang;
 
 		// Sort control style: 'radio' | 'dropdown' — controlled by admin setting
-		$sortDisplay = get_option(Settings::OPTION_SORT_DISPLAY, 'radio');
-		$data['sortDisplay'] = in_array($sortDisplay, ['radio', 'dropdown'], true) ? $sortDisplay : 'radio';
+		$data['sortDisplay'] = $this->settings->getSortDisplay();
 
 		// Home URL used by the search form
 		$data['homeUrl'] = $data['homeUrl'] ?? home_url('/');

@@ -63,15 +63,11 @@ class Settings extends OptionKeys
     /**
      * Check whether a specific post type is enabled for indexing.
      *
-     * Static callers in CLI actions and indexing strategies use this method;
-     * new code should prefer injecting SettingsRepository and calling
-     * the instance method isPostTypeEnabled() there.
+     * @deprecated Use SettingsRepository::isPostTypeEnabled() via an injected instance instead.
      */
     public static function isPostTypeEnabled(string $postType): bool
     {
-        $enabled = (array) get_option(self::OPTION_POST_TYPES, []);
-
-        return in_array($postType, $enabled, true);
+        return (new SettingsRepository())->isPostTypeEnabled($postType);
     }
 
     /**
