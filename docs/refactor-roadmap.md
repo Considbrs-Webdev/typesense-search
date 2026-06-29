@@ -1,13 +1,10 @@
 # Typesense Search Refactor Roadmap
 
-This document captures structural refactor ideas for a future branch. It is
-intended for Michael, Codex, or another AI agent coming back to improve the
-plugin later.
+This document captures structural refactor ideas. It is intended for Michael,
+Codex, or another AI agent coming back to improve the plugin later.
 
 The main goal is maintainability. Do not treat this as a feature backlog and do
-not change behavior unless a specific task asks for it. The plugin has grown a
-lot through incremental feature work, and the code is still workable, but some
-boundaries are now blurry.
+not change behavior unless a specific task asks for it.
 
 ## Item Index
 
@@ -57,10 +54,6 @@ The plugin currently includes:
 - Admin settings, admin AJAX endpoints, REST endpoints, CLI commands, and
   uninstall cleanup.
 
-The biggest structural issue is not that any one component is broken. It is that
-new features have mostly been added beside the old structure instead of giving
-the plugin clearer feature-level boundaries.
-
 ## Refactor Principles
 
 - Keep changes behavior-preserving unless explicitly requested.
@@ -79,106 +72,67 @@ Work in PR-sized batches. Each batch should leave the plugin fully functional.
 
 **PR 0 — Test infrastructure only (done)**
 
-- Added PHPUnit, Brain Monkey, Mockery, `phpunit.xml.dist`,
-  `tests/bootstrap.php`, a base test case, Composer test scripts, and a
-  GitHub Actions workflow.
-- Added initial characterization tests for settings sanitizers,
-  `SettingsRepository`, `DocumentBuilder`, pinned-result delete behavior, and
-  database migration guards.
-- The suite currently has one intentionally incomplete test documenting the
-  desired future pinned-results sync-state fix from item 9.
+Added PHPUnit, Brain Monkey, Mockery, `phpunit.xml.dist`, `tests/bootstrap.php`,
+a base test case, Composer test scripts, and a GitHub Actions workflow.
+Initial characterization tests for sanitizers, `SettingsRepository`,
+`DocumentBuilder`, pinned-result delete behavior, and database migration guards.
 
 **PR 1 — Pure cleanup, zero behavioral risk (items 1, 5, 6, 13) (done)**
 
-- Renamed uninstall helper to `typesense_search_uninstall_data_for_site()`.
-- Extracted search-result behavior card to `views/admin/settings-tabs/advanced/search-result-behavior.php`.
-- Moved inline JavaScript into `source/js/admin-settings.js`.
-- Removed empty `source/php/AcfFields/` directory.
-- Softened `SettingsRepository` docblock.
+Renamed uninstall helper. Extracted search-result behavior card to a partial.
+Moved inline JavaScript into `admin-settings.js`. Removed empty `AcfFields/`
+directory. Softened `SettingsRepository` docblock.
 
 **PR 2 — Large-file splits (items 7, 16) (done)**
 
-- `SettingsAjax.php` (36 K) split into 6 action classes under `source/php/Admin/Ajax/`
-  plus a shared `AjaxHelpers` trait. `SettingsAjax.php` is now a thin wiring class
-  that holds the AJAX action name constants.
-- `IndexCommand.php` (63 K) split into 5 action classes under `source/php/CLI/Actions/`.
-  `IndexCommand.php` is now a thin delegator.
-- Added characterization tests: `AjaxHelpersTest` (9 tests), `IndexCommandTest` (23 tests).
+`SettingsAjax.php` (36 K) split into 6 action classes under
+`source/php/Admin/Ajax/` plus a shared `AjaxHelpers` trait.
+`IndexCommand.php` (63 K) split into 5 action classes under
+`source/php/CLI/Actions/`. 32 new tests.
 
 **PR 3 — Bootstrap and settings restructure (items 2, 3) (done)**
 
-- `App.php` split into 6 feature bootstrap classes under `source/php/Bootstrap/`.
-  `App::getRegistry()` unchanged.
-- `Settings.php` split into `OptionKeys`, `Sanitizers` (trait), `SettingsPage`,
-  `SettingsRegistry` under `source/php/Admin/Settings/`. `Settings extends OptionKeys`
-  so all `Settings::OPTION_*` call sites are unchanged.
-- Static helpers (`getIndexablePostTypes`, `isPdfToTextAvailable`, `isModularityAvailable`)
-  moved to `SettingsRepository` with delegate stubs kept on `Settings`.
-- 60 tests total, 96 assertions, 1 intentionally incomplete.
+`App.php` split into 6 feature bootstrap classes under `source/php/Bootstrap/`.
+`Settings.php` split into `OptionKeys`, `Sanitizers`, `SettingsPage`,
+`SettingsRegistry` under `source/php/Admin/Settings/`. `Settings extends
+OptionKeys` so all `Settings::OPTION_*` call sites are unchanged.
+60 tests total, 96 assertions.
 
 **PR 4 — Option access and Typesense API (items 4, 8) (done)**
 
-- Created `Typesense/AdminApi.php` — centralises all raw `wp_remote_*`
-  calls (previously split across `TypesenseSync::request()` and
-  `ServerCapabilities::getServerVersion()`).
-- `ServerCapabilities::getServerVersion()` delegates to `AdminApi`; static
-  cache behaviour preserved for existing callers.
-- `ClientFactory::fromSettings(SettingsRepository)` added for injected callers.
-- All 5 Ajax action classes, `SettingsAjax`, `MetaBox`, `EnrichSearchTemplate`,
-  `PinnedResults\Repository`, `PdfIndexingStrategy`, `ClearAction`, and
-  `RebuildAction` receive `SettingsRepository` via constructor.
-- `Settings::isPostTypeEnabled()` updated to delegate to `SettingsRepository`.
-- Bootstrap classes and `IndexCommand` updated to wire the new dependencies.
-- 67 tests total, 107 assertions, 1 intentionally incomplete.
+Created `Typesense/AdminApi.php` — centralises all raw `wp_remote_*` calls.
+`ClientFactory::fromSettings(SettingsRepository)` added for injected callers.
+All Ajax action classes, `MetaBox`, `EnrichSearchTemplate`,
+`PinnedResults\Repository`, and indexing actions receive `SettingsRepository`
+via constructor. 67 tests total, 107 assertions.
 
 **PR 5 — Pinned results sync-state fix (item 9) (done)**
 
-- `Repository::delete()` now fetches the row first and only calls
-  `markAllPending()` when the deleted rule had a non-null `synced_at`.
-  Never-synced rules no longer trigger a full re-sync of curation sets.
-- All three `RepositoryTest` tests rewritten to cover synced, never-synced,
-  and failed-delete cases.
-- 71 tests total, 110 assertions.
+`Repository::delete()` now fetches the row first and only calls
+`markAllPending()` when the deleted rule had a non-null `synced_at`.
+Never-synced rules no longer trigger a full re-sync.
+71 tests total, 110 assertions.
 
 **PR 6 — ServerCapabilities instance service (item 12) (done)**
 
-- `ServerCapabilities` converted from a static class to an instance class with
-  `AdminApi` injected via constructor. Per-instance `?string $cached` replaces
-  the process-global `static $cached`, fixing test isolation.
-- `Collection::getSchema()` and `Collection::create()` now accept optional
-  `?SettingsRepository` and `?ServerCapabilities` parameters; callers that
-  don't pass them get fresh instances created internally (backward-compatible).
-- `Collection::getSchema()` uses `SettingsRepository::isPinnedResultsEnabled()`
-  instead of a direct `get_option()` call, eliminating the last direct option
-  read in a non-view runtime class.
-- All static `ServerCapabilities::supportsCurationSets()` call sites updated:
-  - `RestController` and `PinnedResultsPage` now receive `ServerCapabilities`
-    via constructor; bootstrap classes create and wire the instance.
-  - `SettingsPage::render()` and `Sanitizers::sanitizePinnedResultsEnabled()`
-    use inline instantiation (admin views / trait, no constructor to inject).
-- 4 new tests in `ServerCapabilitiesTest` (version delegation, per-instance
-  caching, no shared cache, feature flag combinations).
-- 74 tests total, 117 assertions.
+`ServerCapabilities` converted from a static class to an instance class with
+`AdminApi` injected via constructor. Per-instance `?string $cached` replaces
+the process-global `static $cached`. `Collection::getSchema()` uses
+`SettingsRepository::isPinnedResultsEnabled()`, eliminating the last direct
+option read in a non-view runtime class. `RestController` and
+`PinnedResultsPage` now receive `ServerCapabilities` via constructor.
+74 tests total, 117 assertions.
 
 **PR 7 — Admin JS modularization (item 10) (done)**
 
-- Extracted shared admin utilities to `source/js/admin/`: `ajax.ts`
-  (WP AJAX helper), `button.ts` (loading state), `dom.ts` (HTML escaping),
-  `debounce.ts` (generic debounce), `toast.ts` (DOM-based notice widget),
-  `sortable-list.ts` (drag-and-drop with index callback),
-  `autocomplete.ts` (generic dropdown search widget for future pages).
-- `source/js/admin-settings.js` (1145 lines, plain JS) converted to TypeScript
-  and split into a thin entry `source/js/admin-settings.ts` plus six section
-  modules under `source/js/admin-settings/`: `connection.ts`,
-  `statistics.ts`, `status.ts`, `facets.ts`, `quick-search-settings.ts`,
-  `toggles.ts`. Each exports a single `init()`.
-- `source/js/pinned-results-admin.ts` (647 lines) split into
-  `source/js/pinned-results/`: `types.ts`, `state.ts`, `api.ts`,
-  `render.ts`, `events.ts`. Module-level `let` variables consolidated into
-  one shared `state` object. Dep graph: `state ← render ← api ← events ←
-  entry` (no circular imports). `sortable-list` utility used for
-  drag-and-drop post reorder.
-- Vite entry points unchanged; build output is identical.
+Extracted shared admin utilities to `source/js/admin/`: `ajax.ts`,
+`button.ts`, `dom.ts`, `debounce.ts`, `toast.ts`, `sortable-list.ts`,
+`autocomplete.ts`. `admin-settings.js` (1145 lines, plain JS) converted to
+TypeScript and split into a thin entry plus six section modules under
+`source/js/admin-settings/`. `pinned-results-admin.ts` (647 lines) split into
+`source/js/pinned-results/`: `types.ts`, `state.ts`, `api.ts`, `render.ts`,
+`events.ts`. Dep graph: `state ← render ← api ← events ← entry`.
+Vite entry points unchanged; build output is identical.
 
 **Remaining / as needed (items 14, 15, 17)**
 
@@ -189,728 +143,188 @@ Work in PR-sized batches. Each batch should leave the plugin fully functional.
 
 **Skip for now (item 11)**
 
-- `PluginTable` interface — not worth adding for two tables.
+`PluginTable` interface — not worth adding for two tables.
 
-## 1. Uninstall Cleanup Naming And Ownership
+---
 
-### Current smell
+## Done Items
 
-`uninstall.php` defines:
+### 1. Uninstall Cleanup Naming And Ownership
 
-```php
-typesense_search_uninstall_statistics_for_site()
-```
+Done in PR 1. Renamed to `typesense_search_uninstall_data_for_site()`.
 
-but the function now deletes both search statistics data and pinned results
-data.
+### 2. App Bootstrap Is Becoming A Hand-Written Container
 
-Relevant file:
+Done in PR 3. Split into feature bootstrap classes under
+`source/php/Bootstrap/`. `App::getRegistry()` unchanged.
 
-- `uninstall.php`
+### 3. Settings.php Has Too Many Jobs
 
-Current responsibilities:
+Done in PR 3. Split into `OptionKeys`, `Sanitizers` (trait), `SettingsPage`,
+`SettingsRegistry` under `source/php/Admin/Settings/`. `Settings extends
+OptionKeys` so all `Settings::OPTION_*` call sites are unchanged.
 
-- Drops `{$wpdb->prefix}typesense_search_events`.
-- Drops `{$wpdb->prefix}typesense_pinned_results`.
-- Deletes statistics options.
-- Deletes pinned-results options.
-- Clears the statistics retention cron hook.
-- Handles multisite by switching blogs.
+### 4. SettingsRepository Promise Is No Longer True
 
-### Suggested refactor
+Done in PR 4. All plugin-owned option reads in non-view runtime classes now
+route through `SettingsRepository`. Settings views may still use `get_option()`
+directly — that is intentional.
 
-Rename the helper to something more neutral:
+### 5. Global Function In Advanced Settings View
 
-```php
-typesense_search_uninstall_data_for_site()
-```
+Done in PR 1. Extracted to
+`views/admin/settings-tabs/advanced/search-result-behavior.php`.
 
-Then consider using feature-owned cleanup methods instead of duplicating table
-names:
+### 6. Inline JavaScript In PHP Views
 
-```php
-\TypesenseSearch\SearchStatistics\Database::drop();
-\TypesenseSearch\PinnedResults\Database::drop();
-```
+Done in PR 1. Moved into `admin-settings.js` (now `admin-settings.ts`
+after PR 7).
 
-Because `uninstall.php` is intentionally self-contained, this needs a deliberate
-choice:
+### 7. SettingsAjax Is A Large Multi-Purpose Controller
 
-- Either keep it self-contained but rename the helper.
-- Or bootstrap just enough plugin code to call module cleanup methods.
+Done in PR 2. Split into 6 action classes under `source/php/Admin/Ajax/`
+plus a shared `AjaxHelpers` trait. Existing AJAX action names unchanged.
 
-The low-risk first step is only the rename.
+### 8. Typesense HTTP/Admin Access Is Scattered
 
-## 2. App Bootstrap Is Becoming A Hand-Written Container
+Done in PR 4. Centralised in `source/php/Typesense/AdminApi.php`.
 
-### Current smell
+### 9. Pinned Results Sync-State Policy Lives In Repository
 
-`source/php/App.php` instantiates almost everything directly:
+Done in PR 5. `Repository::delete()` only calls `markAllPending()` when the
+deleted rule had a non-null `synced_at`.
 
-- constants loader
-- templates
-- ACF fields
-- admin settings
-- admin AJAX
-- meta boxes
-- pinned results page
-- frontend assets/config
-- search statistics database, repository, REST controller, retention, widgets,
-  admin actions, admin page
-- pinned results database, repository, REST controller, sync service
-- indexing registry and strategies
-- indexing hooks
-- enrichers
-- CLI command
+### 10. Admin JavaScript Files Are Becoming Page Apps
 
-Relevant file:
-
-- `source/php/App.php`
-
-This is still readable, but it will keep growing as new feature areas are added.
-
-### Suggested refactor
-
-Introduce small feature bootstrap classes. For example:
+Done in PR 7. New admin pages should follow this pattern:
 
 ```text
-source/php/Bootstrap/AdminFeature.php
-source/php/Bootstrap/FrontendFeature.php
-source/php/Bootstrap/IndexingFeature.php
-source/php/Bootstrap/SearchStatisticsFeature.php
-source/php/Bootstrap/PinnedResultsFeature.php
-source/php/Bootstrap/CliFeature.php
-```
-
-Each feature class should do only wiring. Avoid moving business logic into
-bootstrap classes.
-
-Possible target shape:
-
-```php
-$settings = new SettingsRepository();
-$clientService = new TypesenseClientService($settings);
-$logger = new IndexingLogLogger(new ErrorLogLogger());
-
-(new AdminFeature($settings))->register();
-(new FrontendFeature($settings))->register();
-$searchStatistics = (new SearchStatisticsFeature($settings))->register();
-(new PinnedResultsFeature($settings))->register();
-$registry = (new IndexingFeature($settings, $clientService, $logger))->register();
-(new CliFeature($settings, $searchStatistics, $registry))->register();
-```
-
-Keep `App::getRegistry()` working if external code may depend on it.
-
-## 3. Settings.php Has Too Many Jobs
-
-### Current smell
-
-`source/php/Admin/Settings.php` owns:
-
-- option key constants
-- option group constants
-- tab labels
-- settings page registration
-- all settings registration
-- all settings sanitizers
-- admin asset enqueueing
-- render context for every settings tab
-- static helpers for post types, weights, PDF availability, Modularity checks
-
-This makes every new setting feel like it belongs in the same class forever.
-
-### Suggested refactor
-
-Split by responsibility:
-
-```text
-source/php/Admin/Settings/OptionKeys.php
-source/php/Admin/Settings/SettingsRegistry.php
-source/php/Admin/Settings/SettingsPage.php
-source/php/Admin/Settings/Sanitizers.php
-source/php/Admin/Settings/TabContext.php
-```
-
-This can be done gradually. A lower-risk first step:
-
-1. Extract settings registration to `SettingsRegistry`.
-2. Keep constants in `Settings` for backward compatibility.
-3. Delegate from `Settings::registerSettings()` to the new class.
-
-Avoid changing option names.
-
-### Static helpers also belong elsewhere
-
-`Settings.php` contains several static helpers that have nothing to do with
-settings registration:
-
-- `getIndexablePostTypes()` — belongs in `SettingsRepository` or a new
-  `Environment` helper.
-- `isPdfToTextAvailable()` — environment check, same as above.
-- `isModularityAvailable()` — plugin detection, same as above.
-- `isPostTypeEnabled()` — already proxied through `SettingsRepository`; the
-  duplicate in `Settings` can be removed once routing is complete (see item 4).
-
-Extract these when splitting `Settings.php` so they do not end up in
-`SettingsPage` or `SettingsRegistry` by accident.
-
-## 4. SettingsRepository Promise Is No Longer True
-
-### Current smell
-
-`source/php/Services/SettingsRepository.php` says plugin `get_option()` calls are
-centralized there, but many direct `get_option()` calls remain in:
-
-- settings views
-- `Settings.php`
-- `SettingsAjax.php`
-- `Typesense/ClientFactory.php`
-- `Typesense/ServerCapabilities.php`
-- `Typesense/Collection.php`
-- `Frontend/Assets.php`
-- `Frontend/EnrichSearchTemplate.php`
-- CLI code
-- indexing strategies
-
-Some direct option calls are fine for WordPress core options such as date/time
-formats. The mismatch is mainly for plugin-owned options.
-
-### Suggested refactor
-
-Decide what the repository is meant to be:
-
-- If it is the source of truth, route plugin option reads through it.
-- If not, soften the docblock so it does not claim all option access is
-  centralized.
-
-Recommended direction: use `SettingsRepository` for runtime/plugin behavior,
-but allow settings views to use raw `get_option()` when rendering forms.
-
-Possible improvement:
-
-- Add getters for every plugin option.
-- Add grouped DTO-style methods for frontend config, quick search config, and
-  search statistics config.
-- Inject `SettingsRepository` into classes that currently call plugin options
-  directly.
-
-## 5. Global Function In Advanced Settings View
-
-### Current smell
-
-`views/admin/settings-tabs/advanced-settings.php` defines:
-
-```php
-typesense_search_render_search_result_behavior()
-```
-
-inside the template.
-
-This works, but global functions in views are awkward because:
-
-- they can be redeclared if the template is included twice in a request
-- they are not namespaced
-- they make view rendering harder to scan
-- they hide a reusable partial inside another file
-
-### Suggested refactor
-
-Move the markup to a partial:
-
-```text
-views/admin/settings-tabs/advanced/search-result-behavior.php
-```
-
-Then include it from `advanced-settings.php`, passing required variables in
-scope:
-
-```php
-include TYPESENSESEARCH_PATH . 'views/admin/settings-tabs/advanced/search-result-behavior.php';
-```
-
-If more advanced-settings cards are extracted, use a consistent folder:
-
-```text
-views/admin/settings-tabs/advanced/facets.php
-views/admin/settings-tabs/advanced/search-field-weights.php
-views/admin/settings-tabs/advanced/search-result-behavior.php
-views/admin/settings-tabs/advanced/search-statistics.php
-```
-
-## 6. Inline JavaScript In PHP Views
-
-### Current smell
-
-`views/admin/settings-tabs/advanced-settings.php` contains inline JavaScript for:
-
-- truncator mode
-- debounce delay visibility
-- statistics consent integration visibility
-
-There is already `source/js/admin-settings.js`, so the behavior is split across
-two places.
-
-### Suggested refactor
-
-Move the inline script into `source/js/admin-settings.js`.
-
-Use stable data attributes instead of relying only on IDs where useful:
-
-```html
-data-js-truncator-mode
-data-js-truncator-hidden
-data-js-truncator-custom
-data-js-debounce-toggle
-data-js-debounce-delay-field
-```
-
-This keeps all admin behavior in the asset pipeline and makes it easier to test
-and refactor later.
-
-## 7. SettingsAjax Is A Large Multi-Purpose Controller
-
-### Current smell
-
-`source/php/Admin/SettingsAjax.php` is approximately 36 K and handles many
-unrelated admin-ajax actions:
-
-- connection test
-- collection creation
-- search key generation
-- collection statistics
-- clear post type
-- reindex post type
-- facet field discovery
-- status check
-- search key repair
-- status tab collection creation
-- indexing log clear
-
-This class is doing too much.
-
-### Suggested refactor
-
-Split by responsibility:
-
-```text
-source/php/Admin/Ajax/ConnectionActions.php
-source/php/Admin/Ajax/CollectionActions.php
-source/php/Admin/Ajax/SearchKeyActions.php
-source/php/Admin/Ajax/IndexingActions.php
-source/php/Admin/Ajax/FacetActions.php
-source/php/Admin/Ajax/LogActions.php
-```
-
-Alternative: move newer admin APIs to REST controllers, like pinned results
-already does.
-
-Keep existing AJAX action names stable unless intentionally migrating.
-
-### Coupling note
-
-Several handlers in `SettingsAjax.php` instantiate `ClientFactory` directly.
-Once item 8 (`AdminApi`) exists, inject it into each action class instead of
-calling `ClientFactory` or `wp_remote_*` inline. Do PR 2 (this split) before
-PR 4 (the `AdminApi` wrapper) so that injection targets are smaller and
-clearer.
-
-## 8. Typesense HTTP/Admin Access Is Scattered
-
-### Current smell
-
-Several classes know how to speak to Typesense directly:
-
-- `Typesense/ClientFactory.php`
-- `Typesense/ApiKey.php`
-- `Typesense/Collection.php`
-- `Typesense/ServerCapabilities.php`
-- `PinnedResults/TypesenseSync.php`
-- `Admin/SettingsAjax.php`
-- `CLI/IndexCommand.php`
-
-Some use the Typesense PHP client. Some use `wp_remote_get()` or
-`wp_remote_request()`.
-
-### Suggested refactor
-
-Introduce a small admin API wrapper, for example:
-
-```text
-source/php/Typesense/AdminApi.php
-```
-
-Possible responsibilities:
-
-- `getServerVersion()`
-- `getCollection()`
-- `collectionExists()`
-- `createCollection()`
-- `patchCollection()`
-- `putCurationSet()`
-- `getStats()`
-- shared request handling and error formatting
-
-Do not overbuild this. Start by centralizing repeated raw HTTP request code and
-server capability checks.
-
-## 9. Pinned Results Sync-State Policy Lives In Repository
-
-### Current smell
-
-`PinnedResults\Repository::delete()` currently deletes a rule and then marks all
-remaining rules pending.
-
-That is structurally odd because the repository is both persistence and sync
-policy.
-
-It also causes an edge case: if all rules are synced, then an admin creates a
-new unsynced rule and deletes that same unsynced rule before syncing, all other
-rules become pending even though Typesense did not need a change.
-
-### Suggested refactor
-
-At minimum, update the delete policy:
-
-- If the deleted rule had previously been synced, mark remaining rules pending.
-- If it was never synced, delete it without changing the rest.
-
-Better structure:
-
-```text
-PinnedResults\Repository       persistence only
-PinnedResults\SyncStateService sync-state transitions
-PinnedResults\TypesenseSync    remote sync
-```
-
-Keep this behavior change separate from broad structural refactors if possible,
-because it is not purely structural.
-
-## 10. Admin JavaScript Files Are Becoming Page Apps
-
-**Done in PR 7.** See the PR 7 entry in Recommended Order for full details.
-
-### What was done
-
-Shared utilities live in `source/js/admin/`. Each admin page entry point has
-its own sub-directory. New pages should follow the same pattern:
-
-```text
-source/js/admin/           shared utilities (import from here, don't copy)
+source/js/admin/           shared utilities — import from here, don't copy
 source/js/<page-name>/     modules for a specific admin page
 source/js/<page-name>.ts   thin entry point that calls init() on each module
 ```
 
-`quick-search.ts` was already modular (it imports from five other files) and
-was left as-is. It is a frontend widget, not an admin page, so the
-sub-directory pattern does not apply.
+`quick-search.ts` was left as-is — it is a frontend widget, not an admin page.
 
-## 11. Database Lifecycle Is Similar But Not Shared
+### 11. Database Lifecycle Is Similar But Not Shared
 
-### Current smell
+Skipped. Two tables with matching static method signatures is not a smell worth
+fixing. Add a `PluginTable` interface only if a third feature table is
+introduced.
 
-Search statistics and pinned results each have:
+### 12. Capability Detection Is Static And Option-Based
 
-- `Database::tableName()`
-- `Database::maybeMigrate()`
-- `Database::migrate()`
-- `Database::drop()`
-- `OPTION_DB_VERSION`
-- `DB_VERSION`
+Done in PR 6. `ServerCapabilities` is now an instance class with `AdminApi`
+injected via constructor.
 
-This duplication is not terrible, but lifecycle wiring is spread across
-`App.php` and `uninstall.php`.
+### 13. Source Tree Has An Empty Or Stray Directory
 
-### Recommendation
+Done in PR 1. Removed empty `source/php/AcfFields/` directory.
 
-Skip this for now. Two tables with matching static method signatures is not a
-smell that needs fixing. Add the `PluginTable` interface only if a third feature
-table is introduced, or if lifecycle code is already being touched for another
-reason. Do not create an abstraction for two cases.
+### 16. CLI/IndexCommand Is The Largest File In The Plugin
 
-## 12. Capability Detection Is Static And Option-Based
+Done in PR 2. Split into 5 action classes under `source/php/CLI/Actions/`.
+`IndexCommand.php` is now a thin delegator.
 
-### Current smell
+---
 
-`Typesense/ServerCapabilities.php` is static and reads options directly. It
-caches the server version in a request-local static variable.
+## Pending Items
 
-That is simple, but it makes dependency injection and tests harder. It also
-means code that already has `SettingsRepository` still bypasses it.
+### 14. Frontend Config Building Could Be Separated
 
-### Recommendation
+`Frontend/TypesenseConfig.php` both decides whether config is needed, builds
+frontend and quick search config, maps Web Awesome locales, reads facets,
+applies filters, and injects inline scripts.
 
-Defer this until item 8 (`AdminApi`) exists. Once `AdminApi` is in place,
-converting `ServerCapabilities` to an instance service that accepts it as a
-constructor argument is straightforward. Doing it before `AdminApi` exists just
-moves the same static option reads into a constructor without a real benefit.
-
-Target shape when the time comes:
-
-```php
-new ServerCapabilities($settings, $adminApi)
-```
-
-Keep a static facade only if external code calls `ServerCapabilities`
-statically and cannot be updated at the same time.
-
-## 13. Source Tree Has An Empty Or Stray Directory
-
-There is a `source/php/AcfFields` directory alongside `source/php/ACF`.
-
-The `AcfFields/` directory is confirmed empty. The active ACF integration lives
-in `source/php/ACF/Fields.php`.
-
-Suggested action:
-
-- Remove `source/php/AcfFields/` entirely.
-- No code changes needed; this is a filesystem cleanup only.
-
-This is safe to do in PR 1.
-
-## 14. Frontend Config Building Could Be Separated
-
-### Current smell
-
-`Frontend/TypesenseConfig.php` both:
-
-- decides whether config is needed
-- builds frontend search config
-- builds quick search config
-- maps Web Awesome locales
-- reads facets
-- applies template and placeholder filters
-- injects inline scripts
-
-### Suggested refactor
-
-Split config assembly from script injection:
+Suggested split:
 
 ```text
 Frontend/TypesenseConfigBuilder.php
 Frontend/TypesenseConfigLocalizer.php
 ```
 
-This would also make it easier to add future frontend config for search
-shortcuts, search notices, or query suggestions.
+Low urgency — the file is large but self-contained.
 
-## 15. Future Feature Structure Recommendation
+### 15. Future Feature Structure Recommendation
 
-If adding search shortcuts, notices, or query suggestions later, avoid putting
+If adding search shortcuts, notices, or query suggestions, avoid putting
 everything into the existing settings page.
 
-Recommended shape:
+For interactive or list-heavy features, use a dedicated admin page:
 
 ```text
-source/php/SearchRules/
+source/php/<FeatureName>/
     Database.php
     Repository.php
     RestController.php
     AdminPage.php
 
-source/js/search-rules-admin/
-    ...
+source/js/<feature-name>-admin/
+    types.ts
+    state.ts
+    api.ts
+    render.ts
+    events.ts
+source/js/<feature-name>-admin.ts
 ```
 
-Or split by feature:
+The main settings page should stay for configuration toggles, not rule
+management.
 
-```text
-source/php/SearchShortcuts/
-source/php/SearchNotices/
-source/php/SearchSuggestions/
-```
+### 17. Frontend/I18n.php Is Unusually Large
 
-Use a dedicated admin page if the UI is interactive or list-heavy. The main
-settings page should stay for configuration toggles, not rule management.
+`source/php/Frontend/I18n.php` is approximately 10 K. Audit before touching.
 
-## 16. CLI/IndexCommand Is The Largest File In The Plugin
+Possible causes: large inline locale map, Web Awesome locale mapping, JS
+localization payload injection that belongs in `TypesenseConfig`.
 
-### Current smell
-
-`source/php/CLI/IndexCommand.php` is approximately 63 K — the largest single
-file in the entire plugin. It almost certainly mixes command parsing, business
-logic, progress output, and error handling in one place.
-
-This is a higher practical risk than most other items on this list. WP-CLI
-commands are harder to test manually than admin pages, and breakage is
-invisible to users until they run `wp typesense`.
-
-Relevant file:
-
-- `source/php/CLI/IndexCommand.php`
-
-### Suggested refactor
-
-Split by subcommand or action:
-
-```text
-source/php/CLI/IndexCommand.php    (entry point, registers subcommands)
-source/php/CLI/Actions/IndexAction.php
-source/php/CLI/Actions/RebuildAction.php
-source/php/CLI/Actions/ClearAction.php
-source/php/CLI/Actions/StatusAction.php
-source/php/CLI/Actions/RepairAction.php
-```
-
-Each action class receives its dependencies via constructor (registry,
-settings, etc.) and is responsible for one logical operation. `IndexCommand`
-becomes thin: it reads CLI arguments, validates them, and delegates.
-
-Read the file before splitting. The subcommand boundary may not match the
-method names exactly — let the actual code drive the split, not this document.
-
-### Verification
-
-```bash
-php -l source/php/CLI/IndexCommand.php
-wp typesense --help          # confirm commands still register
-wp typesense index --dry-run
-wp typesense rebuild --dry-run --skip-index
-```
-
-## 17. Frontend/I18n.php Is Unusually Large
-
-### Current smell
-
-`source/php/Frontend/I18n.php` is approximately 10 K. For a localization file
-this is large and worth auditing.
-
-Possible causes:
-
-- It contains a large string map inline instead of delegating to `.pot`/`.po`
-  files.
-- It handles locale mapping for Web Awesome (icon library) in addition to
-  plugin strings.
-- It may be building JavaScript localization payloads that belong in
-  `TypesenseConfig` or a dedicated localizer.
-
-### Suggested refactor
-
-Audit first. If the file is large because it contains a necessary locale map,
-leave it alone. If it is doing multiple jobs (plugin i18n + JS payload
-injection + locale detection), extract:
+If the file is doing multiple jobs, extract:
 
 ```text
 Frontend/I18n.php              plugin string registration only
 Frontend/WebAwesomeLocale.php  locale detection and mapping
 ```
 
-Note: there is already a `source/js/webawesome-locale.ts`, so the JS side may
-already be handled. Check whether the PHP file is duplicating that logic
-server-side.
+There is already a `source/js/webawesome-locale.ts` — check whether the PHP
+file is duplicating that logic server-side before splitting.
+
+---
 
 ## Testing Strategy
 
-Tests serve two purposes here: pinning current behavior before refactoring, and
-giving ongoing confidence when new features are added. Both are worth investing
-in, and the two goals reinforce each other — a test written to guard a refactor
-stays useful forever.
+Tests pin current behavior before refactoring and give ongoing confidence when
+new features are added.
 
 ### Current Setup
 
-PR 0 has been completed. The plugin now has a fast PHPUnit unit-test setup that
-does not bootstrap WordPress:
-
-- `phpunit.xml.dist`
-- `tests/bootstrap.php`
-- `tests/TestCase.php`
-- `tests/Unit/...`
-- Composer scripts: `composer test`, `composer test:dox`, and
+- `phpunit.xml.dist`, `tests/bootstrap.php`, `tests/TestCase.php`,
+  `tests/Unit/`
+- Composer scripts: `composer test`, `composer test:dox`,
   `composer test:coverage`
-- GitHub Actions workflow: `.github/workflows/test.yml`
+- GitHub Actions: `.github/workflows/test.yml` (PHP 8.3 and PHP 8.4)
+- Stack: PHPUnit + Brain Monkey (WP function stubs) + Mockery (object mocks)
+- PHP 8.3+ required
+- Current count: **74 tests, 117 assertions**
 
-The current stack is:
+### What To Test
 
-- **`phpunit/phpunit`** — test runner.
-- **`Brain\Monkey`** — stubs and asserts WordPress functions such as
-  `get_option`, `apply_filters`, and `sanitize_text_field`.
-- **`Mockery`** — object mocks, especially for `$wpdb`.
-
-The plugin now explicitly requires PHP 8.3:
-
-- Composer: `"php": ">=8.3"`
-- WordPress plugin header: `Requires PHP: 8.3`
-
-The GitHub Actions workflow runs `composer test` on PHP 8.3 and PHP 8.4 for
-pushes and pull requests targeting `dev` or `main`.
-
-Current tests cover:
-
-- Settings sanitizers.
-- `SettingsRepository` defaults, coercion, clamping, and query-weight ordering.
-- `DocumentBuilder` document shape and public filter hooks.
-- `PinnedResults\Repository::delete()` current delete behavior.
-- Database `maybeMigrate()` guards when the installed version is current.
-
-There is one intentionally incomplete test for the desired future item 9
-behavior: deleting a never-synced pinned-result rule should not mark all
-remaining rules pending. Leave it incomplete until item 9 is implemented, then
-remove the incomplete marker and make the behavior real.
-
-### What To Test And When
-
-#### Before PR 2 — Characterization tests for classes being split
-
-Write these against the current code so they pin existing behavior. They will
-break if the refactor accidentally changes something.
-
-**`Admin/SettingsAjax.php`** — do not try to test every handler end to end.
-Instead test the shared helper methods (nonce checks, permission checks,
-JSON response shape) if they are extracted during the split.
-
-**`CLI/IndexCommand.php`** — focus on argument validation and subcommand
-registration, not the full indexing/rebuild flow. WP-CLI has a test mode via
-`WP_CLI::set_logger()` that captures output without running a real site.
-
-#### Before PR 3 — Characterization tests for Settings and App
-
-Initial tests already cover `Settings` sanitizers and `SettingsRepository`
-getters. Before splitting `Settings.php` or `App.php`, add focused tests for
-any newly touched sanitizer, registration method, or bootstrap hook that is not
-already covered.
-
-#### Before or during PR 4 — Behavior tests for PinnedResults and sync state
-
-**`PinnedResults\Repository::delete()` sync-state edge case** (see item 9):
-
-```php
-// Rule that was synced → delete should mark remaining rules pending
-// Rule that was never synced → delete should not touch other rules
-```
-
-Prefer writing these as desired-behavior tests in the PR that fixes item 9. If
-characterization tests are needed before a broader refactor, mark the current
-all-rules-pending behavior as temporary and replace it with the desired tests
-when applying the behavior fix. Do not permanently lock in the known bug.
-
-**Database migration guards** — the current tests verify that `maybeMigrate()`
-is a no-op when the stored version matches `DB_VERSION`. If future migrations
-add versioned branches, add tests for the branch conditions before changing the
-schema code.
-
-#### For new features — Write tests first
-
-When adding features such as search shortcuts, search notices, or query
-suggestions, write the test before the implementation. Target:
+For new features, write tests first. Target:
 
 - Repository methods: save, fetch, delete, sync-state transitions.
 - REST controller: authorization, response shape, error cases.
-- Any sanitizer or validator for the new settings.
+- Sanitizers and validators for new settings.
 
-This is the long-term payoff. A test per feature area means regressions surface
-in CI, not in production.
+When a refactor touches a class, write characterization tests against the
+current code first so they catch accidental behavior changes.
 
 ### What Not To Test
 
-- **Views and rendered HTML** — brittle and slow to write. Trust manual
-  review for visual output.
-- **Full AJAX handler integration** — the request/response cycle depends on
-  WordPress internals that are hard to stub cleanly. Test the logic inside the
-  handler, not the handler itself.
-- **Full indexing/rebuild flow against a real Typesense server** — this
-  belongs in an end-to-end suite, not unit tests. Out of scope for now.
-- **WordPress core behavior** — trust `add_action`, `get_option`, etc. to work.
-  Only test your own code.
+- **Views and rendered HTML** — brittle.
+- **Full AJAX handler integration** — test the logic inside the handler, not
+  the WordPress request cycle.
+- **Full indexing/rebuild flow against a real Typesense server** — belongs in
+  an end-to-end suite, out of scope here.
+- **WordPress core behavior** — trust `add_action`, `get_option`, etc.
 
 ### Running Tests
 
@@ -921,161 +335,20 @@ composer test:coverage
 ./vendor/bin/phpunit --filter SettingsRepository
 ```
 
-Use `composer test` for the normal pass/fail check. Use `composer test:dox` when
-you want readable behavior names. Use `composer test:coverage` when Xdebug
-coverage is available and you want to inspect which production files are
-exercised.
-
-## PR 0 — Test Infrastructure (Done)
-
-Foundation work for the later refactor PRs.
-
-Completed:
-
-1. Added PHPUnit, Brain Monkey, and Mockery as dev dependencies.
-2. Added `phpunit.xml.dist`.
-3. Added `tests/bootstrap.php`, a base test case, and a minimal WordPress
-   upgrade fixture.
-4. Added Composer scripts for running the test suite, TestDox output, and
-   coverage.
-5. Added GitHub Actions for PHP 8.3 and PHP 8.4.
-6. Added first characterization tests around low-dependency and refactor-prone
-   behavior.
-
-Verification:
-
-```bash
-composer test
-./vendor/bin/phpunit
-```
-
-PR 0 intentionally did not split large production files. Keep adding tests
-alongside later PRs when a refactor touches uncovered behavior.
-
-## PR 1 — Pure Cleanup
-
-Zero behavioral risk. Items: 1, 5, 6, 13.
-
-1. Rename `typesense_search_uninstall_statistics_for_site()` to
-   `typesense_search_uninstall_data_for_site()`.
-2. Extract the advanced settings search-result behavior card into a partial.
-3. Move the inline advanced settings JavaScript into `source/js/admin-settings.js`.
-4. Remove the empty `source/php/AcfFields/` directory.
-5. Update comments/docblocks that claim all option reads are centralized.
-
-Suggested verification:
-
-```bash
-php -l uninstall.php
-php -l source/php/Admin/Settings.php
-npm run build
-```
-
-Then manually visit:
-
-- Settings > Typesense Search > Advanced settings
-- Settings > Pinned results
-- Tools > Search log
-
-## PR 2 — Large-File Splits
-
-Moderate risk — these are large rewrites but behavior should be identical.
-Items: 7, 16.
-
-Depends on PR 0. Do not combine test infrastructure setup and large file splits
-unless there is a strong reason.
-
-1. Write characterization tests for any shared helpers in `SettingsAjax.php`
-   (nonce/permission checks, JSON response helpers).
-2. Split `SettingsAjax.php` into focused action classes under
-   `source/php/Admin/Ajax/`.
-3. Write characterization tests for CLI argument validation and subcommand
-   registration in `IndexCommand.php`.
-4. Split `CLI/IndexCommand.php` into action classes under
-   `source/php/CLI/Actions/`.
-
-Read both files fully before starting. Let the existing method groupings drive
-the split boundaries.
-
-Suggested verification:
-
-```bash
-composer test
-php -l source/php/Admin/Ajax/*.php
-php -l source/php/CLI/Actions/*.php
-wp typesense --help
-wp typesense index --dry-run
-wp typesense rebuild --dry-run --skip-index
-```
-
-Manually trigger each admin-ajax action from the settings page UI.
-
-## PR 3 — Bootstrap And Settings Restructure
-
-Higher diff volume but low behavioral risk. Items: 2, 3.
-
-1. Write characterization tests for `Settings` sanitizers and
-   `SettingsRepository` getters before touching either class (see Testing
-   Strategy).
-2. Split `App.php` into feature bootstrap classes under `source/php/Bootstrap/`.
-3. Split `Settings.php` by responsibility (registry, sanitizers, page, option
-   keys).
-4. Move `Settings.php` static helpers (`getIndexablePostTypes`,
-   `isPdfToTextAvailable`, `isModularityAvailable`) to `SettingsRepository` or
-   an `Environment` helper.
-
-Keep `App::getRegistry()` working. Keep all option key constants accessible
-from their existing fully-qualified names or add aliases.
-
-Suggested verification:
-
-```bash
-php -l source/php/App.php
-php -l source/php/Bootstrap/*.php
-php -l source/php/Admin/Settings/*.php
-npm run build
-composer validate --no-check-publish
-```
-
-## PR 4 — Option Access And Typesense API
-
-Touches runtime behavior. Items: 4, 8.
-
-1. Write tests for `PinnedResults\Repository::delete()` sync-state behavior
-   and database migration guards before changing either (see Testing Strategy).
-2. Introduce `Typesense/AdminApi.php` and route raw HTTP calls through it.
-3. Route plugin-owned `get_option()` calls in non-view runtime classes through
-   `SettingsRepository`.
-
-Do this after PR 2 so that the newly split Ajax action classes are the
-injection targets, not the monolithic `SettingsAjax`.
-
-Suggested verification:
-
-```bash
-composer test
-php -l source/php/Typesense/AdminApi.php
-```
-
-Then test the full settings page AJAX flow end to end (connection test,
-collection create, key generation, reindex).
+---
 
 ## Notes For AI Agents
 
-- Read the relevant files before editing. Do not refactor blindly based on this
-  document.
+- Read the relevant files before editing. Do not refactor from this document
+  alone.
 - Avoid broad formatting churn.
-- Keep option names, table names, hooks, REST routes, AJAX action names, and CLI
-  commands stable unless the user explicitly asks for migrations.
-- Run focused checks after each small refactor.
-- If the branch has unpushed release commits, ask before changing release
-  history.
-- `CLI/IndexCommand.php` is the largest file in the plugin (~63 K). Read it
-  fully before touching it. Do not assume subcommand boundaries from this
-  document — derive them from the actual method groupings.
-- `SettingsAjax.php` (~36 K) and `Settings.php` (~19 K) are the largest admin
-  files. Both have handler logic and helper methods interleaved; read carefully
-  before splitting.
-- The PR ordering in this document matters. PR 2 (SettingsAjax split) should
-  come before PR 4 (AdminApi) because smaller injection targets make the API
-  wrapper cleaner.
+- Keep option names, table names, hooks, REST routes, AJAX action names, and
+  CLI commands stable unless the user explicitly asks for migrations.
+- Run `php -l` on changed PHP files and `npm run build` after JS changes.
+- `SettingsRepository` is the runtime source of truth for plugin-owned options.
+  Settings views may use `get_option()` directly — that is intentional.
+- For new JS-heavy admin pages, follow the `source/js/admin/` +
+  `source/js/<page>/` pattern from PR 7. Named exports only; factory functions,
+  not classes.
+- The PR ordering in Recommended Order matters for understanding dependencies.
+  PRs 0–7 are done; start from the Pending section.
