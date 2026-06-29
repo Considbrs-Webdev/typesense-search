@@ -2,7 +2,7 @@
 
 namespace TypesenseSearch\CLI\Actions;
 
-use TypesenseSearch\Admin\Settings;
+use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\ClientFactory;
 
 /**
@@ -15,8 +15,10 @@ use TypesenseSearch\Typesense\ClientFactory;
  */
 class RebuildAction
 {
-    public function __construct(private IndexAction $indexAction)
-    {
+    public function __construct(
+        private IndexAction $indexAction,
+        private readonly SettingsRepository $settings,
+    ) {
     }
 
     /**
@@ -34,8 +36,8 @@ class RebuildAction
         $includeExternal = (bool) \WP_CLI\Utils\get_flag_value($assocArgs, 'include-external', false);
 
         // ── Client + collection name ─────────────────────────────────────────
-        $client         = ClientFactory::fromOptions();
-        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+        $client         = ClientFactory::fromSettings($this->settings);
+        $collectionName = $this->settings->getCollectionName();
 
         if ($client === null || $collectionName === '') {
             \WP_CLI::error('Typesense connection is not configured. Check the plugin settings page.');

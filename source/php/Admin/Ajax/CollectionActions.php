@@ -2,8 +2,8 @@
 
 namespace TypesenseSearch\Admin\Ajax;
 
-use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\Admin\SettingsAjax;
+use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\ClientFactory;
 use TypesenseSearch\Typesense\Collection;
 
@@ -19,6 +19,10 @@ use TypesenseSearch\Typesense\Collection;
 class CollectionActions
 {
     use AjaxHelpers;
+
+    public function __construct(private readonly SettingsRepository $settings)
+    {
+    }
 
     public function register(): void
     {
@@ -74,9 +78,9 @@ class CollectionActions
     {
         $this->requirePermission(SettingsAjax::AJAX_ACTION_STATUS_CREATE_COL);
 
-        $remote         = (string) get_option(Settings::OPTION_REMOTE, '');
-        $adminKey       = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
-        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+        $remote         = $this->settings->getRemote();
+        $adminKey       = $this->settings->getAdminKey();
+        $collectionName = $this->settings->getCollectionName();
 
         if (empty($remote) || empty($adminKey) || empty($collectionName)) {
             wp_send_json_error([

@@ -46,8 +46,8 @@ class IndexCommand
         SearchStatisticsRepository $searchStatistics
     ) {
         $this->indexAction        = new IndexAction();
-        $this->rebuildAction      = new RebuildAction($this->indexAction);
-        $this->clearAction        = new ClearAction();
+        $this->rebuildAction      = new RebuildAction($this->indexAction, $settings);
+        $this->clearAction        = new ClearAction($settings);
         $this->syncExternalAction = new SyncExternalAction();
         $this->statisticsAction   = new StatisticsAction($settings, $searchStatistics);
     }

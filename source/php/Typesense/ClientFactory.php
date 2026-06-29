@@ -4,6 +4,7 @@ namespace TypesenseSearch\Typesense;
 
 use Typesense\Client;
 use TypesenseSearch\Admin\Settings;
+use TypesenseSearch\Services\SettingsRepository;
 
 /**
  * Class ClientFactory
@@ -64,6 +65,24 @@ class ClientFactory
     {
         $remote   = (string) get_option(Settings::OPTION_REMOTE, '');
         $adminKey = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
+
+        if (empty($remote) || empty($adminKey)) {
+            return null;
+        }
+
+        return self::build($remote, $adminKey);
+    }
+
+    /**
+     * Build a Typesense client using credentials from a SettingsRepository instance.
+     *
+     * Prefer this over fromOptions() in code that already has a SettingsRepository
+     * injected, so option reads stay centralised.
+     */
+    public static function fromSettings(SettingsRepository $settings): ?Client
+    {
+        $remote   = $settings->getRemote();
+        $adminKey = $settings->getAdminKey();
 
         if (empty($remote) || empty($adminKey)) {
             return null;

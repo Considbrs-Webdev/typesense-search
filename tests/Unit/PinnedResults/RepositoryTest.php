@@ -7,6 +7,7 @@ namespace TypesenseSearch\Tests\Unit\PinnedResults;
 use Mockery;
 use TypesenseSearch\PinnedResults\Database;
 use TypesenseSearch\PinnedResults\Repository;
+use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Tests\TestCase;
 
 class RepositoryTest extends TestCase
@@ -26,7 +27,7 @@ class RepositoryTest extends TestCase
             ->with("UPDATE wp_typesense_pinned_results SET synced_at = NULL, sync_status = 'pending', sync_error = NULL")
             ->andReturn(1);
 
-        self::assertTrue((new Repository())->delete(42));
+        self::assertTrue((new Repository(Mockery::mock(SettingsRepository::class)))->delete(42));
     }
 
     public function test_delete_does_not_mark_rules_pending_when_delete_fails(): void
@@ -41,7 +42,7 @@ class RepositoryTest extends TestCase
             ->andReturn(false);
         $wpdb->shouldNotReceive('query');
 
-        self::assertFalse((new Repository())->delete(42));
+        self::assertFalse((new Repository(Mockery::mock(SettingsRepository::class)))->delete(42));
     }
 
     /**
@@ -82,6 +83,6 @@ class RepositoryTest extends TestCase
         // this rule so the other curation sets are still correct.
         $wpdb->shouldNotReceive('query');
 
-        self::assertTrue((new Repository())->delete(7));
+        self::assertTrue((new Repository(Mockery::mock(SettingsRepository::class)))->delete(7));
     }
 }

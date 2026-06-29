@@ -2,13 +2,16 @@
 
 namespace TypesenseSearch\PinnedResults;
 
-use TypesenseSearch\Admin\Settings;
+use TypesenseSearch\Services\SettingsRepository;
 
 /**
  * Reads and writes pinned search-result rules stored in WordPress.
  */
 class Repository
 {
+    public function __construct(private readonly SettingsRepository $settings)
+    {
+    }
     /**
      * @return array<int, array<string, mixed>>
      */
@@ -151,9 +154,9 @@ class Repository
             return [];
         }
 
-        $postTypes = array_values(array_filter((array) get_option(Settings::OPTION_POST_TYPES, [])));
+        $postTypes = array_values(array_filter($this->settings->getEnabledPostTypes()));
         if (empty($postTypes)) {
-            $postTypes = array_keys(Settings::getIndexablePostTypes());
+            $postTypes = array_keys(SettingsRepository::getIndexablePostTypes());
         }
 
         $query = new \WP_Query([

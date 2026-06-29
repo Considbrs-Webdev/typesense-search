@@ -8,6 +8,7 @@ use TypesenseSearch\Admin\Ajax\FacetActions;
 use TypesenseSearch\Admin\Ajax\IndexingActions;
 use TypesenseSearch\Admin\Ajax\LogActions;
 use TypesenseSearch\Admin\Ajax\SearchKeyActions;
+use TypesenseSearch\Services\SettingsRepository;
 
 /**
  * Class SettingsAjax
@@ -35,13 +36,13 @@ class SettingsAjax
     public const AJAX_ACTION_STATUS_CREATE_COL = 'typesense_status_create_collection';
     public const AJAX_ACTION_CLEAR_LOG         = 'typesense_clear_indexing_log';
 
-    public function __construct()
+    public function __construct(private readonly SettingsRepository $settings)
     {
-        (new ConnectionActions())->register();
-        (new CollectionActions())->register();
-        (new SearchKeyActions())->register();
-        (new IndexingActions())->register();
-        (new FacetActions())->register();
+        (new ConnectionActions($this->settings))->register();
+        (new CollectionActions($this->settings))->register();
+        (new SearchKeyActions($this->settings))->register();
+        (new IndexingActions($this->settings))->register();
+        (new FacetActions($this->settings))->register();
         (new LogActions())->register();
     }
 }
