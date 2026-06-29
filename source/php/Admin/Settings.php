@@ -33,6 +33,7 @@ class Settings extends OptionKeys
         add_action('admin_menu', [$settingsPage, 'addSettingsPage']);
         add_action('admin_init', [$settingsRegistry, 'registerSettings']);
         add_action('admin_enqueue_scripts', [$settingsPage, 'enqueueAssets']);
+        add_filter('script_loader_tag', [$settingsPage, 'addModuleType'], 10, 2);
     }
 
     // ── Static helpers ──────────────────────────────────────────────────────

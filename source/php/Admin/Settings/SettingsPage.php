@@ -43,6 +43,14 @@ class SettingsPage
         );
     }
 
+    public function addModuleType(string $tag, string $handle): string
+    {
+        if ($handle !== 'typesense-search-admin') {
+            return $tag;
+        }
+        return str_replace(' src=', ' type="module" src=', $tag);
+    }
+
     /**
      * Enqueue admin-only styles and scripts on the settings page.
      */

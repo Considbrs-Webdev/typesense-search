@@ -20,6 +20,7 @@ class PinnedResultsPage
     ) {
         add_action('admin_menu', [$this, 'addPage']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAssets']);
+        add_filter('script_loader_tag', [$this, 'addModuleType'], 10, 2);
     }
 
     public function addPage(): void
@@ -35,6 +36,14 @@ class PinnedResultsPage
             self::PAGE_SLUG,
             [$this, 'renderPage']
         );
+    }
+
+    public function addModuleType(string $tag, string $handle): string
+    {
+        if ($handle !== 'typesense-search-pinned-results') {
+            return $tag;
+        }
+        return str_replace(' src=', ' type="module" src=', $tag);
     }
 
     public function enqueueAssets(string $hook): void
