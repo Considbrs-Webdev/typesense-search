@@ -105,8 +105,15 @@ class Repository
     {
         global $wpdb;
 
+        $row     = $wpdb->get_row(
+            $wpdb->prepare('SELECT synced_at FROM ' . Database::tableName() . ' WHERE id = %d', $id) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        );
         $deleted = false !== $wpdb->delete(Database::tableName(), ['id' => $id], ['%d']);
-        if ($deleted) {
+
+        // Only mark remaining rules pending when the deleted rule had already
+        // been pushed to Typesense. If it was never synced, the curation sets
+        // in Typesense are unaffected and do not need to be re-synced.
+        if ($deleted && $row !== null && $row->synced_at !== null) {
             $this->markAllPending();
         }
 
