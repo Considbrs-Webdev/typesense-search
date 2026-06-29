@@ -14,8 +14,10 @@ class PinnedResultsPage
 {
     public const PAGE_SLUG = 'typesense-search-pinned-results';
 
-    public function __construct(private SettingsRepository $settings)
-    {
+    public function __construct(
+        private SettingsRepository $settings,
+        private ServerCapabilities $capabilities
+    ) {
         add_action('admin_menu', [$this, 'addPage']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAssets']);
     }
@@ -89,6 +91,6 @@ class PinnedResultsPage
     private function shouldShow(): bool
     {
         return $this->settings->isPinnedResultsEnabled()
-            && ServerCapabilities::supportsCurationSets();
+            && $this->capabilities->supportsCurationSets();
     }
 }

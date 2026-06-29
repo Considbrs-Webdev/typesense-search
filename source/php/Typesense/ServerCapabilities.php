@@ -2,8 +2,6 @@
 
 namespace TypesenseSearch\Typesense;
 
-use TypesenseSearch\Services\SettingsRepository;
-
 /**
  * Detects Typesense server capabilities that depend on the server version.
  */
@@ -11,28 +9,24 @@ class ServerCapabilities
 {
     private const MIN_CURATION_SETS_VERSION = '30.0.0';
 
-    public static function supportsCurationSets(): bool
+    private ?string $cached = null;
+
+    public function __construct(private AdminApi $adminApi)
     {
-        $version = self::getServerVersion();
+    }
+
+    public function supportsCurationSets(): bool
+    {
+        $version = $this->getServerVersion();
 
         return $version !== '' && version_compare($version, self::MIN_CURATION_SETS_VERSION, '>=');
     }
 
     /**
-     * Returns the server version string, cached per-request, or '' on failure.
-     *
-     * HTTP logic lives in AdminApi; this wrapper preserves the static interface
-     * that Collection::getSchema() and other callers depend on.
+     * Returns the server version string, cached per-instance, or '' on failure.
      */
-    public static function getServerVersion(): string
+    public function getServerVersion(): string
     {
-        static $cached = null;
-
-        if (is_string($cached)) {
-            return $cached;
-        }
-
-        $adminApi = new AdminApi(new SettingsRepository());
-        return $cached = $adminApi->getServerVersion();
+        return $this->cached ??= $this->adminApi->getServerVersion();
     }
 }

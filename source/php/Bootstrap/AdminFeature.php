@@ -4,6 +4,8 @@ namespace TypesenseSearch\Bootstrap;
 
 use TypesenseSearch\Admin;
 use TypesenseSearch\Services\SettingsRepository;
+use TypesenseSearch\Typesense\AdminApi;
+use TypesenseSearch\Typesense\ServerCapabilities;
 
 /**
  * Wires all admin-panel components.
@@ -18,9 +20,11 @@ class AdminFeature
 
     public function register(): void
     {
+        $capabilities = new ServerCapabilities(new AdminApi($this->settings));
+
         new Admin\Settings();
         new Admin\SettingsAjax($this->settings);
         new Admin\MetaBox($this->settings);
-        new Admin\PinnedResultsPage($this->settings);
+        new Admin\PinnedResultsPage($this->settings, $capabilities);
     }
 }

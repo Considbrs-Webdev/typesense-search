@@ -2,6 +2,8 @@
 
 namespace TypesenseSearch\Admin\Settings;
 
+use TypesenseSearch\Services\SettingsRepository;
+use TypesenseSearch\Typesense\AdminApi;
 use TypesenseSearch\Typesense\ServerCapabilities;
 
 /**
@@ -77,7 +79,7 @@ trait Sanitizers
 
     public function sanitizePinnedResultsEnabled(mixed $value): int
     {
-        if (!ServerCapabilities::supportsCurationSets()) {
+        if (!(new ServerCapabilities(new AdminApi(new SettingsRepository())))->supportsCurationSets()) {
             return 0;
         }
 

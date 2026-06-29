@@ -18,7 +18,8 @@ class RestController
     public function __construct(
         private SettingsRepository $settings,
         private Repository $repository,
-        private TypesenseSync $sync
+        private TypesenseSync $sync,
+        private ServerCapabilities $capabilities
     ) {
         add_action('rest_api_init', [$this, 'registerRoutes']);
     }
@@ -159,7 +160,7 @@ class RestController
 
     private function guardFeature(): bool|\WP_Error
     {
-        if (!$this->settings->isPinnedResultsEnabled() || !ServerCapabilities::supportsCurationSets()) {
+        if (!$this->settings->isPinnedResultsEnabled() || !$this->capabilities->supportsCurationSets()) {
             $this->sendNoCacheHeaders();
 
             return new \WP_Error(

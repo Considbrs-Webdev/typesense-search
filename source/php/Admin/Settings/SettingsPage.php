@@ -5,6 +5,8 @@ namespace TypesenseSearch\Admin\Settings;
 use TypesenseSearch\Admin\SettingsAjax;
 use TypesenseSearch\Frontend\I18n;
 use TypesenseSearch\Helper\CacheBust;
+use TypesenseSearch\Services\SettingsRepository;
+use TypesenseSearch\Typesense\AdminApi;
 use TypesenseSearch\Typesense\ServerCapabilities;
 
 /**
@@ -127,7 +129,7 @@ class SettingsPage
         $quickSearchSelectors     = (array) get_option(OptionKeys::OPTION_QUICK_SEARCH_SELECTORS, []);
         $quickSearchHitsPerPage   = (int) get_option(OptionKeys::OPTION_QUICK_SEARCH_HITS_PER_PAGE, 5);
         $supportsPinnedResults    = $activeTab === 'advanced-settings'
-            ? ServerCapabilities::supportsCurationSets()
+            ? (new ServerCapabilities(new AdminApi(new SettingsRepository())))->supportsCurationSets()
             : false;
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';

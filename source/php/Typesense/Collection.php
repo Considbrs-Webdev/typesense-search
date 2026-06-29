@@ -3,8 +3,8 @@
 namespace TypesenseSearch\Typesense;
 
 use Typesense\Client;
-use TypesenseSearch\Admin\Settings;
 use Typesense\Exceptions\ObjectNotFound;
+use TypesenseSearch\Services\SettingsRepository;
 
 /**
  * Class Collection
@@ -42,11 +42,16 @@ class Collection
      * during indexing are indexed automatically even if they were not declared
      * in the schema up-front.
      *
-     * @param string $collectionName The Typesense collection name.
+     * @param string                  $collectionName The Typesense collection name.
+     * @param SettingsRepository|null $settings       Injected settings; falls back to a new instance.
+     * @param ServerCapabilities|null $capabilities   Injected capabilities; falls back to a new instance.
      * @return array<string, mixed>
      */
-    public static function getSchema(string $collectionName): array
-    {
+    public static function getSchema(
+        string $collectionName,
+        ?SettingsRepository $settings = null,
+        ?ServerCapabilities $capabilities = null
+    ): array {
         $schema = [
             'name'   => $collectionName,
             'fields' => [
@@ -67,10 +72,10 @@ class Collection
             ],
         ];
 
-        if (
-            (bool) get_option(Settings::OPTION_PINNED_RESULTS_ENABLED, 0)
-            && ServerCapabilities::supportsCurationSets()
-        ) {
+        $settings     ??= new SettingsRepository();
+        $capabilities ??= new ServerCapabilities(new AdminApi($settings));
+
+        if ($settings->isPinnedResultsEnabled() && $capabilities->supportsCurationSets()) {
             $schema['curation_sets'] = ['wordpress-pinned-results-' . $collectionName];
         }
 
@@ -86,13 +91,19 @@ class Collection
     /**
      * Creates the collection in Typesense using the resolved schema.
      *
-     * @param Client $client         An authenticated Typesense client.
-     * @param string $collectionName The name of the collection to create.
+     * @param Client                  $client         An authenticated Typesense client.
+     * @param string                  $collectionName The name of the collection to create.
+     * @param SettingsRepository|null $settings       Injected settings; falls back to a new instance.
+     * @param ServerCapabilities|null $capabilities   Injected capabilities; falls back to a new instance.
      * @throws \Exception On API failure.
      */
-    public static function create(Client $client, string $collectionName): void
-    {
-        $client->collections->create(self::getSchema($collectionName));
+    public static function create(
+        Client $client,
+        string $collectionName,
+        ?SettingsRepository $settings = null,
+        ?ServerCapabilities $capabilities = null
+    ): void {
+        $client->collections->create(self::getSchema($collectionName, $settings, $capabilities));
     }
 
     /**
