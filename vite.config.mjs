@@ -5,7 +5,7 @@ const entries = {
     'css/typesense-search':  './source/sass/typesense-search.scss',
     'js/typesense-search':   './source/js/typesense-search.ts',
     'css/admin-settings':    './source/sass/admin-settings.scss',
-    'js/admin-settings':     './source/js/admin-settings.js',
+    'js/admin-settings':     './source/js/admin-settings.ts',
     'css/pinned-results-admin': './source/sass/pinned-results-admin.scss',
     'js/pinned-results-admin':  './source/js/pinned-results-admin.ts',
     'css/quick-search':      './source/sass/quick-search.scss',
