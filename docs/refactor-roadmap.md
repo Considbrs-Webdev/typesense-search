@@ -11,6 +11,24 @@ boundaries are now blurry.
 
 ## Item Index
 
+Pending items are listed first. Completed items are at the bottom.
+
+### Pending
+
+| # | Title | Status |
+|---|-------|--------|
+| 14 | [Frontend config building could be separated](#14-frontend-config-building-could-be-separated) | ⏳ low urgency |
+| 15 | [Future feature structure recommendation](#15-future-feature-structure-recommendation) | ⏳ guidance for when new features are added |
+| 17 | [Frontend/I18n.php is unusually large](#17-frontendi18nphp-is-unusually-large) | ⏳ audit first |
+
+### Skipped
+
+| # | Title | Status |
+|---|-------|--------|
+| 11 | [Database lifecycle is similar but not shared](#11-database-lifecycle-is-similar-but-not-shared) | ⏭ skip — don't abstract two cases |
+
+### Done
+
 | # | Title | Status |
 |---|-------|--------|
 | 1 | [Uninstall cleanup naming and ownership](#1-uninstall-cleanup-naming-and-ownership) | ✅ PR 1 |
@@ -22,14 +40,10 @@ boundaries are now blurry.
 | 7 | [SettingsAjax is a large multi-purpose controller](#7-settingsajax-is-a-large-multi-purpose-controller) | ✅ PR 2 |
 | 8 | [Typesense HTTP/admin access is scattered](#8-typesense-httpadmin-access-is-scattered) | ✅ PR 4 |
 | 9 | [Pinned results sync-state policy lives in Repository](#9-pinned-results-sync-state-policy-lives-in-repository) | ✅ PR 5 |
-| 10 | [Admin JavaScript files are becoming page apps](#10-admin-javascript-files-are-becoming-page-apps) | ⏳ do before adding new JS-heavy admin pages |
-| 11 | [Database lifecycle is similar but not shared](#11-database-lifecycle-is-similar-but-not-shared) | ⏭ skip — don't abstract two cases |
+| 10 | [Admin JavaScript files are becoming page apps](#10-admin-javascript-files-are-becoming-page-apps) | ✅ PR 7 |
 | 12 | [Capability detection is static and option-based](#12-capability-detection-is-static-and-option-based) | ✅ PR 6 |
 | 13 | [Source tree has an empty or stray directory](#13-source-tree-has-an-empty-or-stray-directory) | ✅ PR 1 |
-| 14 | [Frontend config building could be separated](#14-frontend-config-building-could-be-separated) | ⏳ low urgency |
-| 15 | [Future feature structure recommendation](#15-future-feature-structure-recommendation) | ⏳ guidance for when new features are added |
 | 16 | [CLI/IndexCommand is the largest file in the plugin](#16-cliindexcommand-is-the-largest-file-in-the-plugin) | ✅ PR 2 |
-| 17 | [Frontend/I18n.php is unusually large](#17-frontendi18nphp-is-unusually-large) | ⏳ audit first |
 
 ## Current Context
 
@@ -146,9 +160,28 @@ Work in PR-sized batches. Each batch should leave the plugin fully functional.
   caching, no shared cache, feature flag combinations).
 - 74 tests total, 117 assertions.
 
-**Remaining / as needed (items 10, 14, 15, 17)**
+**PR 7 — Admin JS modularization (item 10) (done)**
 
-- Admin JS modularization (item 10) — do before adding new JS-heavy pages.
+- Extracted shared admin utilities to `source/js/admin/`: `ajax.ts`
+  (WP AJAX helper), `button.ts` (loading state), `dom.ts` (HTML escaping),
+  `debounce.ts` (generic debounce), `toast.ts` (DOM-based notice widget),
+  `sortable-list.ts` (drag-and-drop with index callback),
+  `autocomplete.ts` (generic dropdown search widget for future pages).
+- `source/js/admin-settings.js` (1145 lines, plain JS) converted to TypeScript
+  and split into a thin entry `source/js/admin-settings.ts` plus six section
+  modules under `source/js/admin-settings/`: `connection.ts`,
+  `statistics.ts`, `status.ts`, `facets.ts`, `quick-search-settings.ts`,
+  `toggles.ts`. Each exports a single `init()`.
+- `source/js/pinned-results-admin.ts` (647 lines) split into
+  `source/js/pinned-results/`: `types.ts`, `state.ts`, `api.ts`,
+  `render.ts`, `events.ts`. Module-level `let` variables consolidated into
+  one shared `state` object. Dep graph: `state ← render ← api ← events ←
+  entry` (no circular imports). `sortable-list` utility used for
+  drag-and-drop post reorder.
+- Vite entry points unchanged; build output is identical.
+
+**Remaining / as needed (items 14, 15, 17)**
+
 - Frontend config split (item 14) — low urgency.
 - Future feature structure (item 15) — guidance, not a code task.
 - `I18n.php` audit (item 17) — audit first, refactor only if it is doing too
@@ -555,42 +588,22 @@ because it is not purely structural.
 
 ## 10. Admin JavaScript Files Are Becoming Page Apps
 
-### Current smell
+**Done in PR 7.** See the PR 7 entry in Recommended Order for full details.
 
-Large single JS/TS files:
+### What was done
 
-- `source/js/admin-settings.js` is over 1000 lines.
-- `source/js/pinned-results-admin.ts` is a full mutable-state app in one file.
-- `source/js/quick-search.ts` is also large.
-
-This is acceptable for now, but future features like search shortcuts, search
-notices, and "Did you mean" suggestions will likely need similar admin UIs.
-
-### Suggested refactor
-
-Create small shared admin utilities before adding more JS-heavy admin pages:
+Shared utilities live in `source/js/admin/`. Each admin page entry point has
+its own sub-directory. New pages should follow the same pattern:
 
 ```text
-source/js/admin/dom.ts
-source/js/admin/rest.ts
-source/js/admin/toast.ts
-source/js/admin/debounce.ts
-source/js/admin/autocomplete.ts
-source/js/admin/sortable-list.ts
+source/js/admin/           shared utilities (import from here, don't copy)
+source/js/<page-name>/     modules for a specific admin page
+source/js/<page-name>.ts   thin entry point that calls init() on each module
 ```
 
-Then split pinned results into modules:
-
-```text
-source/js/pinned-results/state.ts
-source/js/pinned-results/api.ts
-source/js/pinned-results/render.ts
-source/js/pinned-results/events.ts
-source/js/pinned-results/types.ts
-```
-
-Do not introduce a framework unless there is a stronger reason. The current
-plain TypeScript approach is fine if it is modular.
+`quick-search.ts` was already modular (it imports from five other files) and
+was left as-is. It is a frontend widget, not an admin page, so the
+sub-directory pattern does not apply.
 
 ## 11. Database Lifecycle Is Similar But Not Shared
 
