@@ -28,9 +28,8 @@ export async function loadRules(): Promise<void> {
     try {
         const data = await request<{ rules: PinnedRule[] }>();
         state.rules      = (data.rules ?? []).map(cloneRule);
-        const first      = state.rules[0] ?? null;
-        state.selectedId = first?.id ?? null;
-        state.draft      = first ? cloneRule(first) : emptyRule();
+        state.selectedId = null;
+        state.draft      = emptyRule();
         setNotice('', 'info', render);
     } catch (error) {
         setNotice(error instanceof Error ? error.message : 'Could not load pinned results.', 'error', render);

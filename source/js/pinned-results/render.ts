@@ -125,7 +125,7 @@ function renderAutocomplete(): string {
 
 function renderEditor(): string {
     const title           = state.draft.id ? state.draft.phrase || t('pinnedSearch', 'Pinned search') : t('newPinnedSearch', 'New pinned search');
-    const saveButtonLabel = state.saveState === 'saving' ? t('saving', 'Saving...') : state.saveState === 'saved' ? t('saved', 'Saved') : t('saveChanges', 'Save changes');
+    const saveButtonLabel = state.saveState === 'saving' ? t('saving', 'Saving...') : state.saveState === 'saved' ? t('saved', 'Saved') : state.draft.id ? t('saveChanges', 'Save changes') : t('saveNewSearch', 'Save new search');
 
     return `
         <section class="ts-pr__editor" aria-label="Pinned search editor">
@@ -139,36 +139,40 @@ function renderEditor(): string {
                         ${state.draft.id ? `<button type="button" class="button-link-delete ts-pr__delete-rule" data-action="delete">${esc(t('deletePinnedSearch', 'Delete pinned search'))}</button>` : ''}
                     </div>
 
-                    <h2>${esc(title)}</h2>
-
-                    <label class="ts-pr__field">
-                        <span>${esc(t('searchPhrase', 'Search phrase'))}</span>
-                        <input type="text" id="ts-pr-phrase" value="${esc(state.draft.phrase)}" autocomplete="off">
-                        ${state.editorError && state.draft.phrase.trim() === '' ? `<span class="ts-pr__field-error">${esc(state.editorError)}</span>` : ''}
-                    </label>
-
-                    <div class="ts-pr__field">
-                        <span>${esc(t('matchType', 'Match type'))}</span>
-                        <div class="ts-pr__segments" role="group" aria-label="Match type">
-                            <button type="button" class="ts-pr__segment ${state.draft.match_type === 'exact' ? 'is-active' : ''}" data-action="set-match-type" data-match-type="exact">${esc(t('exact', 'Exact'))}</button>
-                            <button type="button" class="ts-pr__segment ${state.draft.match_type === 'contains' ? 'is-active' : ''}" data-action="set-match-type" data-match-type="contains">${esc(t('contains', 'Contains'))}</button>
+                    <div class="ts-pr__title-row">
+                        <h2>${esc(title)}</h2>
+                        <div class="ts-pr__enabled-row">
+                            <button type="button" class="ts-pr__switch ${state.draft.enabled !== false ? 'is-on' : ''}" data-action="toggle-enabled" aria-pressed="${state.draft.enabled !== false ? 'true' : 'false'}">
+                                <span></span>
+                            </button>
+                            <span>${esc(t('enabled', 'Enabled'))}</span>
                         </div>
                     </div>
 
-                    <div class="ts-pr__enabled-row">
-                        <button type="button" class="ts-pr__switch ${state.draft.enabled !== false ? 'is-on' : ''}" data-action="toggle-enabled" aria-pressed="${state.draft.enabled !== false ? 'true' : 'false'}">
-                            <span></span>
-                        </button>
-                        <span>${esc(t('enabled', 'Enabled'))}</span>
+                    <div class="ts-pr__group">
+                        <label class="ts-pr__field">
+                            <span>${esc(t('searchPhrase', 'Search phrase'))}</span>
+                            <input type="text" id="ts-pr-phrase" value="${esc(state.draft.phrase)}" autocomplete="off">
+                            ${state.editorError && state.draft.phrase.trim() === '' ? `<span class="ts-pr__field-error">${esc(state.editorError)}</span>` : ''}
+                        </label>
+
+                        <div class="ts-pr__field">
+                            <span>${esc(t('matchType', 'Match type'))}</span>
+                            <div class="ts-pr__segments" role="group" aria-label="Match type">
+                                <button type="button" class="ts-pr__segment ${state.draft.match_type === 'exact' ? 'is-active' : ''}" data-action="set-match-type" data-match-type="exact">${esc(t('exact', 'Exact'))}</button>
+                                <button type="button" class="ts-pr__segment ${state.draft.match_type === 'contains' ? 'is-active' : ''}" data-action="set-match-type" data-match-type="contains">${esc(t('contains', 'Contains'))}</button>
+                            </div>
+                        </div>
                     </div>
 
                     ${state.draft.sync_error ? `<div class="notice notice-error inline"><p>${esc(state.draft.sync_error)}</p></div>` : ''}
 
-                    <div class="ts-pr__section-title">${esc(t('pinnedResults', 'Pinned results'))}</div>
-                    <ol class="ts-pr__pins">${renderPinnedPosts()}</ol>
-
-                    <div class="ts-pr__add-result">
-                        ${renderAutocomplete()}
+                    <div class="ts-pr__group">
+                        <div class="ts-pr__section-title">${esc(t('pinnedResults', 'Pinned results'))}</div>
+                        <ol class="ts-pr__pins">${renderPinnedPosts()}</ol>
+                        <div class="ts-pr__add-result">
+                            ${renderAutocomplete()}
+                        </div>
                     </div>
                 </div>
             </div>
