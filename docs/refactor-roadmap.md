@@ -9,6 +9,28 @@ not change behavior unless a specific task asks for it. The plugin has grown a
 lot through incremental feature work, and the code is still workable, but some
 boundaries are now blurry.
 
+## Item Index
+
+| # | Title | Status |
+|---|-------|--------|
+| 1 | [Uninstall cleanup naming and ownership](#1-uninstall-cleanup-naming-and-ownership) | ✅ PR 1 |
+| 2 | [App bootstrap is becoming a hand-written container](#2-app-bootstrap-is-becoming-a-hand-written-container) | ✅ PR 3 |
+| 3 | [Settings.php has too many jobs](#3-settingsphp-has-too-many-jobs) | ✅ PR 3 |
+| 4 | [SettingsRepository promise is no longer true](#4-settingsrepository-promise-is-no-longer-true) | ✅ PR 4 |
+| 5 | [Global function in advanced settings view](#5-global-function-in-advanced-settings-view) | ✅ PR 1 |
+| 6 | [Inline JavaScript in PHP views](#6-inline-javascript-in-php-views) | ✅ PR 1 |
+| 7 | [SettingsAjax is a large multi-purpose controller](#7-settingsajax-is-a-large-multi-purpose-controller) | ✅ PR 2 |
+| 8 | [Typesense HTTP/admin access is scattered](#8-typesense-httpadmin-access-is-scattered) | ✅ PR 4 |
+| 9 | [Pinned results sync-state policy lives in Repository](#9-pinned-results-sync-state-policy-lives-in-repository) | ⏳ behavior fix — test written, implementation pending |
+| 10 | [Admin JavaScript files are becoming page apps](#10-admin-javascript-files-are-becoming-page-apps) | ⏳ do before adding new JS-heavy admin pages |
+| 11 | [Database lifecycle is similar but not shared](#11-database-lifecycle-is-similar-but-not-shared) | ⏭ skip — don't abstract two cases |
+| 12 | [Capability detection is static and option-based](#12-capability-detection-is-static-and-option-based) | ⏳ unblocked now that AdminApi exists |
+| 13 | [Source tree has an empty or stray directory](#13-source-tree-has-an-empty-or-stray-directory) | ✅ PR 1 |
+| 14 | [Frontend config building could be separated](#14-frontend-config-building-could-be-separated) | ⏳ low urgency |
+| 15 | [Future feature structure recommendation](#15-future-feature-structure-recommendation) | ⏳ guidance for when new features are added |
+| 16 | [CLI/IndexCommand is the largest file in the plugin](#16-cliindexcommand-is-the-largest-file-in-the-plugin) | ✅ PR 2 |
+| 17 | [Frontend/I18n.php is unusually large](#17-frontendi18nphp-is-unusually-large) | ⏳ audit first |
+
 ## Current Context
 
 The plugin currently includes:
