@@ -21,10 +21,10 @@ boundaries are now blurry.
 | 6 | [Inline JavaScript in PHP views](#6-inline-javascript-in-php-views) | ✅ PR 1 |
 | 7 | [SettingsAjax is a large multi-purpose controller](#7-settingsajax-is-a-large-multi-purpose-controller) | ✅ PR 2 |
 | 8 | [Typesense HTTP/admin access is scattered](#8-typesense-httpadmin-access-is-scattered) | ✅ PR 4 |
-| 9 | [Pinned results sync-state policy lives in Repository](#9-pinned-results-sync-state-policy-lives-in-repository) | ⏳ behavior fix — test written, implementation pending |
+| 9 | [Pinned results sync-state policy lives in Repository](#9-pinned-results-sync-state-policy-lives-in-repository) | ✅ PR 5 |
 | 10 | [Admin JavaScript files are becoming page apps](#10-admin-javascript-files-are-becoming-page-apps) | ⏳ do before adding new JS-heavy admin pages |
 | 11 | [Database lifecycle is similar but not shared](#11-database-lifecycle-is-similar-but-not-shared) | ⏭ skip — don't abstract two cases |
-| 12 | [Capability detection is static and option-based](#12-capability-detection-is-static-and-option-based) | ⏳ unblocked now that AdminApi exists |
+| 12 | [Capability detection is static and option-based](#12-capability-detection-is-static-and-option-based) | ✅ PR 6 |
 | 13 | [Source tree has an empty or stray directory](#13-source-tree-has-an-empty-or-stray-directory) | ✅ PR 1 |
 | 14 | [Frontend config building could be separated](#14-frontend-config-building-could-be-separated) | ⏳ low urgency |
 | 15 | [Future feature structure recommendation](#15-future-feature-structure-recommendation) | ⏳ guidance for when new features are added |
@@ -117,13 +117,40 @@ Work in PR-sized batches. Each batch should leave the plugin fully functional.
 - Bootstrap classes and `IndexCommand` updated to wire the new dependencies.
 - 67 tests total, 107 assertions, 1 intentionally incomplete.
 
-**Later / as needed (items 9, 10, 12, 14, 15, 17)**
+**PR 5 — Pinned results sync-state fix (item 9) (done)**
 
-- Pinned results sync-state policy (item 9) — touches behavior, keep separate.
+- `Repository::delete()` now fetches the row first and only calls
+  `markAllPending()` when the deleted rule had a non-null `synced_at`.
+  Never-synced rules no longer trigger a full re-sync of curation sets.
+- All three `RepositoryTest` tests rewritten to cover synced, never-synced,
+  and failed-delete cases.
+- 71 tests total, 110 assertions.
+
+**PR 6 — ServerCapabilities instance service (item 12) (done)**
+
+- `ServerCapabilities` converted from a static class to an instance class with
+  `AdminApi` injected via constructor. Per-instance `?string $cached` replaces
+  the process-global `static $cached`, fixing test isolation.
+- `Collection::getSchema()` and `Collection::create()` now accept optional
+  `?SettingsRepository` and `?ServerCapabilities` parameters; callers that
+  don't pass them get fresh instances created internally (backward-compatible).
+- `Collection::getSchema()` uses `SettingsRepository::isPinnedResultsEnabled()`
+  instead of a direct `get_option()` call, eliminating the last direct option
+  read in a non-view runtime class.
+- All static `ServerCapabilities::supportsCurationSets()` call sites updated:
+  - `RestController` and `PinnedResultsPage` now receive `ServerCapabilities`
+    via constructor; bootstrap classes create and wire the instance.
+  - `SettingsPage::render()` and `Sanitizers::sanitizePinnedResultsEnabled()`
+    use inline instantiation (admin views / trait, no constructor to inject).
+- 4 new tests in `ServerCapabilitiesTest` (version delegation, per-instance
+  caching, no shared cache, feature flag combinations).
+- 74 tests total, 117 assertions.
+
+**Remaining / as needed (items 10, 14, 15, 17)**
+
 - Admin JS modularization (item 10) — do before adding new JS-heavy pages.
-- `ServerCapabilities` instance service (item 12) — defer until `AdminApi`
-  exists.
 - Frontend config split (item 14) — low urgency.
+- Future feature structure (item 15) — guidance, not a code task.
 - `I18n.php` audit (item 17) — audit first, refactor only if it is doing too
   much.
 
