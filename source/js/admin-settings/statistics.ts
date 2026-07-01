@@ -26,16 +26,41 @@ type Facet = { slug: string; label: string; count: number; external: boolean; co
 // Chart
 // ---------------------------------------------------------------------------
 
+function drawFullDonutPath(cx: number, cy: number, rOuter: number, rInner: number, fill: string): string {
+    return `
+        <path
+            d="M ${cx} ${cy - rOuter}
+               A ${rOuter} ${rOuter} 0 1 1 ${cx} ${cy + rOuter}
+               A ${rOuter} ${rOuter} 0 1 1 ${cx} ${cy - rOuter}
+               M ${cx} ${cy - rInner}
+               A ${rInner} ${rInner} 0 1 0 ${cx} ${cy + rInner}
+               A ${rInner} ${rInner} 0 1 0 ${cx} ${cy - rInner}
+               Z"
+            fill="${fill}"
+            fill-rule="evenodd"
+        />`;
+}
+
 function drawDonutChart(container: HTMLElement, segments: Facet[], total: number): void {
     const size = 180, cx = 90, cy = 90, rOuter = 70, rInner = 42;
+    const fullCircle = 2 * Math.PI;
     let paths = '';
 
     if (total === 0) {
-        paths = `<path d="M ${cx} ${cy - rOuter} A ${rOuter} ${rOuter} 0 1 1 ${cx - 0.001} ${cy - rOuter} Z" fill="#e0e0e0"/>`;
+        paths = drawFullDonutPath(cx, cy, rOuter, rInner, '#e0e0e0');
     } else {
         let startAngle = -Math.PI / 2;
         segments.forEach((seg) => {
-            const angle    = (seg.count / total) * 2 * Math.PI;
+            if (seg.count <= 0) return;
+
+            const angle = (seg.count / total) * fullCircle;
+
+            if (angle >= fullCircle - 0.0001) {
+                paths += drawFullDonutPath(cx, cy, rOuter, rInner, seg.color);
+                startAngle += angle;
+                return;
+            }
+
             const endAngle = startAngle + angle;
             const large    = angle > Math.PI ? 1 : 0;
             const [x1, y1] = [cx + rOuter * Math.cos(startAngle), cy + rOuter * Math.sin(startAngle)];
