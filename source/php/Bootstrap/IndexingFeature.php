@@ -2,6 +2,7 @@
 
 namespace TypesenseSearch\Bootstrap;
 
+use TypesenseSearch\Indexing\DisabledContentPruner;
 use TypesenseSearch\Indexing\Enrichers\JobPostingEnricher;
 use TypesenseSearch\Indexing\Enrichers\ModularityEnricher;
 use TypesenseSearch\Indexing\Enrichers\PageEnricher;
@@ -57,6 +58,7 @@ class IndexingFeature
         do_action('Municipio/TypesenseSearch/RegisterStrategies', $this->registry, $this->clientService, $this->settings, $this->logger);
 
         new IndexingHooks($this->registry);
+        (new DisabledContentPruner($this->clientService, $this->settings, $this->logger))->register();
 
         // Document enrichers hook into DocumentBuilder's filter chain to add
         // fields to specific post types.
