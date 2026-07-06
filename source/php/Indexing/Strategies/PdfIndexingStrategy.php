@@ -229,7 +229,7 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
      */
     private function isActive(): bool
     {
-        return $this->settings->isIndexPdfEnabled()
+        return $this->getSettings()->isIndexPdfEnabled()
             && PdfToText::isAvailable();
     }
 
