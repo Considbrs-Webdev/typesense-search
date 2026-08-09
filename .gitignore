@@ -58,3 +58,9 @@ phpunit-testdox.txt
 !.editorconfig
 !.vscode
 !.env.example
+
+# share project-level Claude Code skills via the repo, but keep local
+# machine-specific settings (settings.local.json, worktrees/) untracked
+!.claude/
+.claude/*
+!.claude/skills/
