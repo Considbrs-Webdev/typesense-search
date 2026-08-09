@@ -286,7 +286,10 @@ class IndexAction
 
                         foreach ($pdfs as $pdf) {
                             try {
-                                if (!$pdfStrategy || $pdf->post_mime_type !== 'application/pdf') {
+                                if (!$pdfStrategy
+                                    || $pdf->post_mime_type !== 'application/pdf'
+                                    || !$pdfStrategy->shouldIndex($pdf)
+                                ) {
                                     $pdfSkipped++;
                                     $progress->tick();
                                     continue;
