@@ -31,7 +31,9 @@ class OptionKeys
     public const OPTION_TRUNCATOR              = 'typesense_search_truncator';
     public const OPTION_SORT_DISPLAY           = 'typesense_search_sort_display';
     public const OPTION_QUERY_BY_WEIGHTS       = 'typesense_search_query_by_weights';
+    public const OPTION_STEMMING_ENABLED       = 'typesense_search_stemming_enabled';
     public const OPTION_PINNED_RESULTS_ENABLED = 'typesense_search_pinned_results_enabled';
+    public const OPTION_SYNONYMS_ENABLED       = 'typesense_search_synonyms_enabled';
 
     public const OPTION_SEARCH_LOGGING_ENABLED             = 'typesense_search_logging_enabled';
     public const OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS   = 'typesense_search_logging_dashboard_widgets';

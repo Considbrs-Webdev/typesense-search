@@ -122,6 +122,30 @@ class SettingsSanitizersTest extends TestCase
         self::assertSame(0, $this->settings->sanitizePinnedResultsEnabled(0));
     }
 
+    /**
+     * When Typesense is not configured (OPTION_REMOTE is empty), the server
+     * version cannot be determined, so sanitizeSynonymsEnabled must always
+     * return 0 regardless of the submitted value.
+     */
+    public function test_sanitize_synonyms_enabled_returns_zero_when_server_has_no_version(): void
+    {
+        Functions\when('get_option')->justReturn('');
+
+        self::assertSame(0, $this->settings->sanitizeSynonymsEnabled(1));
+        self::assertSame(0, $this->settings->sanitizeSynonymsEnabled(0));
+    }
+
+    /**
+     * Same as above, for sanitizeStemmingEnabled.
+     */
+    public function test_sanitize_stemming_enabled_returns_zero_when_server_has_no_version(): void
+    {
+        Functions\when('get_option')->justReturn('');
+
+        self::assertSame(0, $this->settings->sanitizeStemmingEnabled(1));
+        self::assertSame(0, $this->settings->sanitizeStemmingEnabled(0));
+    }
+
     public function test_get_default_query_by_weights_returns_one_for_all_fields(): void
     {
         $defaults = Settings::getDefaultQueryByWeights();

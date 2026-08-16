@@ -12,11 +12,14 @@
  *  @var int           $quickSearchEnabled   Whether quick search is enabled (1/0).
  *  @var array[]       $quickSearchSelectors Saved CSS selector entries.
  *  @var bool          $supportsPinnedResults Whether the Typesense server supports curation sets.
+ *  @var bool          $supportsSynonyms     Whether the Typesense server supports synonym sets.
+ *  @var bool          $supportsStemming     Whether the Typesense server supports field-level stemming.
+ *  @var string        $stemmingLocale       Two-letter language code derived from the site's locale.
  */
 
 use TypesenseSearch\Admin\Settings;
 
-$pageUrl = admin_url('options-general.php?page=' . Settings::PAGE_SLUG);
+$pageUrl = admin_url('admin.php?page=' . Settings::PAGE_SLUG);
 ?>
 
 <div class="wrap ts-settings">

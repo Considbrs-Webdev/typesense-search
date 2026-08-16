@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-06-26T18:47:35+00:00\n"
+"POT-Creation-Date: 2026-08-16T17:54:46+00:00\n"
 "PO-Revision-Date: 2026-06-16 15:06+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -15,8 +15,9 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Plugin Name of the plugin
-#: typesense-search.php source/php/Admin/Settings.php:81
-#: source/php/Admin/Settings.php:82 views/admin/settings-page.php:26
+#: typesense-search.php source/php/Admin/Settings/SettingsPage.php:45
+#: source/php/Admin/Settings/SettingsPage.php:58
+#: views/admin/settings-page.php:29
 msgid "Typesense Search"
 msgstr "Typesense-sök"
 
@@ -40,19 +41,251 @@ msgstr "Consid Borås AB"
 msgid "https://github.com/considbrs-webdev"
 msgstr "https://github.com/considbrs-webdev"
 
-#: source/php/Admin/MetaBox.php:65
+#: source/php/Admin/Ajax/AjaxHelpers.php:26
+#: source/php/Admin/Ajax/AjaxHelpers.php:40
+msgid "Unauthorized."
+msgstr "Obehörig."
+
+#: source/php/Admin/Ajax/AjaxHelpers.php:49
+msgid "Enter both a host URL and an Admin API key before testing."
+msgstr "Ange både en värd-URL och en Admin-API-nyckel innan du testar."
+
+#: source/php/Admin/Ajax/AjaxHelpers.php:57
+msgid "The host value is not a valid URL."
+msgstr "Värdadressen är inte en giltig URL."
+
+#: source/php/Admin/Ajax/CollectionActions.php:43
+msgid "Collection name is required."
+msgstr "Ett samlingsnamn krävs."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/CollectionActions.php:55
+#: source/php/Admin/Ajax/CollectionActions.php:99
+msgid "Could not create collection: %s"
+msgstr "Kunde inte skapa samling: %s"
+
+#. translators: %s: collection name
+#: source/php/Admin/Ajax/CollectionActions.php:65
+#: source/php/Admin/Ajax/CollectionActions.php:109
+msgid "Collection \"%s\" created successfully."
+msgstr "Samlingen \"%s\" skapades."
+
+#: source/php/Admin/Ajax/CollectionActions.php:87
+msgid ""
+"Host, admin key, and collection name must all be saved before the collection "
+"can be created."
+msgstr ""
+"Värd, admin-nyckel och samlingsnamn måste vara sparade innan samlingen kan "
+"skapas."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/ConnectionActions.php:49
+#: source/php/Admin/Ajax/ConnectionActions.php:154
+msgid "Could not reach server: %s"
+msgstr "Kunde inte nå servern: %s"
+
+#: source/php/Admin/Ajax/ConnectionActions.php:59
+#: source/php/Admin/Ajax/ConnectionActions.php:147
+msgid "Server responded but reported an unhealthy status."
+msgstr "Servern svarade men rapporterade ett ohälsosamt status."
+
+#: source/php/Admin/Ajax/ConnectionActions.php:70
+msgid "Server is reachable, but the Admin API key was rejected."
+msgstr "Servern är nåbar, men Admin-API-nyckeln avvisades."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/ConnectionActions.php:78
+msgid "Server is reachable, but key validation failed: %s"
+msgstr "Servern är nåbar, men validering av nyckeln misslyckades: %s"
+
+#: source/php/Admin/Ajax/ConnectionActions.php:94
+msgid ""
+"Connected successfully. Server is healthy and the Admin API key is valid."
+msgstr ""
+"Anslutningen lyckades. Servern är i gott skick och Admin-API-nyckeln är "
+"giltig."
+
+#: source/php/Admin/Ajax/ConnectionActions.php:134
+msgid "No host URL configured."
+msgstr "Ingen värd-URL konfigurerad."
+
+#: source/php/Admin/Ajax/ConnectionActions.php:145
+msgid "Server is reachable and healthy."
+msgstr "Servern är nåbar och i gott skick."
+
+#: source/php/Admin/Ajax/ConnectionActions.php:164
+msgid "No admin key configured."
+msgstr "Ingen admin-nyckel konfigurerad."
+
+#: source/php/Admin/Ajax/ConnectionActions.php:170
+msgid "Admin key is valid."
+msgstr "Admin-nyckeln är giltig."
+
+#: source/php/Admin/Ajax/ConnectionActions.php:172
+msgid "Admin key was rejected by the server."
+msgstr "Admin-nyckeln avvisades av servern."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/ConnectionActions.php:176
+msgid "Admin key check failed: %s"
+msgstr "Kontroll av admin-nyckel misslyckades: %s"
+
+#: source/php/Admin/Ajax/ConnectionActions.php:185
+msgid "Cannot check — admin key is not valid."
+msgstr "Kan inte kontrollera — admin-nyckeln är inte giltig."
+
+#: source/php/Admin/Ajax/ConnectionActions.php:187
+msgid "No collection name configured."
+msgstr "Inget samlingsnamn konfigurerat."
+
+#. translators: %s: collection name
+#: source/php/Admin/Ajax/ConnectionActions.php:195
+msgid "Collection \"%s\" exists."
+msgstr "Samlingen \"%s\" finns."
+
+#. translators: %s: collection name
+#: source/php/Admin/Ajax/ConnectionActions.php:201
+msgid "Collection \"%s\" does not exist."
+msgstr "Samlingen \"%s\" finns inte."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/ConnectionActions.php:209
+msgid "Collection check failed: %s"
+msgstr "Kontroll av samling misslyckades: %s"
+
+#: source/php/Admin/Ajax/ConnectionActions.php:218
+msgid "No search key configured."
+msgstr "Ingen söknyckel konfigurerad."
+
+#: source/php/Admin/Ajax/ConnectionActions.php:221
+msgid "No collection name configured — cannot test the search key."
+msgstr "Inget samlingsnamn konfigurerat — kan inte testa söknyckeln."
+
+#. translators: %s: collection name
+#: source/php/Admin/Ajax/ConnectionActions.php:233
+msgid "Search key works against collection \"%s\"."
+msgstr "Söknyckeln fungerar mot samlingen \"%s\"."
+
+#. translators: %s: collection name
+#: source/php/Admin/Ajax/ConnectionActions.php:239
+msgid "Search key does not have access to collection \"%s\"."
+msgstr "Söknyckeln har inte åtkomst till samlingen \"%s\"."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/ConnectionActions.php:247
+msgid "Search key check failed: %s"
+msgstr "Kontroll av söknyckel misslyckades: %s"
+
+#: source/php/Admin/Ajax/FacetActions.php:41
+#: source/php/Admin/Ajax/IndexingActions.php:46
+msgid ""
+"Connection settings are incomplete. Please configure the connection first."
+msgstr ""
+"Anslutningsinställningarna är ofullständiga. Konfigurera anslutningen först."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/FacetActions.php:62
+msgid "Could not fetch collection schema: %s"
+msgstr "Kunde inte hämta samlingens schema: %s"
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/IndexingActions.php:105
+msgid "Could not load statistics: %s"
+msgstr "Kunde inte läsa in statistik: %s"
+
+#: source/php/Admin/Ajax/IndexingActions.php:128
+#: source/php/Admin/Ajax/IndexingActions.php:178
+msgid "Post type is required."
+msgstr "Inläggstyp krävs."
+
+#: source/php/Admin/Ajax/IndexingActions.php:137
+msgid "Connection settings are incomplete."
+msgstr "Anslutningsinställningarna är ofullständiga."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/IndexingActions.php:150
+msgid "Could not clear post type: %s"
+msgstr "Kunde inte rensa inläggstyp: %s"
+
+#. translators: 1: number of deleted docs, 2: post type slug
+#: source/php/Admin/Ajax/IndexingActions.php:160
+msgid "Removed %1$d documents of type \"%2$s\" from the index."
+msgstr "Tog bort %1$d dokument av typen \"%2$s\" från indexet."
+
+#. translators: %s: post type slug
+#: source/php/Admin/Ajax/IndexingActions.php:193
+msgid "Manual reindex: %s"
+msgstr "Manuell omindexering: %s"
+
+#: source/php/Admin/Ajax/IndexingActions.php:207
+#: source/php/Admin/Ajax/IndexingActions.php:208
+msgid "PDF indexing strategy is not available."
+msgstr "PDF-indexeringsstrategi är inte tillgänglig."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/IndexingActions.php:295
+#: source/php/Admin/Ajax/IndexingActions.php:302
+msgid "Reindex failed: %s"
+msgstr "Omindexering misslyckades: %s"
+
+#. translators: 1: indexed count, 2: skipped count, 3: failed count, 4: post type slug
+#: source/php/Admin/Ajax/IndexingActions.php:315
+#: source/php/Admin/Ajax/IndexingActions.php:325
+msgid "Reindexed \"%4$s\": %1$d indexed, %2$d skipped, %3$d failed."
+msgstr ""
+"Omindexerade \"%4$s\": %1$d indexerade, %2$d hoppades över, %3$d "
+"misslyckades."
+
+#: source/php/Admin/Ajax/LogActions.php:34
+msgid "Indexing log cleared."
+msgstr "Indexeringsloggen har rensats."
+
+#: source/php/Admin/Ajax/SearchKeyActions.php:44
+msgid "Set a collection name before generating a search key."
+msgstr "Ange ett samlingsnamn innan du genererar en söknyckel."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/SearchKeyActions.php:56
+msgid "Could not generate search key: %s"
+msgstr "Kunde inte generera söknyckel: %s"
+
+#: source/php/Admin/Ajax/SearchKeyActions.php:64
+msgid ""
+"Search key generated. It has been filled in below — save settings to keep it."
+msgstr ""
+"Söknyckel genererad. Den har fyllts i nedan — spara inställningarna för att "
+"behålla den."
+
+#: source/php/Admin/Ajax/SearchKeyActions.php:90
+msgid ""
+"Host, admin key, and collection name must all be saved before a new search "
+"key can be created."
+msgstr ""
+"Värd, admin-nyckel och samlingsnamn måste vara sparade innan en ny söknyckel "
+"kan skapas."
+
+#. translators: %s: error message
+#: source/php/Admin/Ajax/SearchKeyActions.php:102
+msgid "Could not create search key: %s"
+msgstr "Kunde inte skapa söknyckel: %s"
+
+#: source/php/Admin/Ajax/SearchKeyActions.php:112
+msgid "New search key created and saved. The status checks should now pass."
+msgstr "Ny söknyckel skapad och sparad. Statuskontrollerna borde nu passera."
+
+#: source/php/Admin/MetaBox.php:67
 msgid "Search settings"
 msgstr "Sökinställningar"
 
-#: source/php/Admin/MetaBox.php:111 source/php/Admin/MetaBox.php:230
+#: source/php/Admin/MetaBox.php:113 source/php/Admin/MetaBox.php:232
 msgid "Exclude from search index"
 msgstr "Exkludera från sökindex"
 
-#: source/php/Admin/MetaBox.php:125
+#: source/php/Admin/MetaBox.php:127
 msgid "Exclude as search section"
 msgstr "Exkludera som avdelning"
 
-#: source/php/Admin/MetaBox.php:129
+#: source/php/Admin/MetaBox.php:131
 msgid ""
 "Prevents this page from being used as the section label for itself and "
 "descendant pages when it is the top page in the page tree."
@@ -60,15 +293,15 @@ msgstr ""
 "Förhindrar att den här sidan används som sektionsetikett för sig själv och "
 "underordnade sidor när den är den översta sidan i sidträdet."
 
-#: source/php/Admin/MetaBox.php:135 source/php/Admin/Settings.php:347
+#: source/php/Admin/MetaBox.php:137 source/php/Admin/Settings/Sanitizers.php:33
 msgid "Extra search terms"
 msgstr "Extra söktermer"
 
-#: source/php/Admin/MetaBox.php:142
+#: source/php/Admin/MetaBox.php:144
 msgid "Keywords, synonyms or alternate phrasings…"
 msgstr "Nyckelord, synonymer eller alternativa formuleringar…"
 
-#: source/php/Admin/MetaBox.php:145
+#: source/php/Admin/MetaBox.php:147
 msgid ""
 "Additional words or phrases that should match this post in search, even if "
 "they do not appear in the content."
@@ -76,15 +309,15 @@ msgstr ""
 "Ytterligare ord eller fraser som ska matcha detta inlägg i sökningen, även "
 "om de inte förekommer i innehållet."
 
-#: source/php/Admin/PinnedResultsPage.php:30 source/php/Frontend/I18n.php:136
+#: source/php/Admin/PinnedResultsPage.php:43 source/php/Frontend/I18n.php:136
 msgid "Pinned search results"
 msgstr "Fästa sökresultat"
 
-#: source/php/Admin/PinnedResultsPage.php:31 source/php/Frontend/I18n.php:145
+#: source/php/Admin/PinnedResultsPage.php:44 source/php/Frontend/I18n.php:145
 msgid "Pinned results"
 msgstr "Fästa resultat"
 
-#: source/php/Admin/PinnedResultsPage.php:83
+#: source/php/Admin/PinnedResultsPage.php:106
 msgid "Pinned results are not available."
 msgstr "Fästa resultat är inte tillgängliga."
 
@@ -155,7 +388,8 @@ msgid "Normal search"
 msgstr "Vanlig sökning"
 
 #: source/php/Admin/SearchLogListTable.php:230
-#: source/php/Admin/SearchLogListTable.php:240 source/php/Admin/Settings.php:61
+#: source/php/Admin/SearchLogListTable.php:240
+#: source/php/Admin/Settings/SettingsPage.php:31
 #: source/php/Frontend/I18n.php:54
 #: views/admin/settings-tabs/quick-search.php:15
 #: views/admin/settings-tabs/statistics.php:120
@@ -217,271 +451,62 @@ msgid_plural "%d search statistics were deleted."
 msgstr[0] "%d sökstatistikpost togs bort."
 msgstr[1] "%d sökstatistikposter togs bort."
 
-#: source/php/Admin/Settings.php:58
-msgid "Typesense Connection"
-msgstr "Anslutning"
-
-#: source/php/Admin/Settings.php:59
-msgid "Settings"
-msgstr "Inställningar"
-
-#: source/php/Admin/Settings.php:60
-msgid "Advanced settings"
-msgstr "Avancerade inställningar"
-
-#: source/php/Admin/Settings.php:62
-msgid "Statistics"
-msgstr "Statistik"
-
-#: source/php/Admin/Settings.php:63
-msgid "Logging"
-msgstr "Loggning"
-
-#: source/php/Admin/Settings.php:64
-msgid "Status"
-msgstr "Status"
-
-#: source/php/Admin/Settings.php:343
+#: source/php/Admin/Settings/Sanitizers.php:29
 msgid "Title"
 msgstr "Titel"
 
-#: source/php/Admin/Settings.php:344
+#: source/php/Admin/Settings/Sanitizers.php:30
 msgid "Excerpt"
 msgstr "Utdrag"
 
-#: source/php/Admin/Settings.php:345
+#: source/php/Admin/Settings/Sanitizers.php:31
 msgid "Content"
 msgstr "Innehåll"
 
-#: source/php/Admin/Settings.php:346
+#: source/php/Admin/Settings/Sanitizers.php:32
 msgid "Content type name"
 msgstr "Innehållstypens namn"
 
-#: source/php/Admin/SettingsAjax.php:62 source/php/Admin/SettingsAjax.php:232
-#: source/php/Admin/SettingsAjax.php:321 source/php/Admin/SettingsAjax.php:376
-#: source/php/Admin/SettingsAjax.php:550 source/php/Admin/SettingsAjax.php:608
-#: source/php/Admin/SettingsAjax.php:767 source/php/Admin/SettingsAjax.php:814
-#: source/php/Admin/SettingsAjax.php:859
-msgid "Unauthorized."
-msgstr "Obehörig."
+#: source/php/Admin/Settings/SettingsPage.php:28
+msgid "Typesense Connection"
+msgstr "Anslutning"
 
-#: source/php/Admin/SettingsAjax.php:71
-msgid "Enter both a host URL and an Admin API key before testing."
-msgstr "Ange både en värd-URL och en Admin-API-nyckel innan du testar."
+#: source/php/Admin/Settings/SettingsPage.php:29
+msgid "Settings"
+msgstr "Inställningar"
 
-#: source/php/Admin/SettingsAjax.php:79
-msgid "The host value is not a valid URL."
-msgstr "Värdadressen är inte en giltig URL."
+#: source/php/Admin/Settings/SettingsPage.php:30
+msgid "Advanced settings"
+msgstr "Avancerade inställningar"
 
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:101 source/php/Admin/SettingsAjax.php:649
-msgid "Could not reach server: %s"
-msgstr "Kunde inte nå servern: %s"
+#: source/php/Admin/Settings/SettingsPage.php:32
+msgid "Statistics"
+msgstr "Statistik"
 
-#: source/php/Admin/SettingsAjax.php:111 source/php/Admin/SettingsAjax.php:642
-msgid "Server responded but reported an unhealthy status."
-msgstr "Servern svarade men rapporterade ett ohälsosamt status."
+#: source/php/Admin/Settings/SettingsPage.php:33
+msgid "Logging"
+msgstr "Loggning"
 
-#: source/php/Admin/SettingsAjax.php:122
-msgid "Server is reachable, but the Admin API key was rejected."
-msgstr "Servern är nåbar, men Admin-API-nyckeln avvisades."
+#: source/php/Admin/Settings/SettingsPage.php:34
+msgid "Status"
+msgstr "Status"
 
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:130
-msgid "Server is reachable, but key validation failed: %s"
-msgstr "Servern är nåbar, men validering av nyckeln misslyckades: %s"
+#: source/php/Admin/Settings/SettingsPage.php:46
+msgid "Typesense search"
+msgstr "Typesense-sök"
 
-#: source/php/Admin/SettingsAjax.php:146
-msgid ""
-"Connected successfully. Server is healthy and the Admin API key is valid."
-msgstr ""
-"Anslutningen lyckades. Servern är i gott skick och Admin-API-nyckeln är "
-"giltig."
+#: source/php/Admin/Settings/SettingsPage.php:59
+msgid "General"
+msgstr "Allmänt"
 
-#: source/php/Admin/SettingsAjax.php:162
-msgid "Collection name is required."
-msgstr "Ett samlingsnamn krävs."
+#: source/php/Admin/SynonymsPage.php:43 source/php/Admin/SynonymsPage.php:44
+#: source/php/Frontend/I18n.php:207
+msgid "Synonyms"
+msgstr "Synonymer"
 
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:174 source/php/Admin/SettingsAjax.php:836
-msgid "Could not create collection: %s"
-msgstr "Kunde inte skapa samling: %s"
-
-#. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:184 source/php/Admin/SettingsAjax.php:846
-msgid "Collection \"%s\" created successfully."
-msgstr "Samlingen \"%s\" skapades."
-
-#: source/php/Admin/SettingsAjax.php:200
-msgid "Set a collection name before generating a search key."
-msgstr "Ange ett samlingsnamn innan du genererar en söknyckel."
-
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:212
-msgid "Could not generate search key: %s"
-msgstr "Kunde inte generera söknyckel: %s"
-
-#: source/php/Admin/SettingsAjax.php:220
-msgid ""
-"Search key generated. It has been filled in below — save settings to keep it."
-msgstr ""
-"Söknyckel genererad. Den har fyllts i nedan — spara inställningarna för att "
-"behålla den."
-
-#: source/php/Admin/SettingsAjax.php:241 source/php/Admin/SettingsAjax.php:559
-msgid ""
-"Connection settings are incomplete. Please configure the connection first."
-msgstr ""
-"Anslutningsinställningarna är ofullständiga. Konfigurera anslutningen först."
-
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:300
-msgid "Could not load statistics: %s"
-msgstr "Kunde inte läsa in statistik: %s"
-
-#: source/php/Admin/SettingsAjax.php:328 source/php/Admin/SettingsAjax.php:383
-msgid "Post type is required."
-msgstr "Inläggstyp krävs."
-
-#: source/php/Admin/SettingsAjax.php:337
-msgid "Connection settings are incomplete."
-msgstr "Anslutningsinställningarna är ofullständiga."
-
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:350
-msgid "Could not clear post type: %s"
-msgstr "Kunde inte rensa inläggstyp: %s"
-
-#. translators: 1: number of deleted docs, 2: post type slug
-#: source/php/Admin/SettingsAjax.php:360
-msgid "Removed %1$d documents of type \"%2$s\" from the index."
-msgstr "Tog bort %1$d dokument av typen \"%2$s\" från indexet."
-
-#. translators: %s: post type slug
-#: source/php/Admin/SettingsAjax.php:398
-msgid "Manual reindex: %s"
-msgstr "Manuell omindexering: %s"
-
-#: source/php/Admin/SettingsAjax.php:412 source/php/Admin/SettingsAjax.php:413
-msgid "PDF indexing strategy is not available."
-msgstr "PDF-indexeringsstrategi är inte tillgänglig."
-
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:500 source/php/Admin/SettingsAjax.php:507
-msgid "Reindex failed: %s"
-msgstr "Omindexering misslyckades: %s"
-
-#. translators: 1: indexed count, 2: skipped count, 3: failed count, 4: post type slug
-#: source/php/Admin/SettingsAjax.php:520 source/php/Admin/SettingsAjax.php:530
-msgid "Reindexed \"%4$s\": %1$d indexed, %2$d skipped, %3$d failed."
-msgstr ""
-"Omindexerade \"%4$s\": %1$d indexerade, %2$d hoppades över, %3$d "
-"misslyckades."
-
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:580
-msgid "Could not fetch collection schema: %s"
-msgstr "Kunde inte hämta samlingens schema: %s"
-
-#: source/php/Admin/SettingsAjax.php:629
-msgid "No host URL configured."
-msgstr "Ingen värd-URL konfigurerad."
-
-#: source/php/Admin/SettingsAjax.php:640
-msgid "Server is reachable and healthy."
-msgstr "Servern är nåbar och i gott skick."
-
-#: source/php/Admin/SettingsAjax.php:659
-msgid "No admin key configured."
-msgstr "Ingen admin-nyckel konfigurerad."
-
-#: source/php/Admin/SettingsAjax.php:665
-msgid "Admin key is valid."
-msgstr "Admin-nyckeln är giltig."
-
-#: source/php/Admin/SettingsAjax.php:667
-msgid "Admin key was rejected by the server."
-msgstr "Admin-nyckeln avvisades av servern."
-
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:671
-msgid "Admin key check failed: %s"
-msgstr "Kontroll av admin-nyckel misslyckades: %s"
-
-#: source/php/Admin/SettingsAjax.php:680
-msgid "Cannot check — admin key is not valid."
-msgstr "Kan inte kontrollera — admin-nyckeln är inte giltig."
-
-#: source/php/Admin/SettingsAjax.php:682
-msgid "No collection name configured."
-msgstr "Inget samlingsnamn konfigurerat."
-
-#. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:690
-msgid "Collection \"%s\" exists."
-msgstr "Samlingen \"%s\" finns."
-
-#. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:696
-msgid "Collection \"%s\" does not exist."
-msgstr "Samlingen \"%s\" finns inte."
-
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:704
-msgid "Collection check failed: %s"
-msgstr "Kontroll av samling misslyckades: %s"
-
-#: source/php/Admin/SettingsAjax.php:713
-msgid "No search key configured."
-msgstr "Ingen söknyckel konfigurerad."
-
-#: source/php/Admin/SettingsAjax.php:716
-msgid "No collection name configured — cannot test the search key."
-msgstr "Inget samlingsnamn konfigurerat — kan inte testa söknyckeln."
-
-#. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:728
-msgid "Search key works against collection \"%s\"."
-msgstr "Söknyckeln fungerar mot samlingen \"%s\"."
-
-#. translators: %s: collection name
-#: source/php/Admin/SettingsAjax.php:734
-msgid "Search key does not have access to collection \"%s\"."
-msgstr "Söknyckeln har inte åtkomst till samlingen \"%s\"."
-
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:742
-msgid "Search key check failed: %s"
-msgstr "Kontroll av söknyckel misslyckades: %s"
-
-#: source/php/Admin/SettingsAjax.php:777
-msgid ""
-"Host, admin key, and collection name must all be saved before a new search "
-"key can be created."
-msgstr ""
-"Värd, admin-nyckel och samlingsnamn måste vara sparade innan en ny söknyckel "
-"kan skapas."
-
-#. translators: %s: error message
-#: source/php/Admin/SettingsAjax.php:789
-msgid "Could not create search key: %s"
-msgstr "Kunde inte skapa söknyckel: %s"
-
-#: source/php/Admin/SettingsAjax.php:799
-msgid "New search key created and saved. The status checks should now pass."
-msgstr "Ny söknyckel skapad och sparad. Statuskontrollerna borde nu passera."
-
-#: source/php/Admin/SettingsAjax.php:824
-msgid ""
-"Host, admin key, and collection name must all be saved before the collection "
-"can be created."
-msgstr ""
-"Värd, admin-nyckel och samlingsnamn måste vara sparade innan samlingen kan "
-"skapas."
-
-#: source/php/Admin/SettingsAjax.php:866
-msgid "Indexing log cleared."
-msgstr "Indexeringsloggen har rensats."
+#: source/php/Admin/SynonymsPage.php:106
+msgid "Synonyms are not available."
+msgstr "Synonymer är inte tillgängliga."
 
 #: source/php/Frontend/EnrichSearchTemplate.php:36
 #: source/php/Frontend/EnrichSearchTemplate.php:37
@@ -786,11 +811,11 @@ msgstr "Kunde inte läsa in fästa resultat."
 msgid "Add pinned search"
 msgstr "Lägg till fäst sökning"
 
-#: source/php/Frontend/I18n.php:138
+#: source/php/Frontend/I18n.php:138 source/php/Frontend/I18n.php:202
 msgid "Sync to Typesense"
 msgstr "Synka till Typesense"
 
-#: source/php/Frontend/I18n.php:139
+#: source/php/Frontend/I18n.php:139 source/php/Frontend/I18n.php:203
 msgid "Syncing..."
 msgstr "Synkar..."
 
@@ -814,7 +839,7 @@ msgstr "Sökfras"
 msgid "Match type"
 msgstr "Matchningstyp"
 
-#: source/php/Frontend/I18n.php:146
+#: source/php/Frontend/I18n.php:146 source/php/Frontend/I18n.php:210
 msgid "Sync status"
 msgstr "Synkstatus"
 
@@ -826,19 +851,19 @@ msgstr "objekt"
 msgid "items"
 msgstr "objekt"
 
-#: source/php/Frontend/I18n.php:149
+#: source/php/Frontend/I18n.php:149 source/php/Frontend/I18n.php:211
 msgid "New"
 msgstr "Ny"
 
-#: source/php/Frontend/I18n.php:150
+#: source/php/Frontend/I18n.php:150 source/php/Frontend/I18n.php:212
 msgid "Synced"
 msgstr "Synkad"
 
-#: source/php/Frontend/I18n.php:151
+#: source/php/Frontend/I18n.php:151 source/php/Frontend/I18n.php:213
 msgid "Error"
 msgstr "Fel"
 
-#: source/php/Frontend/I18n.php:152
+#: source/php/Frontend/I18n.php:152 source/php/Frontend/I18n.php:214
 msgid "Pending"
 msgstr "Väntar"
 
@@ -890,63 +915,178 @@ msgstr "Ta bort resultat"
 msgid "Search for posts below and add the results you want to pin."
 msgstr "Sök efter inlägg nedan och lägg till resultaten du vill fästa."
 
-#: source/php/Frontend/I18n.php:165
+#: source/php/Frontend/I18n.php:165 source/php/Frontend/I18n.php:216
 msgid "Save changes"
 msgstr "Spara ändringar"
 
 #: source/php/Frontend/I18n.php:166
+msgid "Save new search"
+msgstr "Spara ny sökning"
+
+#: source/php/Frontend/I18n.php:167 source/php/Frontend/I18n.php:217
 msgid "Saving..."
 msgstr "Sparar..."
 
-#: source/php/Frontend/I18n.php:167
+#: source/php/Frontend/I18n.php:168 source/php/Frontend/I18n.php:218
 msgid "Saved"
 msgstr "Sparad"
 
-#: source/php/Frontend/I18n.php:168
+#: source/php/Frontend/I18n.php:169
 msgid "Delete pinned search"
 msgstr "Ta bort fäst sökning"
 
-#: source/php/Frontend/I18n.php:169
+#: source/php/Frontend/I18n.php:170
 msgid "Delete this pinned search?"
 msgstr "Ta bort den här fästa sökningen?"
 
-#: source/php/Frontend/I18n.php:170 source/php/PinnedResults/Repository.php:56
+#: source/php/Frontend/I18n.php:171 source/php/PinnedResults/Repository.php:59
 msgid "Add a search phrase before saving."
 msgstr "Lägg till en sökfras innan du sparar."
 
-#: source/php/Frontend/I18n.php:171
+#: source/php/Frontend/I18n.php:172
 msgid "Add at least one pinned result before saving."
 msgstr "Lägg till minst ett fäst resultat innan du sparar."
 
-#: source/php/Frontend/I18n.php:172
+#: source/php/Frontend/I18n.php:173
 msgid "Pinned search saved. Sync to Typesense when you are ready."
 msgstr "Fäst sökning sparad. Synka till Typesense när du är redo."
 
-#: source/php/Frontend/I18n.php:173
+#: source/php/Frontend/I18n.php:174
 msgid "Could not save pinned search."
 msgstr "Kunde inte spara fäst sökning."
 
-#: source/php/Frontend/I18n.php:174
-msgid "Pinned search deleted. Sync to Typesense to apply the change."
-msgstr "Fäst sökning borttagen. Synka till Typesense för att tillämpa ändringen."
-
 #: source/php/Frontend/I18n.php:175
+msgid "Pinned search deleted. Sync to Typesense to apply the change."
+msgstr ""
+"Fäst sökning borttagen. Synka till Typesense för att tillämpa ändringen."
+
+#: source/php/Frontend/I18n.php:176
 msgid "Could not delete pinned search."
 msgstr "Kunde inte ta bort fäst sökning."
 
-#: source/php/Frontend/I18n.php:176
+#: source/php/Frontend/I18n.php:177
 msgid "Pinned searches synced."
 msgstr "Fästa sökningar synkades."
 
-#: source/php/Frontend/I18n.php:177
+#: source/php/Frontend/I18n.php:178
 msgid "Could not sync pinned searches."
 msgstr "Kunde inte synka fästa sökningar."
 
-#: source/php/Frontend/I18n.php:178
+#: source/php/Frontend/I18n.php:179
 msgid "Could not search posts."
 msgstr "Kunde inte söka efter inlägg."
 
-#: source/php/Indexing/Strategies/PdfIndexingStrategy.php:120
+#: source/php/Frontend/I18n.php:191
+msgid "Missing synonyms configuration."
+msgstr "Synonymkonfiguration saknas."
+
+#: source/php/Frontend/I18n.php:192
+msgid "Instructions"
+msgstr "Instruktioner"
+
+#: source/php/Frontend/I18n.php:193
+msgid ""
+"Add words that should be treated as the same when people search. Every word "
+"in a group is interchangeable with every other word in that group."
+msgstr "Lägg till ord som ska behandlas som samma när besökare söker. Alla ord i en grupp är utbytbara mot varandra."
+
+#. translators: %s: example group of interchangeable words
+#: source/php/Frontend/I18n.php:196
+msgid ""
+"Example: grouping \"%s\" together means a search for any one of them also "
+"finds results for the others."
+msgstr "Exempel: att gruppera \"%s\" innebär att en sökning på valfritt av dem även ger träffar för de andra."
+
+#: source/php/Frontend/I18n.php:197
+msgid "lekplatser, playground, amusement park"
+msgstr "lekplatser, playground, amusement park"
+
+#: source/php/Frontend/I18n.php:199 views/admin/synonyms-page.php:14
+msgid "Loading synonyms..."
+msgstr "Laddar synonymer..."
+
+#: source/php/Frontend/I18n.php:200
+msgid "Could not load synonyms."
+msgstr "Kunde inte läsa in synonymer."
+
+#: source/php/Frontend/I18n.php:201
+msgid "Add synonym rule"
+msgstr "Lägg till synonymregel"
+
+#: source/php/Frontend/I18n.php:204
+msgid "Search synonym rules..."
+msgstr "Sök synonymregler..."
+
+#: source/php/Frontend/I18n.php:205
+msgid "No synonym rules yet."
+msgstr "Inga synonymregler ännu."
+
+#: source/php/Frontend/I18n.php:206
+msgid "No synonym rules match your filter."
+msgstr "Inga synonymregler matchar ditt filter."
+
+#: source/php/Frontend/I18n.php:208
+msgid "Words"
+msgstr "Ord"
+
+#: source/php/Frontend/I18n.php:209
+msgid "All words in this group are treated as interchangeable when searching."
+msgstr "Alla ord i den här gruppen behandlas som utbytbara vid sökning."
+
+#: source/php/Frontend/I18n.php:215
+msgid "New synonym rule"
+msgstr "Ny synonymregel"
+
+#: source/php/Frontend/I18n.php:219
+msgid "Delete synonym rule"
+msgstr "Ta bort synonymregel"
+
+#: source/php/Frontend/I18n.php:220
+msgid "Delete this synonym rule?"
+msgstr "Ta bort den här synonymregeln?"
+
+#: source/php/Frontend/I18n.php:221 source/php/Synonyms/Repository.php:54
+msgid "Add at least two words that should be treated as synonyms."
+msgstr "Lägg till minst två ord som ska behandlas som synonymer."
+
+#: source/php/Frontend/I18n.php:222
+msgid "Synonym rule saved. Sync to Typesense when you are ready."
+msgstr "Synonymregeln sparades. Synka till Typesense när du är redo."
+
+#: source/php/Frontend/I18n.php:223
+msgid "Could not save synonym rule."
+msgstr "Kunde inte spara synonymregeln."
+
+#: source/php/Frontend/I18n.php:224
+msgid "Synonym rule deleted. Sync to Typesense to apply the change."
+msgstr ""
+"Synonymregeln togs bort. Synka till Typesense för att tillämpa ändringen."
+
+#: source/php/Frontend/I18n.php:225
+msgid "Could not delete synonym rule."
+msgstr "Kunde inte ta bort synonymregeln."
+
+#: source/php/Frontend/I18n.php:226
+msgid "Synonyms synced."
+msgstr "Synonymer synkade."
+
+#: source/php/Frontend/I18n.php:227
+msgid "Could not sync synonyms."
+msgstr "Kunde inte synka synonymer."
+
+#: source/php/Frontend/I18n.php:228
+msgid "Add a word and press Enter"
+msgstr "Lägg till ett ord och tryck Enter"
+
+#: source/php/Frontend/I18n.php:229
+msgid "Add word"
+msgstr "Lägg till ord"
+
+#: source/php/Frontend/I18n.php:230
+msgid "Remove word"
+msgstr "Ta bort ord"
+
+#: source/php/Indexing/Strategies/PdfIndexingStrategy.php:119
 msgid "PDF document"
 msgstr "PDF-dokument"
 
@@ -958,15 +1098,15 @@ msgstr "WordPress-sparning"
 msgid "A WordPress save indexing issue was logged."
 msgstr "Ett indexeringsproblem vid WordPress-sparning loggades."
 
-#: source/php/PinnedResults/Repository.php:60
+#: source/php/PinnedResults/Repository.php:63
 msgid "Add at least one result to pin."
 msgstr "Lägg till minst ett resultat att fästa."
 
-#: source/php/PinnedResults/Repository.php:72
+#: source/php/PinnedResults/Repository.php:75
 msgid "A pinned result rule already exists for this phrase."
 msgstr "Det finns redan en regel för fästa resultat för den här frasen."
 
-#: source/php/PinnedResults/RestController.php:167
+#: source/php/PinnedResults/RestController.php:168
 msgid ""
 "Pinned results are not enabled or this Typesense server does not support "
 "curation sets."
@@ -974,12 +1114,13 @@ msgstr ""
 "Fästa resultat är inte aktiverade eller så har den här Typesense-servern "
 "inte stöd för kureringsuppsättningar."
 
-#: source/php/PinnedResults/TypesenseSync.php:27
+#: source/php/PinnedResults/TypesenseSync.php:29
+#: source/php/Synonyms/TypesenseSync.php:29
 msgid "Typesense connection settings are incomplete."
 msgstr "Anslutningsinställningarna är ofullständiga."
 
 #. translators: %d: number of pinned-result rules
-#: source/php/PinnedResults/TypesenseSync.php:61
+#: source/php/PinnedResults/TypesenseSync.php:63
 msgid "Synced %d pinned result rule."
 msgid_plural "Synced %d pinned result rules."
 msgstr[0] "Synkade %d regel för fästa resultat."
@@ -1024,6 +1165,25 @@ msgstr "sedan"
 msgid "Sessions"
 msgstr "Sessioner"
 
+#: source/php/Synonyms/Repository.php:68
+msgid "A synonym rule already exists for this group of words."
+msgstr "Det finns redan en synonymregel för den här ordgruppen."
+
+#: source/php/Synonyms/RestController.php:147
+msgid ""
+"Synonyms are not enabled or this Typesense server does not support synonym "
+"sets."
+msgstr ""
+"Synonymer är inte aktiverade eller så saknar den här Typesense-servern stöd "
+"för synonymuppsättningar."
+
+#. translators: %d: number of synonym rules
+#: source/php/Synonyms/TypesenseSync.php:65
+msgid "Synced %d synonym rule."
+msgid_plural "Synced %d synonym rules."
+msgstr[0] "Synkade %d synonymregel."
+msgstr[1] "Synkade %d synonymregler."
+
 #: source/php/Typesense/ApiKey.php:39
 msgid ""
 "Key was created but no value was returned. Please check your Typesense "
@@ -1036,18 +1196,18 @@ msgstr ""
 msgid "Loading pinned results..."
 msgstr "Laddar fästa resultat..."
 
-#: views/admin/settings-page.php:30
+#: views/admin/settings-page.php:33
 msgid ""
 "Configure your Typesense server connection and choose which content to index."
 msgstr ""
 "Konfigurera anslutningen till din Typesense-server och välj vilket innehåll "
 "som ska indexeras."
 
-#: views/admin/settings-page.php:36
+#: views/admin/settings-page.php:39
 msgid "Settings sections"
 msgstr "Inställningssektioner"
 
-#: views/admin/settings-page.php:60
+#: views/admin/settings-page.php:63
 msgid "Select a settings section"
 msgstr "Välj en inställningssektion"
 
@@ -1084,124 +1244,11 @@ msgid "Control how much each search field contributes to result relevance."
 msgstr "Styr hur mycket varje sökfält påverkar resultatens relevans."
 
 #: views/admin/settings-tabs/advanced-settings.php:149
-msgid "Search result behavior"
-msgstr "Sökresultatens beteende"
-
-#: views/admin/settings-tabs/advanced-settings.php:150
-msgid ""
-"Fine-tune highlighting, snippet truncation, and the timing of search "
-"requests."
-msgstr ""
-"Finjustera markering, avkortning av utdrag och tidpunkten för "
-"sökförfrågningar."
-
-#: views/admin/settings-tabs/advanced-settings.php:156
-msgid "Highlight context tokens"
-msgstr "Visa kontext runt träffar"
-
-#: views/admin/settings-tabs/advanced-settings.php:170
-msgid ""
-"Number of tokens (words) to include before and after each highlighted match "
-"in search result snippets. Higher values show more context around matches."
-msgstr ""
-"Antal ord (tokens) som ska inkluderas före och efter varje markerad träff i "
-"sökresultatens utdrag. Högre värden visar mer sammanhang runt träffarna."
-
-#: views/admin/settings-tabs/advanced-settings.php:177
-msgid "Snippet truncator"
-msgstr "Snippet-trunkerare"
-
-#: views/admin/settings-tabs/advanced-settings.php:188
-msgid "Brackets (e.g. [...] )"
-msgstr "Hakparenteser (t.ex. […])"
-
-#: views/admin/settings-tabs/advanced-settings.php:189
-msgid "Ellipsis (e.g. … )"
-msgstr "Ellips (t.ex. …)"
-
-#: views/admin/settings-tabs/advanced-settings.php:190
-msgid "None (no truncation marker)"
-msgstr "Ingen markör"
-
-#: views/admin/settings-tabs/advanced-settings.php:191
-msgid "Custom"
-msgstr "Egen"
-
-#: views/admin/settings-tabs/advanced-settings.php:203
-msgid ""
-"Select any of the predefined markers, or choose 'Custom' to enter your own."
-msgstr ""
-"Välj en av de fördefinierade markörerna eller välj ”Egen” för att ange en "
-"egen markör."
-
-#: views/admin/settings-tabs/advanced-settings.php:209
-msgid "Debounce search"
-msgstr "Fördröjd sökning"
-
-#: views/admin/settings-tabs/advanced-settings.php:223
-#: views/admin/settings-tabs/advanced-settings.php:270
-#: views/admin/settings-tabs/advanced-settings.php:305
-#: views/admin/settings-tabs/advanced-settings.php:324
-#: views/admin/settings-tabs/advanced-settings.php:344
-#: views/admin/settings-tabs/quick-search.php:42
-#: views/admin/settings-tabs/settings.php:84
-#: views/admin/settings-tabs/settings.php:138
-#: views/admin/settings-tabs/settings.php:169
-msgid "On"
-msgstr "På"
-
-#: views/admin/settings-tabs/advanced-settings.php:224
-#: views/admin/settings-tabs/advanced-settings.php:271
-#: views/admin/settings-tabs/advanced-settings.php:305
-#: views/admin/settings-tabs/advanced-settings.php:324
-#: views/admin/settings-tabs/advanced-settings.php:344
-#: views/admin/settings-tabs/quick-search.php:43
-#: views/admin/settings-tabs/settings.php:85
-#: views/admin/settings-tabs/settings.php:139
-#: views/admin/settings-tabs/settings.php:170
-msgid "Off"
-msgstr "Av"
-
-#: views/admin/settings-tabs/advanced-settings.php:228
-msgid ""
-"When enabled, search results are fetched only after the user pauses typing "
-"(debounced). When disabled, results appear immediately on every keystroke."
-msgstr ""
-"När aktiverat hämtas sökresultat först när användaren slutar skriva "
-"(fördröjt). När inaktiverat visas resultat omedelbart vid varje "
-"tangenttryckning."
-
-#: views/admin/settings-tabs/advanced-settings.php:235
-msgid "Debounce delay (ms)"
-msgstr "Fördröjningstid (ms)"
-
-#: views/admin/settings-tabs/advanced-settings.php:249
-msgid ""
-"How long to wait after the user stops typing before firing the search "
-"request."
-msgstr ""
-"Hur länge man ska vänta efter att användaren slutar skriva innan sökningen "
-"utförs."
-
-#: views/admin/settings-tabs/advanced-settings.php:256
-msgid "Enable pinned results"
-msgstr "Aktivera fästa resultat"
-
-#: views/admin/settings-tabs/advanced-settings.php:275
-msgid ""
-"Enable curated search rules that can pin selected results for specific "
-"search phrases. After saving, manage them from Settings > Pinned results."
-msgstr ""
-"Aktivera kurerade sökregler som kan fästa valda resultat för specifika "
-"sökfraser. Efter att du har sparat hanterar du dem under Inställningar > "
-"Fästa resultat."
-
-#: views/admin/settings-tabs/advanced-settings.php:286
 #: views/admin/settings-tabs/statistics.php:89
 msgid "Search statistics"
 msgstr "Sökstatistik"
 
-#: views/admin/settings-tabs/advanced-settings.php:287
+#: views/admin/settings-tabs/advanced-settings.php:150
 msgid ""
 "Record completed searches in WordPress to identify content gaps and popular "
 "search terms. Each normalised term is stored only once per anonymous browser "
@@ -1211,15 +1258,43 @@ msgstr ""
 "innehållsluckor och populära söktermer. Varje normaliserad term lagras bara "
 "en gång per anonym webbläsarsession."
 
-#: views/admin/settings-tabs/advanced-settings.php:292
+#: views/admin/settings-tabs/advanced-settings.php:155
 msgid "Enable search logging"
 msgstr "Aktivera sökloggning"
 
-#: views/admin/settings-tabs/advanced-settings.php:311
+#: views/admin/settings-tabs/advanced-settings.php:168
+#: views/admin/settings-tabs/advanced-settings.php:187
+#: views/admin/settings-tabs/advanced-settings.php:207
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:80
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:127
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:154
+#: views/admin/settings-tabs/quick-search.php:42
+#: views/admin/settings-tabs/settings.php:79
+#: views/admin/settings-tabs/settings.php:117
+#: views/admin/settings-tabs/settings.php:171
+#: views/admin/settings-tabs/settings.php:202
+msgid "On"
+msgstr "På"
+
+#: views/admin/settings-tabs/advanced-settings.php:168
+#: views/admin/settings-tabs/advanced-settings.php:187
+#: views/admin/settings-tabs/advanced-settings.php:207
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:81
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:128
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:155
+#: views/admin/settings-tabs/quick-search.php:43
+#: views/admin/settings-tabs/settings.php:80
+#: views/admin/settings-tabs/settings.php:118
+#: views/admin/settings-tabs/settings.php:172
+#: views/admin/settings-tabs/settings.php:203
+msgid "Off"
+msgstr "Av"
+
+#: views/admin/settings-tabs/advanced-settings.php:174
 msgid "Dashboard widgets"
 msgstr "Adminpanelwidgetar"
 
-#: views/admin/settings-tabs/advanced-settings.php:326
+#: views/admin/settings-tabs/advanced-settings.php:189
 msgid ""
 "Register Latest searches, Failed searches, and Popular searches widgets on "
 "the WordPress dashboard."
@@ -1227,11 +1302,11 @@ msgstr ""
 "Registrera widgetarna Senaste sökningar, Misslyckade sökningar och Populära "
 "sökningar på WordPress adminpanel."
 
-#: views/admin/settings-tabs/advanced-settings.php:331
+#: views/admin/settings-tabs/advanced-settings.php:194
 msgid "Require statistics consent"
 msgstr "Kräv samtycke för statistik"
 
-#: views/admin/settings-tabs/advanced-settings.php:346
+#: views/admin/settings-tabs/advanced-settings.php:209
 msgid ""
 "When enabled, no search term or session storage is created until your "
 "consent platform explicitly grants statistics consent."
@@ -1239,11 +1314,11 @@ msgstr ""
 "När detta är aktiverat skapas ingen sökterm eller sessionslagring förrän din "
 "samtyckesplattform uttryckligen godkänner statistik."
 
-#: views/admin/settings-tabs/advanced-settings.php:351
+#: views/admin/settings-tabs/advanced-settings.php:214
 msgid "Connect your consent platform"
 msgstr "Anslut din samtyckesplattform"
 
-#: views/admin/settings-tabs/advanced-settings.php:352
+#: views/admin/settings-tabs/advanced-settings.php:215
 msgid ""
 "Run this on every page containing a search field when Pressidium Cookie "
 "Consent, Cookiebot, or another consent platform grants or withdraws "
@@ -1253,7 +1328,7 @@ msgstr ""
 "Consent, Cookiebot eller en annan samtyckesplattform godkänner eller "
 "återkallar samtycke för statistik. Kör det innan sökloggningen får starta."
 
-#: views/admin/settings-tabs/advanced-settings.php:362
+#: views/admin/settings-tabs/advanced-settings.php:225
 msgid ""
 "Replace the final example with the boolean consent value from your platform. "
 "The plugin treats consent as denied until it receives true. When false is "
@@ -1264,11 +1339,11 @@ msgstr ""
 "När false skickas stoppas väntande loggning och tillägget tar bort sin "
 "sessionslagring."
 
-#: views/admin/settings-tabs/advanced-settings.php:366
+#: views/admin/settings-tabs/advanced-settings.php:229
 msgid "Search registration delay (seconds)"
 msgstr "Fördröjning innan sökning registreras (sekunder)"
 
-#: views/admin/settings-tabs/advanced-settings.php:369
+#: views/admin/settings-tabs/advanced-settings.php:232
 msgid ""
 "How long a completed query must remain unchanged before it is recorded. This "
 "is independent of the search-result debounce setting."
@@ -1276,31 +1351,31 @@ msgstr ""
 "Hur länge en slutförd sökning måste vara oförändrad innan den registreras. "
 "Detta är oberoende av inställningen för fördröjd sökning."
 
-#: views/admin/settings-tabs/advanced-settings.php:374
+#: views/admin/settings-tabs/advanced-settings.php:237
 msgid "Minimum search-term characters"
 msgstr "Minsta antal tecken i sökterm"
 
-#: views/admin/settings-tabs/advanced-settings.php:377
+#: views/admin/settings-tabs/advanced-settings.php:240
 msgid ""
 "Shorter queries are searched normally but are not included in statistics."
 msgstr "Kortare sökningar hanteras normalt men ingår inte i statistiken."
 
-#: views/admin/settings-tabs/advanced-settings.php:382
+#: views/admin/settings-tabs/advanced-settings.php:245
 msgid "Statistics retention (days)"
 msgstr "Lagringstid för statistik (dagar)"
 
-#: views/admin/settings-tabs/advanced-settings.php:385
+#: views/admin/settings-tabs/advanced-settings.php:248
 msgid ""
 "Search terms and anonymous session hashes older than this are permanently "
 "deleted."
 msgstr ""
 "Söktermer och anonyma sessionshashar som är äldre än detta raderas permanent."
 
-#: views/admin/settings-tabs/advanced-settings.php:390
+#: views/admin/settings-tabs/advanced-settings.php:253
 msgid "Automatic cleanup"
 msgstr "Automatisk rensning"
 
-#: views/admin/settings-tabs/advanced-settings.php:391
+#: views/admin/settings-tabs/advanced-settings.php:254
 msgid ""
 "A daily WordPress cron event removes expired statistics. Ensure WP-Cron runs "
 "reliably, or call the command below from your server cron."
@@ -1308,7 +1383,7 @@ msgstr ""
 "En daglig WordPress-cronhändelse tar bort utgången statistik. Säkerställ att "
 "WP-Cron körs tillförlitligt eller anropa kommandot nedan från serverns cron."
 
-#: views/admin/settings-tabs/advanced-settings.php:393
+#: views/admin/settings-tabs/advanced-settings.php:256
 msgid ""
 "Alternatively, run the scheduled event with “wp cron event run "
 "typesense_search_prune_statistics”. The command uses the retention period "
@@ -1317,12 +1392,115 @@ msgstr ""
 "Du kan också köra den schemalagda händelsen med “wp cron event run "
 "typesense_search_prune_statistics”. Kommandot använder lagringstiden ovan."
 
-#: views/admin/settings-tabs/advanced-settings.php:436
+#: views/admin/settings-tabs/advanced-settings.php:261
 #: views/admin/settings-tabs/connection.php:274
 #: views/admin/settings-tabs/quick-search.php:158
-#: views/admin/settings-tabs/settings.php:182
+#: views/admin/settings-tabs/settings.php:215
 msgid "Save settings"
 msgstr "Spara inställningar"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:6
+msgid "Search result behavior"
+msgstr "Sökresultatens beteende"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:7
+msgid ""
+"Fine-tune highlighting, snippet truncation, and the timing of search "
+"requests."
+msgstr ""
+"Finjustera markering, avkortning av utdrag och tidpunkten för "
+"sökförfrågningar."
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:13
+msgid "Highlight context tokens"
+msgstr "Visa kontext runt träffar"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:27
+msgid ""
+"Number of tokens (words) to include before and after each highlighted match "
+"in search result snippets. Higher values show more context around matches."
+msgstr ""
+"Antal ord (tokens) som ska inkluderas före och efter varje markerad träff i "
+"sökresultatens utdrag. Högre värden visar mer sammanhang runt träffarna."
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:34
+msgid "Snippet truncator"
+msgstr "Snippet-trunkerare"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:45
+msgid "Brackets (e.g. [...] )"
+msgstr "Hakparenteser (t.ex. […])"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:46
+msgid "Ellipsis (e.g. … )"
+msgstr "Ellips (t.ex. …)"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:47
+msgid "None (no truncation marker)"
+msgstr "Ingen markör"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:48
+msgid "Custom"
+msgstr "Egen"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:60
+msgid ""
+"Select any of the predefined markers, or choose 'Custom' to enter your own."
+msgstr ""
+"Välj en av de fördefinierade markörerna eller välj ”Egen” för att ange en "
+"egen markör."
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:66
+msgid "Debounce search"
+msgstr "Fördröjd sökning"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:85
+msgid ""
+"When enabled, search results are fetched only after the user pauses typing "
+"(debounced). When disabled, results appear immediately on every keystroke."
+msgstr ""
+"När aktiverat hämtas sökresultat först när användaren slutar skriva "
+"(fördröjt). När inaktiverat visas resultat omedelbart vid varje "
+"tangenttryckning."
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:92
+msgid "Debounce delay (ms)"
+msgstr "Fördröjningstid (ms)"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:106
+msgid ""
+"How long to wait after the user stops typing before firing the search "
+"request."
+msgstr ""
+"Hur länge man ska vänta efter att användaren slutar skriva innan sökningen "
+"utförs."
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:113
+msgid "Enable pinned results"
+msgstr "Aktivera fästa resultat"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:132
+msgid ""
+"Enable curated search rules that can pin selected results for specific "
+"search phrases. After saving, manage them from Typesense search > Pinned "
+"results."
+msgstr ""
+"Aktivera kurerade sökregler som kan fästa valda resultat för specifika "
+"sökfraser. Hantera dem via Typesense-sök > Fästa resultat efter att du "
+"sparat."
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:140
+msgid "Enable synonyms"
+msgstr "Aktivera synonymer"
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:159
+msgid ""
+"Enable synonym rules so a search for one word also matches related words you "
+"define. After saving, manage them from Typesense search > Synonyms."
+msgstr ""
+"Aktivera synonymregler så att en sökning på ett ord även matchar relaterade "
+"ord du definierar. Hantera dem via Typesense-sök > Synonymer efter att du "
+"sparat."
 
 #: views/admin/settings-tabs/connection.php:23
 msgid "Server"
@@ -1646,11 +1824,29 @@ msgstr ""
 "alternativen direkt i sidans innehåll; ”Dropdown” använder ett väljarelement "
 "(select) likt filteralternativen."
 
-#: views/admin/settings-tabs/settings.php:66
+#: views/admin/settings-tabs/settings.php:65
+msgid "Enable stemming"
+msgstr "Aktivera stamning"
+
+#. translators: %s: two-letter language code detected from the site's locale, e.g. "sv"
+#: views/admin/settings-tabs/settings.php:87
+msgid ""
+"Matches word variations (e.g. \"running\" also matches \"run\") on the "
+"title, content, excerpt, and extra search terms fields, using your site's "
+"detected language (\"%s\"). Changing this setting requires rebuilding your "
+"Typesense collection — run \"wp typesense rebuild\" after saving."
+msgstr ""
+"Matchar böjningsformer av ord (t.ex. matchar \"springer\" även \"springa\") "
+"i fälten titel, innehåll, utdrag och extra söktermer, utifrån webbplatsens "
+"identifierade språk (\"%s\"). Om du ändrar den här inställningen måste din "
+"Typesense-samling byggas om — kör \"wp typesense rebuild\" efter att du "
+"sparat."
+
+#: views/admin/settings-tabs/settings.php:99
 msgid "Index Modularity content"
 msgstr "Indexera Modularity-innehåll"
 
-#: views/admin/settings-tabs/settings.php:90
+#: views/admin/settings-tabs/settings.php:123
 msgid ""
 "When enabled, content that is added via Modularity modules will be included "
 "in the Typesense index. If disabled, content placed in module slots like "
@@ -1660,11 +1856,11 @@ msgstr ""
 "Typesense-indexet. Om inaktiverat indexeras inte innehåll som placerats i "
 "modulplatser som sidofält."
 
-#: views/admin/settings-tabs/settings.php:101
+#: views/admin/settings-tabs/settings.php:134
 msgid "Post types"
 msgstr "Inläggstyper"
 
-#: views/admin/settings-tabs/settings.php:102
+#: views/admin/settings-tabs/settings.php:135
 msgid ""
 "Choose which content types should be synced to Typesense. Disabled types are "
 "excluded from indexing and search results."
@@ -1672,16 +1868,16 @@ msgstr ""
 "Välj vilka innehållstyper som ska synkas till Typesense. Inaktiverade typer "
 "exkluderas från indexering och sökresultat."
 
-#: views/admin/settings-tabs/settings.php:105
+#: views/admin/settings-tabs/settings.php:138
 msgid ""
 "PDF indexing requires the pdftotext binary to be installed on the server."
 msgstr "PDF-indexering kräver att binären pdftotext är installerad på servern."
 
-#: views/admin/settings-tabs/settings.php:112
+#: views/admin/settings-tabs/settings.php:145
 msgid "No public post types found."
 msgstr "Inga publika inläggstyper hittades."
 
-#: views/admin/settings-tabs/settings.php:151
+#: views/admin/settings-tabs/settings.php:184
 msgid "PDF files"
 msgstr "PDF-filer"
 
@@ -1822,6 +2018,67 @@ msgstr "Kör om kontroller"
 #: views/templates/hits/hit-jobposting.blade.php:22
 msgid "Valid through"
 msgstr "Sista ansökningsdag"
+
+#~ msgid ""
+#~ "Add a word and its synonyms below. Searching for the word will also match "
+#~ "its synonyms — but searching for a synonym will not match the word itself."
+#~ msgstr ""
+#~ "Lägg till ett ord och dess synonymer nedan. En sökning på ordet matchar "
+#~ "även dess synonymer — men en sökning på en synonym matchar inte ordet "
+#~ "självt."
+
+#~ msgid ""
+#~ "Example: word \"%1$s\" with synonyms \"%2$s\" means a search for \"%1$s\" "
+#~ "also finds \"iphone\"/\"android\" results, but a search for \"iphone\" "
+#~ "will not find \"%1$s\" results."
+#~ msgstr ""
+#~ "Exempel: ordet \"%1$s\" med synonymerna \"%2$s\" innebär att en sökning "
+#~ "på \"%1$s\" även ger träffar på \"iphone\"/\"android\", men en sökning på "
+#~ "\"iphone\" ger inte träffar på \"%1$s\"."
+
+#~ msgid "smart phone"
+#~ msgstr "mobiltelefon"
+
+#~ msgid "iphone, android"
+#~ msgstr "iphone, android"
+
+#~ msgid "Word"
+#~ msgstr "Ord"
+
+#~ msgid "The term people search for."
+#~ msgstr "Termen som besökare söker efter."
+
+#~ msgid "Also matched when searching for the word above, but not vice versa."
+#~ msgstr "Matchas även vid sökning på ordet ovan, men inte tvärtom."
+
+#~ msgid "Add a word before saving."
+#~ msgstr "Lägg till ett ord innan du sparar."
+
+#~ msgid "Add at least one synonym before saving."
+#~ msgstr "Lägg till minst en synonym innan du sparar."
+
+#~ msgid "Add a synonym and press Enter"
+#~ msgstr "Lägg till en synonym och tryck Enter"
+
+#~ msgid "Add synonym"
+#~ msgstr "Lägg till synonym"
+
+#~ msgid "Remove synonym"
+#~ msgstr "Ta bort synonym"
+
+#~ msgid "Add at least one synonym."
+#~ msgstr "Lägg till minst en synonym."
+
+#~ msgid "A synonym rule already exists for this word."
+#~ msgstr "Det finns redan en synonymregel för det här ordet."
+
+#~ msgid ""
+#~ "Enable curated search rules that can pin selected results for specific "
+#~ "search phrases. After saving, manage them from Settings > Pinned results."
+#~ msgstr ""
+#~ "Aktivera kurerade sökregler som kan fästa valda resultat för specifika "
+#~ "sökfraser. Efter att du har sparat hanterar du dem under Inställningar > "
+#~ "Fästa resultat."
 
 #~ msgid "Facetting"
 #~ msgstr "Facettering"

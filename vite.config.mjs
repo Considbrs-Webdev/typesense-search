@@ -8,6 +8,8 @@ const entries = {
     'js/admin-settings':     './source/js/admin-settings.ts',
     'css/pinned-results-admin': './source/sass/pinned-results-admin.scss',
     'js/pinned-results-admin':  './source/js/pinned-results-admin.ts',
+    'css/synonyms-admin':     './source/sass/synonyms-admin.scss',
+    'js/synonyms-admin':      './source/js/synonyms-admin.ts',
     'css/quick-search':      './source/sass/quick-search.scss',
     'js/quick-search':       './source/js/quick-search.ts',
 };

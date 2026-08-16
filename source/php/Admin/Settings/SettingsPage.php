@@ -7,6 +7,7 @@ use TypesenseSearch\Frontend\I18n;
 use TypesenseSearch\Helper\CacheBust;
 use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\AdminApi;
+use TypesenseSearch\Typesense\Collection;
 use TypesenseSearch\Typesense\ServerCapabilities;
 
 /**
@@ -16,6 +17,12 @@ use TypesenseSearch\Typesense\ServerCapabilities;
  */
 class SettingsPage
 {
+    /**
+     * The hook suffix WordPress assigns the "General" submenu, captured from
+     * add_submenu_page()'s return value rather than guessed/hardcoded.
+     */
+    private string $pageHook = '';
+
     private static function getTabs(): array
     {
         return [
@@ -30,17 +37,33 @@ class SettingsPage
     }
 
     /**
-     * Register the settings page under WordPress Settings menu.
+     * Register the top-level "Typesense search" admin menu and its "General"
+     * submenu (this settings page).
      */
     public function addSettingsPage(): void
     {
-        add_options_page(
+        add_menu_page(
             __('Typesense Search', 'typesense-search'),
+            __('Typesense search', 'typesense-search'),
+            'manage_options',
+            OptionKeys::PAGE_SLUG,
+            [$this, 'renderPage'],
+            'dashicons-search',
+            80
+        );
+
+        // add_menu_page() auto-creates a first submenu item that duplicates the
+        // top-level label; override it explicitly so it reads "General".
+        $hook = add_submenu_page(
+            OptionKeys::PAGE_SLUG,
             __('Typesense Search', 'typesense-search'),
+            __('General', 'typesense-search'),
             'manage_options',
             OptionKeys::PAGE_SLUG,
             [$this, 'renderPage']
         );
+
+        $this->pageHook = $hook !== false ? $hook : '';
     }
 
     public function addModuleType(string $tag, string $handle): string
@@ -56,7 +79,7 @@ class SettingsPage
      */
     public function enqueueAssets(string $hook): void
     {
-        if ($hook !== 'settings_page_' . OptionKeys::PAGE_SLUG) {
+        if ($hook === '' || $hook !== $this->pageHook) {
             return;
         }
 
@@ -136,9 +159,11 @@ class SettingsPage
         $quickSearchEnabled       = (int) get_option(OptionKeys::OPTION_QUICK_SEARCH_ENABLED, 0);
         $quickSearchSelectors     = (array) get_option(OptionKeys::OPTION_QUICK_SEARCH_SELECTORS, []);
         $quickSearchHitsPerPage   = (int) get_option(OptionKeys::OPTION_QUICK_SEARCH_HITS_PER_PAGE, 5);
-        $supportsPinnedResults    = $activeTab === 'advanced-settings'
-            ? (new ServerCapabilities(new AdminApi(new SettingsRepository())))->supportsCurationSets()
-            : false;
+        $capabilities             = new ServerCapabilities(new AdminApi(new SettingsRepository()));
+        $supportsPinnedResults    = $activeTab === 'advanced-settings' ? $capabilities->supportsCurationSets() : false;
+        $supportsSynonyms         = $activeTab === 'advanced-settings' ? $capabilities->supportsSynonymSets() : false;
+        $supportsStemming         = $activeTab === 'content' ? $capabilities->supportsStemming() : false;
+        $stemmingLocale           = Collection::getStemmingLocale();
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';
     }

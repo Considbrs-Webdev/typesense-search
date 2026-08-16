@@ -26,5 +26,6 @@ class AdminFeature
         new Admin\SettingsAjax($this->settings);
         new Admin\MetaBox($this->settings);
         new Admin\PinnedResultsPage($this->settings, $capabilities);
+        new Admin\SynonymsPage($this->settings, $capabilities);
     }
 }

@@ -96,3 +96,7 @@ PHPUnit + Brain Monkey (WP function stubs) + Mockery. Base class `tests/TestCase
 ## Stable identifiers
 
 Do not rename option names, table names, hooks, REST routes, AJAX action names, or CLI commands unless the user explicitly asks for a migration.
+
+## DB schema changes on unreleased features
+
+A custom table's schema only needs backward-compatible migration logic (converting old rows to a new shape) once a version containing that table has actually been tagged/released and could exist on a real site. Before that point — e.g. a table introduced earlier in the same unreleased feature branch — a schema change can just drop and recreate the table via `Database::migrate()`; there's no published data to preserve. Bump `DB_VERSION` as usual so `maybeMigrate()` still fires on dev/test sites that already created the old shape.

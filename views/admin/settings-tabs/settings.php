@@ -60,6 +60,39 @@ if ($activeTab !== 'content') {
                     </div>
                 </div>
 
+                <?php if ($supportsStemming) : ?>
+                <div class="ts-field">
+                    <div class="ts-field__label"><?php esc_html_e('Enable stemming', 'typesense-search'); ?></div>
+                    <div class="ts-field__body">
+                        <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_STEMMING_ENABLED); ?>" value="0" />
+                        <label for="ts-stemming-enabled" class="ts-toggle">
+                            <input
+                                type="checkbox"
+                                id="ts-stemming-enabled"
+                                name="<?php echo esc_attr(Settings::OPTION_STEMMING_ENABLED); ?>"
+                                value="1"
+                                <?php checked(1, (int) get_option(Settings::OPTION_STEMMING_ENABLED, 0)); ?>
+                                class="ts-toggle__input"
+                            />
+                            <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
+                            <span class="ts-toggle__status">
+                                <span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span>
+                                <span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span>
+                            </span>
+                        </label>
+                        <p class="ts-field__description">
+                            <?php
+                            printf(
+                                /* translators: %s: two-letter language code detected from the site's locale, e.g. "sv" */
+                                esc_html__('Matches word variations (e.g. "running" also matches "run") on the title, content, excerpt, and extra search terms fields, using your site\'s detected language ("%s"). Changing this setting requires rebuilding your Typesense collection — run "wp typesense rebuild" after saving.', 'typesense-search'),
+                                esc_html($stemmingLocale)
+                            );
+                            ?>
+                        </p>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <?php if (Settings::isModularityAvailable()) : ?>
                 <div class="ts-field">
                     <div class="ts-field__label">

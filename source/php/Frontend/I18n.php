@@ -163,6 +163,7 @@ class I18n
             'removeResult'               => __('Remove result', 'typesense-search'),
             'emptyPinnedResultsHelp'     => __('Search for posts below and add the results you want to pin.', 'typesense-search'),
             'saveChanges'                => __('Save changes', 'typesense-search'),
+            'saveNewSearch'              => __('Save new search', 'typesense-search'),
             'saving'                     => __('Saving...', 'typesense-search'),
             'saved'                      => __('Saved', 'typesense-search'),
             'deletePinnedSearch'         => __('Delete pinned search', 'typesense-search'),
@@ -176,6 +177,57 @@ class I18n
             'syncSuccess'                => __('Pinned searches synced.', 'typesense-search'),
             'syncError'                  => __('Could not sync pinned searches.', 'typesense-search'),
             'postSearchError'            => __('Could not search posts.', 'typesense-search'),
+        ];
+    }
+
+    /**
+     * Returns translatable strings for the synonyms admin app.
+     *
+     * @return array<string, string>
+     */
+    public static function synonymsStrings(): array
+    {
+        return [
+            'missingConfig'      => __('Missing synonyms configuration.', 'typesense-search'),
+            'instructionsHeading' => __('Instructions', 'typesense-search'),
+            'introText'          => __('Add words that should be treated as the same when people search. Every word in a group is interchangeable with every other word in that group.', 'typesense-search'),
+            'introExample'       => sprintf(
+                /* translators: %s: example group of interchangeable words */
+                __('Example: grouping "%s" together means a search for any one of them also finds results for the others.', 'typesense-search'),
+                __('lekplatser, playground, amusement park', 'typesense-search')
+            ),
+            'loadingSynonyms'    => __('Loading synonyms...', 'typesense-search'),
+            'couldNotLoadSynonyms' => __('Could not load synonyms.', 'typesense-search'),
+            'addSynonymRule'     => __('Add synonym rule', 'typesense-search'),
+            'syncToTypesense'    => __('Sync to Typesense', 'typesense-search'),
+            'syncing'            => __('Syncing...', 'typesense-search'),
+            'searchSynonymRules' => __('Search synonym rules...', 'typesense-search'),
+            'noSynonymRules'     => __('No synonym rules yet.', 'typesense-search'),
+            'noFilteredSynonymRules' => __('No synonym rules match your filter.', 'typesense-search'),
+            'synonyms'           => __('Synonyms', 'typesense-search'),
+            'terms'              => __('Words', 'typesense-search'),
+            'termsHelp'          => __('All words in this group are treated as interchangeable when searching.', 'typesense-search'),
+            'syncStatus'         => __('Sync status', 'typesense-search'),
+            'newStatus'          => __('New', 'typesense-search'),
+            'syncedStatus'       => __('Synced', 'typesense-search'),
+            'errorStatus'        => __('Error', 'typesense-search'),
+            'pendingStatus'      => __('Pending', 'typesense-search'),
+            'newSynonymRule'     => __('New synonym rule', 'typesense-search'),
+            'saveChanges'        => __('Save changes', 'typesense-search'),
+            'saving'             => __('Saving...', 'typesense-search'),
+            'saved'              => __('Saved', 'typesense-search'),
+            'deleteSynonymRule'  => __('Delete synonym rule', 'typesense-search'),
+            'confirmDeleteSynonymRule' => __('Delete this synonym rule?', 'typesense-search'),
+            'tooFewTermsError'   => __('Add at least two words that should be treated as synonyms.', 'typesense-search'),
+            'savedNotice'        => __('Synonym rule saved. Sync to Typesense when you are ready.', 'typesense-search'),
+            'saveError'          => __('Could not save synonym rule.', 'typesense-search'),
+            'deletedNotice'      => __('Synonym rule deleted. Sync to Typesense to apply the change.', 'typesense-search'),
+            'deleteError'        => __('Could not delete synonym rule.', 'typesense-search'),
+            'syncSuccess'        => __('Synonyms synced.', 'typesense-search'),
+            'syncError'          => __('Could not sync synonyms.', 'typesense-search'),
+            'addTermPlaceholder' => __('Add a word and press Enter', 'typesense-search'),
+            'addTerm'            => __('Add word', 'typesense-search'),
+            'removeTerm'         => __('Remove word', 'typesense-search'),
         ];
     }
 }

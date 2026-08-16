@@ -125,6 +125,16 @@ class SettingsRepository
         return (bool) get_option(Settings::OPTION_PINNED_RESULTS_ENABLED, 0);
     }
 
+    public function isSynonymsEnabled(): bool
+    {
+        return (bool) get_option(Settings::OPTION_SYNONYMS_ENABLED, 0);
+    }
+
+    public function isStemmingEnabled(): bool
+    {
+        return (bool) get_option(Settings::OPTION_STEMMING_ENABLED, 0);
+    }
+
     // ── Search statistics ──────────────────────────────────────────────────
 
     public function isSearchLoggingEnabled(): bool

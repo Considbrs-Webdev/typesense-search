@@ -86,6 +86,24 @@ trait Sanitizers
         return absint($value) ? 1 : 0;
     }
 
+    public function sanitizeSynonymsEnabled(mixed $value): int
+    {
+        if (!(new ServerCapabilities(new AdminApi(new SettingsRepository())))->supportsSynonymSets()) {
+            return 0;
+        }
+
+        return absint($value) ? 1 : 0;
+    }
+
+    public function sanitizeStemmingEnabled(mixed $value): int
+    {
+        if (!(new ServerCapabilities(new AdminApi(new SettingsRepository())))->supportsStemming()) {
+            return 0;
+        }
+
+        return absint($value) ? 1 : 0;
+    }
+
     /**
      * Sanitize the quick search CSS selectors array before saving.
      * Each entry must have a non-empty 'selector' key.

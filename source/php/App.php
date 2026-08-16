@@ -8,6 +8,7 @@ use TypesenseSearch\Bootstrap\FrontendFeature;
 use TypesenseSearch\Bootstrap\IndexingFeature;
 use TypesenseSearch\Bootstrap\PinnedResultsFeature;
 use TypesenseSearch\Bootstrap\SearchStatisticsFeature;
+use TypesenseSearch\Bootstrap\SynonymsFeature;
 use TypesenseSearch\Indexing\IndexingRegistry;
 use TypesenseSearch\Logger\ErrorLogLogger;
 use TypesenseSearch\Logger\IndexingLogLogger;
@@ -58,6 +59,8 @@ class App {
         $statsFeature->register();
 
         (new PinnedResultsFeature($settings))->register();
+
+        (new SynonymsFeature($settings))->register();
 
         $indexingFeature = new IndexingFeature($settings, $clientService, $logger);
         $indexingFeature->register();

@@ -8,6 +8,8 @@ namespace TypesenseSearch\Typesense;
 class ServerCapabilities
 {
     private const MIN_CURATION_SETS_VERSION = '30.0.0';
+    private const MIN_SYNONYM_SETS_VERSION = '30.0.0';
+    private const MIN_STEMMING_VERSION = '27.0.0';
 
     private ?string $cached = null;
 
@@ -20,6 +22,20 @@ class ServerCapabilities
         $version = $this->getServerVersion();
 
         return $version !== '' && version_compare($version, self::MIN_CURATION_SETS_VERSION, '>=');
+    }
+
+    public function supportsSynonymSets(): bool
+    {
+        $version = $this->getServerVersion();
+
+        return $version !== '' && version_compare($version, self::MIN_SYNONYM_SETS_VERSION, '>=');
+    }
+
+    public function supportsStemming(): bool
+    {
+        $version = $this->getServerVersion();
+
+        return $version !== '' && version_compare($version, self::MIN_STEMMING_VERSION, '>=');
     }
 
     /**

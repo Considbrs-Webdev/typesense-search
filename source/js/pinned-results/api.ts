@@ -1,10 +1,10 @@
 import type { PinnedPost, PinnedRule } from './types';
-import { state, cloneRule, emptyRule, setNotice, setSaveState, resetPostSearch, clearEditorError, getSearchTimer, setSearchTimer } from './state';
+import { state, cloneRule, emptyRule, setNotice, setSaveState, resetPostSearch, clearEditorError, getSearchTimer, setSearchTimer, t } from './state';
 import { render } from './render';
 
 async function request<T>(path = '', options: RequestInit = {}): Promise<T> {
     const config = window.tsPinnedResults;
-    if (!config) throw new Error('Missing pinned results configuration.');
+    if (!config) throw new Error(t('missingConfig', 'Missing pinned results configuration.'));
 
     const response = await fetch(config.restUrl + path, {
         ...options,
@@ -32,7 +32,7 @@ export async function loadRules(): Promise<void> {
         state.draft      = emptyRule();
         setNotice('', 'info', render);
     } catch (error) {
-        setNotice(error instanceof Error ? error.message : 'Could not load pinned results.', 'error', render);
+        setNotice(error instanceof Error ? error.message : t('couldNotLoadPinnedResults', 'Could not load pinned results.'), 'error', render);
     } finally {
         state.isLoading = false;
         render();
@@ -42,14 +42,14 @@ export async function loadRules(): Promise<void> {
 export async function saveDraft(): Promise<void> {
     if (state.draft.phrase.trim() === '') {
         setSaveState('idle', render);
-        state.editorError = 'Add a search phrase before saving.';
+        state.editorError = t('emptyPhraseError', 'Add a search phrase before saving.');
         render('ts-pr-phrase');
         return;
     }
 
     if (!state.draft.posts.length) {
         setSaveState('idle', render);
-        state.editorError = 'Add at least one pinned result before saving.';
+        state.editorError = t('emptyPinnedResultsError', 'Add at least one pinned result before saving.');
         render();
         return;
     }
@@ -85,16 +85,16 @@ export async function saveDraft(): Promise<void> {
 
         clearEditorError();
         setSaveState('saved', render);
-        setNotice('Pinned search saved. Sync to Typesense when you are ready.', 'success', render);
+        setNotice(t('savedNotice', 'Pinned search saved. Sync to Typesense when you are ready.'), 'success', render);
     } catch (error) {
         setSaveState('idle', render);
-        state.editorError = error instanceof Error ? error.message : 'Could not save pinned search.';
+        state.editorError = error instanceof Error ? error.message : t('saveError', 'Could not save pinned search.');
     }
     render();
 }
 
 export async function deleteSelected(): Promise<void> {
-    if (!state.draft.id || !window.confirm('Delete this pinned search?')) return;
+    if (!state.draft.id || !window.confirm(t('confirmDeletePinnedSearch', 'Delete this pinned search?'))) return;
 
     try {
         const data       = await request<{ rules: PinnedRule[] }>(`/${state.draft.id}`, { method: 'DELETE' });
@@ -105,9 +105,9 @@ export async function deleteSelected(): Promise<void> {
         state.isDirty    = false;
         clearEditorError();
         resetPostSearch();
-        setNotice('Pinned search deleted. Sync to Typesense to apply the change.', 'success', render);
+        setNotice(t('deletedNotice', 'Pinned search deleted. Sync to Typesense to apply the change.'), 'success', render);
     } catch (error) {
-        setNotice(error instanceof Error ? error.message : 'Could not delete pinned search.', 'error', render);
+        setNotice(error instanceof Error ? error.message : t('deleteError', 'Could not delete pinned search.'), 'error', render);
     }
     render();
 }
@@ -123,9 +123,9 @@ export async function syncRules(): Promise<void> {
         state.rules = (data.rules ?? state.rules).map(cloneRule);
         const current = state.draft.id ? state.rules.find((r) => r.id === state.draft.id) : null;
         state.draft   = current ? cloneRule(current) : state.draft;
-        setNotice(data.message || 'Pinned searches synced.', data.ok ? 'success' : 'error', render);
+        setNotice(data.message || t('syncSuccess', 'Pinned searches synced.'), data.ok ? 'success' : 'error', render);
     } catch (error) {
-        setNotice(error instanceof Error ? error.message : 'Could not sync pinned searches.', 'error', render);
+        setNotice(error instanceof Error ? error.message : t('syncError', 'Could not sync pinned searches.'), 'error', render);
     } finally {
         state.isSyncing = false;
     }
@@ -152,7 +152,7 @@ export async function searchPosts(search: string): Promise<void> {
         state.postResults = (data.posts ?? []).filter((p) => !state.draft.posts.some((item) => item.id === p.id));
     } catch (error) {
         state.postResults = [];
-        setNotice(error instanceof Error ? error.message : 'Could not search posts.', 'error', render);
+        setNotice(error instanceof Error ? error.message : t('postSearchError', 'Could not search posts.'), 'error', render);
     } finally {
         state.postSearchLoading = false;
         render('ts-pr-post-search');

@@ -9,11 +9,11 @@ use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\ServerCapabilities;
 
 /**
- * Renders the JavaScript-based pinned results manager.
+ * Renders the JavaScript-based synonyms manager.
  */
-class PinnedResultsPage
+class SynonymsPage
 {
-    public const PAGE_SLUG = 'typesense-search-pinned-results';
+    public const PAGE_SLUG = 'typesense-search-synonyms';
 
     /**
      * The hook suffix WordPress assigns this submenu page, captured from
@@ -40,8 +40,8 @@ class PinnedResultsPage
 
         $hook = add_submenu_page(
             OptionKeys::PAGE_SLUG,
-            __('Pinned search results', 'typesense-search'),
-            __('Pinned results', 'typesense-search'),
+            __('Synonyms', 'typesense-search'),
+            __('Synonyms', 'typesense-search'),
             'manage_options',
             self::PAGE_SLUG,
             [$this, 'renderPage']
@@ -52,7 +52,7 @@ class PinnedResultsPage
 
     public function addModuleType(string $tag, string $handle): string
     {
-        if ($handle !== 'typesense-search-pinned-results') {
+        if ($handle !== 'typesense-search-synonyms') {
             return $tag;
         }
         return str_replace(' src=', ' type="module" src=', $tag);
@@ -64,15 +64,15 @@ class PinnedResultsPage
             return;
         }
 
-        $cssFile = CacheBust::name('css/pinned-results-admin.css') ?: 'css/pinned-results-admin.css';
-        $jsFile = CacheBust::name('js/pinned-results-admin.js') ?: 'js/pinned-results-admin.js';
+        $cssFile = CacheBust::name('css/synonyms-admin.css') ?: 'css/synonyms-admin.css';
+        $jsFile = CacheBust::name('js/synonyms-admin.js') ?: 'js/synonyms-admin.js';
 
         $cssPath = TYPESENSESEARCH_PATH . 'assets/dist/' . $cssFile;
         $jsPath = TYPESENSESEARCH_PATH . 'assets/dist/' . $jsFile;
 
         if (file_exists($cssPath)) {
             wp_enqueue_style(
-                'typesense-search-pinned-results',
+                'typesense-search-synonyms',
                 TYPESENSESEARCH_URL . '/assets/dist/' . $cssFile,
                 [],
                 null
@@ -81,17 +81,17 @@ class PinnedResultsPage
 
         if (file_exists($jsPath)) {
             wp_enqueue_script(
-                'typesense-search-pinned-results',
+                'typesense-search-synonyms',
                 TYPESENSESEARCH_URL . '/assets/dist/' . $jsFile,
                 [],
                 null,
                 true
             );
 
-            wp_localize_script('typesense-search-pinned-results', 'tsPinnedResults', [
-                'restUrl' => esc_url_raw(rest_url('typesense-search/v1/pinned-results')),
+            wp_localize_script('typesense-search-synonyms', 'tsSynonyms', [
+                'restUrl' => esc_url_raw(rest_url('typesense-search/v1/synonyms')),
                 'nonce'   => wp_create_nonce('wp_rest'),
-                'i18n'    => I18n::pinnedResultsStrings(),
+                'i18n'    => I18n::synonymsStrings(),
             ]);
         }
     }
@@ -103,15 +103,15 @@ class PinnedResultsPage
         }
 
         if (!$this->shouldShow()) {
-            wp_die(esc_html__('Pinned results are not available.', 'typesense-search'));
+            wp_die(esc_html__('Synonyms are not available.', 'typesense-search'));
         }
 
-        include TYPESENSESEARCH_PATH . 'views/admin/pinned-results-page.php';
+        include TYPESENSESEARCH_PATH . 'views/admin/synonyms-page.php';
     }
 
     private function shouldShow(): bool
     {
-        return $this->settings->isPinnedResultsEnabled()
-            && $this->capabilities->supportsCurationSets();
+        return $this->settings->isSynonymsEnabled()
+            && $this->capabilities->supportsSynonymSets();
     }
 }

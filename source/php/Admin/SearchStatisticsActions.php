@@ -45,7 +45,7 @@ class SearchStatisticsActions
             'page' => Settings::PAGE_SLUG,
             'tab' => 'statistics',
             'settings-updated' => 'true',
-        ], admin_url('options-general.php')));
+        ], admin_url('admin.php')));
         exit;
     }
 

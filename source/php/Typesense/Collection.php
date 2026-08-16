@@ -79,6 +79,21 @@ class Collection
             $schema['curation_sets'] = ['wordpress-pinned-results-' . $collectionName];
         }
 
+        if ($settings->isSynonymsEnabled() && $capabilities->supportsSynonymSets()) {
+            $schema['synonym_sets'] = ['wordpress-synonyms-' . $collectionName];
+        }
+
+        if ($settings->isStemmingEnabled() && $capabilities->supportsStemming()) {
+            $locale = self::getStemmingLocale();
+            foreach ($schema['fields'] as &$field) {
+                if (in_array($field['name'], ['title', 'content', 'excerpt', 'extra_terms'], true)) {
+                    $field['stem']   = true;
+                    $field['locale'] = $locale;
+                }
+            }
+            unset($field);
+        }
+
         /**
          * Filters the Typesense collection schema before the collection is created.
          *
@@ -86,6 +101,17 @@ class Collection
          * @param string               $collectionName The target collection name.
          */
         return (array) apply_filters(self::FILTER_SCHEMA, $schema, $collectionName);
+    }
+
+    /**
+     * Derives the two-letter stemming locale from the WordPress site locale
+     * (e.g. "sv_SE" -> "sv"), falling back to "en" when unset.
+     */
+    public static function getStemmingLocale(): string
+    {
+        $lang = strtolower(substr(get_locale(), 0, 2));
+
+        return $lang !== '' ? $lang : 'en';
     }
 
     /**

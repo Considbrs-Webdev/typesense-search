@@ -77,4 +77,72 @@ class ServerCapabilitiesTest extends TestCase
 
         self::assertFalse((new ServerCapabilities($adminApi))->supportsCurationSets());
     }
+
+    // ── supportsSynonymSets ───────────────────────────────────────────────────
+
+    public function test_supports_synonym_sets_returns_true_for_version_at_minimum(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class);
+        $adminApi->shouldReceive('getServerVersion')->andReturn('30.0.0');
+
+        self::assertTrue((new ServerCapabilities($adminApi))->supportsSynonymSets());
+    }
+
+    public function test_supports_synonym_sets_returns_true_for_newer_version(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class);
+        $adminApi->shouldReceive('getServerVersion')->andReturn('31.0.0');
+
+        self::assertTrue((new ServerCapabilities($adminApi))->supportsSynonymSets());
+    }
+
+    public function test_supports_synonym_sets_returns_false_for_older_version(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class);
+        $adminApi->shouldReceive('getServerVersion')->andReturn('29.9.9');
+
+        self::assertFalse((new ServerCapabilities($adminApi))->supportsSynonymSets());
+    }
+
+    public function test_supports_synonym_sets_returns_false_when_version_is_empty(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class);
+        $adminApi->shouldReceive('getServerVersion')->andReturn('');
+
+        self::assertFalse((new ServerCapabilities($adminApi))->supportsSynonymSets());
+    }
+
+    // ── supportsStemming ───────────────────────────────────────────────────────
+
+    public function test_supports_stemming_returns_true_for_version_at_minimum(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class);
+        $adminApi->shouldReceive('getServerVersion')->andReturn('27.0.0');
+
+        self::assertTrue((new ServerCapabilities($adminApi))->supportsStemming());
+    }
+
+    public function test_supports_stemming_returns_true_for_newer_version(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class);
+        $adminApi->shouldReceive('getServerVersion')->andReturn('31.0.0');
+
+        self::assertTrue((new ServerCapabilities($adminApi))->supportsStemming());
+    }
+
+    public function test_supports_stemming_returns_false_for_older_version(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class);
+        $adminApi->shouldReceive('getServerVersion')->andReturn('26.9.9');
+
+        self::assertFalse((new ServerCapabilities($adminApi))->supportsStemming());
+    }
+
+    public function test_supports_stemming_returns_false_when_version_is_empty(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class);
+        $adminApi->shouldReceive('getServerVersion')->andReturn('');
+
+        self::assertFalse((new ServerCapabilities($adminApi))->supportsStemming());
+    }
 }
