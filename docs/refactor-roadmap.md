@@ -2,7 +2,7 @@
 
 Reviewed against local revision `10c5d6a` on 2026-09-07.
 **Status: mostly implemented, not fully complete.** Keep this file while the
-remaining item below is useful; it is not a prerequisite for new features.
+remaining items below are useful; it is not a prerequisite for new features.
 
 ## Remaining optional refactor
 
@@ -13,6 +13,39 @@ configuration construction, facets, filters, quick-search selectors and inline
 script injection. A pure config builder plus a small localizer could improve
 testability, but the current file is self-contained. Low urgency; split only
 when a concrete change benefits from it. Preserve public filters and payloads.
+
+## Optional multisite follow-ups
+
+Retained after reassessing the
+[multisite code review](multisite-code-review-2026-09-07.md) on 2026-09-07.
+These are low-priority improvements, not established rollout blockers.
+
+- [ ] **Reuse the shared policy in AdminApi.** In
+  `source/php/Typesense/AdminApi.php`, use the injected settings repository's
+  `canUseTypesense()` in `request()` instead of recreating the equivalent
+  network-policy check. Preserve current behavior, including provisioning's
+  internal candidate context.
+- [ ] **Avoid verifying an existing valid key twice during prepare.** In
+  `source/php/Multisite/SiteProvisioner.php`, a successful existing-key check
+  is followed by another unconditional `verify()`. Remove the redundant
+  search request while retaining verification of newly issued keys and repair
+  of revoked keys.
+- [ ] **Align network table readiness with runtime requirements.** In
+  `views/admin/network/settings.php`, readiness does not require a nonempty
+  collection, whereas `NetworkSettingsRepository::canUse()` does. Normal
+  provisioning supplies it, but the UI should also handle incomplete state
+  consistently. Preserve each row's target-site context; calling `identity()`
+  directly in the loop would inspect the current site instead.
+- [ ] **Make REST policy rejection explicit.** Consider checking
+  `SettingsRepository::canUseTypesense()` in both pinned-results and synonyms
+  REST permission checks, alongside `manage_options`. Existing feature guards
+  already reject disabled/unprepared sites through effective connection and
+  capability checks. This would make authorization easier to follow and allow
+  a clearer managed-state error, rather than repair a demonstrated bypass.
+- [ ] **Document blocked external-sync results.** Update the contract for
+  `IndexingRegistry::runExternalSync()` / `runAllExternalSyncs()` to explain
+  that policy rejection also returns `-1` / `[]`. Preserve public return types;
+  richer diagnostics can wait until a caller needs them.
 
 ## Correctness work tracked elsewhere
 
