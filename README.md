@@ -6,6 +6,8 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 - **License:** MIT
 - **Requires:** WordPress 5.6+, PHP 8.1+
 
+Pending multisite improvements and agreed setup-flow changes: [Multisite refactor checklist](docs/multisite-refactor.md).
+
 ---
 
 ## Table of contents

@@ -6,6 +6,17 @@ remaining items below are useful; it is not a prerequisite for new features.
 
 ## Remaining optional refactor
 
+The agreed multisite UX changes and simplified setup flow are tracked separately
+in [multisite-refactor.md](multisite-refactor.md). Read that checklist before
+continuing multisite work; it records user decisions from 2026-09-07 and pending
+bugs, and supersedes the earlier manual preparation workflow as the target design.
+
+**Before merging this branch into `dev`:** remove all temporary documents created
+during this work and every reference to them. This includes the multisite guide,
+refactor checklist, verification report, network-mode plan and dated code review.
+The full cleanup checklist is in `multisite-refactor.md`; remove this temporary
+notice and the links above as part of that cleanup.
+
 ### Separate frontend config construction from script injection
 
 `source/php/Frontend/TypesenseConfig.php` still handles locale mapping,
