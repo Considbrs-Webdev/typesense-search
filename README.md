@@ -41,6 +41,9 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
    - [8.3 Index external content](#83-index-external-content)
    - [8.4 Customise hit templates](#84-customise-hit-templates)
 9. [WordPress hooks and filters reference](#9-wordpress-hooks-and-filters-reference)
+10. [Multisite network mode](#10-multisite-network-mode)
+    - [10.1 Site state, naming and configuration](#101-site-state-naming-and-configuration)
+    - [10.2 Custom integrations and shared-core installations](#102-custom-integrations-and-shared-core-installations)
 
 ---
 
@@ -136,6 +139,8 @@ These settings tell the plugin how to reach your Typesense instance.
 | Frontend host           | `typesense_search_frontend_host` | Optional override of the host sent to the browser (useful behind reverse proxies) |
 
 The admin key is kept server-side. The search key is the only credential exposed to the browser.
+
+> **Multisite:** in network mode these settings are managed by the network administrator under **Network Admin → Settings → Typesense Search**, and this tab becomes read-only for the current site. See [§10 Multisite network mode](#10-multisite-network-mode).
 
 ### 4.3 Settings tab
 
@@ -269,6 +274,8 @@ indexing. The log can be cleared from this tab.
 ### 4.9 Status tab
 
 Checks whether the current configuration is valid and the collection exists. Can create the collection if it is missing.
+
+> **Multisite:** in network mode this tab checks the shared connection or the current site's active key instead, and legacy connection/key AJAX actions are unavailable. See [§10 Multisite network mode](#10-multisite-network-mode).
 
 ---
 
@@ -1190,7 +1197,7 @@ Both hooks are wired in `IndexingHooks` during bootstrap, so they are available 
 | `Municipio/TypesenseSearch/postTypeToTemplate`  | `array<string,string> $mapping`  | Map Typesense `post_type` values to template keys. Entries not listed fall back to `'default'`                                       |
 | `Municipio/TypesenseSearch/placeholderMappings` | `array<string,string> $mappings` | Add custom `{TOKEN}` → document field mappings that the front-end JavaScript uses when rendering hit cards (see §8.4 for an example) |
 
-## Multisite network mode
+## 10. Multisite network mode
 
 Network-activate Typesense Search to manage the shared connection under
 **Network Admin → Settings → Typesense Search**. Local-only activation in a
@@ -1225,7 +1232,7 @@ Status tabs show that the network administrator owns those settings. Legacy
 connection/key AJAX actions are unavailable in network mode; local indexing
 operations only use the current site's effective collection.
 
-### Site state, naming and configuration
+### 10.1 Site state, naming and configuration
 
 Collections use `{domain}[-{path}]__{environment}_b{blog_id}`, normalized to ASCII
 and bounded to 128 characters while retaining the environment/site suffix. This
@@ -1275,7 +1282,7 @@ Normal completion, exceptions and ordinary CLI exits release their own lock.
 Concurrent provisioning for the same site is rejected. Uninstall removes new
 network configuration and local provisioning metadata, but never remote indexes.
 
-### Custom integrations and shared-core installations
+### 10.2 Custom integrations and shared-core installations
 
 Provisioning and indexing execute in the target site's own request so its theme,
 plugins and schema filters are loaded. A bare `switch_to_blog()` does not load
