@@ -2082,3 +2082,159 @@ msgstr "Sista ansökningsdag"
 
 #~ msgid "Facetting"
 #~ msgstr "Facettering"
+
+#. Multisite network administration
+msgid "Typesense Search — Network settings"
+msgstr "Typesense-sök – nätverksinställningar"
+
+#. Multisite network administration
+msgid "Sites"
+msgstr "Webbplatser"
+
+#. Multisite network administration
+msgid "Typesense host"
+msgstr "Typesense-värd"
+
+#. Multisite network administration
+msgid "Set via constant."
+msgstr "Anges via konstant."
+
+#. Multisite network administration
+msgid "A key is configured. Leave blank to keep it."
+msgstr "En nyckel är sparad. Lämna tomt för att behålla den."
+
+#. Multisite network administration
+msgid "Enter the server admin API key."
+msgstr "Ange serverns admin-API-nyckel."
+
+#. Multisite network administration
+msgid "Changing the host, site URL or environment requires preparing and reviewing the affected sites again. Existing collections are preserved."
+msgstr "Om värd, webbplatsadress eller miljö ändras måste berörda webbplatser förberedas och granskas igen. Befintliga index bevaras."
+
+#. Multisite network administration
+msgid "Remove TYPESENSE_COLLECTION and TYPESENSE_SEARCH_KEY constants before using network mode. Each site needs its own collection and key."
+msgstr "Ta bort konstanterna TYPESENSE_COLLECTION och TYPESENSE_SEARCH_KEY innan nätverksläget används. Varje webbplats behöver ett eget index och en egen nyckel."
+
+#. Multisite network administration
+msgid "Environment: %s. New sites are disabled until selected, prepared and activated."
+msgstr "Miljö: %s. Nya webbplatser är avstängda tills de har valts, förberetts och aktiverats."
+
+#. Multisite network administration
+msgid "Save site selection first. Prepare creates or reuses a separate collection and key. Index the candidate with WP-CLI, review its results, then activate. Disabling preserves existing indexes and keys."
+msgstr "Spara först valet av webbplatser. Förbered skapar eller återanvänder ett separat index och en nyckel. Indexera kandidaten med WP-CLI, granska resultatet och aktivera sedan. Avstängning bevarar befintliga index och nycklar."
+
+#. Multisite network administration
+msgid "Check shared connection"
+msgstr "Kontrollera gemensam anslutning"
+
+#. Multisite network administration
+msgid "Checks run only when requested. Each check verifies the shared server credentials and that site’s active search key."
+msgstr "Kontroller körs på begäran. Varje kontroll verifierar de gemensamma serveruppgifterna och webbplatsens aktiva söknyckel."
+
+#. Multisite network administration
+msgid "Site"
+msgstr "Webbplats"
+
+#. Multisite network administration
+msgid "Collection / state"
+msgstr "Index / status"
+
+#. Multisite network administration
+msgid "Actions"
+msgstr "Åtgärder"
+
+#. Multisite network administration
+msgid "Active"
+msgstr "Aktiv"
+
+#. Multisite network administration
+msgid "Preparation or activation required"
+msgstr "Förberedelse eller aktivering krävs"
+
+#. Multisite network administration
+msgid "Enable site %d"
+msgstr "Aktivera webbplats %d"
+
+#. Multisite network administration
+msgid "Not active"
+msgstr "Inte aktiv"
+
+#. Multisite network administration
+msgid "Candidate: %s"
+msgstr "Kandidat: %s"
+
+#. Multisite network administration
+msgid "Prepare / retry"
+msgstr "Förbered / försök igen"
+
+#. Multisite network administration
+msgid "I have reviewed the candidate content."
+msgstr "Jag har granskat kandidatens innehåll."
+
+#. Multisite network administration
+msgid "Activate"
+msgstr "Aktivera"
+
+#. Multisite network administration
+msgid "Check status"
+msgstr "Kontrollera status"
+
+#. Multisite network administration
+msgid "Save site selection"
+msgstr "Spara val av webbplatser"
+
+#. Multisite network administration
+msgid "The Typesense connection and site activation are managed by the network administrator."
+msgstr "Typesense-anslutningen och aktiveringen av webbplatser hanteras av nätverksadministratören."
+
+#. Multisite network administration
+msgid "Network settings"
+msgstr "Nätverksinställningar"
+
+#. Multisite network administration
+msgid "Invalid settings section."
+msgstr "Ogiltig inställningsflik."
+
+#. Multisite network administration
+msgid "Server connection and admin key are working."
+msgstr "Serveranslutningen och adminnyckeln fungerar."
+
+#. Multisite network administration
+msgid "Connection check failed. Verify the saved host and admin key."
+msgstr "Anslutningskontrollen misslyckades. Kontrollera den sparade värden och adminnyckeln."
+
+#. Multisite network administration
+msgid "Enter a valid HTTP or HTTPS URL."
+msgstr "Ange en giltig HTTP- eller HTTPS-adress."
+
+#. Multisite network administration
+msgid "Invalid site selection."
+msgstr "Ogiltigt val av webbplatser."
+
+#. Multisite network administration
+msgid "Invalid site context."
+msgstr "Ogiltig webbplatskontext."
+
+#. Multisite network administration
+msgid "Collection and search key prepared. Index the candidate before activating an existing site."
+msgstr "Index och söknyckel är förberedda. Indexera kandidaten innan en befintlig webbplats aktiveras."
+
+#. Multisite network administration
+msgid "Typesense is now active for this site."
+msgstr "Typesense är nu aktivt för denna webbplats."
+
+#. Multisite network administration
+msgid "Server connection, admin key and site search key are working."
+msgstr "Serveranslutningen, adminnyckeln och webbplatsens söknyckel fungerar."
+
+#. Multisite network administration
+msgid "Typesense operation failed. Verify the server, credentials and collection in Network Admin, then retry."
+msgstr "Typesense-åtgärden misslyckades. Kontrollera server, inloggningsuppgifter och index i nätverksadministrationen och försök igen."
+
+#. Multisite network administration
+msgid "Use Network Admin to manage the connection and keys."
+msgstr "Hantera anslutningen och nycklarna i nätverksadministrationen."
+
+#. Multisite network administration
+msgid "Typesense is disabled or not ready for this site."
+msgstr "Typesense är avstängt eller inte klart för denna webbplats."

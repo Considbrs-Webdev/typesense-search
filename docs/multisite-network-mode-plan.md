@@ -1,206 +1,255 @@
 # Multisite network mode (GitHub issue #1)
 
-Status: **plan, not yet implemented.** This document is the implementation
-plan for `feature/multisite-network-mode`, written for review before code is
-written.
+Status: **implemented and locally verified** on 2026-09-07, based on
+revision `10c5d6a`, for [issue #1](https://github.com/Considbrs-Webdev/typesense-search/issues/1).
+The sections below retain the implementation contract. See
+[multisite-verification.md](multisite-verification.md) for evidence and limitations.
 
-## Context
+## Implementation decisions
 
-The plugin is going onto a multisite install (path-based multisite — sites are
-`example.com/sub-site/`, not `sub-site.example.com`) and the goal is to avoid
-configuring the Typesense connection, collection, and search key separately on
-every sub-site. [Issue #1](https://github.com/Considbrs-Webdev/typesense-search/issues/1)
-asks for three things:
+- Network settings use `Multisite/NetworkSettingsRepository`, a dedicated
+  `Admin/NetworkSettingsPage` and native WordPress forms; no new JavaScript bundle.
+- One site-local `typesense_network_state` option stores candidate, active and
+  previous mappings. Activation atomically switches collection and key there.
+  Legacy local collection/key options are preserved, not mirrored or migrated.
+- Ownership is verified against a random token in Typesense collection metadata.
+  An unrelated existing collection is never silently adopted or cleared.
+- Preparation, candidate indexing and activation are explicit operations in the
+  target site's own request. `wp typesense network` provides all three operations.
+- Network activation initially falls back to ordinary WordPress search until
+  each selected site is prepared, indexed, reviewed and activated. This is a
+  controlled migration, not a promise of uninterrupted Typesense search.
+- Context-sensitive consumers and caches use effective settings. Existing
+  ConstantsLoader behavior remains intact for local activation; network mode
+  explicitly rejects global collection/search-key constants.
+- The shared-core `/wp` layout uses `Multisite/SiteUrls` for target-site admin
+  actions, with a filter for custom routing. No installation rewrite is changed.
 
-1. Move the connection and status tabs to a network-level configuration.
-2. Use domain + environment as the collection name.
-3. A network-level setting for which sites are enabled/indexed.
+## Goal and scope
 
-The issue also carries a very thorough analysis comment covering an idealized
-full implementation (resumable provisioning with partial-failure recovery,
-IDN-safe naming with collision detection, paginated site lists, exhaustive
-uninstall across every subsystem, REST/CLI guards everywhere, etc). That
-comment is a useful risk checklist, but building all of it is a multi-week
-epic. This plan deliberately scopes down to a correct, secure v1 that satisfies
-the 3 literal asks, and explicitly calls out what's deferred and why.
+When network-activated, configure the Typesense connection and status in
+Network Admin and select which sites use/index into Typesense. Each selected
+site gets its own collection and search key. Content selection, search
+appearance, synonyms, pinned results and statistics settings remain local.
+Single-site and multisite with only local plugin activation retain their
+existing behavior. The first version supports a small path-based network;
+subdomains and mapped domains must still produce valid collection identities.
 
-**Key simplification found during code exploration:** every consumer of
-connection settings today (`ClientFactory::isReady()`, indexing strategies,
-frontend search, quick search, the AJAX status checks) already treats an empty
-remote/admin-key/collection as "not configured" and no-ops gracefully — this is
-exactly how a fresh single-site install behaves before anyone fills in the
-connection tab. So "this site is not enabled at the network level" doesn't need
-new guards sprinkled through `IndexingHooks`, CLI, or AJAX — it's enough to make
-the *settings resolution layer* return `''` for a disabled site and let the
-existing graceful-no-op behavior take over. This avoids touching
-`IndexingHooks.php`, `IndexingRegistry.php`, CLI actions, or REST at all.
+Keep the UI small, but do not substitute empty credentials for an activation
+or authorization policy. The original code had direct option consumers and AJAX handlers accepting
+explicit credentials. These paths now use effective settings and explicit policy guards.
 
-## Scope for this branch
+## Settings and activation contract
 
-### In scope
+Add a small NetworkSettingsRepository and a shared site-use policy. Detect
+actual network activation using the plugin basename and the owning network's
+`active_sitewide_plugins`, with an `is_multisite()` guard. Resolve the network
+from the target site for operations accepting a site ID; reject IDs outside
+the administrator's current network. Do not use `is_network_admin()` as the
+runtime mode test.
 
-- **Network detection.** Check actual network activation (network-activated
-  plugin), not just `is_multisite()` — a network can have the plugin active
-  only locally on one site, which must keep behaving exactly as single-site
-  does today.
-- **Settings resolution.** For the 3 *shared* connection fields (`remote`,
-  `admin_key`, `frontend_host`): constant (existing `ConstantsLoader`) > network
-  value (only if the current site is enabled) > local option (existing
-  single-site behavior, unchanged when network mode doesn't apply).
-- **Network admin page** (Anslutning / Webbplatser / Status) to configure the
-  shared connection once and tick which sites are enabled.
-- **Collection-name resolver**: `{normalized-domain}[-{normalized-path}]__{environment}_b{blog_id}`.
-  The `_b{blog_id}` suffix guarantees uniqueness deterministically, without a
-  collision-detection scheme (a deliberate simplification vs. the issue
-  comment's IDN/collision-resolution proposal — revisit only if collisions
-  actually become a problem).
-- **Provisioning.** When a site is newly enabled: `switch_to_blog()` to it,
-  resolve its collection name, create the collection with `Collection::create()`
-  using *that site's own* `SettingsRepository` (so stemming/synonyms/pinned
-  results are respected), generate a search key scoped to that collection with
-  `ApiKey::generateSearchKey()`, and persist both as the site's normal local
-  options (`typesense_search_index_name`, `typesense_search_search_key` — no
-  new storage, no option renames, no schema migration).
-- **Disabling** a site at the network level stops the network connection from
-  applying to it (it falls back to "not configured" unless it has its own local
-  override) but does **not** delete its remote collection or revoke its key —
-  destructive cleanup stays a separate, explicit action.
-- **Local per-site settings page.** When network mode is active for the current
-  site, the Connection and Status tabs show a read-only "managed by the network
-  admin" state instead of editable fields (same visual pattern already used for
-  `ConstantsLoader`-defined fields). Content/Advanced/Quick search/Logging/
-  Synonyms/Pinned-results tabs are untouched and stay fully local — this is
-  intentional per the issue: "Innehållsval och sökutseende ligger kvar på
-  respektive webbplats."
-- **Tests** for network-mode detection, settings resolution, and the
-  collection-name resolver, following the existing Brain Monkey conventions in
-  `tests/TestCase.php` (which currently stubs no multisite functions at all —
-  this is genuinely new stubbing, not an extension of something existing).
-- **README** update documenting network mode.
+| Mode/state | Effective behavior |
+| --- | --- |
+| Single-site or local activation only | Existing constant > local option behavior. |
+| Network mode, site disabled or not ready | No Typesense search/indexing, even with old local values or constants. Preserve stored values. |
+| Network mode, site enabled and ready | Shared connection constant > network option; no fallback to old local connection options. Collection/key come from the site's verified provisioned identity. |
 
-### Explicitly deferred (do not build in this branch)
+Use network options for remote, admin key, frontend host and selected site IDs
+(proposed keys: `typesense_network_remote`, `typesense_network_admin_key`,
+`typesense_network_frontend_host`, `typesense_network_enabled_sites`). Empty
+frontend host falls back to the effective remote. Keep existing local
+`typesense_search_index_name` and `typesense_search_search_key` identifiers;
+add minimal provisioned-state metadata for identity, target server and readiness.
+Selection and readiness are distinct: a selected site with a provisioning error
+must remain inactive until an explicit successful retry.
 
-- Resumable/multi-step provisioning with a partial-failure recovery UI.
-- IDN/domain-alias collision detection — sidestepped by the `_b{blog_id}`
-  suffix.
-- Paginated network site list / on-demand-only status checks — fine for a
-  handful of municipal sub-sites; revisit if the network grows large.
-- Extending `uninstall.php` for network options. Note: `uninstall.php` already
-  doesn't clean up the connection options even in single-site mode today —
-  that's a pre-existing gap, not something this issue needs to fix.
-- Any change to CLI `--url` handling, REST routes, or `IndexingHooks` — not
-  needed, per the simplification above.
+SettingsRepository exposes effective values and the shared policy. Empty
+values may be a secondary safeguard, but callers must not infer permission
+from the presence of credentials. Provisioning/network status needs privileged
+access to shared configuration even when the target site is not ready; use an
+explicit internal configuration path, not a public runtime-policy bypass.
 
-## Current architecture (relevant parts, as of `dev`)
+### Constants and legacy reads
 
-- `Services/SettingsRepository.php` — the runtime source of truth for options,
-  currently all plain `get_option()` calls with no multisite awareness.
-- `Admin/Settings/OptionKeys.php` — all WP option name constants live here.
-- `ConstantsLoader.php` — registers `pre_option_{name}` / `pre_update_option_{name}`
-  filters for 5 connection-related options when a matching PHP constant is
-  defined, and exposes `ConstantsLoader::isDefinedAsConstant()` for views to
-  render read-only fields. The network-value resolution should follow the same
-  filter pattern, layered so the constant always wins.
-- `Admin/Settings/SettingsPage.php` / `SettingsRegistry.php` — per-site admin
-  page registered on `admin_menu`/`admin_init` (not network hooks). The
-  connection tab form posts to `options.php` via `register_setting()` — this
-  mechanism can't be reused as-is for a network page (`options.php` always
-  targets the current site's options table), so the network page needs its own
-  `network_admin_edit_{action}` handler with nonce + `manage_network_options`.
-- `views/admin/settings-tabs/connection.php` — reads options directly and
-  renders `readonly` + a notice when `ConstantsLoader::isDefinedAsConstant()`
-  is true. The network-managed state should render the same way.
-- `Admin/Ajax/*` (`ConnectionActions`, `CollectionActions`, `SearchKeyActions`,
-  etc.) — all gated by `manage_options` via the `AjaxHelpers` trait, all
-  site-scoped, no blog-id parameter anywhere. `SearchKeyActions::handleFixSearchKey()`
-  writes directly via `update_option()`, bypassing `options.php`.
-- `Typesense/ClientFactory.php` — `build()`/`fromOptions()`/`fromSettings()`/`isReady()`
-  are stateless (safe to call repeatedly across `switch_to_blog()`).
-  **`isReadyWithCollection()` uses a function-static cache that persists for
-  the whole PHP process** — provisioning must not go through this method (or
-  through `TypesenseClientService`/`ServerCapabilities`, which cache per
-  instance) when looping over sites in one request. Provisioning should call
-  `ClientFactory::build()` directly with explicit parameters instead.
-- `Typesense/Collection.php` — `Collection::create($client, $name, $settings, $capabilities)`
-  already accepts an injected `SettingsRepository`/`ServerCapabilities`, which
-  is exactly what provisioning needs to build a site-correct schema without
-  new schema logic.
-- `Typesense/ApiKey.php` — `generateSearchKey($client, $collectionName)` scopes
-  the key to exactly one collection name passed in by the caller — already
-  multisite-safe, no changes needed.
-- `uninstall.php` — already loops `get_sites()` + `switch_to_blog()`/`restore_current_blog()`
-  for its existing (partial) per-site cleanup.
-- `tests/TestCase.php` — Brain Monkey + Mockery, stubs `__`, `sanitize_key`,
-  `sanitize_text_field`, `absint`, `wp_strip_all_tags`. No multisite functions
-  stubbed anywhere in the test suite today.
+ConstantsLoader currently filters local reads and prevents writes for five
+options. In network mode, global TYPESENSE_COLLECTION and TYPESENSE_SEARCH_KEY
+must produce a clear conflict that blocks provisioning/use until removed or
+replaced by an explicitly site-specific design. Do not silently save local
+values that these constants will override. Connection constants remain
+supported, but never bypass the disabled-site policy. Preserve all existing
+constant behavior outside network mode.
 
-## New/changed files
+Route ClientFactory::fromOptions(), isReady() and isReadyWithCollection()
+through the same effective configuration/policy. Audit direct option reads,
+including Frontend/Assets and views. Avoid global option filters that expose
+a network admin key through old local forms. Prefer explicit resolution;
+adapt ConstantsLoader so its existing filters do not defeat the contract.
 
-- `source/php/Multisite/NetworkSettingsRepository.php` (new) —
-  - `isNetworkActivated(): bool` — checks `get_site_option('active_sitewide_plugins')`
-    for our plugin basename directly, rather than calling
-    `is_plugin_active_for_network()` (which requires `wp-admin/includes/plugin.php`,
-    not loaded on the frontend/CLI). Needs a `TYPESENSESEARCH_BASENAME` constant
-    defined in the main plugin file (`plugin_basename(__FILE__)`).
-  - `getEnabledSiteIds(): int[]`, `isSiteEnabled(int $blogId): bool`.
-  - `getNetworkRemote()/getNetworkAdminKey()/getNetworkFrontendHost()` reading
-    new network options: `typesense_network_remote`, `typesense_network_admin_key`,
-    `typesense_network_frontend_host`, `typesense_network_enabled_sites`.
-  - Setters used only by the network admin save handler.
-- `source/php/Multisite/CollectionNameResolver.php` (new) — `resolve(int $blogId): string`
-  using `get_blog_details()`/`home_url()` for domain+path and
-  `wp_get_environment_type()` for environment; ASCII-normalizes, truncates to a
-  safe length, appends `_b{blogId}`.
-- `source/php/Multisite/SiteProvisioner.php` (new) — `enable(int $blogId): void`
-  (switch_to_blog → resolve name → `Collection::create()` → `ApiKey::generateSearchKey()`
-  → persist as local options → `restore_current_blog()` in a `finally`) and
-  `disable(int $blogId): void` (bookkeeping only — no remote deletion).
-- `source/php/Services/SettingsRepository.php` — inject `NetworkSettingsRepository`;
-  `getRemote()/getAdminKey()/getFrontendHost()` resolve constant > network (if
-  enabled) > local option. `getCollectionName()`/`getSearchKey()` stay exactly
-  as they are (provisioning already writes the right local values).
-- `source/php/Admin/Settings/OptionKeys.php` — add the 4 new network option
-  name constants.
-- `source/php/Bootstrap/` — a `NetworkAdminFeature` (or extend `AdminFeature`,
-  whichever fits better once the bootstrap classes are re-read at
-  implementation time) registering `network_admin_menu` + a
-  `network_admin_edit_{action}` handler (nonce + `manage_network_options`),
-  mirroring the existing `SettingsPage`/`SettingsRegistry` split.
-- `views/admin/network/*.php` (new) — network admin views for
-  Anslutning/Webbplatser/Status, modeled on the existing settings-tab views.
-- `views/admin/settings-tabs/connection.php` (and the status tab view) — when
-  `NetworkSettingsRepository::isNetworkActivated()` is true for the current
-  site, render the existing "locked" pattern instead of an editable form, with
-  a link to the network settings page.
-- `App.php` — construct `NetworkSettingsRepository` alongside the other shared
-  services; pass it into `SettingsRepository` and the new admin feature.
-- `tests/Unit/Multisite/*Test.php` (new).
-- `README.md` — document network mode, the collection naming scheme, and that
-  per-site indexing/search-appearance settings remain local.
+## Administration and authorization
 
-## Verification plan
+Add Network Admin tabs **Anslutning / Webbplatser / Status**, using
+network_admin_menu and a dedicated network_admin_edit action. Saving requires
+manage_network_options, nonce validation, sanitization and a network redirect.
+Do not reuse the local options.php form for network options.
 
-- `php -l` on every changed/new PHP file after each step.
-- `composer test` — existing 74 tests must keep passing, plus the new
-  multisite suite.
-- `npm run build` — no JS changes expected, but check
-  `source/js/admin-settings/` in case the connection/status tab UI needs a
-  small update to reflect the read-only/network-managed state.
-- Live check on a local multisite (`pitea.local`, path-based, 2 sites):
-  network-activate the plugin, configure the shared connection once from
-  Network Admin, enable both sites, confirm each gets its own collection name
-  and that a search key from one site cannot query the other's collection.
-  Confirm the local per-site settings page shows the read-only
-  "managed by network" state for Connection/Status while Content/Advanced/etc.
-  stay editable.
+In network mode, local Connection/Status tabs show only a managed-state notice
+and a suitable network-settings link for authorized users. Do not render the
+shared admin key, even as a readonly password field. Stop registering network-
+owned connection fields for local options.php writes in this mode.
 
-## Open questions for review
+Audit existing AJAX and REST actions on the server:
 
-- Is the `_b{blog_id}` suffix on collection names acceptable, or is a
-  human-readable-only name (with explicit collision handling) actually
-  required for this deployment?
-- Should the network "Webbplatser" list support deferred/paginated status
-  checks now, or is a plain synchronous list fine given the expected site
-  count for this network?
-- Any objection to leaving `uninstall.php`'s existing gap (connection options
-  never cleaned up) untouched rather than fixing it as a drive-by in this PR?
+- Network connection changes, collection provisioning and search-key creation
+  require manage_network_options in network mode, including old endpoints.
+- Local content/indexing operations can retain manage_options, restricted to
+  the current active site and its server-resolved collection.
+- Validate nonce/authentication as appropriate, site ID and network membership
+  before switching context. Never let a local administrator choose another
+  collection or use the shared admin key by manipulating POST fields.
+- Existing direct update_option writes, including SearchKeyActions, must honor
+  ownership and constant locks. Hiding a form or withholding a nonce in the UI
+  is not the authorization mechanism.
+- Saved and constant credentials are used server-side for status/tests. Never
+  send a masked password as an actual key, or return the shared key in JSON.
+
+Show shared server status separately from each site's collection/key status.
+A simple unpaginated list is acceptable for this deployment. Run remote checks
+on explicit request, rather than probing every site on every page load. A
+single-site retry/provision button is sufficient; no background queue is needed.
+
+## Collection identity and environment changes
+
+Proposed name: `{normalized-domain}[-{normalized-path}]__{environment}_b{blog_id}`.
+For example `pitea-local-test2__local_b2`. Use the target site's canonical home
+URL, never the incoming Host header. Use wp_get_environment_type(); document
+that an unset environment defaults to production and configure the local test
+environment explicitly.
+
+Define deterministic ASCII normalization and a bounded readable prefix. Preserve
+the environment and blog-ID suffix when truncating. The blog ID distinguishes
+sites within one WordPress installation, including normalization collisions.
+It does not guarantee uniqueness between independent installations sharing a
+Typesense cluster: use a deployment namespace if that topology is needed.
+Advanced IDN/alias handling is deferred; deterministic normalization is not.
+
+Store the canonical URL, environment and Typesense target identity used during
+provisioning. Before runtime use, compare them with current configuration.
+On mismatch, block use of the old identity and show an explicit reprovisioning
+requirement. Do not automatically rename/drop/rebuild on an ordinary request.
+This must cover a production database copied into a correctly configured local
+or staging environment. No resolver can distinguish a clone with identical URL,
+environment and target configuration; document that deployment prerequisite.
+
+## Provisioning, retries and transition
+
+A small synchronous operation per site is sufficient. It must be idempotent:
+
+1. Validate network authorization, target site, selected state, effective
+   configuration and constant conflicts. Lock provision operations per site so
+   concurrent requests cannot race to overwrite the active key/identity.
+2. Establish target-site context and create fresh settings/client/capability
+   instances. For context switches use try/finally with restore_current_blog().
+3. Resolve the candidate identity. If a matching plugin-owned collection
+   already exists, verify/reuse it; do not recreate or clear it. An unexpected
+   existing collection requires explicit review rather than silent adoption.
+4. Create a missing collection with the target site's schema and verify or
+   generate a search key scoped to that exact collection. Persist enough state
+   to retry after collection creation or a failed key operation. Do not rotate
+   working keys on every settings save or re-enable.
+5. Verify local persistence and key access before marking the site ready.
+   On failure, report the failed stage and allow retry without deleting data.
+
+switch_to_blog() changes database context, not loaded plugins, themes or their
+registered schema filters. Run schema-sensitive provisioning and full indexing
+in the target site's own authenticated request/CLI context when those hooks
+matter. Do not claim that merely constructing SettingsRepository reloads them.
+No network-wide indexing loop is required: existing CLI commands with --url
+or target-site admin operations are sufficient.
+
+For a fresh site, provision the empty collection/key and then index using the
+existing actions. For an already configured site, show an explicit transition:
+retain old local settings/index, select the shared connection and candidate
+identity, provision and populate the replacement, sync synonyms/pinned results,
+and verify before switching the active mapping. An advanced migration wizard
+is deferred; this controlled sequence and preserving the old index are not.
+A failed transition must not overwrite the old mapping with an incomplete pair.
+
+Disabling stops runtime use, including when local credentials/constants exist.
+It preserves remote data and keys; it does not revoke previously published keys.
+Re-enabling reuses a valid identity/key, and reports stale or missing state for
+explicit repair. Do not silently create duplicate resources.
+
+## Runtime and lifecycle integration
+
+Use the common policy at bootstrap where useful and at operations that can run
+after a context switch. Audit save/delete indexing, DisabledContentPruner,
+external strategy sync, CLI, AJAX and REST writes to Typesense. Existing guards
+can be reused where proven sufficient; no file group is exempt in advance.
+Do not rename public hooks, commands or routes as part of this work.
+
+Disabled sites use ordinary WordPress search and do not load the Typesense quick
+search behavior or publish its config. Review Templates, FrontendFeature,
+Frontend/Assets and Frontend/TypesenseConfig together. Preserve local management
+of stored configuration and retention of previously collected statistics;
+turning off search must not disable necessary local cleanup.
+
+ClientFactory::isReadyWithCollection() has a request-static cache;
+TypesenseClientService and ServerCapabilities cache per instance. Key caches by
+relevant site/configuration or rebuild/invalidate them across context changes.
+Test A → B → A, including a disabled site, not only network provisioning.
+
+New sites default to disabled. Exclude archived/spam/deleted sites from active
+use. Audit activation/deactivation and statistics cron cleanup across affected
+sites without expensive network-wide work on normal requests. Keep tables local.
+Clean up newly introduced network options and provision metadata at uninstall;
+repairing all historical uninstall omissions is a separate task. Uninstall must
+not delete remote Typesense collections as an incidental side effect.
+
+## Implementation map and sequence
+
+1. Multisite/NetworkSettingsRepository, site-use policy, OptionKeys and plugin
+   basename; wire through App and SettingsRepository without breaking existing
+   no-argument repository construction sites.
+2. ConstantsLoader, ClientFactory and cached services; align legacy consumers
+   with the effective settings contract.
+3. Multisite/CollectionNameResolver and SiteProvisioner with minimal persisted
+   identity/readiness state, retries and transition handling.
+4. NetworkAdminFeature plus dedicated network page/save controller and views;
+   local SettingsRegistry/SettingsPage, AJAX guards/actions and admin-settings
+   TypeScript as needed for server-side ownership and context-correct actions.
+5. Runtime consumers under Bootstrap, Frontend, Templates, Indexing, CLI and
+   REST; activation/retention/uninstall integration as required by the audit.
+6. Tests and README: setup, constants, transition, environment changes,
+   disabling/re-enabling, and target-site CLI examples.
+
+## Deferred
+
+- Network-wide bulk indexing, background queues and a multi-step recovery UI.
+- Paginated network listing and large-network job orchestration.
+- Cross-site search or shared collections/keys.
+- Advanced IDN/alias naming controls and cross-installation cluster management.
+- General cleanup of pre-existing uninstall omissions and unrelated refactors.
+
+## Verification and completion criteria
+
+- PHP syntax checks on changed PHP; existing composer test suite plus new
+  behavior tests; npm run build after implementation. Do not hard-code a stale
+  test count in the acceptance criteria.
+- Unit tests: network vs local activation, constant precedence/conflicts,
+  disabled sites with old values, naming/truncation and identity mismatches.
+- Action tests: local admin cannot mutate network connection/key/collection,
+  spoof a site ID, or bypass guards via old AJAX/options.php paths.
+- Provisioning tests: existing collection, failure after collection creation,
+  retry, persistence failure, concurrency guard and disable/re-enable.
+- Integration: two real local sites, separate test Typesense resources, local
+  and network admin users; correct search results and key A denied access to B.
+- Verify save/delete, external sync and CLI --url affect only the active target;
+  disabled sites use ordinary search even with prior credentials/quick search.
+- Verify A → B → A cache/config isolation, site-specific schema hooks, local
+  tables/retention, new-site defaults and network deactivation.
+- Verify existing-site transition and staging clone mismatch; old index remains
+  intact. Repeat key smoke checks with single-site/local plugin activation.
+
+Prepare a second test site and confirm the test WordPress installation loads
+this branch before implementation tests. Environment mutations and test runs
+belong to the implementation task, not to this documentation review.

@@ -52,6 +52,7 @@ class App {
         new ACF\Fields();
 
         (new AdminFeature($settings))->register();
+        (new \TypesenseSearch\Admin\NetworkSettingsPage())->register();
 
         (new FrontendFeature($settings))->register();
 

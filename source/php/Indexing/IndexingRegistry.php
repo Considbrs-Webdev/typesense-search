@@ -155,6 +155,9 @@ class IndexingRegistry
      */
     public function runExternalSync(string $identifier): int
     {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense()) {
+            return -1;
+        }
         $strategy = $this->getExternal($identifier);
 
         if ($strategy === null) {
@@ -174,6 +177,9 @@ class IndexingRegistry
      */
     public function runAllExternalSyncs(): array
     {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense()) {
+            return [];
+        }
         $results = [];
 
         foreach ($this->externalStrategies as $identifier => $strategy) {

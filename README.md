@@ -1189,3 +1189,104 @@ Both hooks are wired in `IndexingHooks` during bootstrap, so they are available 
 | `Municipio/TypesenseSearch/hitTemplateView`     | `string $view, string $key`      | Override the Blade view path for a given template key (e.g. map `'my-event'` to `'my-theme.search.hit-event'`)                       |
 | `Municipio/TypesenseSearch/postTypeToTemplate`  | `array<string,string> $mapping`  | Map Typesense `post_type` values to template keys. Entries not listed fall back to `'default'`                                       |
 | `Municipio/TypesenseSearch/placeholderMappings` | `array<string,string> $mappings` | Add custom `{TOKEN}` → document field mappings that the front-end JavaScript uses when rendering hit cards (see §8.4 for an example) |
+
+## Multisite network mode
+
+Network-activate Typesense Search to manage the shared connection under
+**Network Admin → Settings → Typesense Search**. Local-only activation in a
+multisite installation retains the existing single-site behavior.
+
+1. Save the shared Typesense host, admin key and optional frontend host on the
+   Connection tab. A blank admin-key field keeps the existing secret; the saved
+   secret is never rendered back into the page.
+2. Select sites on the Sites tab and save. New sites are disabled by default.
+3. Use **Prepare / retry** for each selected site. This creates a separate
+   collection and a search-only key restricted to that collection. Existing
+   resources are reused only when their ownership marker matches this site.
+4. Index and review the candidate in that site's own WordPress context:
+
+   ```sh
+   wp --url=https://example.com/subsite/ typesense network prepare
+   wp --url=https://example.com/subsite/ typesense network index --yes --batch-size=100
+   # Add --include-pdf and/or --include-external when those sources are needed.
+   wp --url=https://example.com/subsite/ typesense network activate --yes
+   ```
+
+   The first command is equivalent to the Prepare button. Activation can also
+   be performed in Network Admin after checking the review confirmation.
+   It verifies key access and synchronizes enabled synonyms and pinned results
+   before switching search to the candidate. Existing collections are not deleted.
+5. Use Status to check the shared connection or an individual site's active key.
+   Checks run only on request.
+
+Post types, PDFs, Modularity, search appearance, facets, quick search, statistics,
+synonyms and pinned-result rules remain site-local. The local Connection and
+Status tabs show that the network administrator owns those settings. Legacy
+connection/key AJAX actions are unavailable in network mode; local indexing
+operations only use the current site's effective collection.
+
+### Site state, naming and configuration
+
+Collections use `{domain}[-{path}]__{environment}_b{blog_id}`, normalized to ASCII
+and bounded to 128 characters while retaining the environment/site suffix. This
+supports path-based sites, subdomains and mapped domains. Site IDs distinguish
+sites in one WordPress installation; independent installations sharing the same
+cluster must use distinct URL/environment identities or separate clusters.
+
+Set `WP_ENVIRONMENT_TYPE` correctly before copying a production database to
+local/staging. WordPress defaults to `production` if it is not set. The plugin
+records the canonical home URL, environment and server when preparing a site.
+A mismatch blocks the old mapping until the site is explicitly prepared and
+activated for the new context. A clone with *identical* URL, environment and
+server configuration cannot be distinguished automatically.
+
+In network mode, `TYPESENSE_HOST`, `TYPESENSE_ADMIN_KEY` and
+`TYPESENSE_FRONTEND_HOST` override their shared database settings. Global
+`TYPESENSE_COLLECTION` and `TYPESENSE_SEARCH_KEY` conflict with site isolation:
+remove them before preparing sites. All five constants keep their existing
+behavior outside network mode. Disabled sites cannot bypass network policy with
+legacy local credentials or constants.
+
+The authoritative active/candidate mapping is stored atomically in the site's
+`typesense_network_state` option (not autoloaded). Legacy local connection,
+collection and key options are left untouched so local activation can resume
+its original configuration after network activation ends. No existing index is
+silently adopted, renamed or deleted. On first transition to network mode,
+unprepared sites use ordinary WordPress search until activation; this is not a
+zero-downtime migration of an existing local Typesense frontend.
+
+Disabling a site stops Typesense frontend behavior and plugin-managed indexing,
+including CLI and synchronization. It preserves local settings, remote documents
+and previously issued keys. Re-enabling a prepared site reuses its mapping;
+run indexing to catch up on changes made while it was disabled. Disabling does
+not revoke an already public search key. Remote cleanup is an explicit operator
+operation outside this feature.
+
+Preparation can be retried after failures. A revoked search key is replaced on
+an explicit Prepare retry. No automatic background rebuild or network-wide
+indexing loop is performed. If a process was killed and left a lock, first ensure
+it has ended, then run:
+
+```sh
+wp --url=https://example.com/subsite/ option delete typesense_network_provision_lock
+```
+
+Normal completion, exceptions and ordinary CLI exits release their own lock.
+Concurrent provisioning for the same site is rejected. Uninstall removes new
+network configuration and local provisioning metadata, but never remote indexes.
+
+### Custom integrations and shared-core installations
+
+Provisioning and indexing execute in the target site's own request so its theme,
+plugins and schema filters are loaded. A bare `switch_to_blog()` does not load
+another site's plugins or theme. Use `--url` for complete per-site indexing.
+Custom strategies should use the supplied SettingsRepository/TypesenseClientService
+and honor `canUseTypesense()`; plugins making independent Typesense requests are
+responsible for enforcing this policy themselves.
+
+For path-based networks which store one shared core URL (for example `/wp`) as
+every site's `siteurl`, network actions use the subsite's `/subsite/wp-admin/`
+route. Other installations use WordPress's normal admin URL. Custom routing can
+adjust `typesense_search_network_site_admin_url` (URL, site ID, path). This plugin
+does not change site URLs, database tables or server rewrite rules to establish
+multisite itself.

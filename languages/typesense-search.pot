@@ -1767,3 +1767,159 @@ msgstr ""
 #: views/templates/hits/hit-jobposting.blade.php:22
 msgid "Valid through"
 msgstr ""
+
+#. Multisite network administration
+msgid "Typesense Search — Network settings"
+msgstr ""
+
+#. Multisite network administration
+msgid "Sites"
+msgstr ""
+
+#. Multisite network administration
+msgid "Typesense host"
+msgstr ""
+
+#. Multisite network administration
+msgid "Set via constant."
+msgstr ""
+
+#. Multisite network administration
+msgid "A key is configured. Leave blank to keep it."
+msgstr ""
+
+#. Multisite network administration
+msgid "Enter the server admin API key."
+msgstr ""
+
+#. Multisite network administration
+msgid "Changing the host, site URL or environment requires preparing and reviewing the affected sites again. Existing collections are preserved."
+msgstr ""
+
+#. Multisite network administration
+msgid "Remove TYPESENSE_COLLECTION and TYPESENSE_SEARCH_KEY constants before using network mode. Each site needs its own collection and key."
+msgstr ""
+
+#. Multisite network administration
+msgid "Environment: %s. New sites are disabled until selected, prepared and activated."
+msgstr ""
+
+#. Multisite network administration
+msgid "Save site selection first. Prepare creates or reuses a separate collection and key. Index the candidate with WP-CLI, review its results, then activate. Disabling preserves existing indexes and keys."
+msgstr ""
+
+#. Multisite network administration
+msgid "Check shared connection"
+msgstr ""
+
+#. Multisite network administration
+msgid "Checks run only when requested. Each check verifies the shared server credentials and that site’s active search key."
+msgstr ""
+
+#. Multisite network administration
+msgid "Site"
+msgstr ""
+
+#. Multisite network administration
+msgid "Collection / state"
+msgstr ""
+
+#. Multisite network administration
+msgid "Actions"
+msgstr ""
+
+#. Multisite network administration
+msgid "Active"
+msgstr ""
+
+#. Multisite network administration
+msgid "Preparation or activation required"
+msgstr ""
+
+#. Multisite network administration
+msgid "Enable site %d"
+msgstr ""
+
+#. Multisite network administration
+msgid "Not active"
+msgstr ""
+
+#. Multisite network administration
+msgid "Candidate: %s"
+msgstr ""
+
+#. Multisite network administration
+msgid "Prepare / retry"
+msgstr ""
+
+#. Multisite network administration
+msgid "I have reviewed the candidate content."
+msgstr ""
+
+#. Multisite network administration
+msgid "Activate"
+msgstr ""
+
+#. Multisite network administration
+msgid "Check status"
+msgstr ""
+
+#. Multisite network administration
+msgid "Save site selection"
+msgstr ""
+
+#. Multisite network administration
+msgid "The Typesense connection and site activation are managed by the network administrator."
+msgstr ""
+
+#. Multisite network administration
+msgid "Network settings"
+msgstr ""
+
+#. Multisite network administration
+msgid "Invalid settings section."
+msgstr ""
+
+#. Multisite network administration
+msgid "Server connection and admin key are working."
+msgstr ""
+
+#. Multisite network administration
+msgid "Connection check failed. Verify the saved host and admin key."
+msgstr ""
+
+#. Multisite network administration
+msgid "Enter a valid HTTP or HTTPS URL."
+msgstr ""
+
+#. Multisite network administration
+msgid "Invalid site selection."
+msgstr ""
+
+#. Multisite network administration
+msgid "Invalid site context."
+msgstr ""
+
+#. Multisite network administration
+msgid "Collection and search key prepared. Index the candidate before activating an existing site."
+msgstr ""
+
+#. Multisite network administration
+msgid "Typesense is now active for this site."
+msgstr ""
+
+#. Multisite network administration
+msgid "Server connection, admin key and site search key are working."
+msgstr ""
+
+#. Multisite network administration
+msgid "Typesense operation failed. Verify the server, credentials and collection in Network Admin, then retry."
+msgstr ""
+
+#. Multisite network administration
+msgid "Use Network Admin to manage the connection and keys."
+msgstr ""
+
+#. Multisite network administration
+msgid "Typesense is disabled or not ready for this site."
+msgstr ""

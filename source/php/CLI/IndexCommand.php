@@ -184,6 +184,9 @@ class IndexCommand
      */
     public function index(array $args, array $assocArgs): void
     {
+        if (!(new SettingsRepository())->canUseTypesense()) {
+            \WP_CLI::error('Typesense is disabled or not ready for this site. Use Network Admin and wp typesense network.');
+        }
         $this->indexAction->handle($args, $assocArgs);
     }
 
@@ -259,6 +262,9 @@ class IndexCommand
      */
     public function rebuild(array $args, array $assocArgs): void
     {
+        if (!(new SettingsRepository())->canUseTypesense()) {
+            \WP_CLI::error('Typesense is disabled or not ready for this site. Use Network Admin and wp typesense network.');
+        }
         $this->rebuildAction->handle($args, $assocArgs);
     }
 
@@ -341,6 +347,9 @@ class IndexCommand
      */
     public function clear(array $args, array $assocArgs): void
     {
+        if (!(new SettingsRepository())->canUseTypesense()) {
+            \WP_CLI::error('Typesense is disabled or not ready for this site. Use Network Admin and wp typesense network.');
+        }
         $this->clearAction->handle($args, $assocArgs);
     }
 
@@ -385,6 +394,9 @@ class IndexCommand
      */
     public function syncExternal(array $args, array $assocArgs): void
     {
+        if (!(new SettingsRepository())->canUseTypesense()) {
+            \WP_CLI::error('Typesense is disabled or not ready for this site. Use Network Admin and wp typesense network.');
+        }
         $this->syncExternalAction->syncExternal($args, $assocArgs);
     }
 

@@ -9,11 +9,11 @@ use TypesenseSearch\Typesense\ClientFactory;
  * Class TypesenseClientService
  *
  * Injectable service that provides a single, lazily-created Typesense client
- * for the duration of the current request.
+ * for the current effective site configuration.
  *
  * Unlike calling ClientFactory::fromOptions() directly, this service:
- *   - Caches the client instance so credentials are only read and parsed once
- *     per request, regardless of how many strategies or hooks call getClient().
+ *   - Reuses the client while the effective connection and collection match,
+ *     and invalidates it when the current site/configuration changes.
  *   - Can be injected as a dependency, making consumers (strategies, CLI
  *     commands, etc.) testable via a mock or stub without a live server.
  *
@@ -36,10 +36,10 @@ class TypesenseClientService
     private ?Client $client = null;
 
     /**
-     * Set to true once a build attempt has been made so that unconfigured
-     * installations do not repeat the option reads on every getClient() call.
+     * Avoid repeated build attempts while the effective configuration is unchanged.
      */
     private bool $attempted = false;
+    private string $context = '';
 
     public function __construct(SettingsRepository $settings)
     {
@@ -53,6 +53,14 @@ class TypesenseClientService
      */
     public function getClient(): ?Client
     {
+        $remote = $this->settings->getRemote();
+        $adminKey = $this->settings->getAdminKey();
+        $context = hash('sha256', $remote . '|' . $adminKey . '|' . $this->settings->getCollectionName());
+        if ($this->context !== $context) {
+            $this->client = null;
+            $this->attempted = false;
+            $this->context = $context;
+        }
         if ($this->client !== null) {
             return $this->client;
         }
@@ -62,9 +70,6 @@ class TypesenseClientService
         }
 
         $this->attempted = true;
-
-        $remote   = $this->settings->getRemote();
-        $adminKey = $this->settings->getAdminKey();
 
         if (empty($remote) || empty($adminKey)) {
             return null;
