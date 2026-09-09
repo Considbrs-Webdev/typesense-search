@@ -184,9 +184,6 @@ class IndexCommand
      */
     public function index(array $args, array $assocArgs): void
     {
-        if (!(new SettingsRepository())->canUseTypesense()) {
-            \WP_CLI::error('Typesense is disabled or not ready for this site. Use Network Admin and wp typesense network.');
-        }
         $this->indexAction->handle($args, $assocArgs);
     }
 

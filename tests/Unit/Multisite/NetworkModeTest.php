@@ -14,12 +14,18 @@ class NetworkModeTest extends TestCase
     private int $site = 1;
     private array $options = [];
     private array $networkOptions = [];
+    private array $transients = [];
+    private int $user = 42;
     private string $environment = 'development';
 
     protected function setUp(): void
     {
         parent::setUp();
         Functions\when('is_multisite')->justReturn(true);
+        Functions\when('get_current_user_id')->alias(fn () => $this->user);
+        Functions\when('set_site_transient')->alias(function ($key, $value, $ttl) { $this->transients[$key] = $value; return true; });
+        Functions\when('get_site_transient')->alias(fn ($key) => $this->transients[$key] ?? false);
+        Functions\when('delete_site_transient')->alias(function ($key) { unset($this->transients[$key]); return true; });
         Functions\when('get_current_blog_id')->alias(fn () => $this->site);
         Functions\when('get_current_network_id')->justReturn(1);
         Functions\when('get_site')->alias(fn ($id) => (object) ['network_id' => 1, 'archived' => 0, 'spam' => 0, 'deleted' => 0]);
@@ -173,6 +179,69 @@ class NetworkModeTest extends TestCase
         self::assertArrayNotHasKey(NetworkSettingsRepository::LOCK, $this->options[1]);
     }
 
+    public function test_setup_retries_sync_failure_and_activates_without_indexing(): void
+    {
+        $network = new NetworkSettingsRepository();
+        $gateway = new class extends ProvisioningGateway {
+            public int $creates = 0;
+            public int $keys = 0;
+            public int $syncs = 0;
+            public function exists(array $connection, string $name): bool { return $this->creates > 0; }
+            public function create(array $connection, string $name): void { $this->creates++; }
+            public function owns(array $connection, string $name, string $owner): bool { return true; }
+            public function key(array $connection, string $name): string { $this->keys++; return 'scoped-key'; }
+            public function verify(array $connection, array $mapping): void {}
+            public function sync(): void {
+                // The same lock covers both creation and activation.
+                if (!get_option(NetworkSettingsRepository::LOCK)) { throw new \LogicException('Missing setup lock'); }
+                if (++$this->syncs === 1) { throw new \RuntimeException('sync failed'); }
+            }
+        };
+        $provisioner = new SiteProvisioner($network, $gateway);
+        try {
+            $provisioner->setup();
+            self::fail('Expected sync failure');
+        } catch (\RuntimeException $e) {
+            self::assertSame('sync failed', $e->getMessage());
+        }
+        self::assertFalse($network->canUse());
+        self::assertTrue($network->state()['candidate']['prepared']);
+        self::assertArrayNotHasKey(NetworkSettingsRepository::LOCK, $this->options[1]);
+        $provisioner->setup();
+        self::assertTrue($network->canUse());
+        self::assertSame('scoped-key', (new SettingsRepository())->getSearchKey());
+        $active = $network->state()['active'];
+        $provisioner->setup();
+        self::assertSame($active, $network->state()['active']);
+        self::assertSame([], $network->state()['previous']);
+        self::assertSame(1, $gateway->creates);
+        self::assertSame(1, $gateway->keys);
+        self::assertArrayNotHasKey(NetworkSettingsRepository::LOCK, $this->options[1]);
+
+        // Indexing failures must not change runtime eligibility.
+        try {
+            $provisioner->index(function () { throw new \RuntimeException('index interrupted'); });
+        } catch (\RuntimeException $e) {
+            self::assertSame('index interrupted', $e->getMessage());
+        }
+        self::assertSame($active, $network->state()['active']);
+        self::assertTrue($network->canUse());
+        self::assertArrayNotHasKey(NetworkSettingsRepository::LOCK, $this->options[1]);
+    }
+
+    public function test_setup_respects_existing_lock(): void
+    {
+        $this->options[1][NetworkSettingsRepository::LOCK] = 'another-process';
+        try {
+            (new SiteProvisioner())->setup();
+            self::fail('Expected lock conflict');
+        } catch (\RuntimeException $e) {
+            self::assertStringContainsString('holds this site lock', $e->getMessage());
+        }
+        self::assertSame('another-process', $this->options[1][NetworkSettingsRepository::LOCK]);
+        self::assertArrayNotHasKey(NetworkSettingsRepository::STATE, $this->options[1]);
+    }
+
     public function test_foreign_collection_is_not_adopted(): void
     {
         $gateway = new class extends ProvisioningGateway {
@@ -282,6 +351,195 @@ class NetworkModeTest extends TestCase
         Functions\when('apply_filters')->alias(fn ($name, $url) => $url);
         self::assertSame('https://example.test/sub/wp-admin/admin-post.php', \TypesenseSearch\Multisite\SiteUrls::admin(2, 'admin-post.php'));
         self::assertSame('https://example.test/wp/wp-admin/admin-post.php', \TypesenseSearch\Multisite\SiteUrls::admin(1, 'admin-post.php'));
+    }
+
+
+    public function test_dispatch_rejects_unprivileged_user(): void
+    {
+        Functions\when('current_user_can')->justReturn(false);
+        Functions\expect('wp_remote_post')->never();
+        $this->expectExceptionMessage('Unauthorized setup request');
+        (new \TypesenseSearch\Multisite\SetupDispatcher())->dispatch([1]);
+    }
+
+
+    public function test_setup_activates_legacy_candidate_and_records_status(): void
+    {
+        $network = new NetworkSettingsRepository();
+        $candidate = ['identity' => $network->identity(), 'collection' => (new CollectionNameResolver())->resolve(),
+            'owner' => 'legacy', 'key' => 'saved-key', 'prepared' => true];
+        $this->options[1][NetworkSettingsRepository::STATE] = ['candidate' => $candidate];
+        $gateway = new class extends ProvisioningGateway {
+            public function exists(array $connection, string $name): bool { return true; }
+            public function owns(array $connection, string $name, string $owner): bool { return $owner === 'legacy'; }
+            public function key(array $connection, string $name): string { throw new \LogicException('Must reuse key'); }
+            public function verify(array $connection, array $mapping): void {}
+            public function sync(): void {}
+        };
+        (new SiteProvisioner($network, $gateway))->setup();
+        self::assertSame($candidate, $network->state()['active']);
+        self::assertTrue($network->canUse());
+        self::assertSame('ready', \TypesenseSearch\Multisite\SetupDispatcher::status(1)['status']);
+        $this->environment = 'staging';
+        self::assertFalse($network->canUse());
+        try { (new SiteProvisioner($network, $gateway))->setup(); } catch (\RuntimeException $e) {}
+        self::assertSame($candidate, $network->state()['active']);
+        self::assertSame('error', \TypesenseSearch\Multisite\SetupDispatcher::status(1)['status']);
+    }
+
+
+
+    public function test_configuration_errors_distinguish_disabled_missing_setup_and_changed_identity(): void
+    {
+        $network = new NetworkSettingsRepository();
+        self::assertStringContainsString('Setup is incomplete', $network->unavailableReason());
+        $this->options[1][NetworkSettingsRepository::STATE] = ['active' => $this->mapping()];
+        $this->environment = 'staging';
+        self::assertFalse($network->canUse());
+        self::assertStringContainsString('has changed', $network->unavailableReason());
+        $this->networkOptions[NetworkSettingsRepository::ENABLED] = [];
+        self::assertStringContainsString('disabled', $network->unavailableReason());
+        $this->networkOptions[NetworkSettingsRepository::ENABLED] = [1];
+        $this->networkOptions[NetworkSettingsRepository::ADMIN_KEY] = '';
+        self::assertStringContainsString('Configure the network connection', $network->unavailableReason());
+    }
+
+
+
+    private function deletionFixture(): array
+    {
+        $network = new NetworkSettingsRepository();
+        $mapping = $this->mapping() + ['owner' => 'owner'];
+        $this->options[1][NetworkSettingsRepository::STATE] = ['active' => $mapping, 'candidate' => $mapping];
+        $this->networkOptions[NetworkSettingsRepository::ENABLED] = [];
+        $fingerprint = \TypesenseSearch\Admin\NetworkSettingsPage::checkFingerprint($network->connection(), $mapping);
+        return [$network, $mapping, $fingerprint];
+    }
+
+    public function test_delete_removes_only_reviewed_mapping_and_preserves_local_settings(): void
+    {
+        [$network, $mapping, $fingerprint] = $this->deletionFixture();
+        $other = ['identity' => ['environment' => 'production'], 'collection' => 'other'];
+        $this->options[1][NetworkSettingsRepository::STATE]['previous'] = $other;
+        $this->options[1]['typesense_search_index_name'] = 'legacy-local';
+        $gateway = $this->createMock(ProvisioningGateway::class);
+        $gateway->method('exists')->willReturn(true);
+        $gateway->method('owns')->willReturn(true);
+        $gateway->expects(self::once())->method('deletionKeyIds')->with($network->connection(), ['active' => $mapping, 'candidate' => $mapping])->willReturn(['7']);
+        $gateway->expects(self::once())->method('deleteKey')->with($network->connection(), '7');
+        $gateway->expects(self::once())->method('deleteCollection')->with($network->connection(), $mapping['collection']);
+        (new SiteProvisioner($network, $gateway))->delete($fingerprint);
+        self::assertSame(['previous' => $other], $network->state());
+        self::assertSame('legacy-local', $this->options[1]['typesense_search_index_name']);
+        self::assertArrayNotHasKey(NetworkSettingsRepository::LOCK, $this->options[1]);
+    }
+
+    public function test_delete_rejects_enabled_site_and_foreign_ownership(): void
+    {
+        [$network, $mapping, $fingerprint] = $this->deletionFixture();
+        $gateway = $this->createMock(ProvisioningGateway::class);
+        $gateway->method('exists')->willReturn(true);
+        $gateway->method('owns')->willReturn(false);
+        $gateway->expects(self::never())->method('deleteCollection');
+        $gateway->expects(self::never())->method('deleteKey');
+        $this->networkOptions[NetworkSettingsRepository::ENABLED] = [1];
+        try { (new SiteProvisioner($network, $gateway))->delete($fingerprint); self::fail(); }
+        catch (\TypesenseSearch\Multisite\SetupException $e) { self::assertStringContainsString('Disable the site', $e->getMessage()); }
+        $this->networkOptions[NetworkSettingsRepository::ENABLED] = [];
+        try { (new SiteProvisioner($network, $gateway))->delete($fingerprint); self::fail(); }
+        catch (\TypesenseSearch\Multisite\SetupException $e) { self::assertStringContainsString('does not belong', $e->getMessage()); }
+        self::assertSame($mapping, $network->state()['active']);
+    }
+
+    public function test_delete_rejects_changed_connection_or_stale_confirmation(): void
+    {
+        [$network, $mapping, $fingerprint] = $this->deletionFixture();
+        $gateway = $this->createMock(ProvisioningGateway::class);
+        $gateway->expects(self::never())->method('exists');
+        try { (new SiteProvisioner($network, $gateway))->delete('stale'); self::fail(); }
+        catch (\TypesenseSearch\Multisite\SetupException $e) { self::assertStringContainsString('has changed', $e->getMessage()); }
+        $this->networkOptions[NetworkSettingsRepository::REMOTE] = 'https://other.test';
+        $this->expectException(\TypesenseSearch\Multisite\SetupException::class);
+        (new SiteProvisioner($network, $gateway))->delete($fingerprint);
+    }
+
+    public function test_partial_delete_preserves_state_for_retry(): void
+    {
+        [$network, $mapping, $fingerprint] = $this->deletionFixture();
+        $gateway = new class extends ProvisioningGateway {
+            public int $attempts = 0;
+            public function exists(array $connection, string $name): bool { return true; }
+            public function owns(array $connection, string $name, string $owner): bool { return true; }
+            public function deletionKeyIds(array $connection, array $mappings): array { return []; }
+            public function deleteCollection(array $connection, string $name): void {
+                if (++$this->attempts === 1) { throw new \RuntimeException('network failed'); }
+            }
+        };
+        $provisioner = new SiteProvisioner($network, $gateway);
+        try { $provisioner->delete($fingerprint); self::fail(); } catch (\RuntimeException $e) {}
+        self::assertSame($mapping, $network->state()['active']);
+        self::assertArrayNotHasKey(NetworkSettingsRepository::LOCK, $this->options[1]);
+        $provisioner->delete($fingerprint);
+        self::assertSame([], $network->state());
+    }
+
+    public function test_delete_respects_existing_setup_lock(): void
+    {
+        [$network, $mapping, $fingerprint] = $this->deletionFixture();
+        $this->options[1][NetworkSettingsRepository::LOCK] = 'running';
+        $gateway = $this->createMock(ProvisioningGateway::class);
+        $gateway->expects(self::never())->method('exists');
+        $this->expectExceptionMessage('holds this site lock');
+        (new SiteProvisioner($network, $gateway))->delete($fingerprint);
+    }
+
+    public function test_deletion_keys_require_unique_prefix_and_exact_scope(): void
+    {
+        $mapping = ['key' => 'abcd-full-secret', 'collection' => 'site-1'];
+        $key = ['id' => 7, 'value_prefix' => 'abcd', 'collections' => ['site-1'],
+            'actions' => ['documents:search'], 'description' => 'Search-only key for collection: site-1'];
+        self::assertSame(['7'], ProvisioningGateway::matchDeletionKeys([$key], [$mapping, $mapping]));
+        self::assertSame([], ProvisioningGateway::matchDeletionKeys([], [$mapping]));
+        foreach ([[$key, array_merge($key, ['id' => 8])], [array_merge($key, ['collections' => ['*']])]] as $keys) {
+            try { ProvisioningGateway::matchDeletionKeys($keys, [$mapping]); self::fail(); }
+            catch (\TypesenseSearch\Multisite\SetupException $e) { self::assertStringContainsString('cannot be identified uniquely', $e->getMessage()); }
+        }
+    }
+
+    public function test_setup_queue_uses_browser_and_is_scoped_to_user_and_current_step(): void
+    {
+        Functions\when('current_user_can')->justReturn(true);
+        Functions\expect('wp_remote_post')->never();
+        $dispatcher = new \TypesenseSearch\Multisite\SetupDispatcher();
+        $id = $dispatcher->dispatch([1, 2, 2, 99]);
+        self::assertSame([1, 2], $dispatcher::pending($id)['sites']);
+        self::assertTrue($dispatcher::accepts($id, 1));
+        self::assertFalse($dispatcher::accepts($id, 2));
+        self::assertFalse($dispatcher::accepts('old', 1));
+        $this->user = 43;
+        self::assertSame([], $dispatcher::pending($id));
+        $this->user = 42;
+        $dispatcher::complete($id, 1);
+        self::assertFalse($dispatcher::accepts($id, 1));
+        self::assertTrue($dispatcher::accepts($id, 2));
+        $dispatcher::complete($id, 2);
+        self::assertSame([], $dispatcher::pending($id));
+    }
+
+    public function test_new_save_replaces_old_sequence_and_invalidates_legacy_tokens(): void
+    {
+        Functions\when('current_user_can')->justReturn(true);
+        $dispatcher = new \TypesenseSearch\Multisite\SetupDispatcher();
+        $this->options[1][$dispatcher::JOB] = ['hash' => 'old'];
+        $old = $dispatcher->dispatch([1]);
+        $new = $dispatcher->dispatch([2], 'connection');
+        self::assertArrayNotHasKey($dispatcher::JOB, $this->options[1]);
+        self::assertSame([], $dispatcher::pending($old));
+        self::assertSame('connection', $dispatcher::pending($new)['tab']);
+        $dispatcher::complete($old, 1);
+        self::assertTrue($dispatcher::accepts($new, 2));
+        self::assertSame('', $dispatcher->dispatch([]));
+        self::assertSame([], $dispatcher::pending($new));
     }
 
 }

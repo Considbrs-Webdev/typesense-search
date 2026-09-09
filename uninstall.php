@@ -28,6 +28,9 @@ function typesense_search_uninstall_data_for_site(?int $blogId = null): void
     foreach ([
         'typesense_network_state',
         'typesense_network_provision_lock',
+        'typesense_network_setup_job',
+        'typesense_network_setup_status',
+        'typesense_network_status_check',
         'typesense_search_statistics_db_version',
         'typesense_search_pinned_results_db_version',
         'typesense_search_pinned_results_enabled',

@@ -91,6 +91,26 @@ class NetworkSettingsRepository
             && !empty($mapping['collection']) && !empty($mapping['key']);
     }
 
+    /** Explain configuration eligibility independently of server/index availability. */
+    public function unavailableReason(): string
+    {
+        if (!$this->selected()) {
+            return __('This site is disabled. Select it in Network Admin to enable Typesense.', 'typesense-search');
+        }
+        if ($this->conflict()) {
+            return __('Global collection or search-key constants conflict with network mode. Remove these constants before setup.', 'typesense-search');
+        }
+        $connection = $this->connection();
+        if ($connection['remote'] === '' || $connection['admin_key'] === '') {
+            return __('Configure the network connection first.', 'typesense-search');
+        }
+        $mapping = $this->mapping();
+        if (!empty($mapping['identity']) && $mapping['identity'] !== $this->identity()) {
+            return __('The site URL, environment or server has changed. Save the site selection to run setup again.', 'typesense-search');
+        }
+        return __('Setup is incomplete. Save the site selection or retry the failed setup.', 'typesense-search');
+    }
+
     /** Runs only server-owned preparation/indexing code, never selected by public request input. */
     public function withCandidate(array $mapping, callable $operation): mixed
     {

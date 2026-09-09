@@ -44,7 +44,7 @@ class App {
         add_action('init', fn() => load_plugin_textdomain(
             'typesense-search',
             false,
-            './typesense-search/languages'
+            dirname(TYPESENSESEARCH_BASENAME) . '/languages'
         ));
 
         new Templates();

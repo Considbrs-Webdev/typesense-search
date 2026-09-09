@@ -1209,24 +1209,40 @@ multisite installation retains the existing single-site behavior.
    Connection tab. A blank admin-key field keeps the existing secret; the saved
    secret is never rendered back into the page.
 2. Select sites on the Sites tab and save. New sites are disabled by default.
-3. Use **Prepare / retry** for each selected site. This creates a separate
-   collection and a search-only key restricted to that collection. Existing
-   resources are reused only when their ownership marker matches this site.
-4. Index and review the candidate in that site's own WordPress context:
+   Keep the page open: the browser submits authenticated setup requests one site
+   at a time and returns to Network Admin between sites. Each request verifies
+   network administration permission and a WordPress nonce. The server does not
+   call itself and no unauthenticated setup endpoint or TLS override is used.
+   If automatic submission is unavailable, use **Continue setup**.
+3. Setup creates or reuses the site's owned index and search key, synchronizes
+   synonyms and pinned results, and activates the mapping. Search can use an
+   empty index as soon as the server and index are available.
+4. Index content separately, initially and on subsequent runs:
+
+   Enable the desired post types in the site's Typesense Search settings first.
+   A new site's setup can finish with no post types selected; the index remains
+   empty until content types are enabled and indexed. `--post-type` does not
+   enable a disabled content type.
 
    ```sh
-   wp --url=https://example.com/subsite/ typesense network prepare
-   wp --url=https://example.com/subsite/ typesense network index --yes --batch-size=100
-   # Add --include-pdf and/or --include-external when those sources are needed.
-   wp --url=https://example.com/subsite/ typesense network activate --yes
+   wp --url=https://example.com/subsite/ typesense index --yes --batch-size=100
+   # Add --include-pdf and/or --include-external when needed.
    ```
 
-   The first command is equivalent to the Prepare button. Activation can also
-   be performed in Network Admin after checking the review confirmation.
-   It verifies key access and synchronizes enabled synonyms and pinned results
-   before switching search to the candidate. Existing collections are not deleted.
-5. Use Status to check the shared connection or an individual site's active key.
-   Checks run only on request.
+   `typesense network setup` performs setup from CLI. Legacy `network prepare`
+   and `network activate` are setup aliases; `network index` uses the same
+   indexing engine as `typesense index`. No manual review or activation is required.
+5. Check the shared connection on Connection or each site's status on Sites.
+   Checks run only on request. Setup failures appear on the affected site; retry
+   setup or save the selection again. Closing the page interrupts the remaining
+   sequence. On mapped domains, the administrator must be logged in on the target
+   site as well; an absent/expired session or invalid nonce stops that request.
+
+An indexing error or interrupted run does not deactivate a working site. Search
+may return incomplete results until indexing finishes; rerun the same command
+to update the documents. Server and index availability still determine whether
+the frontend can use Typesense. A setup error on one site is recorded in its row
+and ordinary setup failures do not stop the remaining sites in the sequence.
 
 Post types, PDFs, Modularity, search appearance, facets, quick search, statistics,
 synonyms and pinned-result rules remain site-local. The local Connection and
@@ -1245,14 +1261,13 @@ cluster must use distinct URL/environment identities or separate clusters.
 Set `WP_ENVIRONMENT_TYPE` correctly before copying a production database to
 local/staging. WordPress defaults to `production` if it is not set. The plugin
 records the canonical home URL, environment and server when preparing a site.
-A mismatch blocks the old mapping until the site is explicitly prepared and
-activated for the new context. A clone with *identical* URL, environment and
+A mismatch blocks the old mapping until setup completes for the new context. A clone with *identical* URL, environment and
 server configuration cannot be distinguished automatically.
 
 In network mode, `TYPESENSE_HOST`, `TYPESENSE_ADMIN_KEY` and
 `TYPESENSE_FRONTEND_HOST` override their shared database settings. Global
 `TYPESENSE_COLLECTION` and `TYPESENSE_SEARCH_KEY` conflict with site isolation:
-remove them before preparing sites. All five constants keep their existing
+remove them before setting up sites. All five constants keep their existing
 behavior outside network mode. Disabled sites cannot bypass network policy with
 legacy local credentials or constants.
 
@@ -1261,19 +1276,28 @@ The authoritative active/candidate mapping is stored atomically in the site's
 collection and key options are left untouched so local activation can resume
 its original configuration after network activation ends. No existing index is
 silently adopted, renamed or deleted. On first transition to network mode,
-unprepared sites use ordinary WordPress search until activation; this is not a
+sites awaiting setup use ordinary WordPress search until setup completes; this is not a
 zero-downtime migration of an existing local Typesense frontend.
 
 Disabling a site stops Typesense frontend behavior and plugin-managed indexing,
 including CLI and synchronization. It preserves local settings, remote documents
-and previously issued keys. Re-enabling a prepared site reuses its mapping;
+and previously issued keys. Re-enabling a configured site reuses its mapping;
 run indexing to catch up on changes made while it was disabled. Disabling does
-not revoke an already public search key. Remote cleanup is an explicit operator
-operation outside this feature.
+not revoke an already public search key.
 
-Preparation can be retried after failures. A revoked search key is replaced on
-an explicit Prepare retry. No automatic background rebuild or network-wide
-indexing loop is performed. If a process was killed and left a lock, first ensure
+To remove a disabled site's saved index and search key, expand **Delete index
+and search key** in its Index column, review the index name, confirm and submit.
+The operation requires network administration permission and refuses deletion if
+the site is enabled, the saved URL/environment/server identity has changed, or
+index ownership cannot be verified. Only keys matching the saved key prefix and
+exact search-only collection scope are eligible; ambiguous matches stop deletion.
+WordPress content and local settings are preserved. Resources saved for other
+server/environment identities are left for explicit cleanup in that environment.
+A failed deletion retains the saved mapping so it can be retried. After successful
+deletion, re-enable the site and index its content again.
+
+Setup can be retried after failures. A revoked search key is replaced on
+an explicit setup retry. No network-wide content indexing loop is performed. If a process was killed and left a lock, first ensure
 it has ended, then run:
 
 ```sh
