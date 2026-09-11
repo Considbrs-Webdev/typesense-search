@@ -8,6 +8,7 @@ class NetworkSettingsRepository
     public const REMOTE = 'typesense_network_remote';
     public const ADMIN_KEY = 'typesense_network_admin_key';
     public const FRONTEND_HOST = 'typesense_network_frontend_host';
+    public const PREFIX = 'typesense_network_prefix';
     public const ENABLED = 'typesense_network_enabled_sites';
     public const STATE = 'typesense_network_state';
     public const LOCK = 'typesense_network_provision_lock';
@@ -55,12 +56,20 @@ class NetworkSettingsRepository
         ];
     }
 
+    /** Prepended to the resolved collection name; MU-only, never used outside network mode. */
+    public function prefix(): string
+    {
+        $prefix = $this->constant('TYPESENSE_NETWORK_PREFIX') ?: (string) get_network_option($this->networkId(), self::PREFIX, '');
+        return sanitize_key($prefix);
+    }
+
     public function identity(): array
     {
         return (new CollectionNameResolver())->identity() + [
             'remote' => rtrim($this->connection()['remote'], '/'),
             'network' => $this->networkId(),
             'site' => (int) get_current_blog_id(),
+            'prefix' => $this->prefix(),
         ];
     }
 

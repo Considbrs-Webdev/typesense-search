@@ -12,21 +12,25 @@ class CollectionNameResolver
         ];
     }
 
-    public function resolve(): string
+    public function resolve(string $prefix = ''): string
     {
         $identity = $this->identity();
-        return self::name($identity['home'], $identity['environment'], get_current_blog_id());
+        return self::name($identity['home'], $identity['environment'], get_current_blog_id(), $prefix);
     }
 
-    public static function name(string $home, string $environment, int $blogId): string
+    public static function name(string $home, string $environment, int $blogId, string $prefix = ''): string
     {
         $url = parse_url($home);
         if (!$url || empty($url['host']) || $blogId < 1) {
             throw new \InvalidArgumentException('A canonical site URL and site ID are required.');
         }
-        $prefix = strtolower($url['host'] . (isset($url['port']) ? '-' . $url['port'] : '') . ($url['path'] ?? ''));
-        $prefix = trim((string) preg_replace('/[^a-z0-9]+/', '-', $prefix), '-');
+        $slug = strtolower($url['host'] . (isset($url['port']) ? '-' . $url['port'] : '') . ($url['path'] ?? ''));
+        $slug = trim((string) preg_replace('/[^a-z0-9]+/', '-', $slug), '-');
+        $prefix = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($prefix)), '-');
+        if ($prefix !== '') {
+            $slug = $slug !== '' ? $prefix . '_' . $slug : $prefix;
+        }
         $suffix = '__' . preg_replace('/[^a-z0-9_-]/', '', strtolower($environment)) . '_b' . $blogId;
-        return rtrim(substr($prefix ?: 'site', 0, 128 - strlen($suffix)), '-') . $suffix;
+        return rtrim(substr($slug ?: 'site', 0, 128 - strlen($suffix)), '-') . $suffix;
     }
 }

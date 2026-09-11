@@ -27,6 +27,7 @@ class NetworkSettingsPageTest extends TestCase
         $this->network->shouldReceive('connection')->andReturnUsing(fn () => $this->connection);
         $this->network->shouldReceive('networkId')->andReturn(1);
         $this->network->shouldReceive('conflict')->andReturn(false);
+        $this->network->shouldReceive('prefix')->andReturn('');
         Functions\when('get_home_url')->justReturn('https://site.test/');
         Functions\when('wp_get_environment_type')->justReturn('local');
         Functions\when('get_blog_option')->alias(fn ($id, $name, $default = false) => $this->options[$name] ?? $default);
@@ -35,7 +36,7 @@ class NetworkSettingsPageTest extends TestCase
     private function mapping(): array
     {
         return ['identity' => ['home' => 'https://site.test', 'environment' => 'local',
-            'remote' => 'https://search.test', 'network' => 1, 'site' => 2],
+            'remote' => 'https://search.test', 'network' => 1, 'site' => 2, 'prefix' => ''],
             'collection' => 'site_index', 'key' => 'site-secret'];
     }
 

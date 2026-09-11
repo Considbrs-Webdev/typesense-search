@@ -24,6 +24,7 @@ En **collection** är ett sökindex i Typesense som innehåller webbplatsens sö
 - **Typesense-värd:** serverns adress, inklusive `http://` eller `https://` och eventuell port.
 - **Admin-API-nyckel:** används av WordPress för administration och indexering. Den sparade nyckeln visas inte i formuläret. Lämna fältet tomt för att behålla den.
 - **Värd för frontend:** valfri separat adress som besökarnas webbläsare använder för sökning. Om den lämnas tom används Typesense-värden. Adressen måste vara nåbar från besökarnas webbläsare.
+- **Indexprefix (valfritt):** sätts en gång för hela nätverket och läggs till först i varje webbplats collection-namn, till exempel `eslov_`. Bara gemener, siffror, bindestreck och understreck behålls. Kan också sättas med konstanten `TYPESENSE_NETWORK_PREFIX`, som då gör fältet skrivskyddat.
 
 Alla valda webbplatser använder denna gemensamma anslutning. Adminnyckeln ska inte användas i frontend; där används webbplatsens egen söknyckel.
 
@@ -58,7 +59,7 @@ De lokala flikarna för anslutning och status visar i nätverksläget att instä
 I nätverksläget skapas namnet automatiskt:
 
 ```text
-{domän-och-eventuell-sökväg}__{miljö}_b{webbplats-id}
+[{prefix}_]{domän-och-eventuell-sökväg}__{miljö}_b{webbplats-id}
 ```
 
 | Webbplatsens adress | Miljö | Webbplats-ID | Collection |
@@ -75,7 +76,8 @@ De två sista raderna är exempel, inte uppgifter om produktionsmiljön.
 - `b3` betyder WordPress webbplats-ID 3. Test 2 har ID 3 trots sitt namn.
 - Miljön hämtas från `WP_ENVIRONMENT_TYPE`, exempelvis `development`, `staging` eller `production`. Om miljön inte anges använder WordPress `production`.
 - Namnet är högst 128 tecken. En lång adressdel kortas, men miljö och webbplats-ID behålls.
-- Det finns inget fält för ett eget collection-namn i nätverkspanelen. Vanlig lokal aktivering behåller sitt befintliga sätt att ange collection.
+- Det gemensamma indexprefixet under **Anslutning** läggs till först i namnet, om det är ifyllt. Utan prefix ser namnet ut som tidigare.
+- Det finns inget fält för att sätta ett helt eget collection-namn per webbplats i nätverkspanelen. Vanlig lokal aktivering behåller sitt befintliga sätt att ange collection.
 
 Varje söknyckel får bara söka i sin egen collection. Funktionen ger alltså separata sökindex, inte gemensam sökning över hela nätverket.
 
@@ -126,6 +128,7 @@ I nätverksläge gäller följande konstanter före sparade nätverksinställnin
 - `TYPESENSE_HOST`
 - `TYPESENSE_ADMIN_KEY`
 - `TYPESENSE_FRONTEND_HOST`
+- `TYPESENSE_NETWORK_PREFIX`
 
 Globala `TYPESENSE_COLLECTION` och `TYPESENSE_SEARCH_KEY` måste tas bort för nätverksläget, eftersom varje webbplats behöver egna värden. Panelen visar en konflikt om de finns. Vid vanlig lokal aktivering behåller alla dessa konstanter sitt tidigare beteende.
 

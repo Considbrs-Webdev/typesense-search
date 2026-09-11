@@ -80,7 +80,7 @@ class SiteProvisioner
     {
         $state = $this->network->state();
         $identity = $this->network->identity();
-        $name = (new CollectionNameResolver())->resolve();
+        $name = (new CollectionNameResolver())->resolve($this->network->prefix());
         $candidate = ['identity' => $identity, 'collection' => $name, 'key' => ''];
         // Returning to a previously configured server/environment must reuse
         // its ownership proof, even if a different candidate was prepared.

@@ -120,6 +120,31 @@ class NetworkModeTest extends TestCase
         self::assertSame('example-test-sub__development_b2', CollectionNameResolver::name('https://example.test/sub/', 'development', 2));
     }
 
+    public function test_naming_accepts_an_optional_prefix(): void
+    {
+        self::assertSame('eslov_example-test__development_b1', CollectionNameResolver::name('https://example.test', 'development', 1, 'eslov_'));
+        self::assertSame('eslov_example-test__development_b1', CollectionNameResolver::name('https://example.test', 'development', 1, 'ESLOV'));
+        self::assertSame('example-test__development_b1', CollectionNameResolver::name('https://example.test', 'development', 1, ''));
+    }
+
+    public function test_network_prefix_is_read_from_settings_and_included_in_identity(): void
+    {
+        $this->networkOptions[NetworkSettingsRepository::PREFIX] = 'Eslöv!';
+        $network = new NetworkSettingsRepository();
+        self::assertSame('eslv', $network->prefix());
+        self::assertSame('eslv', $network->identity()['prefix']);
+        self::assertStringStartsWith('eslv_', (new CollectionNameResolver())->resolve($network->prefix()));
+    }
+
+    public function test_network_prefix_constant_overrides_the_option(): void
+    {
+        $this->networkOptions[NetworkSettingsRepository::PREFIX] = 'eslov';
+        $network = new class extends NetworkSettingsRepository {
+            public function constant(string $name): string { return $name === 'TYPESENSE_NETWORK_PREFIX' ? 'kavlinge' : ''; }
+        };
+        self::assertSame('kavlinge', $network->prefix());
+    }
+
     public function test_prepare_retries_key_failure_without_recreating_collection(): void
     {
         $gateway = new class extends ProvisioningGateway {

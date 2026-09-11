@@ -73,6 +73,9 @@ class NetworkSettingsPage
             if ($key !== '' && $network->constant('TYPESENSE_ADMIN_KEY') === '') {
                 update_network_option($networkId, NetworkSettingsRepository::ADMIN_KEY, $key);
             }
+            if ($network->constant('TYPESENSE_NETWORK_PREFIX') === '') {
+                update_network_option($networkId, NetworkSettingsRepository::PREFIX, sanitize_key(wp_unslash($_POST['prefix'] ?? '')));
+            }
         } else {
             $ids = array_values(array_unique(array_map('absint', (array) ($_POST['sites'] ?? []))));
             foreach ($ids as $id) {
@@ -195,7 +198,8 @@ class NetworkSettingsPage
         $state = (array) get_blog_option($id, NetworkSettingsRepository::STATE, []);
         $mapping = (array) ($state['active'] ?? []);
         $identity = ['home' => rtrim(get_home_url($id), '/'), 'environment' => wp_get_environment_type(),
-            'remote' => rtrim($connection['remote'], '/'), 'network' => $network->networkId(), 'site' => $id];
+            'remote' => rtrim($connection['remote'], '/'), 'network' => $network->networkId(), 'site' => $id,
+            'prefix' => $network->prefix()];
         $ready = $selected && !$network->conflict() && ($mapping['identity'] ?? null) === $identity
             && !empty($mapping['collection']) && !empty($mapping['key'])
             && $connection['remote'] !== '' && $connection['admin_key'] !== '';

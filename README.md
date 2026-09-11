@@ -1264,12 +1264,19 @@ records the canonical home URL, environment and server when preparing a site.
 A mismatch blocks the old mapping until setup completes for the new context. A clone with *identical* URL, environment and
 server configuration cannot be distinguished automatically.
 
-In network mode, `TYPESENSE_HOST`, `TYPESENSE_ADMIN_KEY` and
-`TYPESENSE_FRONTEND_HOST` override their shared database settings. Global
+In network mode, `TYPESENSE_HOST`, `TYPESENSE_ADMIN_KEY`, `TYPESENSE_FRONTEND_HOST`
+and `TYPESENSE_NETWORK_PREFIX` override their shared database settings. Global
 `TYPESENSE_COLLECTION` and `TYPESENSE_SEARCH_KEY` conflict with site isolation:
-remove them before setting up sites. All five constants keep their existing
+remove them before setting up sites. All constants keep their existing
 behavior outside network mode. Disabled sites cannot bypass network policy with
 legacy local credentials or constants.
+
+An optional index prefix can be set network-wide on the Connection tab (or via
+the `TYPESENSE_NETWORK_PREFIX` constant), for example `eslov_`. It is prepended
+to every site's resolved collection name: `{prefix}_{domain}[-{path}]__{environment}_b{blog_id}`.
+Only lowercase letters, digits, hyphens and underscores are kept; other
+characters are dropped. This has no effect outside network mode, where the
+collection name is set directly.
 
 The authoritative active/candidate mapping is stored atomically in the site's
 `typesense_network_state` option (not autoloaded). Legacy local connection,
