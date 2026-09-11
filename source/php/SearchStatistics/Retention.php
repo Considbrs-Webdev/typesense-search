@@ -26,8 +26,20 @@ class Retention
         }
     }
 
-    public static function deactivate(): void
+    public static function deactivate(bool $networkWide = false): void
     {
+        if ($networkWide && is_multisite()) {
+            // Explicit deactivation only; ordinary requests never iterate the network.
+            foreach (get_sites(['network_id' => get_current_network_id(), 'fields' => 'ids', 'number' => 0]) as $id) {
+                switch_to_blog((int) $id);
+                try {
+                    wp_clear_scheduled_hook(self::HOOK);
+                } finally {
+                    restore_current_blog();
+                }
+            }
+            return;
+        }
         wp_clear_scheduled_hook(self::HOOK);
     }
 

@@ -2,21 +2,23 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Typesense Search 1.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
-"POT-Creation-Date: 2026-08-16T17:54:46+00:00\n"
-"PO-Revision-Date: 2026-06-16 15:06+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-16T17:54:46+00:00\n"
+"PO-Revision-Date: 2026-06-16 15:06+0200\n"
+"Language: sv_SE\n"
 "X-Generator: Poedit 3.9\n"
 "X-Domain: typesense-search\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Plugin Name of the plugin
-#: typesense-search.php source/php/Admin/Settings/SettingsPage.php:45
-#: source/php/Admin/Settings/SettingsPage.php:58
+#: typesense-search.php
+#: source/php/Admin/NetworkSettingsPage.php:25
+#: source/php/Admin/Settings/SettingsPage.php:46
+#: source/php/Admin/Settings/SettingsPage.php:59
 #: views/admin/settings-page.php:29
 msgid "Typesense Search"
 msgstr "Typesense-sök"
@@ -41,16 +43,17 @@ msgstr "Consid Borås AB"
 msgid "https://github.com/considbrs-webdev"
 msgstr "https://github.com/considbrs-webdev"
 
-#: source/php/Admin/Ajax/AjaxHelpers.php:26
-#: source/php/Admin/Ajax/AjaxHelpers.php:40
+#: source/php/Admin/Ajax/AjaxHelpers.php:44
+#: source/php/Admin/Ajax/AjaxHelpers.php:59
+#: source/php/Admin/NetworkSettingsPage.php:234
 msgid "Unauthorized."
 msgstr "Obehörig."
 
-#: source/php/Admin/Ajax/AjaxHelpers.php:49
+#: source/php/Admin/Ajax/AjaxHelpers.php:68
 msgid "Enter both a host URL and an Admin API key before testing."
 msgstr "Ange både en värd-URL och en Admin-API-nyckel innan du testar."
 
-#: source/php/Admin/Ajax/AjaxHelpers.php:57
+#: source/php/Admin/Ajax/AjaxHelpers.php:76
 msgid "The host value is not a valid URL."
 msgstr "Värdadressen är inte en giltig URL."
 
@@ -71,12 +74,8 @@ msgid "Collection \"%s\" created successfully."
 msgstr "Samlingen \"%s\" skapades."
 
 #: source/php/Admin/Ajax/CollectionActions.php:87
-msgid ""
-"Host, admin key, and collection name must all be saved before the collection "
-"can be created."
-msgstr ""
-"Värd, admin-nyckel och samlingsnamn måste vara sparade innan samlingen kan "
-"skapas."
+msgid "Host, admin key, and collection name must all be saved before the collection can be created."
+msgstr "Värd, admin-nyckel och samlingsnamn måste vara sparade innan samlingen kan skapas."
 
 #. translators: %s: error message
 #: source/php/Admin/Ajax/ConnectionActions.php:49
@@ -99,11 +98,8 @@ msgid "Server is reachable, but key validation failed: %s"
 msgstr "Servern är nåbar, men validering av nyckeln misslyckades: %s"
 
 #: source/php/Admin/Ajax/ConnectionActions.php:94
-msgid ""
-"Connected successfully. Server is healthy and the Admin API key is valid."
-msgstr ""
-"Anslutningen lyckades. Servern är i gott skick och Admin-API-nyckeln är "
-"giltig."
+msgid "Connected successfully. Server is healthy and the Admin API key is valid."
+msgstr "Anslutningen lyckades. Servern är i gott skick och Admin-API-nyckeln är giltig."
 
 #: source/php/Admin/Ajax/ConnectionActions.php:134
 msgid "No host URL configured."
@@ -178,10 +174,8 @@ msgstr "Kontroll av söknyckel misslyckades: %s"
 
 #: source/php/Admin/Ajax/FacetActions.php:41
 #: source/php/Admin/Ajax/IndexingActions.php:46
-msgid ""
-"Connection settings are incomplete. Please configure the connection first."
-msgstr ""
-"Anslutningsinställningarna är ofullständiga. Konfigurera anslutningen först."
+msgid "Connection settings are incomplete. Please configure the connection first."
+msgstr "Anslutningsinställningarna är ofullständiga. Konfigurera anslutningen först."
 
 #. translators: %s: error message
 #: source/php/Admin/Ajax/FacetActions.php:62
@@ -232,9 +226,7 @@ msgstr "Omindexering misslyckades: %s"
 #: source/php/Admin/Ajax/IndexingActions.php:315
 #: source/php/Admin/Ajax/IndexingActions.php:325
 msgid "Reindexed \"%4$s\": %1$d indexed, %2$d skipped, %3$d failed."
-msgstr ""
-"Omindexerade \"%4$s\": %1$d indexerade, %2$d hoppades över, %3$d "
-"misslyckades."
+msgstr "Omindexerade \"%4$s\": %1$d indexerade, %2$d hoppades över, %3$d misslyckades."
 
 #: source/php/Admin/Ajax/LogActions.php:34
 msgid "Indexing log cleared."
@@ -250,19 +242,12 @@ msgid "Could not generate search key: %s"
 msgstr "Kunde inte generera söknyckel: %s"
 
 #: source/php/Admin/Ajax/SearchKeyActions.php:64
-msgid ""
-"Search key generated. It has been filled in below — save settings to keep it."
-msgstr ""
-"Söknyckel genererad. Den har fyllts i nedan — spara inställningarna för att "
-"behålla den."
+msgid "Search key generated. It has been filled in below — save settings to keep it."
+msgstr "Söknyckel genererad. Den har fyllts i nedan — spara inställningarna för att behålla den."
 
 #: source/php/Admin/Ajax/SearchKeyActions.php:90
-msgid ""
-"Host, admin key, and collection name must all be saved before a new search "
-"key can be created."
-msgstr ""
-"Värd, admin-nyckel och samlingsnamn måste vara sparade innan en ny söknyckel "
-"kan skapas."
+msgid "Host, admin key, and collection name must all be saved before a new search key can be created."
+msgstr "Värd, admin-nyckel och samlingsnamn måste vara sparade innan en ny söknyckel kan skapas."
 
 #. translators: %s: error message
 #: source/php/Admin/Ajax/SearchKeyActions.php:102
@@ -277,7 +262,8 @@ msgstr "Ny söknyckel skapad och sparad. Statuskontrollerna borde nu passera."
 msgid "Search settings"
 msgstr "Sökinställningar"
 
-#: source/php/Admin/MetaBox.php:113 source/php/Admin/MetaBox.php:232
+#: source/php/Admin/MetaBox.php:113
+#: source/php/Admin/MetaBox.php:232
 msgid "Exclude from search index"
 msgstr "Exkludera från sökindex"
 
@@ -286,14 +272,11 @@ msgid "Exclude as search section"
 msgstr "Exkludera som avdelning"
 
 #: source/php/Admin/MetaBox.php:131
-msgid ""
-"Prevents this page from being used as the section label for itself and "
-"descendant pages when it is the top page in the page tree."
-msgstr ""
-"Förhindrar att den här sidan används som sektionsetikett för sig själv och "
-"underordnade sidor när den är den översta sidan i sidträdet."
+msgid "Prevents this page from being used as the section label for itself and descendant pages when it is the top page in the page tree."
+msgstr "Förhindrar att den här sidan används som sektionsetikett för sig själv och underordnade sidor när den är den översta sidan i sidträdet."
 
-#: source/php/Admin/MetaBox.php:137 source/php/Admin/Settings/Sanitizers.php:33
+#: source/php/Admin/MetaBox.php:137
+#: source/php/Admin/Settings/Sanitizers.php:33
 msgid "Extra search terms"
 msgstr "Extra söktermer"
 
@@ -302,18 +285,16 @@ msgid "Keywords, synonyms or alternate phrasings…"
 msgstr "Nyckelord, synonymer eller alternativa formuleringar…"
 
 #: source/php/Admin/MetaBox.php:147
-msgid ""
-"Additional words or phrases that should match this post in search, even if "
-"they do not appear in the content."
-msgstr ""
-"Ytterligare ord eller fraser som ska matcha detta inlägg i sökningen, även "
-"om de inte förekommer i innehållet."
+msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
+msgstr "Ytterligare ord eller fraser som ska matcha detta inlägg i sökningen, även om de inte förekommer i innehållet."
 
-#: source/php/Admin/PinnedResultsPage.php:43 source/php/Frontend/I18n.php:136
+#: source/php/Admin/PinnedResultsPage.php:43
+#: source/php/Frontend/I18n.php:136
 msgid "Pinned search results"
 msgstr "Fästa sökresultat"
 
-#: source/php/Admin/PinnedResultsPage.php:44 source/php/Frontend/I18n.php:145
+#: source/php/Admin/PinnedResultsPage.php:44
+#: source/php/Frontend/I18n.php:145
 msgid "Pinned results"
 msgstr "Fästa resultat"
 
@@ -389,7 +370,7 @@ msgstr "Vanlig sökning"
 
 #: source/php/Admin/SearchLogListTable.php:230
 #: source/php/Admin/SearchLogListTable.php:240
-#: source/php/Admin/Settings/SettingsPage.php:31
+#: source/php/Admin/Settings/SettingsPage.php:32
 #: source/php/Frontend/I18n.php:54
 #: views/admin/settings-tabs/quick-search.php:15
 #: views/admin/settings-tabs/statistics.php:120
@@ -401,7 +382,8 @@ msgstr "Snabbsök"
 msgid "Filter"
 msgstr "Filtrera"
 
-#: source/php/Admin/SearchLogPage.php:23 source/php/Admin/SearchLogPage.php:24
+#: source/php/Admin/SearchLogPage.php:23
+#: source/php/Admin/SearchLogPage.php:24
 #: source/php/Admin/SearchLogPage.php:64
 msgid "Search log"
 msgstr "Söklogg"
@@ -411,14 +393,8 @@ msgid "Searches per page"
 msgstr "Sökningar per sida"
 
 #: source/php/Admin/SearchLogPage.php:65
-msgid ""
-"Each row represents one normalised search term per anonymous browser "
-"session. Repeated searches in the same session update when it was last "
-"searched without increasing the count."
-msgstr ""
-"Varje rad representerar en normaliserad sökterm per anonym webbläsarsession. "
-"Upprepade sökningar i samma session uppdaterar när termen senast söktes utan "
-"att öka antalet."
+msgid "Each row represents one normalised search term per anonymous browser session. Repeated searches in the same session update when it was last searched without increasing the count."
+msgstr "Varje rad representerar en normaliserad sökterm per anonym webbläsarsession. Upprepade sökningar i samma session uppdaterar när termen senast söktes utan att öka antalet."
 
 #: source/php/Admin/SearchLogPage.php:67
 #: views/admin/settings-tabs/statistics.php:93
@@ -467,39 +443,41 @@ msgstr "Innehåll"
 msgid "Content type name"
 msgstr "Innehållstypens namn"
 
-#: source/php/Admin/Settings/SettingsPage.php:28
+#: source/php/Admin/Settings/SettingsPage.php:29
 msgid "Typesense Connection"
 msgstr "Anslutning"
 
-#: source/php/Admin/Settings/SettingsPage.php:29
+#: source/php/Admin/Settings/SettingsPage.php:30
 msgid "Settings"
 msgstr "Inställningar"
 
-#: source/php/Admin/Settings/SettingsPage.php:30
+#: source/php/Admin/Settings/SettingsPage.php:31
 msgid "Advanced settings"
 msgstr "Avancerade inställningar"
 
-#: source/php/Admin/Settings/SettingsPage.php:32
+#: source/php/Admin/Settings/SettingsPage.php:33
 msgid "Statistics"
 msgstr "Statistik"
 
-#: source/php/Admin/Settings/SettingsPage.php:33
+#: source/php/Admin/Settings/SettingsPage.php:34
 msgid "Logging"
 msgstr "Loggning"
 
-#: source/php/Admin/Settings/SettingsPage.php:34
+#: source/php/Admin/Settings/SettingsPage.php:35
+#: views/admin/network/settings.php:78
 msgid "Status"
 msgstr "Status"
 
-#: source/php/Admin/Settings/SettingsPage.php:46
+#: source/php/Admin/Settings/SettingsPage.php:47
 msgid "Typesense search"
 msgstr "Typesense-sök"
 
-#: source/php/Admin/Settings/SettingsPage.php:59
+#: source/php/Admin/Settings/SettingsPage.php:60
 msgid "General"
 msgstr "Allmänt"
 
-#: source/php/Admin/SynonymsPage.php:43 source/php/Admin/SynonymsPage.php:44
+#: source/php/Admin/SynonymsPage.php:43
+#: source/php/Admin/SynonymsPage.php:44
 #: source/php/Frontend/I18n.php:207
 msgid "Synonyms"
 msgstr "Synonymer"
@@ -510,7 +488,8 @@ msgstr "Synonymer är inte tillgängliga."
 
 #: source/php/Frontend/EnrichSearchTemplate.php:36
 #: source/php/Frontend/EnrichSearchTemplate.php:37
-#: source/php/Frontend/I18n.php:57 source/php/Frontend/I18n.php:58
+#: source/php/Frontend/I18n.php:57
+#: source/php/Frontend/I18n.php:58
 msgid "Search"
 msgstr "Sök"
 
@@ -527,7 +506,8 @@ msgid "Your search for <strong>%1$s</strong> returned %2$s"
 msgstr "Din sökning efter <strong>%1$s</strong> gav %2$s"
 
 #: source/php/Frontend/EnrichSearchTemplate.php:41
-#: source/php/Frontend/I18n.php:24 views/admin/settings-tabs/statistics.php:120
+#: source/php/Frontend/I18n.php:24
+#: views/admin/settings-tabs/statistics.php:120
 msgid "%d result"
 msgid_plural "%d results"
 msgstr[0] "%d träff"
@@ -606,12 +586,8 @@ msgid "No hits for your search term"
 msgstr "Inget innehåll matchade din sökning"
 
 #: source/php/Frontend/I18n.php:55
-msgid ""
-"Search suggestions open in this dialog. Press Escape or use the close button "
-"to return to the page."
-msgstr ""
-"Sökförslag visas i den här dialogrutan. Tryck på Escape eller använd "
-"stängknappen för att återgå till sidan."
+msgid "Search suggestions open in this dialog. Press Escape or use the close button to return to the page."
+msgstr "Sökförslag visas i den här dialogrutan. Tryck på Escape eller använd stängknappen för att återgå till sidan."
 
 #: source/php/Frontend/I18n.php:56
 msgid "Close quick search"
@@ -642,22 +618,16 @@ msgid "documents"
 msgstr "dokument"
 
 #: source/php/Frontend/I18n.php:83
-msgid ""
-"Remove all \"%s\" documents from the Typesense index? This cannot be undone."
-msgstr ""
-"Ta bort alla \"%s\"-dokument från Typesense-indexet? Det här kan inte ångras."
+msgid "Remove all \"%s\" documents from the Typesense index? This cannot be undone."
+msgstr "Ta bort alla \"%s\"-dokument från Typesense-indexet? Det här kan inte ångras."
 
 #: source/php/Frontend/I18n.php:84
 msgid "Clear"
 msgstr "Rensa"
 
 #: source/php/Frontend/I18n.php:86
-msgid ""
-"Re-index all \"%s\" documents? Existing entries will be re-processed and "
-"overwritten."
-msgstr ""
-"Omindexera alla \"%s\"-dokument? Befintliga poster kommer att bearbetas på "
-"nytt och skrivas över."
+msgid "Re-index all \"%s\" documents? Existing entries will be re-processed and overwritten."
+msgstr "Omindexera alla \"%s\"-dokument? Befintliga poster kommer att bearbetas på nytt och skrivas över."
 
 #: source/php/Frontend/I18n.php:87
 msgid "Reindex"
@@ -684,12 +654,8 @@ msgid "— No facetable fields found —"
 msgstr "— Inga filterbara fält hittades —"
 
 #: source/php/Frontend/I18n.php:97
-msgid ""
-"No facetable fields found in the collection schema. Make sure the collection "
-"exists and has fields with facet: true."
-msgstr ""
-"Inga filterbara fält hittades i samlingens schema. Kontrollera att samlingen "
-"finns och har fält med facet: true."
+msgid "No facetable fields found in the collection schema. Make sure the collection exists and has fields with facet: true."
+msgstr "Inga filterbara fält hittades i samlingens schema. Kontrollera att samlingen finns och har fält med facet: true."
 
 #: source/php/Frontend/I18n.php:98
 msgid "All facetable fields have already been added as facets."
@@ -791,9 +757,7 @@ msgstr "Öppna i modal"
 #: source/php/Frontend/I18n.php:121
 #: views/admin/settings-tabs/quick-search.php:146
 msgid "No selectors configured yet. Click \"Add selector\" to get started."
-msgstr ""
-"Inga selektorer är konfigurerade ännu. Klicka på “Lägg till selektor” för "
-"att komma igång."
+msgstr "Inga selektorer är konfigurerade ännu. Klicka på “Lägg till selektor” för att komma igång."
 
 #: source/php/Frontend/I18n.php:133
 msgid "Missing pinned results configuration."
@@ -811,11 +775,13 @@ msgstr "Kunde inte läsa in fästa resultat."
 msgid "Add pinned search"
 msgstr "Lägg till fäst sökning"
 
-#: source/php/Frontend/I18n.php:138 source/php/Frontend/I18n.php:202
+#: source/php/Frontend/I18n.php:138
+#: source/php/Frontend/I18n.php:202
 msgid "Sync to Typesense"
 msgstr "Synka till Typesense"
 
-#: source/php/Frontend/I18n.php:139 source/php/Frontend/I18n.php:203
+#: source/php/Frontend/I18n.php:139
+#: source/php/Frontend/I18n.php:203
 msgid "Syncing..."
 msgstr "Synkar..."
 
@@ -839,7 +805,8 @@ msgstr "Sökfras"
 msgid "Match type"
 msgstr "Matchningstyp"
 
-#: source/php/Frontend/I18n.php:146 source/php/Frontend/I18n.php:210
+#: source/php/Frontend/I18n.php:146
+#: source/php/Frontend/I18n.php:210
 msgid "Sync status"
 msgstr "Synkstatus"
 
@@ -851,22 +818,27 @@ msgstr "objekt"
 msgid "items"
 msgstr "objekt"
 
-#: source/php/Frontend/I18n.php:149 source/php/Frontend/I18n.php:211
+#: source/php/Frontend/I18n.php:149
+#: source/php/Frontend/I18n.php:211
 msgid "New"
 msgstr "Ny"
 
-#: source/php/Frontend/I18n.php:150 source/php/Frontend/I18n.php:212
+#: source/php/Frontend/I18n.php:150
+#: source/php/Frontend/I18n.php:212
 msgid "Synced"
 msgstr "Synkad"
 
-#: source/php/Frontend/I18n.php:151 source/php/Frontend/I18n.php:213
+#: source/php/Frontend/I18n.php:151
+#: source/php/Frontend/I18n.php:213
 msgid "Error"
 msgstr "Fel"
 
-#: source/php/Frontend/I18n.php:152 source/php/Frontend/I18n.php:214
+#: source/php/Frontend/I18n.php:152
+#: source/php/Frontend/I18n.php:214
 msgid "Pending"
 msgstr "Väntar"
 
+#: source/php/Admin/NetworkSettingsPage.php:210
 #: source/php/Frontend/I18n.php:153
 msgid "Disabled"
 msgstr "Inaktiverad"
@@ -915,7 +887,8 @@ msgstr "Ta bort resultat"
 msgid "Search for posts below and add the results you want to pin."
 msgstr "Sök efter inlägg nedan och lägg till resultaten du vill fästa."
 
-#: source/php/Frontend/I18n.php:165 source/php/Frontend/I18n.php:216
+#: source/php/Frontend/I18n.php:165
+#: source/php/Frontend/I18n.php:216
 msgid "Save changes"
 msgstr "Spara ändringar"
 
@@ -923,11 +896,13 @@ msgstr "Spara ändringar"
 msgid "Save new search"
 msgstr "Spara ny sökning"
 
-#: source/php/Frontend/I18n.php:167 source/php/Frontend/I18n.php:217
+#: source/php/Frontend/I18n.php:167
+#: source/php/Frontend/I18n.php:217
 msgid "Saving..."
 msgstr "Sparar..."
 
-#: source/php/Frontend/I18n.php:168 source/php/Frontend/I18n.php:218
+#: source/php/Frontend/I18n.php:168
+#: source/php/Frontend/I18n.php:218
 msgid "Saved"
 msgstr "Sparad"
 
@@ -939,7 +914,8 @@ msgstr "Ta bort fäst sökning"
 msgid "Delete this pinned search?"
 msgstr "Ta bort den här fästa sökningen?"
 
-#: source/php/Frontend/I18n.php:171 source/php/PinnedResults/Repository.php:59
+#: source/php/Frontend/I18n.php:171
+#: source/php/PinnedResults/Repository.php:59
 msgid "Add a search phrase before saving."
 msgstr "Lägg till en sökfras innan du sparar."
 
@@ -957,8 +933,7 @@ msgstr "Kunde inte spara fäst sökning."
 
 #: source/php/Frontend/I18n.php:175
 msgid "Pinned search deleted. Sync to Typesense to apply the change."
-msgstr ""
-"Fäst sökning borttagen. Synka till Typesense för att tillämpa ändringen."
+msgstr "Fäst sökning borttagen. Synka till Typesense för att tillämpa ändringen."
 
 #: source/php/Frontend/I18n.php:176
 msgid "Could not delete pinned search."
@@ -985,23 +960,20 @@ msgid "Instructions"
 msgstr "Instruktioner"
 
 #: source/php/Frontend/I18n.php:193
-msgid ""
-"Add words that should be treated as the same when people search. Every word "
-"in a group is interchangeable with every other word in that group."
+msgid "Add words that should be treated as the same when people search. Every word in a group is interchangeable with every other word in that group."
 msgstr "Lägg till ord som ska behandlas som samma när besökare söker. Alla ord i en grupp är utbytbara mot varandra."
 
 #. translators: %s: example group of interchangeable words
 #: source/php/Frontend/I18n.php:196
-msgid ""
-"Example: grouping \"%s\" together means a search for any one of them also "
-"finds results for the others."
+msgid "Example: grouping \"%s\" together means a search for any one of them also finds results for the others."
 msgstr "Exempel: att gruppera \"%s\" innebär att en sökning på valfritt av dem även ger träffar för de andra."
 
 #: source/php/Frontend/I18n.php:197
 msgid "lekplatser, playground, amusement park"
 msgstr "lekplatser, playground, amusement park"
 
-#: source/php/Frontend/I18n.php:199 views/admin/synonyms-page.php:14
+#: source/php/Frontend/I18n.php:199
+#: views/admin/synonyms-page.php:14
 msgid "Loading synonyms..."
 msgstr "Laddar synonymer..."
 
@@ -1045,7 +1017,8 @@ msgstr "Ta bort synonymregel"
 msgid "Delete this synonym rule?"
 msgstr "Ta bort den här synonymregeln?"
 
-#: source/php/Frontend/I18n.php:221 source/php/Synonyms/Repository.php:54
+#: source/php/Frontend/I18n.php:221
+#: source/php/Synonyms/Repository.php:54
 msgid "Add at least two words that should be treated as synonyms."
 msgstr "Lägg till minst två ord som ska behandlas som synonymer."
 
@@ -1059,8 +1032,7 @@ msgstr "Kunde inte spara synonymregeln."
 
 #: source/php/Frontend/I18n.php:224
 msgid "Synonym rule deleted. Sync to Typesense to apply the change."
-msgstr ""
-"Synonymregeln togs bort. Synka till Typesense för att tillämpa ändringen."
+msgstr "Synonymregeln togs bort. Synka till Typesense för att tillämpa ändringen."
 
 #: source/php/Frontend/I18n.php:225
 msgid "Could not delete synonym rule."
@@ -1107,15 +1079,11 @@ msgid "A pinned result rule already exists for this phrase."
 msgstr "Det finns redan en regel för fästa resultat för den här frasen."
 
 #: source/php/PinnedResults/RestController.php:168
-msgid ""
-"Pinned results are not enabled or this Typesense server does not support "
-"curation sets."
-msgstr ""
-"Fästa resultat är inte aktiverade eller så har den här Typesense-servern "
-"inte stöd för kureringsuppsättningar."
+msgid "Pinned results are not enabled or this Typesense server does not support curation sets."
+msgstr "Fästa resultat är inte aktiverade eller så har den här Typesense-servern inte stöd för kureringsuppsättningar."
 
 #: source/php/PinnedResults/TypesenseSync.php:29
-#: source/php/Synonyms/TypesenseSync.php:29
+#: source/php/Synonyms/TypesenseSync.php:30
 msgid "Typesense connection settings are incomplete."
 msgstr "Anslutningsinställningarna är ofullständiga."
 
@@ -1170,38 +1138,27 @@ msgid "A synonym rule already exists for this group of words."
 msgstr "Det finns redan en synonymregel för den här ordgruppen."
 
 #: source/php/Synonyms/RestController.php:147
-msgid ""
-"Synonyms are not enabled or this Typesense server does not support synonym "
-"sets."
-msgstr ""
-"Synonymer är inte aktiverade eller så saknar den här Typesense-servern stöd "
-"för synonymuppsättningar."
+msgid "Synonyms are not enabled or this Typesense server does not support synonym sets."
+msgstr "Synonymer är inte aktiverade eller så saknar den här Typesense-servern stöd för synonymuppsättningar."
 
 #. translators: %d: number of synonym rules
-#: source/php/Synonyms/TypesenseSync.php:65
+#: source/php/Synonyms/TypesenseSync.php:66
 msgid "Synced %d synonym rule."
 msgid_plural "Synced %d synonym rules."
 msgstr[0] "Synkade %d synonymregel."
 msgstr[1] "Synkade %d synonymregler."
 
 #: source/php/Typesense/ApiKey.php:39
-msgid ""
-"Key was created but no value was returned. Please check your Typesense "
-"dashboard."
-msgstr ""
-"Nyckeln skapades men inget värde returnerades. Kontrollera din Typesense-"
-"panel."
+msgid "Key was created but no value was returned. Please check your Typesense dashboard."
+msgstr "Nyckeln skapades men inget värde returnerades. Kontrollera din Typesense-panel."
 
 #: views/admin/pinned-results-page.php:14
 msgid "Loading pinned results..."
 msgstr "Laddar fästa resultat..."
 
 #: views/admin/settings-page.php:33
-msgid ""
-"Configure your Typesense server connection and choose which content to index."
-msgstr ""
-"Konfigurera anslutningen till din Typesense-server och välj vilket innehåll "
-"som ska indexeras."
+msgid "Configure your Typesense server connection and choose which content to index."
+msgstr "Konfigurera anslutningen till din Typesense-server och välj vilket innehåll som ska indexeras."
 
 #: views/admin/settings-page.php:39
 msgid "Settings sections"
@@ -1216,20 +1173,12 @@ msgid "Facets"
 msgstr "Facetter"
 
 #: views/admin/settings-tabs/advanced-settings.php:18
-msgid ""
-"Define which fields can be used to filter search results. Each facet maps a "
-"Typesense field to a human-readable label and an optional placeholder shown "
-"in the UI."
-msgstr ""
-"Definiera vilka fält som kan användas för att filtrera sökresultat. Varje "
-"facett mappar ett Typesense-fält till en läsbar etikett och en valfri "
-"platshållare som visas i gränssnittet."
+msgid "Define which fields can be used to filter search results. Each facet maps a Typesense field to a human-readable label and an optional placeholder shown in the UI."
+msgstr "Definiera vilka fält som kan användas för att filtrera sökresultat. Varje facett mappar ett Typesense-fält till en läsbar etikett och en valfri platshållare som visas i gränssnittet."
 
 #: views/admin/settings-tabs/advanced-settings.php:94
 msgid "No facets configured yet. Click \"Add facet\" to get started."
-msgstr ""
-"Inga facetter konfigurerade ännu. Klicka på \"Lägg till facett\" för att "
-"komma igång."
+msgstr "Inga facetter konfigurerade ännu. Klicka på \"Lägg till facett\" för att komma igång."
 
 #: views/admin/settings-tabs/advanced-settings.php:102
 msgid "Add facet"
@@ -1249,14 +1198,8 @@ msgid "Search statistics"
 msgstr "Sökstatistik"
 
 #: views/admin/settings-tabs/advanced-settings.php:150
-msgid ""
-"Record completed searches in WordPress to identify content gaps and popular "
-"search terms. Each normalised term is stored only once per anonymous browser "
-"session."
-msgstr ""
-"Registrera slutförda sökningar i WordPress för att identifiera "
-"innehållsluckor och populära söktermer. Varje normaliserad term lagras bara "
-"en gång per anonym webbläsarsession."
+msgid "Record completed searches in WordPress to identify content gaps and popular search terms. Each normalised term is stored only once per anonymous browser session."
+msgstr "Registrera slutförda sökningar i WordPress för att identifiera innehållsluckor och populära söktermer. Varje normaliserad term lagras bara en gång per anonym webbläsarsession."
 
 #: views/admin/settings-tabs/advanced-settings.php:155
 msgid "Enable search logging"
@@ -1295,69 +1238,43 @@ msgid "Dashboard widgets"
 msgstr "Adminpanelwidgetar"
 
 #: views/admin/settings-tabs/advanced-settings.php:189
-msgid ""
-"Register Latest searches, Failed searches, and Popular searches widgets on "
-"the WordPress dashboard."
-msgstr ""
-"Registrera widgetarna Senaste sökningar, Misslyckade sökningar och Populära "
-"sökningar på WordPress adminpanel."
+msgid "Register Latest searches, Failed searches, and Popular searches widgets on the WordPress dashboard."
+msgstr "Registrera widgetarna Senaste sökningar, Misslyckade sökningar och Populära sökningar på WordPress adminpanel."
 
 #: views/admin/settings-tabs/advanced-settings.php:194
 msgid "Require statistics consent"
 msgstr "Kräv samtycke för statistik"
 
 #: views/admin/settings-tabs/advanced-settings.php:209
-msgid ""
-"When enabled, no search term or session storage is created until your "
-"consent platform explicitly grants statistics consent."
-msgstr ""
-"När detta är aktiverat skapas ingen sökterm eller sessionslagring förrän din "
-"samtyckesplattform uttryckligen godkänner statistik."
+msgid "When enabled, no search term or session storage is created until your consent platform explicitly grants statistics consent."
+msgstr "När detta är aktiverat skapas ingen sökterm eller sessionslagring förrän din samtyckesplattform uttryckligen godkänner statistik."
 
 #: views/admin/settings-tabs/advanced-settings.php:214
 msgid "Connect your consent platform"
 msgstr "Anslut din samtyckesplattform"
 
 #: views/admin/settings-tabs/advanced-settings.php:215
-msgid ""
-"Run this on every page containing a search field when Pressidium Cookie "
-"Consent, Cookiebot, or another consent platform grants or withdraws "
-"statistics consent. Run it before search logging is allowed to start."
-msgstr ""
-"Kör detta på varje sida som innehåller ett sökfält när Pressidium Cookie "
-"Consent, Cookiebot eller en annan samtyckesplattform godkänner eller "
-"återkallar samtycke för statistik. Kör det innan sökloggningen får starta."
+msgid "Run this on every page containing a search field when Pressidium Cookie Consent, Cookiebot, or another consent platform grants or withdraws statistics consent. Run it before search logging is allowed to start."
+msgstr "Kör detta på varje sida som innehåller ett sökfält när Pressidium Cookie Consent, Cookiebot eller en annan samtyckesplattform godkänner eller återkallar samtycke för statistik. Kör det innan sökloggningen får starta."
 
 #: views/admin/settings-tabs/advanced-settings.php:225
-msgid ""
-"Replace the final example with the boolean consent value from your platform. "
-"The plugin treats consent as denied until it receives true. When false is "
-"sent, pending logging stops and the plugin removes its session storage."
-msgstr ""
-"Ersätt det sista exemplet med det booleska samtyckesvärdet från din "
-"plattform. Tillägget behandlar samtycke som nekat tills det tar emot true. "
-"När false skickas stoppas väntande loggning och tillägget tar bort sin "
-"sessionslagring."
+msgid "Replace the final example with the boolean consent value from your platform. The plugin treats consent as denied until it receives true. When false is sent, pending logging stops and the plugin removes its session storage."
+msgstr "Ersätt det sista exemplet med det booleska samtyckesvärdet från din plattform. Tillägget behandlar samtycke som nekat tills det tar emot true. När false skickas stoppas väntande loggning och tillägget tar bort sin sessionslagring."
 
 #: views/admin/settings-tabs/advanced-settings.php:229
 msgid "Search registration delay (seconds)"
 msgstr "Fördröjning innan sökning registreras (sekunder)"
 
 #: views/admin/settings-tabs/advanced-settings.php:232
-msgid ""
-"How long a completed query must remain unchanged before it is recorded. This "
-"is independent of the search-result debounce setting."
-msgstr ""
-"Hur länge en slutförd sökning måste vara oförändrad innan den registreras. "
-"Detta är oberoende av inställningen för fördröjd sökning."
+msgid "How long a completed query must remain unchanged before it is recorded. This is independent of the search-result debounce setting."
+msgstr "Hur länge en slutförd sökning måste vara oförändrad innan den registreras. Detta är oberoende av inställningen för fördröjd sökning."
 
 #: views/admin/settings-tabs/advanced-settings.php:237
 msgid "Minimum search-term characters"
 msgstr "Minsta antal tecken i sökterm"
 
 #: views/admin/settings-tabs/advanced-settings.php:240
-msgid ""
-"Shorter queries are searched normally but are not included in statistics."
+msgid "Shorter queries are searched normally but are not included in statistics."
 msgstr "Kortare sökningar hanteras normalt men ingår inte i statistiken."
 
 #: views/admin/settings-tabs/advanced-settings.php:245
@@ -1365,35 +1282,23 @@ msgid "Statistics retention (days)"
 msgstr "Lagringstid för statistik (dagar)"
 
 #: views/admin/settings-tabs/advanced-settings.php:248
-msgid ""
-"Search terms and anonymous session hashes older than this are permanently "
-"deleted."
-msgstr ""
-"Söktermer och anonyma sessionshashar som är äldre än detta raderas permanent."
+msgid "Search terms and anonymous session hashes older than this are permanently deleted."
+msgstr "Söktermer och anonyma sessionshashar som är äldre än detta raderas permanent."
 
 #: views/admin/settings-tabs/advanced-settings.php:253
 msgid "Automatic cleanup"
 msgstr "Automatisk rensning"
 
 #: views/admin/settings-tabs/advanced-settings.php:254
-msgid ""
-"A daily WordPress cron event removes expired statistics. Ensure WP-Cron runs "
-"reliably, or call the command below from your server cron."
-msgstr ""
-"En daglig WordPress-cronhändelse tar bort utgången statistik. Säkerställ att "
-"WP-Cron körs tillförlitligt eller anropa kommandot nedan från serverns cron."
+msgid "A daily WordPress cron event removes expired statistics. Ensure WP-Cron runs reliably, or call the command below from your server cron."
+msgstr "En daglig WordPress-cronhändelse tar bort utgången statistik. Säkerställ att WP-Cron körs tillförlitligt eller anropa kommandot nedan från serverns cron."
 
 #: views/admin/settings-tabs/advanced-settings.php:256
-msgid ""
-"Alternatively, run the scheduled event with “wp cron event run "
-"typesense_search_prune_statistics”. The command uses the retention period "
-"set above."
-msgstr ""
-"Du kan också köra den schemalagda händelsen med “wp cron event run "
-"typesense_search_prune_statistics”. Kommandot använder lagringstiden ovan."
+msgid "Alternatively, run the scheduled event with “wp cron event run typesense_search_prune_statistics”. The command uses the retention period set above."
+msgstr "Du kan också köra den schemalagda händelsen med “wp cron event run typesense_search_prune_statistics”. Kommandot använder lagringstiden ovan."
 
 #: views/admin/settings-tabs/advanced-settings.php:261
-#: views/admin/settings-tabs/connection.php:274
+#: views/admin/settings-tabs/connection.php:278
 #: views/admin/settings-tabs/quick-search.php:158
 #: views/admin/settings-tabs/settings.php:215
 msgid "Save settings"
@@ -1404,24 +1309,16 @@ msgid "Search result behavior"
 msgstr "Sökresultatens beteende"
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:7
-msgid ""
-"Fine-tune highlighting, snippet truncation, and the timing of search "
-"requests."
-msgstr ""
-"Finjustera markering, avkortning av utdrag och tidpunkten för "
-"sökförfrågningar."
+msgid "Fine-tune highlighting, snippet truncation, and the timing of search requests."
+msgstr "Finjustera markering, avkortning av utdrag och tidpunkten för sökförfrågningar."
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:13
 msgid "Highlight context tokens"
 msgstr "Visa kontext runt träffar"
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:27
-msgid ""
-"Number of tokens (words) to include before and after each highlighted match "
-"in search result snippets. Higher values show more context around matches."
-msgstr ""
-"Antal ord (tokens) som ska inkluderas före och efter varje markerad träff i "
-"sökresultatens utdrag. Högre värden visar mer sammanhang runt träffarna."
+msgid "Number of tokens (words) to include before and after each highlighted match in search result snippets. Higher values show more context around matches."
+msgstr "Antal ord (tokens) som ska inkluderas före och efter varje markerad träff i sökresultatens utdrag. Högre värden visar mer sammanhang runt träffarna."
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:34
 msgid "Snippet truncator"
@@ -1444,213 +1341,153 @@ msgid "Custom"
 msgstr "Egen"
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:60
-msgid ""
-"Select any of the predefined markers, or choose 'Custom' to enter your own."
-msgstr ""
-"Välj en av de fördefinierade markörerna eller välj ”Egen” för att ange en "
-"egen markör."
+msgid "Select any of the predefined markers, or choose 'Custom' to enter your own."
+msgstr "Välj en av de fördefinierade markörerna eller välj ”Egen” för att ange en egen markör."
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:66
 msgid "Debounce search"
 msgstr "Fördröjd sökning"
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:85
-msgid ""
-"When enabled, search results are fetched only after the user pauses typing "
-"(debounced). When disabled, results appear immediately on every keystroke."
-msgstr ""
-"När aktiverat hämtas sökresultat först när användaren slutar skriva "
-"(fördröjt). När inaktiverat visas resultat omedelbart vid varje "
-"tangenttryckning."
+msgid "When enabled, search results are fetched only after the user pauses typing (debounced). When disabled, results appear immediately on every keystroke."
+msgstr "När aktiverat hämtas sökresultat först när användaren slutar skriva (fördröjt). När inaktiverat visas resultat omedelbart vid varje tangenttryckning."
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:92
 msgid "Debounce delay (ms)"
 msgstr "Fördröjningstid (ms)"
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:106
-msgid ""
-"How long to wait after the user stops typing before firing the search "
-"request."
-msgstr ""
-"Hur länge man ska vänta efter att användaren slutar skriva innan sökningen "
-"utförs."
+msgid "How long to wait after the user stops typing before firing the search request."
+msgstr "Hur länge man ska vänta efter att användaren slutar skriva innan sökningen utförs."
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:113
 msgid "Enable pinned results"
 msgstr "Aktivera fästa resultat"
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:132
-msgid ""
-"Enable curated search rules that can pin selected results for specific "
-"search phrases. After saving, manage them from Typesense search > Pinned "
-"results."
-msgstr ""
-"Aktivera kurerade sökregler som kan fästa valda resultat för specifika "
-"sökfraser. Hantera dem via Typesense-sök > Fästa resultat efter att du "
-"sparat."
+msgid "Enable curated search rules that can pin selected results for specific search phrases. After saving, manage them from Typesense search > Pinned results."
+msgstr "Aktivera kurerade sökregler som kan fästa valda resultat för specifika sökfraser. Hantera dem via Typesense-sök > Fästa resultat efter att du sparat."
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:140
 msgid "Enable synonyms"
 msgstr "Aktivera synonymer"
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:159
-msgid ""
-"Enable synonym rules so a search for one word also matches related words you "
-"define. After saving, manage them from Typesense search > Synonyms."
-msgstr ""
-"Aktivera synonymregler så att en sökning på ett ord även matchar relaterade "
-"ord du definierar. Hantera dem via Typesense-sök > Synonymer efter att du "
-"sparat."
+msgid "Enable synonym rules so a search for one word also matches related words you define. After saving, manage them from Typesense search > Synonyms."
+msgstr "Aktivera synonymregler så att en sökning på ett ord även matchar relaterade ord du definierar. Hantera dem via Typesense-sök > Synonymer efter att du sparat."
 
-#: views/admin/settings-tabs/connection.php:23
+#: views/admin/settings-tabs/connection.php:27
 msgid "Server"
 msgstr "Server"
 
-#: views/admin/settings-tabs/connection.php:24
-msgid ""
-"Point the plugin to your Typesense instance. You can self-host Typesense or "
-"use Typesense Cloud at cloud.typesense.org."
-msgstr ""
-"Peka pluginet mot din Typesense-instans. Du kan hosta Typesense själv eller "
-"använda Typesense Cloud på cloud.typesense.org."
-
 #: views/admin/settings-tabs/connection.php:28
-msgid ""
-"One or more connection settings are defined as PHP constants. Those fields "
-"are read-only and cannot be changed here. See the plugin README for details."
-msgstr ""
-"En eller flera anslutningsinställningar är definierade som PHP-konstanter. "
-"Dessa fält är skrivskyddade och kan inte ändras här. Se tilläggets README "
-"för mer information."
+msgid "Point the plugin to your Typesense instance. You can self-host Typesense or use Typesense Cloud at cloud.typesense.org."
+msgstr "Peka pluginet mot din Typesense-instans. Du kan hosta Typesense själv eller använda Typesense Cloud på cloud.typesense.org."
+
+#: views/admin/settings-tabs/connection.php:32
+msgid "One or more connection settings are defined as PHP constants. Those fields are read-only and cannot be changed here. See the plugin README for details."
+msgstr "En eller flera anslutningsinställningar är definierade som PHP-konstanter. Dessa fält är skrivskyddade och kan inte ändras här. Se tilläggets README för mer information."
 
 #. translators: %s is a link to the plugin README
-#: views/admin/settings-tabs/connection.php:36
-msgid ""
-"Connection settings can also be defined as PHP constants in a config file. %s"
-msgstr ""
-"Anslutningsinställningar kan även definieras som PHP-konstanter i en "
-"konfigurationsfil. %s"
+#: views/admin/settings-tabs/connection.php:40
+msgid "Connection settings can also be defined as PHP constants in a config file. %s"
+msgstr "Anslutningsinställningar kan även definieras som PHP-konstanter i en konfigurationsfil. %s"
 
-#: views/admin/settings-tabs/connection.php:37
+#: views/admin/settings-tabs/connection.php:41
 msgid "See README for details."
 msgstr "Se README för mer information."
 
-#: views/admin/settings-tabs/connection.php:50
+#: views/admin/settings-tabs/connection.php:54
 msgid "Host"
 msgstr "Värd"
 
-#: views/admin/settings-tabs/connection.php:66
-msgid ""
-"The full URL to your Typesense server, including protocol and port if needed "
-"(e.g. https://search.example.com:8108)."
-msgstr ""
-"Den fullständiga URL:en till din Typesense-server, inklusive protokoll och "
-"port vid behov (t.ex. https://search.example.com:8108)."
-
 #: views/admin/settings-tabs/connection.php:70
-#: views/admin/settings-tabs/connection.php:98
-#: views/admin/settings-tabs/connection.php:127
-#: views/admin/settings-tabs/connection.php:217
-#: views/admin/settings-tabs/connection.php:252
+msgid "The full URL to your Typesense server, including protocol and port if needed (e.g. https://search.example.com:8108)."
+msgstr "Den fullständiga URL:en till din Typesense-server, inklusive protokoll och port vid behov (t.ex. https://search.example.com:8108)."
+
+#: views/admin/settings-tabs/connection.php:74
+#: views/admin/settings-tabs/connection.php:102
+#: views/admin/settings-tabs/connection.php:131
+#: views/admin/settings-tabs/connection.php:221
+#: views/admin/settings-tabs/connection.php:256
 msgid "Set via constant — read only."
 msgstr "Anges via konstant — skrivskyddad."
 
-#: views/admin/settings-tabs/connection.php:79
+#: views/admin/network/settings.php:62
+#: views/admin/settings-tabs/connection.php:83
 msgid "Frontend host (optional)"
 msgstr "Värd för frontend (valfri)"
 
-#: views/admin/settings-tabs/connection.php:94
-msgid ""
-"Optional host used by browsers to reach Typesense. Useful when you expose "
-"Typesense through a proxy or different public host than the server-side host."
-msgstr ""
-"Valfri värd som används av webbläsare för att nå Typesense. Användbart när "
-"du exponerar Typesense via en proxy eller en annan publik värd än den som "
-"används på serversidan."
+#: views/admin/settings-tabs/connection.php:98
+msgid "Optional host used by browsers to reach Typesense. Useful when you expose Typesense through a proxy or different public host than the server-side host."
+msgstr "Valfri värd som används av webbläsare för att nå Typesense. Användbart när du exponerar Typesense via en proxy eller en annan publik värd än den som används på serversidan."
 
-#: views/admin/settings-tabs/connection.php:107
+#: views/admin/settings-tabs/connection.php:111
 msgid "Collection name"
 msgstr "Samlingsnamn"
 
-#: views/admin/settings-tabs/connection.php:123
-msgid ""
-"The name of the Typesense collection where content will be indexed. Use "
-"lowercase letters, numbers, and hyphens only."
-msgstr ""
-"Namnet på Typesense-samlingen där innehåll ska indexeras. Använd endast "
-"gemener, siffror och bindestreck."
+#: views/admin/settings-tabs/connection.php:127
+msgid "The name of the Typesense collection where content will be indexed. Use lowercase letters, numbers, and hyphens only."
+msgstr "Namnet på Typesense-samlingen där innehåll ska indexeras. Använd endast gemener, siffror och bindestreck."
 
-#: views/admin/settings-tabs/connection.php:135
+#: views/admin/network/settings.php:33
+#: views/admin/settings-tabs/connection.php:139
 msgid "Connection"
 msgstr "Anslutning"
 
-#: views/admin/settings-tabs/connection.php:141
+#: views/admin/settings-tabs/connection.php:145
 msgid "Test connection and check collection"
 msgstr "Testa anslutning och kontrollera samling"
 
-#: views/admin/settings-tabs/connection.php:145
-msgid ""
-"Verify that the host is reachable, the Admin API key is accepted and the "
-"collection exists."
-msgstr ""
-"Verifiera att värden är nåbar, att Admin-API-nyckeln accepteras och att "
-"samlingen finns."
+#: views/admin/settings-tabs/connection.php:149
+msgid "Verify that the host is reachable, the Admin API key is accepted and the collection exists."
+msgstr "Verifiera att värden är nåbar, att Admin-API-nyckeln accepteras och att samlingen finns."
 
-#: views/admin/settings-tabs/connection.php:156
-#: views/admin/settings-tabs/connection.php:162
-#: views/admin/settings-tabs/status.php:48
+#: views/admin/settings-tabs/connection.php:160
+#: views/admin/settings-tabs/connection.php:166
+#: views/admin/settings-tabs/status.php:52
 msgid "Create collection"
 msgstr "Skapa samling"
 
-#: views/admin/settings-tabs/connection.php:171
+#: views/admin/settings-tabs/connection.php:175
 msgid "The collection does not yet exist in Typesense."
 msgstr "Samlingen finns ännu inte i Typesense."
 
-#: views/admin/settings-tabs/connection.php:172
+#: views/admin/settings-tabs/connection.php:176
 msgid "Click the button to create it before indexing."
 msgstr "Klicka på knappen för att skapa den innan indexering."
 
-#: views/admin/settings-tabs/connection.php:182
+#: views/admin/settings-tabs/connection.php:186
 msgid "API Keys"
 msgstr "API-nycklar"
 
-#: views/admin/settings-tabs/connection.php:183
-msgid ""
-"Keep your admin key secret — it grants full access to your cluster. The "
-"search key is safe to expose in your front-end JavaScript."
-msgstr ""
-"Håll din admin-nyckel hemlig — den ger full åtkomst till ditt kluster. "
-"Söknyckeln är säker att exponera i din front-end."
+#: views/admin/settings-tabs/connection.php:187
+msgid "Keep your admin key secret — it grants full access to your cluster. The search key is safe to expose in your front-end JavaScript."
+msgstr "Håll din admin-nyckel hemlig — den ger full åtkomst till ditt kluster. Söknyckeln är säker att exponera i din front-end."
 
-#: views/admin/settings-tabs/connection.php:191
+#: views/admin/network/settings.php:65
+#: views/admin/settings-tabs/connection.php:195
 msgid "Admin API key"
 msgstr "Admin-API-nyckel"
 
-#: views/admin/settings-tabs/connection.php:207
-#: views/admin/settings-tabs/connection.php:242
+#: views/admin/settings-tabs/connection.php:211
+#: views/admin/settings-tabs/connection.php:246
 msgid "Toggle key visibility"
 msgstr "Växla nyckelsynlighet"
 
-#: views/admin/settings-tabs/connection.php:213
-msgid ""
-"Used server-side for indexing operations. Never expose this key publicly."
-msgstr ""
-"Används på serversidan för indexeringsoperationer. Exponera aldrig denna "
-"nyckel offentligt."
+#: views/admin/settings-tabs/connection.php:217
+msgid "Used server-side for indexing operations. Never expose this key publicly."
+msgstr "Används på serversidan för indexeringsoperationer. Exponera aldrig denna nyckel offentligt."
 
-#: views/admin/settings-tabs/connection.php:226
+#: views/admin/settings-tabs/connection.php:230
 msgid "Search API key"
 msgstr "Sök-API-nyckel"
 
-#: views/admin/settings-tabs/connection.php:248
-msgid ""
-"A search-only API key used in your front-end JavaScript. This key has read-"
-"only access and is safe to include in public code."
-msgstr ""
-"En API-nyckel endast för sökning som används i din front-end-JavaScript. "
-"Denna nyckel har endast läsåtkomst och är säker att inkludera i publik kod."
+#: views/admin/settings-tabs/connection.php:252
+msgid "A search-only API key used in your front-end JavaScript. This key has read-only access and is safe to include in public code."
+msgstr "En API-nyckel endast för sökning som används i din front-end-JavaScript. Denna nyckel har endast läsåtkomst och är säker att inkludera i publik kod."
 
-#: views/admin/settings-tabs/connection.php:260
+#: views/admin/settings-tabs/connection.php:264
 msgid "Generate search key"
 msgstr "Generera söknyckel"
 
@@ -1675,12 +1512,8 @@ msgid "Indexing log"
 msgstr "Indexeringslogg"
 
 #: views/admin/settings-tabs/logging.php:43
-msgid ""
-"Review the latest indexing run and any document-level issues that were "
-"captured while indexing."
-msgstr ""
-"Granska den senaste indexeringskörningen och eventuella problem på "
-"dokumentnivå som fångades upp under indexeringen."
+msgid "Review the latest indexing run and any document-level issues that were captured while indexing."
+msgstr "Granska den senaste indexeringskörningen och eventuella problem på dokumentnivå som fångades upp under indexeringen."
 
 #: views/admin/settings-tabs/logging.php:49
 msgid "Clear log"
@@ -1743,28 +1576,16 @@ msgid "Issue"
 msgstr "Problem"
 
 #: views/admin/settings-tabs/quick-search.php:16
-msgid ""
-"Enable autocomplete / quick search for input fields outside the main search "
-"page. When active, users get instant suggestions while typing in any matched "
-"field."
-msgstr ""
-"Aktivera autokomplettering / snabbsökning för inmatningsfält utanför den "
-"huvudsakliga söksidan. När funktionen är aktiv får användare omedelbara "
-"förslag medan de skriver i alla matchande fält."
+msgid "Enable autocomplete / quick search for input fields outside the main search page. When active, users get instant suggestions while typing in any matched field."
+msgstr "Aktivera autokomplettering / snabbsökning för inmatningsfält utanför den huvudsakliga söksidan. När funktionen är aktiv får användare omedelbara förslag medan de skriver i alla matchande fält."
 
 #: views/admin/settings-tabs/quick-search.php:24
 msgid "Enable quick search"
 msgstr "Aktivera snabbsökning"
 
 #: views/admin/settings-tabs/quick-search.php:48
-msgid ""
-"When enabled, quick search will be attached to the CSS selectors defined "
-"below. It reuses the same frontend Typesense configuration as the main "
-"search."
-msgstr ""
-"När detta är aktiverat kopplas snabbsökning till de CSS-selektorer som "
-"definieras nedan. Den återanvänder samma frontend-konfiguration för "
-"Typesense som huvudsökningen."
+msgid "When enabled, quick search will be attached to the CSS selectors defined below. It reuses the same frontend Typesense configuration as the main search."
+msgstr "När detta är aktiverat kopplas snabbsökning till de CSS-selektorer som definieras nedan. Den återanvänder samma frontend-konfiguration för Typesense som huvudsökningen."
 
 #: views/admin/settings-tabs/quick-search.php:60
 msgid "Number of results"
@@ -1779,12 +1600,8 @@ msgid "Target fields"
 msgstr "Målfält"
 
 #: views/admin/settings-tabs/quick-search.php:89
-msgid ""
-"Add one or more CSS selectors that match the search inputs you want to "
-"enhance with quick search autocomplete."
-msgstr ""
-"Lägg till en eller flera CSS-selektorer som matchar de sökfält du vill "
-"förbättra med autokomplettering för snabbsökning."
+msgid "Add one or more CSS selectors that match the search inputs you want to enhance with quick search autocomplete."
+msgstr "Lägg till en eller flera CSS-selektorer som matchar de sökfält du vill förbättra med autokomplettering för snabbsökning."
 
 #: views/admin/settings-tabs/quick-search.php:153
 msgid "Add selector"
@@ -1815,14 +1632,8 @@ msgid "Radio buttons"
 msgstr "Radioknappar"
 
 #: views/admin/settings-tabs/settings.php:58
-msgid ""
-"How the sort options are displayed on the search page. \"Radio buttons\" "
-"shows inline options; \"Dropdown\" uses a select element like the facet "
-"filters."
-msgstr ""
-"Hur sorteringsalternativen visas på söksidan. ”Radioknappar” visar "
-"alternativen direkt i sidans innehåll; ”Dropdown” använder ett väljarelement "
-"(select) likt filteralternativen."
+msgid "How the sort options are displayed on the search page. \"Radio buttons\" shows inline options; \"Dropdown\" uses a select element like the facet filters."
+msgstr "Hur sorteringsalternativen visas på söksidan. ”Radioknappar” visar alternativen direkt i sidans innehåll; ”Dropdown” använder ett väljarelement (select) likt filteralternativen."
 
 #: views/admin/settings-tabs/settings.php:65
 msgid "Enable stemming"
@@ -1830,47 +1641,27 @@ msgstr "Aktivera stamning"
 
 #. translators: %s: two-letter language code detected from the site's locale, e.g. "sv"
 #: views/admin/settings-tabs/settings.php:87
-msgid ""
-"Matches word variations (e.g. \"running\" also matches \"run\") on the "
-"title, content, excerpt, and extra search terms fields, using your site's "
-"detected language (\"%s\"). Changing this setting requires rebuilding your "
-"Typesense collection — run \"wp typesense rebuild\" after saving."
-msgstr ""
-"Matchar böjningsformer av ord (t.ex. matchar \"springer\" även \"springa\") "
-"i fälten titel, innehåll, utdrag och extra söktermer, utifrån webbplatsens "
-"identifierade språk (\"%s\"). Om du ändrar den här inställningen måste din "
-"Typesense-samling byggas om — kör \"wp typesense rebuild\" efter att du "
-"sparat."
+msgid "Matches word variations (e.g. \"running\" also matches \"run\") on the title, content, excerpt, and extra search terms fields, using your site's detected language (\"%s\"). Changing this setting requires rebuilding your Typesense collection — run \"wp typesense rebuild\" after saving."
+msgstr "Matchar böjningsformer av ord (t.ex. matchar \"springer\" även \"springa\") i fälten titel, innehåll, utdrag och extra söktermer, utifrån webbplatsens identifierade språk (\"%s\"). Om du ändrar den här inställningen måste din Typesense-samling byggas om — kör \"wp typesense rebuild\" efter att du sparat."
 
 #: views/admin/settings-tabs/settings.php:99
 msgid "Index Modularity content"
 msgstr "Indexera Modularity-innehåll"
 
 #: views/admin/settings-tabs/settings.php:123
-msgid ""
-"When enabled, content that is added via Modularity modules will be included "
-"in the Typesense index. If disabled, content placed in module slots like "
-"sidebars will not be indexed for search."
-msgstr ""
-"När aktiverat inkluderas innehåll som lagts till via Modularity-moduler i "
-"Typesense-indexet. Om inaktiverat indexeras inte innehåll som placerats i "
-"modulplatser som sidofält."
+msgid "When enabled, content that is added via Modularity modules will be included in the Typesense index. If disabled, content placed in module slots like sidebars will not be indexed for search."
+msgstr "När aktiverat inkluderas innehåll som lagts till via Modularity-moduler i Typesense-indexet. Om inaktiverat indexeras inte innehåll som placerats i modulplatser som sidofält."
 
 #: views/admin/settings-tabs/settings.php:134
 msgid "Post types"
 msgstr "Inläggstyper"
 
 #: views/admin/settings-tabs/settings.php:135
-msgid ""
-"Choose which content types should be synced to Typesense. Disabled types are "
-"excluded from indexing and search results."
-msgstr ""
-"Välj vilka innehållstyper som ska synkas till Typesense. Inaktiverade typer "
-"exkluderas från indexering och sökresultat."
+msgid "Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results."
+msgstr "Välj vilka innehållstyper som ska synkas till Typesense. Inaktiverade typer exkluderas från indexering och sökresultat."
 
 #: views/admin/settings-tabs/settings.php:138
-msgid ""
-"PDF indexing requires the pdftotext binary to be installed on the server."
+msgid "PDF indexing requires the pdftotext binary to be installed on the server."
 msgstr "PDF-indexering kräver att binären pdftotext är installerad på servern."
 
 #: views/admin/settings-tabs/settings.php:145
@@ -1886,15 +1677,8 @@ msgid "Index overview"
 msgstr "Indexöversikt"
 
 #: views/admin/settings-tabs/statistics.php:20
-msgid ""
-"Live snapshot of what is currently stored in your Typesense collection. Use "
-"the clear buttons to remove all documents of a specific post type, or the "
-"reindex buttons to re-process and overwrite them."
-msgstr ""
-"Livevy av vad som för närvarande är lagrat i din Typesense-samling. Använd "
-"rensningsknapparna för att ta bort alla dokument av en specifik inläggstyp, "
-"eller omindexeringsknapparna för att bearbeta dem på nytt och skriva över "
-"dem."
+msgid "Live snapshot of what is currently stored in your Typesense collection. Use the clear buttons to remove all documents of a specific post type, or the reindex buttons to re-process and overwrite them."
+msgstr "Livevy av vad som för närvarande är lagrat i din Typesense-samling. Använd rensningsknapparna för att ta bort alla dokument av en specifik inläggstyp, eller omindexeringsknapparna för att bearbeta dem på nytt och skriva över dem."
 
 #: views/admin/settings-tabs/statistics.php:25
 msgid "Refresh"
@@ -1921,22 +1705,12 @@ msgid "collection"
 msgstr "samling"
 
 #: views/admin/settings-tabs/statistics.php:90
-msgid ""
-"Searches are recorded locally in WordPress. Counts represent unique "
-"anonymous browser sessions per normalised search term during the configured "
-"retention period."
-msgstr ""
-"Sökningar registreras lokalt i WordPress. Antalet representerar unika "
-"anonyma webbläsarsessioner per normaliserad sökterm under den konfigurerade "
-"lagringstiden."
+msgid "Searches are recorded locally in WordPress. Counts represent unique anonymous browser sessions per normalised search term during the configured retention period."
+msgstr "Sökningar registreras lokalt i WordPress. Antalet representerar unika anonyma webbläsarsessioner per normaliserad sökterm under den konfigurerade lagringstiden."
 
 #: views/admin/settings-tabs/statistics.php:103
-msgid ""
-"Search logging is disabled. Enable it in Advanced settings to start "
-"collecting statistics."
-msgstr ""
-"Sökloggning är inaktiverad. Aktivera den i Avancerade inställningar för att "
-"börja samla in statistik."
+msgid "Search logging is disabled. Enable it in Advanced settings to start collecting statistics."
+msgstr "Sökloggning är inaktiverad. Aktivera den i Avancerade inställningar för att börja samla in statistik."
 
 #: views/admin/settings-tabs/statistics.php:108
 msgid "unique session searches retained"
@@ -1949,69 +1723,51 @@ msgid_plural "%d unique sessions"
 msgstr[0] "%d unik session"
 msgstr[1] "%d unika sessioner"
 
-#: views/admin/settings-tabs/status.php:11
+#: views/admin/settings-tabs/status.php:15
 msgid "Connection &amp; key status"
 msgstr "Anslutnings- och nyckelstatus"
 
-#: views/admin/settings-tabs/status.php:12
-msgid ""
-"Live checks against your saved Typesense settings. Use this to quickly "
-"diagnose connection or key problems."
-msgstr ""
-"Livekontroller mot dina sparade Typesense-inställningar. Använd detta för "
-"att snabbt diagnostisera anslutnings- eller nyckelproblem."
+#: views/admin/settings-tabs/status.php:16
+msgid "Live checks against your saved Typesense settings. Use this to quickly diagnose connection or key problems."
+msgstr "Livekontroller mot dina sparade Typesense-inställningar. Använd detta för att snabbt diagnostisera anslutnings- eller nyckelproblem."
 
-#: views/admin/settings-tabs/status.php:18
+#: views/admin/settings-tabs/status.php:22
 msgid "Running checks…"
 msgstr "Kör kontroller…"
 
-#: views/admin/settings-tabs/status.php:29
+#: views/admin/settings-tabs/status.php:33
 msgid "Server connection"
 msgstr "Serveranslutning"
 
-#: views/admin/settings-tabs/status.php:38
+#: views/admin/settings-tabs/status.php:42
 msgid "Collection"
 msgstr "Samling"
 
-#: views/admin/settings-tabs/status.php:44
-msgid ""
-"The collection does not exist yet. It can be created automatically using "
-"your saved admin key."
-msgstr ""
-"Samlingen finns inte ännu. Den kan skapas automatiskt med din sparade admin-"
-"nyckel."
+#: views/admin/settings-tabs/status.php:48
+msgid "The collection does not exist yet. It can be created automatically using your saved admin key."
+msgstr "Samlingen finns inte ännu. Den kan skapas automatiskt med din sparade admin-nyckel."
 
-#: views/admin/settings-tabs/status.php:59
+#: views/admin/settings-tabs/status.php:63
 msgid "Admin key"
 msgstr "Admin-nyckel"
 
-#: views/admin/settings-tabs/status.php:68
+#: views/admin/settings-tabs/status.php:72
 msgid "Search key"
 msgstr "Söknyckel"
 
-#: views/admin/settings-tabs/status.php:74
-msgid ""
-"A new search key scoped to the configured collection will be created and "
-"saved automatically. If an existing key has the wrong collection scope, "
-"Typesense does not allow changing it — a fresh key will be created instead."
-msgstr ""
-"En ny söknyckel begränsad till den konfigurerade samlingen skapas och sparas "
-"automatiskt. Om en befintlig nyckel har fel samlingsomfång tillåter inte "
-"Typesense att ändra den — en ny nyckel skapas istället."
-
 #: views/admin/settings-tabs/status.php:78
+msgid "A new search key scoped to the configured collection will be created and saved automatically. If an existing key has the wrong collection scope, Typesense does not allow changing it — a fresh key will be created instead."
+msgstr "En ny söknyckel begränsad till den konfigurerade samlingen skapas och sparas automatiskt. Om en befintlig nyckel har fel samlingsomfång tillåter inte Typesense att ändra den — en ny nyckel skapas istället."
+
+#: views/admin/settings-tabs/status.php:82
 msgid "Create new search key for this collection"
 msgstr "Skapa ny söknyckel för den här samlingen"
 
-#: views/admin/settings-tabs/status.php:85
-msgid ""
-"Please go to the Connection tab, enter a valid admin key, and click "
-"\"Generate search key\" to create a new one."
-msgstr ""
-"Gå till fliken Anslutning, ange en giltig admin-nyckel och klicka på "
-"\"Generera söknyckel\" för att skapa en ny."
+#: views/admin/settings-tabs/status.php:89
+msgid "Please go to the Connection tab, enter a valid admin key, and click \"Generate search key\" to create a new one."
+msgstr "Gå till fliken Anslutning, ange en giltig admin-nyckel och klicka på \"Generera söknyckel\" för att skapa en ny."
 
-#: views/admin/settings-tabs/status.php:97
+#: views/admin/settings-tabs/status.php:101
 msgid "Re-run checks"
 msgstr "Kör om kontroller"
 
@@ -2019,66 +1775,336 @@ msgstr "Kör om kontroller"
 msgid "Valid through"
 msgstr "Sista ansökningsdag"
 
-#~ msgid ""
-#~ "Add a word and its synonyms below. Searching for the word will also match "
-#~ "its synonyms — but searching for a synonym will not match the word itself."
-#~ msgstr ""
-#~ "Lägg till ett ord och dess synonymer nedan. En sökning på ordet matchar "
-#~ "även dess synonymer — men en sökning på en synonym matchar inte ordet "
-#~ "självt."
+#: views/admin/network/settings.php:31
+msgid "Typesense Search — Network settings"
+msgstr "Typesense-sök – nätverksinställningar"
 
-#~ msgid ""
-#~ "Example: word \"%1$s\" with synonyms \"%2$s\" means a search for \"%1$s\" "
-#~ "also finds \"iphone\"/\"android\" results, but a search for \"iphone\" "
-#~ "will not find \"%1$s\" results."
-#~ msgstr ""
-#~ "Exempel: ordet \"%1$s\" med synonymerna \"%2$s\" innebär att en sökning "
-#~ "på \"%1$s\" även ger träffar på \"iphone\"/\"android\", men en sökning på "
-#~ "\"iphone\" ger inte träffar på \"%1$s\"."
+#: views/admin/network/settings.php:33
+msgid "Sites"
+msgstr "Webbplatser"
 
-#~ msgid "smart phone"
-#~ msgstr "mobiltelefon"
+#: views/admin/network/settings.php:62
+msgid "Typesense host"
+msgstr "Typesense-värd"
 
-#~ msgid "iphone, android"
-#~ msgstr "iphone, android"
+#: views/admin/network/settings.php:63
+msgid "Set via constant."
+msgstr "Anges via konstant."
 
-#~ msgid "Word"
-#~ msgstr "Ord"
+#: views/admin/network/settings.php:65
+msgid "A key is configured. Leave blank to keep it."
+msgstr "En nyckel är sparad. Lämna tomt för att behålla den."
 
-#~ msgid "The term people search for."
-#~ msgstr "Termen som besökare söker efter."
+#: views/admin/network/settings.php:65
+msgid "Enter the server admin API key."
+msgstr "Ange serverns admin-API-nyckel."
 
-#~ msgid "Also matched when searching for the word above, but not vice versa."
-#~ msgstr "Matchas även vid sökning på ordet ovan, men inte tvärtom."
+#: views/admin/network/settings.php:55
+msgid "Remove TYPESENSE_COLLECTION and TYPESENSE_SEARCH_KEY constants before using network mode. Each site needs its own collection and key."
+msgstr "Ta bort konstanterna TYPESENSE_COLLECTION och TYPESENSE_SEARCH_KEY innan nätverksläget används. Varje webbplats behöver ett eget index och en egen nyckel."
 
-#~ msgid "Add a word before saving."
-#~ msgstr "Lägg till ett ord innan du sparar."
+#: views/admin/network/settings.php:70
+msgid "Check shared connection"
+msgstr "Kontrollera gemensam anslutning"
 
-#~ msgid "Add at least one synonym before saving."
-#~ msgstr "Lägg till minst en synonym innan du sparar."
+#: views/admin/network/settings.php:78
+msgid "Site"
+msgstr "Webbplats"
 
-#~ msgid "Add a synonym and press Enter"
-#~ msgstr "Lägg till en synonym och tryck Enter"
+#: source/php/Admin/NetworkSettingsPage.php:210
+msgid "Active"
+msgstr "Aktiv"
 
-#~ msgid "Add synonym"
-#~ msgstr "Lägg till synonym"
+#: views/admin/network/settings.php:84
+msgid "Enable site %d"
+msgstr "Aktivera webbplats %d"
 
-#~ msgid "Remove synonym"
-#~ msgstr "Ta bort synonym"
+#: views/admin/network/settings.php:97
+msgid "Check status"
+msgstr "Kontrollera status"
 
-#~ msgid "Add at least one synonym."
-#~ msgstr "Lägg till minst en synonym."
+#: views/admin/network/settings.php:126
+msgid "Save site selection"
+msgstr "Spara val av webbplatser"
 
-#~ msgid "A synonym rule already exists for this word."
-#~ msgstr "Det finns redan en synonymregel för det här ordet."
+#: views/admin/settings-tabs/network-managed.php:2
+msgid "The Typesense connection and site activation are managed by the network administrator."
+msgstr "Typesense-anslutningen och aktiveringen av webbplatser hanteras av nätverksadministratören."
 
-#~ msgid ""
-#~ "Enable curated search rules that can pin selected results for specific "
-#~ "search phrases. After saving, manage them from Settings > Pinned results."
-#~ msgstr ""
-#~ "Aktivera kurerade sökregler som kan fästa valda resultat för specifika "
-#~ "sökfraser. Efter att du har sparat hanterar du dem under Inställningar > "
-#~ "Fästa resultat."
+#: views/admin/settings-tabs/network-managed.php:4
+msgid "Network settings"
+msgstr "Nätverksinställningar"
 
-#~ msgid "Facetting"
-#~ msgstr "Facettering"
+#: source/php/Admin/NetworkSettingsPage.php:40
+msgid "Invalid settings section."
+msgstr "Ogiltig inställningsflik."
+
+#: source/php/Admin/NetworkSettingsPage.php:52
+msgid "Server connection and admin key are working."
+msgstr "Serveranslutningen och adminnyckeln fungerar."
+
+#: source/php/Admin/NetworkSettingsPage.php:62
+msgid "Enter a valid HTTP or HTTPS URL."
+msgstr "Ange en giltig HTTP- eller HTTPS-adress."
+
+#: source/php/Admin/NetworkSettingsPage.php:81
+msgid "Invalid site selection."
+msgstr "Ogiltigt val av webbplatser."
+
+#: source/php/Admin/NetworkSettingsPage.php:100
+msgid "Invalid site context."
+msgstr "Ogiltig webbplatskontext."
+
+#: source/php/Admin/NetworkSettingsPage.php:117
+msgid "Typesense is now active for this site."
+msgstr "Typesense är nu aktivt för denna webbplats."
+
+#: source/php/Admin/NetworkSettingsPage.php:135
+#: views/admin/network/settings.php:89
+msgid "Server connection, admin key and site search key are working."
+msgstr "Serveranslutningen, adminnyckeln och webbplatsens söknyckel fungerar."
+
+#: source/php/Multisite/SetupException.php:24
+msgid "Typesense operation failed. Verify the server, credentials and collection in Network Admin, then retry."
+msgstr "Typesense-åtgärden misslyckades. Kontrollera server, inloggningsuppgifter och index i nätverksadministrationen och försök igen."
+
+#: source/php/Admin/Ajax/AjaxHelpers.php:27
+msgid "Use Network Admin to manage the connection and keys."
+msgstr "Hantera anslutningen och nycklarna i nätverksadministrationen."
+
+#: source/php/Admin/Ajax/AjaxHelpers.php:30
+msgid "Typesense is disabled or not ready for this site."
+msgstr "Typesense är avstängt eller inte klart för denna webbplats."
+
+#: source/php/Admin/NetworkSettingsPage.php:46
+#: source/php/Multisite/NetworkSettingsRepository.php:105
+#: source/php/Multisite/SiteProvisioner.php:187
+msgid "Configure the network connection first."
+msgstr "Konfigurera nätverksanslutningen först."
+
+#: source/php/Admin/NetworkSettingsPage.php:51
+msgid "Server reports an unhealthy status."
+msgstr "Servern rapporterar ett driftfel."
+
+#: source/php/Admin/NetworkSettingsPage.php:131
+msgid "The server reports an unhealthy status."
+msgstr "Servern rapporterar ett driftfel."
+
+#: source/php/Admin/NetworkSettingsPage.php:137
+msgid "Unknown operation."
+msgstr "Okänd åtgärd."
+
+#: source/php/Admin/NetworkSettingsPage.php:211
+msgid "Setup failed"
+msgstr "Uppsättningen misslyckades"
+
+#: source/php/Admin/NetworkSettingsPage.php:211
+msgid "Waiting for setup"
+msgstr "Väntar på uppsättning"
+
+#: source/php/Admin/NetworkSettingsPage.php:213
+msgid "Setup is complete. Search uses Typesense when the server and index are available."
+msgstr "Uppsättningen är klar. Sökningen använder Typesense när servern och indexet är tillgängliga."
+
+#: source/php/Admin/NetworkSettingsPage.php:214
+msgid "WordPress search is used until setup is complete. Save the site selection to start setup."
+msgstr "WordPress-sökningen används tills uppsättningen är klar. Spara webbplatsvalet för att starta uppsättningen."
+
+#: source/php/Admin/NetworkSettingsPage.php:216
+msgid "Setup failed. Retry setup."
+msgstr "Uppsättningen misslyckades. Försök igen."
+
+#: source/php/Admin/NetworkSettingsPage.php:219
+msgid "Automatic setup is in progress. Refresh this page to see the result."
+msgstr "Automatisk uppsättning pågår. Uppdatera sidan för att se resultatet."
+
+#: source/php/Multisite/NetworkSettingsRepository.php:98
+msgid "This site is disabled. Select it in Network Admin to enable Typesense."
+msgstr "Webbplatsen är avstängd. Välj den i nätverksadministrationen för att aktivera Typesense."
+
+#: source/php/Multisite/NetworkSettingsRepository.php:101
+msgid "Global collection or search-key constants conflict with network mode. Remove these constants before setup."
+msgstr "Globala konstanter för index eller söknyckel står i konflikt med nätverksläget. Ta bort dessa konstanter före uppsättning."
+
+#: source/php/Multisite/NetworkSettingsRepository.php:109
+msgid "The site URL, environment or server has changed. Save the site selection to run setup again."
+msgstr "Webbplatsens adress, miljö eller server har ändrats. Spara webbplatsvalet för att köra uppsättningen igen."
+
+#: source/php/Multisite/NetworkSettingsRepository.php:111
+msgid "Setup is incomplete. Save the site selection or retry the failed setup."
+msgstr "Uppsättningen är inte klar. Spara webbplatsvalet eller försök igen efter den misslyckade uppsättningen."
+
+#: source/php/Multisite/ProvisioningGateway.php:109
+msgid "Synonym synchronization failed."
+msgstr "Synkroniseringen av synonymer misslyckades."
+
+#: source/php/Multisite/ProvisioningGateway.php:115
+msgid "Pinned-result synchronization failed."
+msgstr "Synkroniseringen av pinnade resultat misslyckades."
+
+#: source/php/Multisite/SetupDispatcher.php:21
+msgid "Unauthorized setup request."
+msgstr "Behörighet saknas för uppsättningsförfrågan."
+
+#: source/php/Multisite/SetupException.php:14
+msgid "The index is missing on the server. Retry setup to recreate it, then run typesense index."
+msgstr "Indexet saknas på servern. Försök med uppsättningen igen för att återskapa det och kör sedan typesense index."
+
+#: source/php/Multisite/SetupException.php:17
+msgid "The server rejected the API key. Check the network admin key and retry setup to repair the site search key."
+msgstr "Servern nekade API-nyckeln. Kontrollera nätverkets adminnyckel och försök med uppsättningen igen för att reparera webbplatsens söknyckel."
+
+#: source/php/Multisite/SetupException.php:22
+msgid "The server could not be reached. Check the host, TLS and network connection, then retry."
+msgstr "Servern kunde inte nås. Kontrollera värd, TLS och nätverksanslutning och försök sedan igen."
+
+#: source/php/Multisite/SiteProvisioner.php:97
+msgid "The collection already exists but is not owned by this provisioning state. Choose an unused target or review it manually."
+msgstr "Indexet finns redan men ägarskapet kan inte verifieras för den här uppsättningen. Välj ett ledigt indexnamn eller kontrollera ägarskapet manuellt."
+
+#: source/php/Multisite/SiteProvisioner.php:161
+msgid "Setup is incomplete for the current URL, environment and server. Save the site selection to retry setup."
+msgstr "Uppsättningen är inte klar för aktuell adress, miljö och server. Spara webbplatsvalet för att försöka igen."
+
+#: source/php/Multisite/SiteProvisioner.php:164
+msgid "The index no longer belongs to this site. Check the index ownership before retrying setup."
+msgstr "Indexet tillhör inte längre webbplatsen. Kontrollera indexets ägarskap innan du försöker med uppsättningen igen."
+
+#: source/php/Multisite/SiteProvisioner.php:173
+msgid "Could not save provisioning state."
+msgstr "Det gick inte att spara uppsättningens tillstånd."
+
+#: source/php/Multisite/SiteProvisioner.php:183
+msgid "Select this site in Network Admin and remove global collection/search-key constants first."
+msgstr "Välj först webbplatsen i nätverksadministrationen och ta bort globala konstanter för index och söknyckel."
+
+#: source/php/Multisite/SiteProvisioner.php:192
+msgid "Another provisioning operation holds this site lock. If its process has ended, remove typesense_network_provision_lock with WP-CLI and retry."
+msgstr "En annan uppsättnings- eller indexeringsåtgärd håller webbplatsens lås. Om processen har avslutats, ta bort typesense_network_provision_lock med WP-CLI och försök igen."
+
+#: views/admin/network/settings.php:57
+msgid "Settings saved."
+msgstr "Inställningarna har sparats."
+
+#: views/admin/network/settings.php:67
+msgid "Saving the connection starts automatic setup for selected sites. After changing a site URL or environment, save the site selection again. Existing indexes are preserved."
+msgstr "När anslutningen sparas startar automatisk uppsättning för valda webbplatser. Spara webbplatsvalet igen efter att en webbplatsadress eller miljö har ändrats. Befintliga index bevaras."
+
+#: views/admin/network/settings.php:78
+msgid "Selected"
+msgstr "Vald"
+
+#: views/admin/network/settings.php:78
+msgid "Index"
+msgstr "Index"
+
+#: views/admin/network/settings.php:89
+msgid "Last check: %s"
+msgstr "Senaste kontroll: %s"
+
+#: views/admin/network/settings.php:90
+msgid "Server and index have not been checked for this configuration."
+msgstr "Servern och indexet har inte kontrollerats för den här konfigurationen."
+
+#: views/admin/network/settings.php:101
+msgid "Index access verified at the last check."
+msgstr "Åtkomst till indexet verifierades vid senaste kontrollen."
+
+#: views/admin/network/settings.php:101
+msgid "Saved index name. Existence has not been verified by a current status check."
+msgstr "Sparat indexnamn. En aktuell statuskontroll har inte verifierat att indexet finns."
+
+#: views/admin/network/settings.php:96
+msgid "Retry"
+msgstr "Försök igen"
+
+#: views/admin/network/settings.php:103
+msgid "Indexing with WP-CLI"
+msgstr "Indexering med WP-CLI"
+
+#: views/admin/network/settings.php:104
+msgid "Use the same command for the first indexing run and later reindexing. Indexing results do not control activation; an empty or partially filled index can return incomplete results."
+msgstr "Använd samma kommando för första indexeringen och senare omindexeringar. Indexeringsresultatet styr inte aktiveringen. Ett tomt eller delvis fyllt index kan ge ofullständiga sökresultat."
+
+#: views/admin/network/settings.php:124
+msgid "No sites found."
+msgstr "Inga webbplatser hittades."
+
+#: source/php/Admin/NetworkSettingsPage.php:218
+msgid "Automatic setup has been requested, but has not started yet. Refresh this page to see the result."
+msgstr "Automatisk uppsättning har begärts men har inte startat ännu. Uppdatera sidan för att se resultatet."
+
+#: source/php/Admin/NetworkSettingsPage.php:120
+msgid "Confirm deletion of the index and search key first."
+msgstr "Bekräfta först att indexet och söknyckeln ska raderas."
+
+#: source/php/Admin/NetworkSettingsPage.php:123
+msgid "The index and site search key were deleted. Re-enable the site and run indexing to restore its search content."
+msgstr "Indexet och webbplatsens söknyckel har raderats. Återaktivera webbplatsen och kör indexering för att återställa sökinnehållet."
+
+#: source/php/CLI/NetworkCommand.php:57
+msgid "Network mode is not enabled. Use typesense index."
+msgstr ""
+
+#: source/php/Multisite/ProvisioningGateway.php:68
+msgid "The search key cannot be identified uniquely. No resources were deleted. Check the keys on the server."
+msgstr "Söknyckeln kan inte identifieras entydigt. Inga resurser raderades. Kontrollera nycklarna på servern."
+
+#: source/php/Multisite/SiteProvisioner.php:43
+msgid "The saved index or connection has changed. Refresh the page and check the site identity before deleting."
+msgstr "Det sparade indexet eller anslutningen har ändrats. Uppdatera sidan och kontrollera webbplatsens identitet före radering."
+
+#: source/php/Multisite/SiteProvisioner.php:47
+#: source/php/Multisite/SiteProvisioner.php:54
+msgid "The index does not belong to this site. Nothing was deleted."
+msgstr "Indexet tillhör inte den här webbplatsen. Ingenting raderades."
+
+#: source/php/Multisite/SiteProvisioner.php:180
+msgid "Disable the site and save the site selection before deleting its index and search key."
+msgstr "Avaktivera webbplatsen och spara webbplatsvalet innan dess index och söknyckel raderas."
+
+#: views/admin/network/settings.php:110
+#: views/admin/network/settings.php:119
+msgid "Delete index and search key"
+msgstr "Radera index och söknyckel"
+
+#: views/admin/network/settings.php:117
+msgid "Permanently delete index %s and its site search key. WordPress content is preserved. Re-enabling requires indexing again."
+msgstr "Radera indexet %s och dess söknyckel permanent. WordPress-innehållet bevaras. Vid återaktivering behöver innehållet indexeras igen."
+
+#: views/admin/network/settings.php:118
+msgid "I confirm deletion of this index and search key."
+msgstr "Jag bekräftar att detta index och dess söknyckel ska raderas."
+
+#: source/php/Admin/NetworkSettingsPage.php:106
+msgid "This setup sequence has expired or changed. Save the site selection again."
+msgstr "Uppsättningsföljden har gått ut eller ändrats. Spara webbplatsvalet igen."
+
+#: source/php/Multisite/SetupDispatcher.php:41
+#: source/php/Multisite/SetupDispatcher.php:68
+msgid "Could not save the setup sequence. Save the site selection again."
+msgstr "Det gick inte att spara uppsättningsföljden. Spara webbplatsvalet igen."
+
+#: source/php/Multisite/SetupDispatcher.php:82
+msgid "Setup did not finish. Save the site selection again and keep the page open until setup completes. If a lock remains, confirm the old process has ended before removing it."
+msgstr "Uppsättningen slutfördes inte. Spara webbplatsvalet igen och håll sidan öppen tills uppsättningen är klar. Om ett lås finns kvar, kontrollera att den gamla processen har avslutats innan det tas bort."
+
+#: views/admin/network/settings.php:42
+msgid "Setting up site %1$d of %2$d. Keep this page open until setup completes."
+msgstr "Sätter upp webbplats %1$d av %2$d. Håll sidan öppen tills uppsättningen är klar."
+
+#: views/admin/network/settings.php:50
+msgid "Continue setup"
+msgstr "Fortsätt uppsättningen"
+
+#: views/admin/network/settings.php:31
+msgid "Environment: %s"
+msgstr "Miljö: %s"
+
+#: views/admin/network/settings.php:75
+msgid "Select sites and save to set up their indexes and search keys. Keep the page open until setup completes."
+msgstr "Välj webbplatser och spara för att skapa deras index och söknycklar. Håll sidan öppen tills uppsättningen är klar."
+
+#: views/admin/network/settings.php:75
+msgid "Index content separately with WP-CLI. Disabling a site preserves its index and search key until you choose to delete them."
+msgstr "Indexera innehållet separat med WP-CLI. När en webbplats avaktiveras bevaras indexet och söknyckeln tills du väljer att radera dem."

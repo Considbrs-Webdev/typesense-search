@@ -41,7 +41,7 @@ class Assets
      */
     public function enqueueScripts(): void
     {
-        if (!is_search()) {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense() || !is_search()) {
             return;
         }
 
@@ -72,7 +72,7 @@ class Assets
      */
     public function enqueueStyles(): void
     {
-        if (!is_search()) {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense() || !is_search()) {
             return;
         }
 
@@ -96,7 +96,7 @@ class Assets
      */
     public function enqueueQuickSearchScripts(): void
     {
-        if (!get_option(\TypesenseSearch\Admin\Settings::OPTION_QUICK_SEARCH_ENABLED, 0)) {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense() || !get_option(\TypesenseSearch\Admin\Settings::OPTION_QUICK_SEARCH_ENABLED, 0)) {
             return;
         }
 
@@ -127,7 +127,7 @@ class Assets
      */
     public function enqueueQuickSearchStyles(): void
     {
-        if (!get_option(\TypesenseSearch\Admin\Settings::OPTION_QUICK_SEARCH_ENABLED, 0)) {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense() || !get_option(\TypesenseSearch\Admin\Settings::OPTION_QUICK_SEARCH_ENABLED, 0)) {
             return;
         }
 

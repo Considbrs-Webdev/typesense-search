@@ -33,7 +33,7 @@ class RestController
 
     public function record(WP_REST_Request $request): WP_REST_Response
     {
-        if (!$this->settings->isSearchLoggingEnabled()) {
+        if (!$this->settings->canUseTypesense() || !$this->settings->isSearchLoggingEnabled()) {
             return new WP_REST_Response(['recorded' => false], 204);
         }
 

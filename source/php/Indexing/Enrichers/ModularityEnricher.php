@@ -19,8 +19,8 @@ use TypesenseSearch\Services\SettingsRepository;
  *
  * Additionally, only post types that have Modularity enabled (via the
  * `enabled-post-types` key in the `modularity-options` option) will have
- * module content appended. This list is cached once at construction time to
- * avoid repeated database reads during bulk indexing runs.
+ * module content appended. The option is read in the current site context to avoid leaking configuration
+ * across switch_to_blog() calls.
  *
  * Hook: Municipio/TypesenseSearch/DocumentBuilder/build
  *
@@ -29,8 +29,8 @@ use TypesenseSearch\Services\SettingsRepository;
 class ModularityEnricher
 {
     /**
-     * Post-type slugs for which Modularity is enabled, cached at construction
-     * time from the `modularity-options` WordPress option.
+     * Post-type slugs for which Modularity is enabled, refreshed from the
+     * current site before each enrichment.
      *
      * @var string[]
      */
@@ -41,13 +41,6 @@ class ModularityEnricher
         if (!$this->isInstalled()) {
             return;
         }
-
-        if (!$this->settings->isIndexModularityEnabled()) {
-            return;
-        }
-
-        $modularityOptions      = get_option('modularity-options', []);
-        $this->enabledPostTypes = (array) ($modularityOptions['enabled-post-types'] ?? []);
 
         add_filter(DocumentBuilder::FILTER_BUILD, [$this, 'appendModularityContent'], 10, 2);
     }
@@ -62,6 +55,11 @@ class ModularityEnricher
      */
     public function appendModularityContent(array $document, \WP_Post $post): array
     {
+        if (!$this->settings->isIndexModularityEnabled()) {
+            return $document;
+        }
+        $modularityOptions = get_option('modularity-options', []);
+        $this->enabledPostTypes = (array) ($modularityOptions['enabled-post-types'] ?? []);
         if (!empty($this->enabledPostTypes) && !in_array($post->post_type, $this->enabledPostTypes, true)) {
             return $document;
         }

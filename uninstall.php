@@ -26,6 +26,11 @@ function typesense_search_uninstall_data_for_site(?int $blogId = null): void
     $wpdb->query("DROP TABLE IF EXISTS {$pinnedResultsTable}"); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
     foreach ([
+        'typesense_network_state',
+        'typesense_network_provision_lock',
+        'typesense_network_setup_job',
+        'typesense_network_setup_status',
+        'typesense_network_status_check',
         'typesense_search_statistics_db_version',
         'typesense_search_pinned_results_db_version',
         'typesense_search_pinned_results_enabled',
@@ -46,6 +51,11 @@ function typesense_search_uninstall_data_for_site(?int $blogId = null): void
 }
 
 if (is_multisite()) {
+    foreach (get_networks(['fields' => 'ids', 'number' => 0]) as $networkId) {
+        foreach (['typesense_network_remote', 'typesense_network_admin_key', 'typesense_network_frontend_host', 'typesense_network_enabled_sites'] as $option) {
+            delete_network_option((int) $networkId, $option);
+        }
+    }
     $siteIds = get_sites(['fields' => 'ids', 'number' => 0]);
     foreach ($siteIds as $siteId) {
         typesense_search_uninstall_data_for_site((int) $siteId);

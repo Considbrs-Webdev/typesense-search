@@ -16,31 +16,58 @@ use TypesenseSearch\Helper\PdfToText;
  */
 class SettingsRepository
 {
+    public function network(): \TypesenseSearch\Multisite\NetworkSettingsRepository
+    {
+        return new \TypesenseSearch\Multisite\NetworkSettingsRepository();
+    }
+
+    public function canUseTypesense(): bool
+    {
+        return $this->network()->canUse();
+    }
+
+    private function connectionValue(string $field, string $option): string
+    {
+        $network = $this->network();
+        if (!$network->isNetworkActivated()) {
+            return (string) get_option($option, '');
+        }
+        return $network->canUse() ? $network->connection()[$field] : '';
+    }
+
     // ── Connection ──────────────────────────────────────────────────────────
 
     public function getRemote(): string
     {
-        return (string) get_option(Settings::OPTION_REMOTE, '');
+        return $this->connectionValue('remote', Settings::OPTION_REMOTE);
     }
 
     public function getAdminKey(): string
     {
-        return (string) get_option(Settings::OPTION_ADMIN_KEY, '');
+        return $this->connectionValue('admin_key', Settings::OPTION_ADMIN_KEY);
     }
 
     public function getSearchKey(): string
     {
+        $network = $this->network();
+        if ($network->isNetworkActivated()) {
+            return $network->canUse() ? (string) $network->mapping()['key'] : '';
+        }
         return (string) get_option(Settings::OPTION_SEARCH_KEY, '');
     }
 
     public function getCollectionName(): string
     {
+        $network = $this->network();
+        if ($network->isNetworkActivated()) {
+            return $network->canUse() ? (string) $network->mapping()['collection'] : '';
+        }
         return (string) get_option(Settings::OPTION_INDEX_NAME, '');
     }
 
     public function getFrontendHost(): string
     {
-        return (string) get_option(Settings::OPTION_FRONTEND_HOST, '');
+        return $this->connectionValue('frontend_host', Settings::OPTION_FRONTEND_HOST);
     }
 
     // ── Content ─────────────────────────────────────────────────────────────

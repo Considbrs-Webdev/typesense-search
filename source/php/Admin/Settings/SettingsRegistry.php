@@ -19,7 +19,8 @@ class SettingsRegistry
      */
     public function registerSettings(): void
     {
-        foreach ([
+        $networkMode = (new \TypesenseSearch\Multisite\NetworkSettingsRepository())->isNetworkActivated();
+        foreach ($networkMode ? [] : [
             OptionKeys::OPTION_REMOTE,
             OptionKeys::OPTION_INDEX_NAME,
             OptionKeys::OPTION_ADMIN_KEY,

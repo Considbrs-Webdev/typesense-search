@@ -2,6 +2,10 @@
 if ($activeTab !== 'status') {
     return;
 }
+if ((new \TypesenseSearch\Multisite\NetworkSettingsRepository())->isNetworkActivated()) {
+    include __DIR__ . '/network-managed.php';
+    return;
+}
 ?>
 
 <div class="ts-settings__panel" id="ts-tab-status">

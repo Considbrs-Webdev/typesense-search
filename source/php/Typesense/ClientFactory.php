@@ -63,14 +63,7 @@ class ClientFactory
      */
     public static function fromOptions(): ?Client
     {
-        $remote   = (string) get_option(Settings::OPTION_REMOTE, '');
-        $adminKey = (string) get_option(Settings::OPTION_ADMIN_KEY, '');
-
-        if (empty($remote) || empty($adminKey)) {
-            return null;
-        }
-
-        return self::build($remote, $adminKey);
+        return self::fromSettings(new SettingsRepository());
     }
 
     /**
@@ -129,7 +122,10 @@ class ClientFactory
      */
     public static function isReadyWithCollection(): bool
     {
-        static $cache = null;
+        static $results = [];
+        $settings = new SettingsRepository();
+        $key = hash('sha256', $settings->getRemote() . '|' . $settings->getAdminKey() . '|' . $settings->getCollectionName());
+        $cache = $results[$key] ?? null;
 
         if ($cache !== null) {
             return $cache;
@@ -138,24 +134,24 @@ class ClientFactory
         $client = self::fromOptions();
 
         if ($client === null) {
-            return $cache = false;
+            return $results[$key] = false;
         }
 
-        $collectionName = (string) get_option(Settings::OPTION_INDEX_NAME, '');
+        $collectionName = $settings->getCollectionName();
 
         if (empty($collectionName)) {
-            return $cache = false;
+            return $results[$key] = false;
         }
 
         try {
             $health = $client->health->retrieve();
             if (empty($health['ok'])) {
-                return $cache = false;
+                return $results[$key] = false;
             }
             
-            return $cache = Collection::exists($client, $collectionName);
+            return $results[$key] = Collection::exists($client, $collectionName);
         } catch (\Exception $e) {
-            return $cache = false;
+            return $results[$key] = false;
         }
     }
 }

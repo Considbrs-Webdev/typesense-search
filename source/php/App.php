@@ -44,7 +44,7 @@ class App {
         add_action('init', fn() => load_plugin_textdomain(
             'typesense-search',
             false,
-            './typesense-search/languages'
+            dirname(TYPESENSESEARCH_BASENAME) . '/languages'
         ));
 
         new Templates();
@@ -52,6 +52,7 @@ class App {
         new ACF\Fields();
 
         (new AdminFeature($settings))->register();
+        (new \TypesenseSearch\Admin\NetworkSettingsPage())->register();
 
         (new FrontendFeature($settings))->register();
 

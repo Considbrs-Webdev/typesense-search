@@ -12,6 +12,10 @@ $tsFrontendHostLocked = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_FR
 $tsCollectionLocked   = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_INDEX_NAME);
 $tsAdminKeyLocked     = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_ADMIN_KEY);
 $tsSearchKeyLocked    = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_SEARCH_KEY);
+if ((new \TypesenseSearch\Multisite\NetworkSettingsRepository())->isNetworkActivated()) {
+    include __DIR__ . '/network-managed.php';
+    return;
+}
 ?>
 
 <div class="ts-settings__panel" id="ts-tab-connection">
