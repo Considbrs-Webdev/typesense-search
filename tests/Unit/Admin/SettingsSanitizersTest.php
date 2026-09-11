@@ -146,6 +146,33 @@ class SettingsSanitizersTest extends TestCase
         self::assertSame(0, $this->settings->sanitizeStemmingEnabled(0));
     }
 
+    public function test_sanitize_admin_key_keeps_saved_value_when_field_is_left_blank(): void
+    {
+        Functions\when('get_option')->justReturn('previously-saved-key');
+
+        self::assertSame('previously-saved-key', $this->settings->sanitizeAdminKey(''));
+        self::assertSame('previously-saved-key', $this->settings->sanitizeAdminKey('   '));
+    }
+
+    public function test_sanitize_admin_key_accepts_a_new_value(): void
+    {
+        Functions\when('get_option')->justReturn('previously-saved-key');
+
+        self::assertSame('new-key', $this->settings->sanitizeAdminKey('new-key'));
+    }
+
+    public function test_sanitize_admin_key_clears_only_with_explicit_clear_flag(): void
+    {
+        Functions\when('get_option')->justReturn('previously-saved-key');
+
+        $_POST[Settings::OPTION_ADMIN_KEY . '_clear'] = '1';
+        try {
+            self::assertSame('', $this->settings->sanitizeAdminKey(''));
+        } finally {
+            unset($_POST[Settings::OPTION_ADMIN_KEY . '_clear']);
+        }
+    }
+
     public function test_get_default_query_by_weights_returns_one_for_all_fields(): void
     {
         $defaults = Settings::getDefaultQueryByWeights();

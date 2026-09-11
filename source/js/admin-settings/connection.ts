@@ -9,6 +9,7 @@ declare const tsSettings: {
     nonceCreateCol: string;
     actionGenKey: string;
     nonceGenKey: string;
+    provisioningAvailable: boolean;
 } & Record<string, string>;
 
 function i18n(key: string, fallback: string): string {
@@ -103,13 +104,15 @@ export function init(): void {
 
     if (genKeyBtn && genKeyResult) {
         genKeyBtn.addEventListener('click', async () => {
-            const { remote, adminKey, collectionName } = readFields();
+            const { collectionName } = readFields();
             setButtonLoading(genKeyBtn, true);
             genKeyResult.hidden = true;
 
+            // No remote/admin key here: the server always generates against its
+            // own already-saved connection, never a form-supplied destination.
             let data: Record<string, unknown>;
             try {
-                data = await ajaxPost({ action: tsSettings.actionGenKey, nonce: tsSettings.nonceGenKey, remote, admin_key: adminKey, collection_name: collectionName }) as Record<string, unknown>;
+                data = await ajaxPost({ action: tsSettings.actionGenKey, nonce: tsSettings.nonceGenKey, collection_name: collectionName }) as Record<string, unknown>;
             } catch (err) {
                 data = { success: false, data: { message: i18n('requestFailed', 'Request failed: ') + (err as Error).message } };
             } finally {

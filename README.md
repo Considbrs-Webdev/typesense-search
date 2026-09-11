@@ -46,6 +46,10 @@ Pending multisite improvements and agreed setup-flow changes: [Multisite refacto
 10. [Multisite network mode](#10-multisite-network-mode)
     - [10.1 Site state, naming and configuration](#101-site-state-naming-and-configuration)
     - [10.2 Custom integrations and shared-core installations](#102-custom-integrations-and-shared-core-installations)
+11. [API key roles and security](#11-api-key-roles-and-security)
+    - [11.1 The four key roles](#111-the-four-key-roles)
+    - [11.2 Configuring the provisioning key](#112-configuring-the-provisioning-key)
+    - [11.3 Rotating keys](#113-rotating-keys)
 
 ---
 
@@ -107,8 +111,10 @@ When a constant is defined:
 | `TYPESENSE_HOST`          | `typesense_search_remote`        | Full URL to the Typesense server               |
 | `TYPESENSE_FRONTEND_HOST` | `typesense_search_frontend_host` | Optional public host sent to the browser       |
 | `TYPESENSE_COLLECTION`    | `typesense_search_index_name`    | Name of the Typesense collection               |
-| `TYPESENSE_ADMIN_KEY`     | `typesense_search_admin_key`     | Full-access Admin API key (server-side only)   |
+| `TYPESENSE_ADMIN_KEY`     | `typesense_search_admin_key`     | Admin/indexing API key (server-side only)      |
 | `TYPESENSE_SEARCH_KEY`    | `typesense_search_search_key`    | Search-only key passed to front-end JavaScript |
+
+> **Security:** `TYPESENSE_ADMIN_KEY` is used only for collections and documents — never for key management. Automatic search-key generation uses a separate, more privileged provisioning key that is never stored as an option. See [§11 API key roles and security](#11-api-key-roles-and-security).
 
 #### Setup
 
@@ -136,11 +142,13 @@ These settings tell the plugin how to reach your Typesense instance.
 | ----------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
 | Remote URL              | `typesense_search_remote`        | Base URL of your Typesense server, e.g. `https://search.example.com`              |
 | Index (collection) name | `typesense_search_index_name`    | The Typesense collection to read from and write to                                |
-| Admin API key           | `typesense_search_admin_key`     | Full-access key — used server-side for indexing and collection management         |
+| Admin (indexing) API key | `typesense_search_admin_key`     | Server-side key for collections and documents only — never key management         |
 | Search API key          | `typesense_search_search_key`    | Read-only key — passed to the front-end JavaScript                                |
 | Frontend host           | `typesense_search_frontend_host` | Optional override of the host sent to the browser (useful behind reverse proxies) |
 
-The admin key is kept server-side. The search key is the only credential exposed to the browser.
+The admin key is kept server-side and is never rendered back into this form once saved — leave the field blank to keep it, or tick "Clear the saved key" to remove it. The search key is the only credential exposed to the browser.
+
+"Generate search key" uses a separate provisioning key (see [§11](#11-api-key-roles-and-security)) and is hidden when none is configured — enter a manually created search-only key instead.
 
 > **Multisite:** in network mode these settings are managed by the network administrator under **Network Admin → Settings → Typesense Search**, and this tab becomes read-only for the current site. See [§10 Multisite network mode](#10-multisite-network-mode).
 
@@ -1330,3 +1338,86 @@ route. Other installations use WordPress's normal admin URL. Custom routing can
 adjust `typesense_search_network_site_admin_url` (URL, site ID, path). This plugin
 does not change site URLs, database tables or server rewrite rules to establish
 multisite itself.
+
+---
+
+## 11. API key roles and security
+
+The admin/indexing key that WordPress, cron and WP-CLI use for ordinary
+indexing never administers API keys. Creating and deleting search keys uses a
+separate, more privileged **provisioning key** that is never stored as a
+WordPress option, never rendered into HTML or AJAX/REST responses, and never
+driven by request input (a form-supplied host/key can't redirect it).
+
+### 11.1 The four key roles
+
+| Role | Where it comes from | Verified Typesense actions (30.2) |
+| --- | --- | --- |
+| Bootstrap/server admin key | Created once when the Typesense server itself is set up | Everything — used only to create the provisioning key below, never held by the plugin |
+| **Provisioning key** | `TYPESENSE_PROVISIONING_KEY` constant or environment variable only — never an option | `keys:create`, `keys:list`, `keys:delete`; scope `["*"]` |
+| **Admin/indexing key** | `TYPESENSE_ADMIN_KEY` (single site) / the network connection setting | `collections:*`, `documents:search`, `documents:create`, `documents:delete`; scoped to this installation's collection(s) |
+| **Public search key** | Generated by the provisioning key, one per site/installation | `documents:search` only, on exactly one collection |
+
+Two results from testing against a real Typesense 30.2 instance are worth
+calling out because they are easy to get wrong by reading the action names
+alone:
+
+- Regular per-document indexing (`documents->upsert()`, the only way this
+  plugin writes documents) is authorized by **`documents:create`**, not
+  `documents:upsert` — Typesense checks the route (`POST /documents`), not the
+  `?action=` query value.
+- The `collections:*` wildcard action is required for the schema `PATCH`
+  request used to attach synonym sets and curation sets — none of
+  `collections:create`/`get`/`delete`/`list`, alone or combined, authorize it.
+  This is why the admin/indexing key needs `collections:*` rather than the
+  three granular actions, even though it stays strictly scoped to this
+  installation's own collection(s).
+
+Collection scoping does **not** protect global resources: API keys, synonym
+sets and curation sets are never isolated by a collection prefix. Only the
+provisioning key role is trusted with `keys:*`, and only for that reason.
+
+### 11.2 Configuring the provisioning key
+
+```sh
+# Recommended: only for the CLI run that actually provisions a site.
+TYPESENSE_PROVISIONING_KEY=your-provisioning-key \
+  wp --url=https://example.com/subsite/ typesense network setup
+```
+
+Or permanently (less isolation — the key becomes available to the whole PHP
+process, including if that process is ever compromised):
+
+```php
+// wp-content/config/typesense.php
+define('TYPESENSE_PROVISIONING_KEY', 'your-provisioning-key');
+// Optional: pin the destination the provisioning key may be sent to.
+define('TYPESENSE_PROVISIONING_REMOTE', 'https://search.example.com');
+```
+
+A defined constant always wins over the environment variable — even an empty
+constant, which means "explicitly unavailable" rather than "fall back to the
+environment".
+
+**A CLI-injected provisioning key only reaches that one CLI invocation.** It
+does **not** reach the browser-driven flow started by clicking **Save** on the
+site selection in Network Admin — that runs as ordinary authenticated POSTs
+inside the web server's own PHP process, which never sees a variable exported
+only into a CLI shell. Automatic setup from the admin screens therefore
+requires the permanent configuration above. Without a provisioning key
+(neither form), setup fails clearly at the key-creation step; ordinary
+indexing (`wp typesense index` / `network index`) of already-provisioned sites
+is unaffected and needs no provisioning key at all.
+
+### 11.3 Rotating keys
+
+1. Create a replacement key (provisioning key rotation: on the Typesense
+   server; search key rotation: via "Generate search key"/"Fix search key" or
+   the network Sites tab).
+2. Configure it (constant/environment variable, or save the new search key).
+3. Verify it works (Status tab / "Check shared connection" / site status
+   check).
+4. Revoke the old key on the Typesense server.
+
+A cached frontend can keep using an old search key until its cache clears —
+account for that before revoking it.

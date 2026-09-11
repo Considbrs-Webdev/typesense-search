@@ -22,7 +22,7 @@ En **collection** är ett sökindex i Typesense som innehåller webbplatsens sö
 ### Anslutning
 
 - **Typesense-värd:** serverns adress, inklusive `http://` eller `https://` och eventuell port.
-- **Admin-API-nyckel:** används av WordPress för administration och indexering. Den sparade nyckeln visas inte i formuläret. Lämna fältet tomt för att behålla den.
+- **Admin-API-nyckel (indexeringsnyckel):** används av WordPress för collections och dokument (skapa/hämta/radera collection, sök, indexera). Den används **aldrig** för att skapa eller radera sök-API-nycklar — det görs av en separat provisioneringsnyckel, se [Provisioneringsnyckel och separata nycklar](#provisioneringsnyckel-och-separata-nycklar). Den sparade nyckeln visas inte i formuläret. Lämna fältet tomt för att behålla den.
 - **Värd för frontend:** valfri separat adress som besökarnas webbläsare använder för sökning. Om den lämnas tom används Typesense-värden. Adressen måste vara nåbar från besökarnas webbläsare.
 - **Indexprefix (valfritt):** sätts en gång för hela nätverket och läggs till först i varje webbplats collection-namn, till exempel `eslov_`. Bara gemener, siffror, bindestreck och understreck behålls. Kan också sättas med konstanten `TYPESENSE_NETWORK_PREFIX`, som då gör fältet skrivskyddat.
 
@@ -133,6 +133,42 @@ I nätverksläge gäller följande konstanter före sparade nätverksinställnin
 Globala `TYPESENSE_COLLECTION` och `TYPESENSE_SEARCH_KEY` måste tas bort för nätverksläget, eftersom varje webbplats behöver egna värden. Panelen visar en konflikt om de finns. Vid vanlig lokal aktivering behåller alla dessa konstanter sitt tidigare beteende.
 
 Kontrollera alltid miljö och adresser när en produktionsdatabas kopieras till utveckling. En kopia med exakt samma adress, miljö och server kan inte automatiskt skiljas från originalet.
+
+## Provisioneringsnyckel och separata nycklar
+
+Sedan API-nyckelseparationen finns fyra roller:
+
+| Roll | Var den kommer ifrån | Vad den får göra |
+| --- | --- | --- |
+| Bootstrap/admin-nyckel på Typesense-servern | Skapas manuellt när servern sätts upp | Allt — används bara för att skapa provisioneringsnyckeln, aldrig av tillägget |
+| Provisioneringsnyckel | Konstanten/miljövariabeln `TYPESENSE_PROVISIONING_KEY` — **aldrig** en sparad inställning | `keys:create`, `keys:list`, `keys:delete`, scope `*` |
+| Admin-/indexeringsnyckel | `TYPESENSE_ADMIN_KEY`/nätverksinställningen ovan | `collections:*`, `documents:search`, `documents:create`, `documents:delete`, scopat till installationens collection(-namn/prefix) |
+| Publik söknyckel | Skapas av provisioneringsnyckeln, en per webbplats | Bara `documents:search`, exakt en collection |
+
+`collections:*` (wildcard) krävs på indexeringsnyckeln eftersom PATCH-anropet som kopplar synonymer/fästa sökresultat till collectionen inte har någon smalare motsvarande action — verifierat mot en riktig Typesense 30.2-server.
+
+**Konfigurera provisioneringsnyckeln:**
+
+```sh
+# Rekommenderat: bara i den CLI-körning som faktiskt sätter upp webbplatser.
+TYPESENSE_PROVISIONING_KEY=din-provisioneringsnyckel \
+  wp --url=https://example.com/subsite/ typesense network setup
+```
+
+Eller permanent (mindre isolering — nyckeln blir tillgänglig för hela PHP-processen, inklusive vid ett eventuellt intrång):
+
+```php
+// wp-content/config/typesense.php
+define('TYPESENSE_PROVISIONING_KEY', 'din-provisioneringsnyckel');
+// Valfritt: lås fast vilken server nyckeln får skickas till.
+define('TYPESENSE_PROVISIONING_REMOTE', 'https://search.example.com');
+```
+
+En definierad konstant gäller alltid före miljövariabeln — även om konstanten är tom (då är provisioneringsnyckeln avsiktligt otillgänglig, ingen fallback till miljövariabeln).
+
+**Viktig begränsning:** en CLI-injicerad provisioneringsnyckel fungerar bara för den `wp ... typesense network setup`-körning den sattes för. Den når **inte** flödet där en nätverksadministratör klickar **Spara** på webbplatsvalet i Nätverksadministration — det körs som vanliga webbläsar-POSTs i webbserverns egen PHP-process, som CLI-processens miljövariabel aldrig når. Automatisk uppsättning via adminpanelen kräver därför den permanenta konfigurationen ovan. Utan provisioneringsnyckel (varken CLI eller permanent) misslyckas uppsättningen tydligt vid nyckelsteget; vanlig indexering (`wp typesense index` / `network index`) av redan uppsatta webbplatser fungerar fortfarande utan provisioneringsnyckel.
+
+**Nyckelrotation:** skapa en ny sök-/provisioneringsnyckel, uppdatera konfigurationen, verifiera med statuskontrollen, återkalla den gamla nyckeln på servern. Tänk på att en cachad frontend kan fortsätta använda en gammal söknyckel tills cachen töms.
 
 ## Att kontrollera hemma
 

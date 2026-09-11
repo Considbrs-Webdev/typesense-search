@@ -518,6 +518,54 @@ class NetworkModeTest extends TestCase
         (new SiteProvisioner($network, $gateway))->delete($fingerprint);
     }
 
+    public function test_matchDeletionKeys_prefers_exact_key_id_when_present(): void
+    {
+        $mapping = ['key' => 'irrelevant-once-key-id-is-set', 'collection' => 'site-1', 'key_id' => '7'];
+        $keys = [['id' => 7, 'value_prefix' => 'zzzz', 'collections' => ['other'], 'actions' => ['documents:*'], 'description' => 'unrelated']];
+        // The old heuristic would reject this (wrong prefix/collections/actions/description);
+        // an exact key_id match bypasses it entirely and never throws on ambiguity.
+        self::assertSame(['7'], ProvisioningGateway::matchDeletionKeys($keys, [$mapping]));
+        self::assertSame([], ProvisioningGateway::matchDeletionKeys([], [$mapping]));
+    }
+
+    public function test_prepare_stores_key_id_and_revokes_orphan_before_creating_a_new_key(): void
+    {
+        $gateway = new class extends ProvisioningGateway {
+            public array $calls = [];
+            public function exists(array $connection, string $name): bool { return false; }
+            public function create(array $connection, string $name): void { $this->calls[] = 'create'; }
+            public function owns(array $connection, string $name, string $owner): bool { return true; }
+            public function revokeOrphanedKey(array $connection, string $collectionName): void { $this->calls[] = 'revoke'; }
+            public function key(array $connection, string $name): string { $this->calls[] = 'key'; return 'fresh-key'; }
+            public function lastKeyId(): ?string { return 'key-id-42'; }
+            public function verify(array $connection, array $mapping): void {}
+            public function sync(): void {}
+        };
+        $network = new NetworkSettingsRepository();
+        (new SiteProvisioner($network, $gateway))->prepare();
+        self::assertSame(['create', 'revoke', 'key'], $gateway->calls);
+        self::assertSame('fresh-key', $network->state()['candidate']['key']);
+        self::assertSame('key-id-42', $network->state()['candidate']['key_id']);
+    }
+
+    public function test_orphan_revocation_failure_does_not_block_key_creation(): void
+    {
+        $gateway = new class extends ProvisioningGateway {
+            public function exists(array $connection, string $name): bool { return false; }
+            public function create(array $connection, string $name): void {}
+            public function owns(array $connection, string $name, string $owner): bool { return true; }
+            public function revokeOrphanedKey(array $connection, string $collectionName): void {
+                throw new \TypesenseSearch\Typesense\ProvisioningException('unavailable in this test');
+            }
+            public function key(array $connection, string $name): string { return 'fresh-key'; }
+            public function verify(array $connection, array $mapping): void {}
+            public function sync(): void {}
+        };
+        $network = new NetworkSettingsRepository();
+        (new SiteProvisioner($network, $gateway))->prepare();
+        self::assertSame('fresh-key', $network->state()['candidate']['key']);
+    }
+
     public function test_deletion_keys_require_unique_prefix_and_exact_scope(): void
     {
         $mapping = ['key' => 'abcd-full-secret', 'collection' => 'site-1'];

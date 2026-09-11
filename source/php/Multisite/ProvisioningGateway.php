@@ -4,11 +4,14 @@ namespace TypesenseSearch\Multisite;
 
 use Typesense\Exceptions\ObjectNotFound;
 use TypesenseSearch\Services\SettingsRepository;
-use TypesenseSearch\Typesense\{AdminApi, ApiKey, ClientFactory, Collection, ServerCapabilities};
+use TypesenseSearch\Typesense\{AdminApi, ApiKey, ClientFactory, Collection, ProvisioningClientFactory, ServerCapabilities};
 
 /** Typesense operations used by provisioning; replaceable in failure-path tests. */
 class ProvisioningGateway
 {
+    /** Set by key() as a side effect; null when a test double overrides key() directly. */
+    private ?string $lastKeyId = null;
+
     public function exists(array $connection, string $name): bool
     {
         try {
@@ -37,15 +40,29 @@ class ProvisioningGateway
         ClientFactory::build($connection['remote'], $connection['admin_key'])->collections->create($schema);
     }
 
+    /**
+     * Create a scoped search key via the provisioning client. The server-side
+     * key ID is captured as a side effect, retrievable via lastKeyId() — kept
+     * out of the return type so existing overrides of this method (typed to
+     * return a bare string) keep working unchanged.
+     */
     public function key(array $connection, string $name): string
     {
-        return ApiKey::generateSearchKey(ClientFactory::build($connection['remote'], $connection['admin_key']), $name);
+        $result = ApiKey::generateSearchKeyWithId(ProvisioningClientFactory::fromTrustedRemote($connection['remote']), $name);
+        $this->lastKeyId = $result['id'];
+        return $result['value'];
+    }
+
+    /** The ID of the key created by the most recent key() call, when known. */
+    public function lastKeyId(): ?string
+    {
+        return $this->lastKeyId;
     }
 
     /** Resolve legacy keys by their prefix and exact search-only scope; never guess on collisions. */
     public function deletionKeyIds(array $connection, array $mappings): array
     {
-        $keys = ClientFactory::build($connection['remote'], $connection['admin_key'])->keys->retrieve()['keys'] ?? [];
+        $keys = ProvisioningClientFactory::fromTrustedRemote($connection['remote'])->keys->retrieve()['keys'] ?? [];
         return self::matchDeletionKeys($keys, $mappings);
     }
 
@@ -54,6 +71,13 @@ class ProvisioningGateway
         $ids = [];
         foreach ($mappings as $mapping) {
             if (empty($mapping['key'])) {
+                continue;
+            }
+            // A stored key_id is an exact, unambiguous reference — skip the heuristic entirely.
+            if (!empty($mapping['key_id'])) {
+                if (array_filter($keys, static fn ($key) => (string) ($key['id'] ?? '') === (string) $mapping['key_id'])) {
+                    $ids[] = (string) $mapping['key_id'];
+                }
                 continue;
             }
             $matches = array_values(array_filter($keys, static fn ($key) =>
@@ -77,9 +101,28 @@ class ProvisioningGateway
     public function deleteKey(array $connection, string $id): void
     {
         try {
-            ClientFactory::build($connection['remote'], $connection['admin_key'])->keys[$id]->delete();
+            ProvisioningClientFactory::fromTrustedRemote($connection['remote'])->keys[$id]->delete();
         } catch (ObjectNotFound $e) {
             // A retry can encounter a key already removed by the preceding attempt.
+        }
+    }
+
+    /**
+     * Clean up a key orphaned by a crash between remote key creation and local
+     * state persistence (see SiteProvisioner::prepareMapping()). Only acts
+     * when exactly one candidate is unambiguous; otherwise leaves keys alone
+     * rather than guessing — a known, documented gap, not a promise of full
+     * idempotency.
+     */
+    public function revokeOrphanedKey(array $connection, string $collectionName): void
+    {
+        $keys = ProvisioningClientFactory::fromTrustedRemote($connection['remote'])->keys->retrieve()['keys'] ?? [];
+        $candidates = array_values(array_filter($keys, static fn ($key) =>
+            ($key['collections'] ?? []) === [$collectionName]
+            && ($key['actions'] ?? []) === ['documents:search']
+            && ($key['description'] ?? '') === 'Search-only key for collection: ' . $collectionName));
+        if (count($candidates) === 1) {
+            $this->deleteKey($connection, (string) $candidates[0]['id']);
         }
     }
 

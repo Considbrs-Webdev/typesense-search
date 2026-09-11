@@ -8,6 +8,7 @@ use TypesenseSearch\Helper\CacheBust;
 use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\AdminApi;
 use TypesenseSearch\Typesense\Collection;
+use TypesenseSearch\Typesense\ProvisioningCredentials;
 use TypesenseSearch\Typesense\ServerCapabilities;
 
 /**
@@ -133,6 +134,7 @@ class SettingsPage
                 'actionStatusCreateCol'=> SettingsAjax::AJAX_ACTION_STATUS_CREATE_COL,
                 'nonceClearLog'        => wp_create_nonce(SettingsAjax::AJAX_ACTION_CLEAR_LOG),
                 'actionClearLog'       => SettingsAjax::AJAX_ACTION_CLEAR_LOG,
+                'provisioningAvailable' => ProvisioningCredentials::isAvailableFor((new SettingsRepository())->getRemote()),
             ]);
         }
     }
@@ -164,6 +166,7 @@ class SettingsPage
         $supportsSynonyms         = $activeTab === 'advanced-settings' ? $capabilities->supportsSynonymSets() : false;
         $supportsStemming         = $activeTab === 'content' ? $capabilities->supportsStemming() : false;
         $stemmingLocale           = Collection::getStemmingLocale();
+        $provisioningAvailable    = ProvisioningCredentials::isAvailableFor((new SettingsRepository())->getRemote());
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';
     }

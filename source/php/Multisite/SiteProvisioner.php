@@ -100,6 +100,7 @@ class SiteProvisioner
             // Persist intent before the remote operation, so a key failure can be retried.
             $candidate['owner'] = $candidate['owner'] ?? bin2hex(random_bytes(16));
             $candidate['key'] = '';
+            $candidate['key_id'] = '';
             $state['candidate'] = $candidate;
             $this->save($state);
             // A temporary key only unlocks internal settings for schema/capability resolution.
@@ -115,7 +116,18 @@ class SiteProvisioner
             }
         }
         if (empty($candidate['key'])) {
+            // A previous attempt may have created a key on the server and then
+            // crashed before it could be saved locally; clean it up first so a
+            // retry does not accumulate unreachable orphaned keys. Best-effort
+            // only: if the lookup itself fails, the key() call below still
+            // runs and surfaces the real, actionable error.
+            try {
+                $this->gateway->revokeOrphanedKey($connection, $name);
+            } catch (\Throwable $e) {
+                // Ignored — see comment above.
+            }
             $candidate['key'] = $this->gateway->key($connection, $name);
+            $candidate['key_id'] = $this->gateway->lastKeyId() ?? '';
             $state['candidate'] = $candidate;
             $this->save($state);
         }

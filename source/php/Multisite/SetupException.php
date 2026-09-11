@@ -7,7 +7,7 @@ class SetupException extends \RuntimeException
 {
     public static function describe(\Throwable $error): string
     {
-        if ($error instanceof self) {
+        if ($error instanceof self || $error instanceof \TypesenseSearch\Typesense\ProvisioningException) {
             return $error->getMessage();
         }
         if ($error instanceof \Typesense\Exceptions\ObjectNotFound) {

@@ -1,5 +1,7 @@
 <?php
 use TypesenseSearch\Admin\NetworkSettingsPage;
+use TypesenseSearch\Typesense\ProvisioningCredentials;
+$provisioningAvailable = ProvisioningCredentials::isAvailableFor($connection['remote']);
 ?>
 <style>
 .typesense-network-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin-bottom: 12px; }
@@ -63,8 +65,15 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <tr><th><label for="<?php echo esc_attr($field); ?>"><?php echo esc_html($label); ?></label></th><td><input class="regular-text" type="url" id="<?php echo esc_attr($field); ?>" name="<?php echo esc_attr($field); ?>" value="<?php echo esc_attr($connection[$field]); ?>" <?php disabled($network->constant($constant) !== ''); ?>><?php if ($network->constant($constant) !== '') : ?><p><?php esc_html_e('Set via constant.', 'typesense-search'); ?></p><?php endif; ?></td></tr>
 <?php endforeach; ?>
 <tr><th><label for="prefix"><?php esc_html_e('Index prefix (optional)', 'typesense-search'); ?></label></th><td><input class="regular-text" type="text" id="prefix" name="prefix" value="<?php echo esc_attr($network->prefix()); ?>" <?php disabled($network->constant('TYPESENSE_NETWORK_PREFIX') !== ''); ?>><p class="description"><?php esc_html_e('Prepended to every site collection name, e.g. eslov_. Lowercase letters, numbers, hyphens and underscores only.', 'typesense-search'); ?></p><?php if ($network->constant('TYPESENSE_NETWORK_PREFIX') !== '') : ?><p><?php esc_html_e('Set via constant.', 'typesense-search'); ?></p><?php endif; ?></td></tr>
-<tr><th><label for="admin_key"><?php esc_html_e('Admin API key', 'typesense-search'); ?></label></th><td><input class="regular-text" type="password" id="admin_key" name="admin_key" autocomplete="new-password" value="" <?php disabled($network->constant('TYPESENSE_ADMIN_KEY') !== ''); ?>><p class="description"><?php echo esc_html($connection['admin_key'] !== '' ? __('A key is configured. Leave blank to keep it.', 'typesense-search') : __('Enter the server admin API key.', 'typesense-search')); ?></p></td></tr>
+<tr><th><label for="admin_key"><?php esc_html_e('Admin (indexing) API key', 'typesense-search'); ?></label></th><td><input class="regular-text" type="password" id="admin_key" name="admin_key" autocomplete="new-password" value="" <?php disabled($network->constant('TYPESENSE_ADMIN_KEY') !== ''); ?>><p class="description"><?php echo esc_html($connection['admin_key'] !== '' ? __('A key is configured. Leave blank to keep it.', 'typesense-search') : __('Enter the server admin API key.', 'typesense-search')); ?> <?php esc_html_e('Used only for collections and documents — never for key management. See the security section in the README.', 'typesense-search'); ?></p></td></tr>
 </table>
+<p class="description">
+<?php if ($provisioningAvailable) : ?>
+<?php esc_html_e('A provisioning key is configured: automatic setup can create and remove per-site search keys.', 'typesense-search'); ?>
+<?php else : ?>
+<?php esc_html_e('No provisioning key is configured: automatic setup will fail at the key-creation step. Configure TYPESENSE_PROVISIONING_KEY (permanently, or for a single "wp ... typesense network setup" run) before saving the site selection. See the security section in the README.', 'typesense-search'); ?>
+<?php endif; ?>
+</p>
 <p><?php esc_html_e('Saving the connection starts automatic setup for selected sites. After changing a site URL or environment, save the site selection again. Existing indexes are preserved.', 'typesense-search'); ?></p>
 <?php submit_button(); ?></form>
 <form method="post" action="<?php echo esc_url(network_admin_url('edit.php?action=typesense_network_save')); ?>">

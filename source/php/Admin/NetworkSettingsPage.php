@@ -4,6 +4,8 @@ namespace TypesenseSearch\Admin;
 
 use TypesenseSearch\Multisite\{NetworkSettingsRepository, SiteProvisioner, SetupDispatcher};
 use TypesenseSearch\Typesense\ClientFactory;
+use TypesenseSearch\Typesense\ProvisioningClientFactory;
+use TypesenseSearch\Typesense\ProvisioningCredentials;
 
 /** Network-owned settings; site operations run through the target site's admin-post.php. */
 class NetworkSettingsPage
@@ -47,9 +49,17 @@ class NetworkSettingsPage
                 }
                 $client = ClientFactory::build($connection['remote'], $connection['admin_key']);
                 $health = $client->health->retrieve();
-                $client->keys->retrieve();
                 if (empty($health['ok'])) { throw new \TypesenseSearch\Multisite\SetupException(__('Server reports an unhealthy status.', 'typesense-search')); }
-                $this->finish(__('Server connection and admin key are working.', 'typesense-search'), true, 'connection');
+                $message = __('Server connection and admin key are working.', 'typesense-search');
+                // The admin/indexing key never touches key-management endpoints; verify
+                // provisioning separately, and only when a provisioning key is configured.
+                if (ProvisioningCredentials::isAvailableFor($connection['remote'])) {
+                    ProvisioningClientFactory::fromTrustedRemote($connection['remote'])->keys->retrieve();
+                    $message .= ' ' . __('Provisioning key management verified.', 'typesense-search');
+                } else {
+                    $message .= ' ' . __('Key management was not verified: no provisioning key is configured.', 'typesense-search');
+                }
+                $this->finish($message, true, 'connection');
             } catch (\Throwable $e) {
                 $this->finish(\TypesenseSearch\Multisite\SetupException::describe($e), false, 'connection');
             }
@@ -133,7 +143,6 @@ class NetworkSettingsPage
                 if (empty($health['ok'])) {
                     throw new \TypesenseSearch\Multisite\SetupException(__('The server reports an unhealthy status.', 'typesense-search'));
                 }
-                $client->keys->retrieve();
                 (new \TypesenseSearch\Multisite\ProvisioningGateway())->verify($connection, $mapping);
                 $message = __('Server connection, admin key and site search key are working.', 'typesense-search');
             } else {
