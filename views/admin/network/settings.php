@@ -197,8 +197,8 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <?php endforeach; ?>
 <?php if (!$sites) : ?><tr><td colspan="4"><?php esc_html_e('No sites found.', 'typesense-search'); ?></td></tr><?php endif; ?>
 </tbody></table></div>
-<?php if ($tab === 'sites') : ?><p class="typesense-network-actions"><button type="submit" form="typesense-sites" class="button button-primary"><?php esc_html_e('Save site selection', 'typesense-search'); ?></button></p><?php endif; ?>
 </div>
+<?php if ($tab === 'sites') : ?><p class="typesense-network-actions"><button type="submit" form="typesense-sites" class="button button-primary"><?php esc_html_e('Save site selection', 'typesense-search'); ?></button></p><?php endif; ?>
 <?php endif; ?>
 </div>
 </div>

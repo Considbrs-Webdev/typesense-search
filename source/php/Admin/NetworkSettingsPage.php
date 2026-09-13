@@ -76,6 +76,8 @@ class NetworkSettingsPage
                 $client = ClientFactory::build($connection['remote'], $connection['admin_key']);
                 $health = $client->health->retrieve();
                 if (empty($health['ok'])) { throw new \TypesenseSearch\Multisite\SetupException(__('Server reports an unhealthy status.', 'typesense-search')); }
+                // The health endpoint requires no key at all; only an authenticated call actually proves the admin key works.
+                $client->collections->retrieve();
                 $message = __('Server connection and admin key are working.', 'typesense-search');
                 // The admin/indexing key never touches key-management endpoints; verify
                 // provisioning separately, and only when a provisioning key is configured.
@@ -169,6 +171,8 @@ class NetworkSettingsPage
                 if (empty($health['ok'])) {
                     throw new \TypesenseSearch\Multisite\SetupException(__('The server reports an unhealthy status.', 'typesense-search'));
                 }
+                // The health endpoint requires no key at all; only an authenticated call actually proves the admin key works.
+                $client->collections->retrieve();
                 (new \TypesenseSearch\Multisite\ProvisioningGateway())->verify($connection, $mapping);
                 $message = __('Server connection, admin key and site search key are working.', 'typesense-search');
             } else {
