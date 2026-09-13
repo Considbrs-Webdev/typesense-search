@@ -5,6 +5,27 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-09-13
+
+### Added
+
+- Network-managed multisite mode: configure a shared Typesense connection once in Network
+  Admin, then prepare, index, and activate search per site, each with its own isolated
+  collection and search-only API key.
+- Provisioning key separation: Typesense API key management (creating/listing/deleting keys)
+  now uses a dedicated provisioning key, kept separate from the runtime admin key used for
+  day-to-day indexing.
+- Swedish translations for the new network-mode and provisioning-key strings.
+
+### Changed
+
+- Redesigned the network connection settings tab to match the main settings page's design.
+- Moved the stemming toggle into Advanced settings, next to synonyms.
+
+### Fixed
+
+- Locale stamping on synonym items and searchable fields could be incorrect in some setups.
+
 ## [1.5.0] - 2026-08-16
 
 ### Added
