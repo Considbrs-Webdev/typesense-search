@@ -48,8 +48,9 @@ Pending multisite improvements and agreed setup-flow changes: [Multisite refacto
     - [10.2 Custom integrations and shared-core installations](#102-custom-integrations-and-shared-core-installations)
 11. [API key roles and security](#11-api-key-roles-and-security)
     - [11.1 The four key roles](#111-the-four-key-roles)
-    - [11.2 Configuring the provisioning key](#112-configuring-the-provisioning-key)
-    - [11.3 Rotating keys](#113-rotating-keys)
+    - [11.2 Creating the provisioning key and admin key](#112-creating-the-provisioning-key-and-admin-key)
+    - [11.3 Configuring the provisioning key](#113-configuring-the-provisioning-key)
+    - [11.4 Rotating keys](#114-rotating-keys)
 
 ---
 
@@ -1377,7 +1378,45 @@ Collection scoping does **not** protect global resources: API keys, synonym
 sets and curation sets are never isolated by a collection prefix. Only the
 provisioning key role is trusted with `keys:*`, and only for that reason.
 
-### 11.2 Configuring the provisioning key
+### 11.2 Creating the provisioning key and admin key
+
+Both keys are created once, directly on the Typesense server, using the
+server's own bootstrap/admin key (never stored by this plugin). Pick a
+collection prefix for the installation — it does not need to match anything
+in WordPress, it only needs to match what you configure as
+`TYPESENSE_NETWORK_PREFIX` (or the plain `TYPESENSE_COLLECTION` name for a
+single-site install) — and scope the admin key to it with a regex in the
+`collections` field:
+
+```sh
+# Provisioning key — only creates/lists/deletes API keys, never touches documents.
+curl "https://search.example.com/keys" \
+  -X POST \
+  -H "X-TYPESENSE-API-KEY: your-bootstrap-admin-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "description": "provisioning_key",
+        "actions": ["keys:create", "keys:list", "keys:delete"],
+        "collections": ["*"]
+      }'
+
+# Admin/indexing key — scoped to every collection starting with the chosen prefix.
+curl "https://search.example.com/keys" \
+  -X POST \
+  -H "X-TYPESENSE-API-KEY: your-bootstrap-admin-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "description": "admin_key",
+        "actions": ["collections:*", "documents:search", "documents:create", "documents:delete"],
+        "collections": ["your-prefix_.*"]
+      }'
+```
+
+Both endpoints return the key's `value` only in this create response — it is
+never shown again. Save it immediately (e.g. into your secrets manager),
+then configure it as described below.
+
+### 11.3 Configuring the provisioning key
 
 ```sh
 # Recommended: only for the CLI run that actually provisions a site.
@@ -1409,7 +1448,7 @@ requires the permanent configuration above. Without a provisioning key
 indexing (`wp typesense index` / `network index`) of already-provisioned sites
 is unaffected and needs no provisioning key at all.
 
-### 11.3 Rotating keys
+### 11.4 Rotating keys
 
 1. Create a replacement key (provisioning key rotation: on the Typesense
    server; search key rotation: via "Generate search key"/"Fix search key" or
