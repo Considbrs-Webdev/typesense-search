@@ -124,9 +124,12 @@ class NetworkSettingsPage
             }
             update_network_option($networkId, NetworkSettingsRepository::ENABLED, $ids);
         }
-        $runId = (new SetupDispatcher())->dispatch(
-            (array) get_network_option($networkId, NetworkSettingsRepository::ENABLED, []), $section
-        );
+        $enabled = (array) get_network_option($networkId, NetworkSettingsRepository::ENABLED, []);
+        $connection = $network->connection();
+        // Only sites that are not already active for the current connection/identity need setup;
+        // an already-ready site must not be re-run just because another site's selection changed.
+        $needsSetup = array_values(array_filter($enabled, fn ($id) => !self::isReady((int) $id, $connection, $network)));
+        $runId = (new SetupDispatcher())->dispatch($needsSetup, $section);
         wp_safe_redirect(network_admin_url('settings.php?page=' . self::SLUG . '&tab=' . $section . '&saved=1' . ($runId !== '' ? '&setup_run=' . rawurlencode($runId) : '')));
         exit;
     }
@@ -230,18 +233,32 @@ class NetworkSettingsPage
         return hash('sha256', serialize([$connection, $mapping]));
     }
 
+    /** The identity a site's active mapping must match to be considered ready. */
+    private static function identity(int $id, array $connection, NetworkSettingsRepository $network): array
+    {
+        return ['home' => rtrim(get_home_url($id), '/'), 'environment' => wp_get_environment_type(),
+            'remote' => rtrim($connection['remote'], '/'), 'network' => $network->networkId(), 'site' => $id,
+            'prefix' => $network->prefix()];
+    }
+
+    /** Identity/mapping match, independent of whether the site is currently selected. */
+    private static function isReady(int $id, array $connection, NetworkSettingsRepository $network): bool
+    {
+        $state = (array) get_blog_option($id, NetworkSettingsRepository::STATE, []);
+        $mapping = (array) ($state['active'] ?? []);
+        return !$network->conflict() && ($mapping['identity'] ?? null) === self::identity($id, $connection, $network)
+            && !empty($mapping['collection']) && !empty($mapping['key'])
+            && $connection['remote'] !== '' && $connection['admin_key'] !== '';
+    }
+
     /** Read saved state only. Network rendering must not load sites or contact Typesense. */
     public function siteStatus(int $id, bool $selected, NetworkSettingsRepository $network): array
     {
         $connection = $network->connection();
         $state = (array) get_blog_option($id, NetworkSettingsRepository::STATE, []);
         $mapping = (array) ($state['active'] ?? []);
-        $identity = ['home' => rtrim(get_home_url($id), '/'), 'environment' => wp_get_environment_type(),
-            'remote' => rtrim($connection['remote'], '/'), 'network' => $network->networkId(), 'site' => $id,
-            'prefix' => $network->prefix()];
-        $ready = $selected && !$network->conflict() && ($mapping['identity'] ?? null) === $identity
-            && !empty($mapping['collection']) && !empty($mapping['key'])
-            && $connection['remote'] !== '' && $connection['admin_key'] !== '';
+        $identity = self::identity($id, $connection, $network);
+        $ready = $selected && self::isReady($id, $connection, $network);
         $setup = SetupDispatcher::status($id);
         $busy = in_array($setup['status'] ?? '', ['pending', 'running'], true);
         $failed = ($setup['status'] ?? '') === 'error';

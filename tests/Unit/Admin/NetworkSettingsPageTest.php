@@ -168,6 +168,49 @@ class NetworkSettingsPageTest extends TestCase
         $this->page->save();
     }
 
+    /** Unchecking one site must not re-run setup for another site that is already active. */
+    public function test_saving_site_selection_does_not_redispatch_setup_for_an_already_ready_site(): void
+    {
+        Functions\when('current_user_can')->justReturn(true);
+        Functions\when('is_multisite')->justReturn(true);
+        Functions\when('get_current_blog_id')->justReturn(2);
+        Functions\when('get_current_user_id')->justReturn(1);
+        Functions\when('get_site')->justReturn((object) ['network_id' => 1, 'archived' => 0, 'spam' => 0, 'deleted' => 0]);
+        $networkOptions = [
+            NetworkSettingsRepository::REMOTE => 'https://search.test',
+            NetworkSettingsRepository::ADMIN_KEY => 'secret',
+        ];
+        Functions\when('get_network_option')->alias(function ($id, $name, $default = false) use (&$networkOptions) {
+            if ($name === 'active_sitewide_plugins') {
+                return ['typesense-search/typesense-search.php' => 1];
+            }
+            return $networkOptions[$name] ?? $default;
+        });
+        Functions\when('update_network_option')->alias(function ($id, $name, $value) use (&$networkOptions) {
+            $networkOptions[$name] = $value;
+            return true;
+        });
+        Functions\when('check_admin_referer')->justReturn(true);
+        Functions\when('get_home_url')->alias(static fn ($id) => "https://site{$id}.test/");
+        Functions\when('wp_get_environment_type')->justReturn('local');
+        // Site 3 already has an active mapping matching the current identity/connection — already ready.
+        $siteState = [3 => [NetworkSettingsRepository::STATE => ['active' => [
+            'identity' => ['home' => 'https://site3.test', 'environment' => 'local',
+                'remote' => 'https://search.test', 'network' => 1, 'site' => 3, 'prefix' => ''],
+            'collection' => 'c3', 'key' => 'k3',
+        ]]]];
+        Functions\when('get_blog_option')->alias(static fn ($id, $name, $default = false) => $siteState[$id][$name] ?? $default);
+        Functions\when('delete_blog_option')->justReturn(true);
+        Functions\when('network_admin_url')->returnArg();
+        Functions\expect('set_site_transient')->once()
+            ->with(SetupDispatcher::RUN . '1', Mockery::on(static fn ($run) => $run['sites'] === [2]), 3600)
+            ->andReturn(true);
+        Functions\expect('wp_safe_redirect')->once()->andThrow(new \LogicException('redirect'));
+        $_POST = ['section' => 'sites', 'sites' => [2, 3]];
+        $this->expectExceptionMessage('redirect');
+        $this->page->save();
+    }
+
     public function test_failed_shared_connection_check_returns_to_connection_tab(): void
     {
         Functions\when('current_user_can')->justReturn(true);
