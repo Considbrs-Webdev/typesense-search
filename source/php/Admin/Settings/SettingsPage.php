@@ -164,7 +164,7 @@ class SettingsPage
         $capabilities             = new ServerCapabilities(new AdminApi(new SettingsRepository()));
         $supportsPinnedResults    = $activeTab === 'advanced-settings' ? $capabilities->supportsCurationSets() : false;
         $supportsSynonyms         = $activeTab === 'advanced-settings' ? $capabilities->supportsSynonymSets() : false;
-        $supportsStemming         = $activeTab === 'content' ? $capabilities->supportsStemming() : false;
+        $supportsStemming         = $activeTab === 'advanced-settings' ? $capabilities->supportsStemming() : false;
         $stemmingLocale           = Collection::getStemmingLocale();
         $provisioningAvailable    = ProvisioningCredentials::isAvailableFor((new SettingsRepository())->getRemote());
 

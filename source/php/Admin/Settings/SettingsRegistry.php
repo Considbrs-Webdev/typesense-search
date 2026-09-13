@@ -93,12 +93,6 @@ class SettingsRegistry
             'default'           => 'radio',
         ]);
 
-        register_setting(OptionKeys::OPTION_GROUP_CONTENT, OptionKeys::OPTION_STEMMING_ENABLED, [
-            'type'              => 'integer',
-            'sanitize_callback' => [$this, 'sanitizeStemmingEnabled'],
-            'default'           => 0,
-        ]);
-
         register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_QUERY_BY_WEIGHTS, [
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitizeQueryByWeights'],
@@ -114,6 +108,12 @@ class SettingsRegistry
         register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_SYNONYMS_ENABLED, [
             'type'              => 'integer',
             'sanitize_callback' => [$this, 'sanitizeSynonymsEnabled'],
+            'default'           => 0,
+        ]);
+
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_STEMMING_ENABLED, [
+            'type'              => 'integer',
+            'sanitize_callback' => [$this, 'sanitizeStemmingEnabled'],
             'default'           => 0,
         ]);
 
