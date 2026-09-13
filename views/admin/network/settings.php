@@ -4,13 +4,14 @@ use TypesenseSearch\Typesense\ProvisioningCredentials;
 $provisioningAvailable = ProvisioningCredentials::isAvailableFor($connection['remote']);
 ?>
 <style>
-.typesense-network-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin-bottom: 12px; }
+.typesense-network-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin-bottom: 4px; }
 .typesense-network-heading h1 { margin: 0; }
 .typesense-network-environment { padding: 4px 9px; border: 1px solid #c3c4c7; border-radius: 3px; color: #50575e; font-size: 12px; white-space: nowrap; }
-.typesense-network-intro { margin: 20px 0; max-width: 850px; }
-.typesense-network-intro p { margin: 0 0 8px; font-weight: 400; }
+.typesense-network-intro { margin: 0; padding: 16px 24px; border-bottom: 1px solid #f0f0f1; }
+.typesense-network-intro p { margin: 0 0 6px; font-size: 13px; color: #646970; }
+.typesense-network-intro p:last-child { margin-bottom: 0; }
 .typesense-network-table-wrap { overflow-x: auto; }
-.typesense-network-table { table-layout: fixed; width: 100%; min-width: 760px; }
+.typesense-network-table { table-layout: fixed; width: 100%; min-width: 760px; border: none; }
 .typesense-network-table .typesense-col-selected { width: 60px; }
 .typesense-network-table .typesense-col-site { width: 25%; }
 .typesense-network-table .typesense-col-status { width: 30%; }
@@ -28,14 +29,17 @@ $provisioningAvailable = ProvisioningCredentials::isAvailableFor($connection['re
 .typesense-network-table summary { cursor: pointer; font-weight: 500; }
 .typesense-network-table details[open] { padding: 12px; background: #fff; border: 1px solid #dcdcde; border-radius: 3px; }
 .typesense-network-site-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.typesense-network-actions { margin: 16px 0 0; }
 </style>
-<div class="wrap typesense-network">
+<div class="wrap typesense-network ts-settings">
 <div class="typesense-network-heading"><h1><?php esc_html_e('Typesense Search — Network settings', 'typesense-search'); ?></h1><span class="typesense-network-environment"><?php echo esc_html(sprintf(__('Environment: %s', 'typesense-search'), wp_get_environment_type())); ?></span></div>
-<nav class="nav-tab-wrapper">
+<p class="ts-settings__subtitle"><?php esc_html_e('Connect the network to a shared Typesense server, then choose which sites get their own index.', 'typesense-search'); ?></p>
+<nav class="nav-tab-wrapper ts-settings__tabs">
 <?php foreach (['connection' => __('Connection', 'typesense-search'), 'sites' => __('Sites', 'typesense-search')] as $slug => $label) : ?>
 <a class="nav-tab <?php echo $tab === $slug ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(network_admin_url('settings.php?page=typesense-network&tab=' . $slug)); ?>"><?php echo esc_html($label); ?></a>
 <?php endforeach; ?>
 </nav>
+<div class="ts-settings__panel">
 <?php $notice = get_site_transient('typesense_network_notice_' . get_current_user_id());
 if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get_current_user_id()); ?>
 <div class="notice <?php echo !empty($notice['success']) ? 'notice-success' : 'notice-error'; ?> inline"><p><?php echo esc_html(__($notice['message'], 'typesense-search')); ?></p></div>
@@ -60,30 +64,88 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <?php if ($tab === 'connection') : ?>
 <form method="post" action="<?php echo esc_url(network_admin_url('edit.php?action=typesense_network_save')); ?>">
 <?php wp_nonce_field('typesense_network_save'); ?><input type="hidden" name="section" value="connection">
-<table class="form-table" role="presentation">
-<?php foreach (['remote' => [__('Typesense host', 'typesense-search'), 'TYPESENSE_HOST'], 'frontend_host' => [__('Frontend host (optional)', 'typesense-search'), 'TYPESENSE_FRONTEND_HOST']] as $field => [$label, $constant]) : ?>
-<tr><th><label for="<?php echo esc_attr($field); ?>"><?php echo esc_html($label); ?></label></th><td><input class="regular-text" type="url" id="<?php echo esc_attr($field); ?>" name="<?php echo esc_attr($field); ?>" value="<?php echo esc_attr($connection[$field]); ?>" <?php disabled($network->constant($constant) !== ''); ?>><?php if ($network->constant($constant) !== '') : ?><p><?php esc_html_e('Set via constant.', 'typesense-search'); ?></p><?php endif; ?></td></tr>
-<?php endforeach; ?>
-<tr><th><label for="prefix"><?php esc_html_e('Index prefix (optional)', 'typesense-search'); ?></label></th><td><input class="regular-text" type="text" id="prefix" name="prefix" value="<?php echo esc_attr($network->prefix()); ?>" <?php disabled($network->constant('TYPESENSE_NETWORK_PREFIX') !== ''); ?>><p class="description"><?php esc_html_e('Prepended to every site collection name, e.g. eslov_. Lowercase letters, numbers, hyphens and underscores only.', 'typesense-search'); ?></p><?php if ($network->constant('TYPESENSE_NETWORK_PREFIX') !== '') : ?><p><?php esc_html_e('Set via constant.', 'typesense-search'); ?></p><?php endif; ?></td></tr>
-<tr><th><label for="admin_key"><?php esc_html_e('Admin (indexing) API key', 'typesense-search'); ?></label></th><td><input class="regular-text" type="password" id="admin_key" name="admin_key" autocomplete="new-password" value="" <?php disabled($network->constant('TYPESENSE_ADMIN_KEY') !== ''); ?>><p class="description"><?php echo esc_html($connection['admin_key'] !== '' ? __('A key is configured. Leave blank to keep it.', 'typesense-search') : __('Enter the server admin API key.', 'typesense-search')); ?> <?php esc_html_e('Used only for collections and documents — never for key management. See the security section in the README.', 'typesense-search'); ?></p></td></tr>
-</table>
-<p class="description">
-<?php if ($provisioningAvailable) : ?>
-<?php esc_html_e('A provisioning key is configured: automatic setup can create and remove per-site search keys.', 'typesense-search'); ?>
-<?php else : ?>
-<?php esc_html_e('No provisioning key is configured: automatic setup will fail at the key-creation step. Configure TYPESENSE_PROVISIONING_KEY (permanently, or for a single "wp ... typesense network setup" run) before saving the site selection. See the security section in the README.', 'typesense-search'); ?>
-<?php endif; ?>
-</p>
-<p><?php esc_html_e('Saving the connection starts automatic setup for selected sites. After changing a site URL or environment, save the site selection again. Existing indexes are preserved.', 'typesense-search'); ?></p>
-<?php submit_button(); ?></form>
+
+<div class="ts-settings__card">
+    <div class="ts-settings__card-header">
+        <h2><?php esc_html_e('Server', 'typesense-search'); ?></h2>
+        <p><?php esc_html_e('Every site on the network shares this Typesense server. Set an index prefix if the same server is also used outside this network.', 'typesense-search'); ?></p>
+    </div>
+    <div class="ts-settings__fields">
+        <?php foreach (['remote' => [__('Typesense host', 'typesense-search'), 'TYPESENSE_HOST'], 'frontend_host' => [__('Frontend host (optional)', 'typesense-search'), 'TYPESENSE_FRONTEND_HOST']] as $field => [$label, $constant]) :
+            $locked = $network->constant($constant) !== '';
+        ?>
+        <div class="ts-field">
+            <label for="<?php echo esc_attr($field); ?>" class="ts-field__label"><?php echo esc_html($label); ?></label>
+            <div class="ts-field__body">
+                <input class="regular-text ts-field__input<?php echo $locked ? ' ts-field__input--env-locked' : ''; ?>" type="url" id="<?php echo esc_attr($field); ?>" name="<?php echo esc_attr($field); ?>" value="<?php echo esc_attr($connection[$field]); ?>" <?php disabled($locked); ?>>
+                <?php if ($locked) : ?><p class="ts-field__env-notice"><span aria-hidden="true">🔒</span> <?php esc_html_e('Set via constant — read only.', 'typesense-search'); ?></p><?php endif; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+        <?php $prefixLocked = $network->constant('TYPESENSE_NETWORK_PREFIX') !== ''; ?>
+        <div class="ts-field">
+            <label for="prefix" class="ts-field__label"><?php esc_html_e('Index prefix (optional)', 'typesense-search'); ?></label>
+            <div class="ts-field__body">
+                <input class="regular-text ts-field__input<?php echo $prefixLocked ? ' ts-field__input--env-locked' : ''; ?>" type="text" id="prefix" name="prefix" value="<?php echo esc_attr($network->prefix()); ?>" <?php disabled($prefixLocked); ?>>
+                <p class="ts-field__description"><?php esc_html_e('Prepended to every site collection name, e.g. eslov_. Lowercase letters, numbers, hyphens and underscores only.', 'typesense-search'); ?></p>
+                <?php if ($prefixLocked) : ?><p class="ts-field__env-notice"><span aria-hidden="true">🔒</span> <?php esc_html_e('Set via constant — read only.', 'typesense-search'); ?></p><?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ts-settings__card">
+    <div class="ts-settings__card-header">
+        <h2><?php esc_html_e('API keys', 'typesense-search'); ?></h2>
+        <p><?php esc_html_e('Two keys work together: one sets up new sites, the other keeps their content indexed.', 'typesense-search'); ?></p>
+        <div class="ts-settings__notice ts-settings__notice--info">
+            <ol>
+                <li><?php esc_html_e('A provisioning key runs the automatic setup: saving the site selection on the Sites tab creates each site’s Typesense collection and its own search key.', 'typesense-search'); ?></li>
+                <li><?php esc_html_e('The admin key below then indexes and maintains content in those collections. It only manages collections and documents — never other keys.', 'typesense-search'); ?></li>
+            </ol>
+        </div>
+        <?php if ($provisioningAvailable) : ?>
+        <div class="ts-settings__notice ts-settings__notice--success">
+            <?php esc_html_e('Provisioning key configured: automatic setup can create and remove per-site search keys.', 'typesense-search'); ?>
+        </div>
+        <?php else : ?>
+        <div class="ts-settings__notice ts-settings__notice--warning">
+            <span>
+            <?php
+            printf(
+                /* translators: %s is the constant name TYPESENSE_PROVISIONING_KEY */
+                esc_html__('No provisioning key configured: automatic setup will fail at the key-creation step. Set %s (permanently, or for a single "wp ... typesense network setup" run) before saving the site selection on the Sites tab. See the security section in the README.', 'typesense-search'),
+                '<code>TYPESENSE_PROVISIONING_KEY</code>'
+            );
+            ?>
+            </span>
+        </div>
+        <?php endif; ?>
+    </div>
+    <div class="ts-settings__fields">
+        <?php $adminKeyLocked = $network->constant('TYPESENSE_ADMIN_KEY') !== ''; ?>
+        <div class="ts-field">
+            <label for="admin_key" class="ts-field__label"><?php esc_html_e('Admin key (indexing)', 'typesense-search'); ?></label>
+            <div class="ts-field__body">
+                <input class="regular-text ts-field__input<?php echo $adminKeyLocked ? ' ts-field__input--env-locked' : ''; ?>" type="password" id="admin_key" name="admin_key" autocomplete="new-password" value="" <?php disabled($adminKeyLocked); ?>>
+                <p class="ts-field__description"><?php echo esc_html($connection['admin_key'] !== '' ? __('A key is configured. Leave blank to keep it.', 'typesense-search') : __('Enter the server admin API key.', 'typesense-search')); ?></p>
+                <?php if ($adminKeyLocked) : ?><p class="ts-field__env-notice"><span aria-hidden="true">🔒</span> <?php esc_html_e('Set via constant — read only.', 'typesense-search'); ?></p><?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php submit_button(__('Save changes', 'typesense-search'), 'primary ts-settings__submit'); ?></form>
+<p class="typesense-network-actions">
 <form method="post" action="<?php echo esc_url(network_admin_url('edit.php?action=typesense_network_save')); ?>">
-<?php wp_nonce_field('typesense_network_save'); ?><input type="hidden" name="section" value="status"><p><button class="button"><?php esc_html_e('Check shared connection', 'typesense-search'); ?></button></p></form>
+<?php wp_nonce_field('typesense_network_save'); ?><input type="hidden" name="section" value="status"><button class="button"><?php esc_html_e('Check shared connection', 'typesense-search'); ?></button></form>
+</p>
 
 <?php else : ?>
+<div class="ts-settings__card">
+    <div class="typesense-network-intro"><p><?php esc_html_e('Select sites and save to set up their indexes and search keys. Keep the page open until setup completes.', 'typesense-search'); ?></p><p><?php esc_html_e('Index content separately with WP-CLI. Disabling a site preserves its index and search key until you choose to delete them.', 'typesense-search'); ?></p></div>
 <form id="typesense-sites" method="post" action="<?php echo esc_url(network_admin_url('edit.php?action=typesense_network_save')); ?>">
 <?php wp_nonce_field('typesense_network_save'); ?><input type="hidden" name="section" value="sites"></form>
-<div class="typesense-network-intro"><p><?php esc_html_e('Select sites and save to set up their indexes and search keys. Keep the page open until setup completes.', 'typesense-search'); ?></p><p class="description"><?php esc_html_e('Index content separately with WP-CLI. Disabling a site preserves its index and search key until you choose to delete them.', 'typesense-search'); ?></p></div>
-
 
 <div class="typesense-network-table-wrap"><table class="widefat striped typesense-network-table"><colgroup><col class="typesense-col-selected"><col class="typesense-col-site"><col class="typesense-col-status"><col></colgroup><thead><tr><th scope="col"><?php esc_html_e('Selected', 'typesense-search'); ?></th><th scope="col"><?php esc_html_e('Site', 'typesense-search'); ?></th><th scope="col"><?php esc_html_e('Status', 'typesense-search'); ?></th><th scope="col"><?php esc_html_e('Index', 'typesense-search'); ?></th></tr></thead><tbody>
 <?php foreach ($sites as $site) :
@@ -133,6 +195,8 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <?php endforeach; ?>
 <?php if (!$sites) : ?><tr><td colspan="4"><?php esc_html_e('No sites found.', 'typesense-search'); ?></td></tr><?php endif; ?>
 </tbody></table></div>
-<?php if ($tab === 'sites') : ?><p><button type="submit" form="typesense-sites" class="button button-primary"><?php esc_html_e('Save site selection', 'typesense-search'); ?></button></p><?php endif; ?>
+<?php if ($tab === 'sites') : ?><p class="typesense-network-actions"><button type="submit" form="typesense-sites" class="button button-primary"><?php esc_html_e('Save site selection', 'typesense-search'); ?></button></p><?php endif; ?>
+</div>
 <?php endif; ?>
+</div>
 </div>

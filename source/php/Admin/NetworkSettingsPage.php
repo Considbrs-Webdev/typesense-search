@@ -2,6 +2,7 @@
 
 namespace TypesenseSearch\Admin;
 
+use TypesenseSearch\Helper\CacheBust;
 use TypesenseSearch\Multisite\{NetworkSettingsRepository, SiteProvisioner, SetupDispatcher};
 use TypesenseSearch\Typesense\ClientFactory;
 use TypesenseSearch\Typesense\ProvisioningClientFactory;
@@ -14,6 +15,9 @@ class NetworkSettingsPage
     public const ACTION = 'typesense_network_site';
     public const CHECK = 'typesense_network_status_check';
 
+    /** Hook suffix WordPress assigns this submenu, captured from add_submenu_page(). */
+    private string $pageHook = '';
+
     public function __construct(private SiteProvisioner $provisioner = new SiteProvisioner())
     {
     }
@@ -24,11 +28,33 @@ class NetworkSettingsPage
             if (!(new NetworkSettingsRepository())->isNetworkActivated()) {
                 return;
             }
-            add_submenu_page('settings.php', __('Typesense Search', 'typesense-search'), __('Typesense Search', 'typesense-search'),
+            $hook = add_submenu_page('settings.php', __('Typesense Search', 'typesense-search'), __('Typesense Search', 'typesense-search'),
                 'manage_network_options', self::SLUG, [$this, 'render']);
+            $this->pageHook = $hook !== false ? $hook : '';
         });
         add_action('network_admin_edit_typesense_network_save', [$this, 'save']);
         add_action('admin_post_' . self::ACTION, [$this, 'siteAction']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueueAssets']);
+    }
+
+    /** Reuse the per-site settings page's stylesheet so both admin UIs share one visual language. */
+    public function enqueueAssets(string $hook): void
+    {
+        if ($hook === '' || $hook !== $this->pageHook) {
+            return;
+        }
+
+        $cssFile = CacheBust::name('css/admin-settings.css') ?: 'css/admin-settings.css';
+        $cssPath = TYPESENSESEARCH_PATH . 'assets/dist/' . $cssFile;
+
+        if (file_exists($cssPath)) {
+            wp_enqueue_style(
+                'typesense-search-admin',
+                TYPESENSESEARCH_URL . '/assets/dist/' . $cssFile,
+                [],
+                null
+            );
+        }
     }
 
     public function save(): void

@@ -9,14 +9,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-11T06:34:14+00:00\n"
+"POT-Creation-Date: 2026-09-13T09:31:15+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
 
 #. Plugin Name of the plugin
 #: typesense-search.php
-#: source/php/Admin/NetworkSettingsPage.php:27
+#: source/php/Admin/NetworkSettingsPage.php:31
 #: source/php/Admin/Settings/SettingsPage.php:47
 #: source/php/Admin/Settings/SettingsPage.php:60
 #: views/admin/settings-page.php:29
@@ -53,7 +53,7 @@ msgstr ""
 
 #: source/php/Admin/Ajax/AjaxHelpers.php:44
 #: source/php/Admin/Ajax/AjaxHelpers.php:59
-#: source/php/Admin/NetworkSettingsPage.php:247
+#: source/php/Admin/NetworkSettingsPage.php:273
 msgid "Unauthorized."
 msgstr ""
 
@@ -300,107 +300,107 @@ msgstr ""
 msgid "Additional words or phrases that should match this post in search, even if they do not appear in the content."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:42
+#: source/php/Admin/NetworkSettingsPage.php:68
 msgid "Invalid settings section."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:48
+#: source/php/Admin/NetworkSettingsPage.php:74
 #: source/php/Multisite/NetworkSettingsRepository.php:114
 #: source/php/Multisite/SiteProvisioner.php:199
 msgid "Configure the network connection first."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:52
+#: source/php/Admin/NetworkSettingsPage.php:78
 msgid "Server reports an unhealthy status."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:53
+#: source/php/Admin/NetworkSettingsPage.php:79
 msgid "Server connection and admin key are working."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:58
+#: source/php/Admin/NetworkSettingsPage.php:84
 msgid "Provisioning key management verified."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:60
+#: source/php/Admin/NetworkSettingsPage.php:86
 msgid "Key management was not verified: no provisioning key is configured."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:72
+#: source/php/Admin/NetworkSettingsPage.php:98
 msgid "Enter a valid HTTP or HTTPS URL."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:94
+#: source/php/Admin/NetworkSettingsPage.php:120
 msgid "Invalid site selection."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:113
+#: source/php/Admin/NetworkSettingsPage.php:139
 msgid "Invalid site context."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:119
+#: source/php/Admin/NetworkSettingsPage.php:145
 msgid "This setup sequence has expired or changed. Save the site selection again."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:130
+#: source/php/Admin/NetworkSettingsPage.php:156
 msgid "Typesense is now active for this site."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:133
+#: source/php/Admin/NetworkSettingsPage.php:159
 msgid "Confirm deletion of the index and search key first."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:136
+#: source/php/Admin/NetworkSettingsPage.php:162
 msgid "The index and site search key were deleted. Re-enable the site and run indexing to restore its search content."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:144
+#: source/php/Admin/NetworkSettingsPage.php:170
 msgid "The server reports an unhealthy status."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:147
-#: views/admin/network/settings.php:99
+#: source/php/Admin/NetworkSettingsPage.php:173
+#: views/admin/network/settings.php:159
 msgid "Server connection, admin key and site search key are working."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:149
+#: source/php/Admin/NetworkSettingsPage.php:175
 msgid "Unknown operation."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:223
+#: source/php/Admin/NetworkSettingsPage.php:249
 #: source/php/Frontend/I18n.php:153
 msgid "Disabled"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:223
+#: source/php/Admin/NetworkSettingsPage.php:249
 msgid "Active"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:224
+#: source/php/Admin/NetworkSettingsPage.php:250
 msgid "Setup failed"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:224
+#: source/php/Admin/NetworkSettingsPage.php:250
 msgid "Waiting for setup"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:226
+#: source/php/Admin/NetworkSettingsPage.php:252
 msgid "Setup is complete. Search uses Typesense when the server and index are available."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:227
+#: source/php/Admin/NetworkSettingsPage.php:253
 msgid "WordPress search is used until setup is complete. Save the site selection to start setup."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:229
+#: source/php/Admin/NetworkSettingsPage.php:255
 msgid "Setup failed. Retry setup."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:231
+#: source/php/Admin/NetworkSettingsPage.php:257
 msgid "Automatic setup has been requested, but has not started yet. Refresh this page to see the result."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:232
+#: source/php/Admin/NetworkSettingsPage.php:258
 msgid "Automatic setup is in progress. Refresh this page to see the result."
 msgstr ""
 
@@ -580,7 +580,7 @@ msgid "Logging"
 msgstr ""
 
 #: source/php/Admin/Settings/SettingsPage.php:36
-#: views/admin/network/settings.php:88
+#: views/admin/network/settings.php:148
 msgid "Status"
 msgstr ""
 
@@ -1004,6 +1004,7 @@ msgstr ""
 
 #: source/php/Frontend/I18n.php:165
 #: source/php/Frontend/I18n.php:216
+#: views/admin/network/settings.php:136
 msgid "Save changes"
 msgstr ""
 
@@ -1369,167 +1370,195 @@ msgstr ""
 msgid "The provisioning key is restricted to a different, server-configured destination than the one currently configured. Update the connection settings or the provisioning destination so they match."
 msgstr ""
 
-#: views/admin/network/settings.php:33
+#: views/admin/network/settings.php:35
 msgid "Typesense Search — Network settings"
 msgstr ""
 
-#: views/admin/network/settings.php:33
+#: views/admin/network/settings.php:35
 msgid "Environment: %s"
 msgstr ""
 
-#: views/admin/network/settings.php:35
+#: views/admin/network/settings.php:36
+msgid "Connect the network to a shared Typesense server, then choose which sites get their own index."
+msgstr ""
+
+#: views/admin/network/settings.php:38
 #: views/admin/settings-tabs/connection.php:139
 msgid "Connection"
 msgstr ""
 
-#: views/admin/network/settings.php:35
+#: views/admin/network/settings.php:38
 msgid "Sites"
 msgstr ""
 
-#: views/admin/network/settings.php:44
+#: views/admin/network/settings.php:48
 msgid "Setting up site %1$d of %2$d. Keep this page open until setup completes."
 msgstr ""
 
-#: views/admin/network/settings.php:52
+#: views/admin/network/settings.php:56
 msgid "Continue setup"
 msgstr ""
 
-#: views/admin/network/settings.php:57
+#: views/admin/network/settings.php:61
 msgid "Remove TYPESENSE_COLLECTION and TYPESENSE_SEARCH_KEY constants before using network mode. Each site needs its own collection and key."
 msgstr ""
 
-#: views/admin/network/settings.php:59
+#: views/admin/network/settings.php:63
 msgid "Settings saved."
 msgstr ""
 
-#: views/admin/network/settings.php:64
+#: views/admin/network/settings.php:70
+#: views/admin/settings-tabs/connection.php:27
+msgid "Server"
+msgstr ""
+
+#: views/admin/network/settings.php:71
+msgid "Every site on the network shares this Typesense server. Set an index prefix if the same server is also used outside this network."
+msgstr ""
+
+#: views/admin/network/settings.php:74
 msgid "Typesense host"
 msgstr ""
 
-#: views/admin/network/settings.php:64
+#: views/admin/network/settings.php:74
 #: views/admin/settings-tabs/connection.php:83
 msgid "Frontend host (optional)"
 msgstr ""
 
-#: views/admin/network/settings.php:65
-#: views/admin/network/settings.php:67
-msgid "Set via constant."
+#: views/admin/network/settings.php:81
+#: views/admin/network/settings.php:91
+#: views/admin/network/settings.php:130
+#: views/admin/settings-tabs/connection.php:74
+#: views/admin/settings-tabs/connection.php:102
+#: views/admin/settings-tabs/connection.php:131
+#: views/admin/settings-tabs/connection.php:222
+#: views/admin/settings-tabs/connection.php:264
+msgid "Set via constant — read only."
 msgstr ""
 
-#: views/admin/network/settings.php:67
+#: views/admin/network/settings.php:87
 msgid "Index prefix (optional)"
 msgstr ""
 
-#: views/admin/network/settings.php:67
+#: views/admin/network/settings.php:90
 msgid "Prepended to every site collection name, e.g. eslov_. Lowercase letters, numbers, hyphens and underscores only."
 msgstr ""
 
-#: views/admin/network/settings.php:68
-msgid "Admin (indexing) API key"
-msgstr ""
-
-#: views/admin/network/settings.php:68
-msgid "A key is configured. Leave blank to keep it."
-msgstr ""
-
-#: views/admin/network/settings.php:68
-msgid "Enter the server admin API key."
-msgstr ""
-
-#: views/admin/network/settings.php:68
-msgid "Used only for collections and documents — never for key management. See the security section in the README."
-msgstr ""
-
-#: views/admin/network/settings.php:72
-msgid "A provisioning key is configured: automatic setup can create and remove per-site search keys."
-msgstr ""
-
-#: views/admin/network/settings.php:74
-msgid "No provisioning key is configured: automatic setup will fail at the key-creation step. Configure TYPESENSE_PROVISIONING_KEY (permanently, or for a single \"wp ... typesense network setup\" run) before saving the site selection. See the security section in the README."
-msgstr ""
-
-#: views/admin/network/settings.php:77
-msgid "Saving the connection starts automatic setup for selected sites. After changing a site URL or environment, save the site selection again. Existing indexes are preserved."
-msgstr ""
-
-#: views/admin/network/settings.php:80
-msgid "Check shared connection"
-msgstr ""
-
-#: views/admin/network/settings.php:85
-msgid "Select sites and save to set up their indexes and search keys. Keep the page open until setup completes."
-msgstr ""
-
-#: views/admin/network/settings.php:85
-msgid "Index content separately with WP-CLI. Disabling a site preserves its index and search key until you choose to delete them."
-msgstr ""
-
-#: views/admin/network/settings.php:88
-msgid "Selected"
-msgstr ""
-
-#: views/admin/network/settings.php:88
-msgid "Site"
-msgstr ""
-
-#: views/admin/network/settings.php:88
-msgid "Index"
-msgstr ""
-
-#: views/admin/network/settings.php:94
-msgid "Enable site %d"
-msgstr ""
-
 #: views/admin/network/settings.php:99
-msgid "Last check: %s"
+msgid "API keys"
 msgstr ""
 
 #: views/admin/network/settings.php:100
+msgid "Two keys work together: one sets up new sites, the other keeps their content indexed."
+msgstr ""
+
+#: views/admin/network/settings.php:103
+msgid "A provisioning key runs the automatic setup: saving the site selection on the Sites tab creates each site’s Typesense collection and its own search key."
+msgstr ""
+
+#: views/admin/network/settings.php:104
+msgid "The admin key below then indexes and maintains content in those collections. It only manages collections and documents — never other keys."
+msgstr ""
+
+#: views/admin/network/settings.php:109
+msgid "Provisioning key configured: automatic setup can create and remove per-site search keys."
+msgstr ""
+
+#. translators: %s is the constant name TYPESENSE_PROVISIONING_KEY
+#: views/admin/network/settings.php:116
+msgid "No provisioning key configured: automatic setup will fail at the key-creation step. Set %s (permanently, or for a single \"wp ... typesense network setup\" run) before saving the site selection on the Sites tab. See the security section in the README."
+msgstr ""
+
+#: views/admin/network/settings.php:126
+msgid "Admin key (indexing)"
+msgstr ""
+
+#: views/admin/network/settings.php:129
+msgid "A key is configured. Leave blank to keep it."
+msgstr ""
+
+#: views/admin/network/settings.php:129
+msgid "Enter the server admin API key."
+msgstr ""
+
+#: views/admin/network/settings.php:139
+msgid "Check shared connection"
+msgstr ""
+
+#: views/admin/network/settings.php:144
+msgid "Select sites and save to set up their indexes and search keys. Keep the page open until setup completes."
+msgstr ""
+
+#: views/admin/network/settings.php:144
+msgid "Index content separately with WP-CLI. Disabling a site preserves its index and search key until you choose to delete them."
+msgstr ""
+
+#: views/admin/network/settings.php:148
+msgid "Selected"
+msgstr ""
+
+#: views/admin/network/settings.php:148
+msgid "Site"
+msgstr ""
+
+#: views/admin/network/settings.php:148
+msgid "Index"
+msgstr ""
+
+#: views/admin/network/settings.php:154
+msgid "Enable site %d"
+msgstr ""
+
+#: views/admin/network/settings.php:159
+msgid "Last check: %s"
+msgstr ""
+
+#: views/admin/network/settings.php:160
 msgid "Server and index have not been checked for this configuration."
 msgstr ""
 
-#: views/admin/network/settings.php:106
+#: views/admin/network/settings.php:166
 msgid "Retry"
 msgstr ""
 
-#: views/admin/network/settings.php:107
+#: views/admin/network/settings.php:167
 msgid "Check status"
 msgstr ""
 
-#: views/admin/network/settings.php:111
+#: views/admin/network/settings.php:171
 msgid "Index access verified at the last check."
 msgstr ""
 
-#: views/admin/network/settings.php:111
+#: views/admin/network/settings.php:171
 msgid "Saved index name. Existence has not been verified by a current status check."
 msgstr ""
 
-#: views/admin/network/settings.php:113
+#: views/admin/network/settings.php:173
 msgid "Indexing with WP-CLI"
 msgstr ""
 
-#: views/admin/network/settings.php:114
+#: views/admin/network/settings.php:174
 msgid "Use the same command for the first indexing run and later reindexing. Indexing results do not control activation; an empty or partially filled index can return incomplete results."
 msgstr ""
 
-#: views/admin/network/settings.php:120
-#: views/admin/network/settings.php:129
+#: views/admin/network/settings.php:180
+#: views/admin/network/settings.php:189
 msgid "Delete index and search key"
 msgstr ""
 
-#: views/admin/network/settings.php:127
+#: views/admin/network/settings.php:187
 msgid "Permanently delete index %s and its site search key. WordPress content is preserved. Re-enabling requires indexing again."
 msgstr ""
 
-#: views/admin/network/settings.php:128
+#: views/admin/network/settings.php:188
 msgid "I confirm deletion of this index and search key."
 msgstr ""
 
-#: views/admin/network/settings.php:134
+#: views/admin/network/settings.php:194
 msgid "No sites found."
 msgstr ""
 
-#: views/admin/network/settings.php:136
+#: views/admin/network/settings.php:196
 msgid "Save site selection"
 msgstr ""
 
@@ -1757,10 +1786,6 @@ msgstr ""
 msgid "Enable synonym rules so a search for one word also matches related words you define. After saving, manage them from Typesense search > Synonyms."
 msgstr ""
 
-#: views/admin/settings-tabs/connection.php:27
-msgid "Server"
-msgstr ""
-
 #: views/admin/settings-tabs/connection.php:28
 msgid "Point the plugin to your Typesense instance. You can self-host Typesense or use Typesense Cloud at cloud.typesense.org."
 msgstr ""
@@ -1784,14 +1809,6 @@ msgstr ""
 
 #: views/admin/settings-tabs/connection.php:70
 msgid "The full URL to your Typesense server, including protocol and port if needed (e.g. https://search.example.com:8108)."
-msgstr ""
-
-#: views/admin/settings-tabs/connection.php:74
-#: views/admin/settings-tabs/connection.php:102
-#: views/admin/settings-tabs/connection.php:131
-#: views/admin/settings-tabs/connection.php:222
-#: views/admin/settings-tabs/connection.php:264
-msgid "Set via constant — read only."
 msgstr ""
 
 #: views/admin/settings-tabs/connection.php:98
