@@ -12,6 +12,7 @@ class ServerCapabilities
     private const MIN_STEMMING_VERSION = '27.0.0';
 
     private ?string $cached = null;
+    private ?string $context = null;
 
     public function __construct(private AdminApi $adminApi)
     {
@@ -43,6 +44,11 @@ class ServerCapabilities
      */
     public function getServerVersion(): string
     {
+        $context = $this->adminApi->contextKey();
+        if ($context !== $this->context) {
+            $this->cached = null;
+            $this->context = $context;
+        }
         return $this->cached ??= $this->adminApi->getServerVersion();
     }
 }

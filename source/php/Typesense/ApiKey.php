@@ -28,6 +28,19 @@ class ApiKey
      */
     public static function generateSearchKey(Client $client, string $collectionName): string
     {
+        return self::generateSearchKeyWithId($client, $collectionName)['value'];
+    }
+
+    /**
+     * Same as {@see generateSearchKey()} but also returns the key's server-side
+     * ID, needed to delete this exact key later without guessing.
+     *
+     * @return array{value: string, id: string}
+     * @throws \RuntimeException When the API does not return a key value.
+     * @throws \Exception        On any other Typesense API failure.
+     */
+    public static function generateSearchKeyWithId(Client $client, string $collectionName): array
+    {
         $result = $client->keys->create([
             'description' => 'Search-only key for collection: ' . $collectionName,
             'actions'     => ['documents:search'],
@@ -40,6 +53,6 @@ class ApiKey
             );
         }
 
-        return (string) $result['value'];
+        return ['value' => (string) $result['value'], 'id' => (string) ($result['id'] ?? '')];
     }
 }

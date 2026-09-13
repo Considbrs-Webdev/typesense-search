@@ -13,26 +13,28 @@ use TypesenseSearch\Typesense\AdminApi;
 
 class TypesenseSyncTest extends TestCase
 {
-    public function test_sync_adds_site_locale_to_synonyms_when_stemming_is_enabled(): void
+    public function test_sync_adds_site_locale_to_synonyms(): void
     {
         Functions\when('get_locale')->justReturn('sv_SE');
 
-        $synonymBody = $this->syncAndCaptureSynonymBody(true);
+        $synonymBody = $this->syncAndCaptureSynonymBody();
 
         self::assertSame('sv', $synonymBody['items'][0]['locale']);
     }
 
-    public function test_sync_omits_locale_when_stemming_is_disabled(): void
+    public function test_sync_falls_back_to_english_locale_when_site_locale_is_unset(): void
     {
-        $synonymBody = $this->syncAndCaptureSynonymBody(false);
+        Functions\when('get_locale')->justReturn('');
 
-        self::assertArrayNotHasKey('locale', $synonymBody['items'][0]);
+        $synonymBody = $this->syncAndCaptureSynonymBody();
+
+        self::assertSame('en', $synonymBody['items'][0]['locale']);
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function syncAndCaptureSynonymBody(bool $stemmingEnabled): array
+    private function syncAndCaptureSynonymBody(): array
     {
         Functions\when('_n')->alias(
             static fn (string $single, string $plural, int $number, string $domain): string =>
@@ -43,7 +45,6 @@ class TypesenseSyncTest extends TestCase
         $settings->shouldReceive('getRemote')->andReturn('https://search.example.com');
         $settings->shouldReceive('getAdminKey')->andReturn('secret');
         $settings->shouldReceive('getCollectionName')->andReturn('my_collection');
-        $settings->shouldReceive('isStemmingEnabled')->andReturn($stemmingEnabled);
 
         $synonymBody = null;
         $adminApi = Mockery::mock(AdminApi::class);

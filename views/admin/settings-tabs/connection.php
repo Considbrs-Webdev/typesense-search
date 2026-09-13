@@ -12,6 +12,10 @@ $tsFrontendHostLocked = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_FR
 $tsCollectionLocked   = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_INDEX_NAME);
 $tsAdminKeyLocked     = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_ADMIN_KEY);
 $tsSearchKeyLocked    = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_SEARCH_KEY);
+if ((new \TypesenseSearch\Multisite\NetworkSettingsRepository())->isNetworkActivated()) {
+    include __DIR__ . '/network-managed.php';
+    return;
+}
 ?>
 
 <div class="ts-settings__panel" id="ts-tab-connection">
@@ -192,13 +196,14 @@ $tsSearchKeyLocked    = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_SE
                         <span class="ts-field__required" aria-hidden="true">*</span>
                     </label>
                     <div class="ts-field__body">
+                        <?php $tsAdminKeySaved = !$tsAdminKeyLocked && get_option(Settings::OPTION_ADMIN_KEY) !== ''; ?>
                         <div class="ts-field__input-wrap">
                             <input
                                 type="password"
                                 id="ts-admin-key"
                                 name="<?php echo esc_attr(Settings::OPTION_ADMIN_KEY); ?>"
-                                value="<?php echo $tsAdminKeyLocked ? esc_attr(str_repeat('•', 20)) : esc_attr(get_option(Settings::OPTION_ADMIN_KEY)); ?>"
-                                placeholder=""
+                                value="<?php echo $tsAdminKeyLocked ? esc_attr(str_repeat('•', 20)) : ''; ?>"
+                                placeholder="<?php echo $tsAdminKeySaved ? esc_attr__('Saved — leave blank to keep', 'typesense-search') : ''; ?>"
                                 class="regular-text ts-field__input<?php echo $tsAdminKeyLocked ? ' ts-field__input--env-locked' : ''; ?>"
                                 spellcheck="false"
                                 autocomplete="new-password"
@@ -210,11 +215,18 @@ $tsSearchKeyLocked    = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_SE
                             </button>
                         </div>
                         <p class="ts-field__description">
-                            <?php esc_html_e('Used server-side for indexing operations. Never expose this key publicly.', 'typesense-search'); ?>
+                            <?php esc_html_e('Used server-side for indexing operations. Never expose this key publicly. It is never shown here once saved.', 'typesense-search'); ?>
                         </p>
                         <?php if ($tsAdminKeyLocked) : ?>
                         <p id="ts-admin-key-env-note" class="ts-field__env-notice">
                             <span aria-hidden="true">🔒</span> <?php esc_html_e('Set via constant — read only.', 'typesense-search'); ?>
+                        </p>
+                        <?php elseif ($tsAdminKeySaved) : ?>
+                        <p class="ts-field__description">
+                            <label>
+                                <input type="checkbox" name="<?php echo esc_attr(Settings::OPTION_ADMIN_KEY); ?>_clear" value="1" />
+                                <?php esc_html_e('Clear the saved key (leaving the field above blank keeps it)', 'typesense-search'); ?>
+                            </label>
                         </p>
                         <?php endif; ?>
                     </div>
@@ -254,6 +266,7 @@ $tsSearchKeyLocked    = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_SE
                         <?php endif; ?>
 
                         <div id="ts-gen-key-wrap" <?php echo get_option(Settings::OPTION_SEARCH_KEY) ? 'hidden' : ''; ?>>
+                            <?php if ($provisioningAvailable) : ?>
                             <button type="button" id="ts-generate-search-key" class="button button-secondary ts-connection-test__button">
                                 <svg class="ts-connection-test__spinner" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                                 <svg class="ts-connection-test__icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
@@ -264,6 +277,11 @@ $tsSearchKeyLocked    = ConstantsLoader::isDefinedAsConstant(Settings::OPTION_SE
                                 <span class="ts-connection-result__dot" aria-hidden="true"></span>
                                 <span class="ts-connection-result__message"></span>
                             </div>
+                            <?php else : ?>
+                            <p class="ts-field__description">
+                                <?php esc_html_e('Automatic generation is unavailable: no provisioning key is configured for this server. Enter a search-only API key created manually in your Typesense dashboard instead.', 'typesense-search'); ?>
+                            </p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

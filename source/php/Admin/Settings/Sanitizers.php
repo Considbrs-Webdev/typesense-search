@@ -77,6 +77,29 @@ trait Sanitizers
         return $weights;
     }
 
+    /**
+     * Sanitize the admin (indexing) key: an empty submission means "keep the
+     * saved secret", never "clear it". Clearing requires the explicit
+     * companion checkbox, since a blank field alone is ambiguous. Nonce
+     * verification already happened in options.php via settings_fields()
+     * before this callback runs.
+     */
+    public function sanitizeAdminKey(mixed $value): string
+    {
+        $value = sanitize_text_field((string) $value);
+
+        if ($value !== '') {
+            return $value;
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        if (!empty($_POST[OptionKeys::OPTION_ADMIN_KEY . '_clear'])) {
+            return '';
+        }
+
+        return (string) get_option(OptionKeys::OPTION_ADMIN_KEY, '');
+    }
+
     public function sanitizePinnedResultsEnabled(mixed $value): int
     {
         if (!(new ServerCapabilities(new AdminApi(new SettingsRepository())))->supportsCurationSets()) {

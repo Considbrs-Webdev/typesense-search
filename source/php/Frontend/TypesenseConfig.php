@@ -63,6 +63,9 @@ class TypesenseConfig
 	 */
 	public function localizeConfig(): void
 	{
+        if (!$this->settings->canUseTypesense()) {
+            return;
+        }
 		$isSearch           = is_search();
 		$quickSearchEnabled = $this->settings->isQuickSearchEnabled();
 

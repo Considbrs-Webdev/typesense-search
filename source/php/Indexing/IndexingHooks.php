@@ -79,6 +79,9 @@ class IndexingHooks
      */
     public function onAfterInsertPost(int $post_id, \WP_Post $post, bool $update, null|\WP_Post $postBefore): void
     {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense()) {
+            return;
+        }
         $strategy  = $this->registry->resolve($post);
         if ($strategy === null) {
             return;
@@ -126,6 +129,9 @@ class IndexingHooks
      */
     public function onExternalIndexPost(int $postId): void
     {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense()) {
+            return;
+        }
         // Raw SQL writes (e.g. Nested Pages sort) bypass WordPress and leave
         // stale data in the object cache. Clear it before reading the post.
         clean_post_cache($postId);
@@ -161,6 +167,9 @@ class IndexingHooks
      */
     public function onPostDeindexed(int $postId): void
     {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense()) {
+            return;
+        }
         // The document ID is the WP post ID, shared across all strategies in
         // the same Typesense collection. A single deindex call is sufficient.
         $post = get_post($postId);
@@ -188,6 +197,9 @@ class IndexingHooks
      */
     public function onSectionExclusionChanged(int $postId): void
     {
+        if (!(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense()) {
+            return;
+        }
         $post = get_post($postId);
         if (!$post || $post->post_type !== 'page' || !empty(get_post_ancestors($post))) {
             return;

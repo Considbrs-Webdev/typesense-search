@@ -16,6 +16,11 @@ class AdminApi
     {
     }
 
+    public function contextKey(): string
+    {
+        return hash('sha256', $this->settings->getRemote() . '|' . $this->settings->getAdminKey());
+    }
+
     /**
      * Fetch the Typesense server version string, or '' on any failure.
      */
@@ -70,6 +75,10 @@ class AdminApi
      */
     public function request(string $method, string $url, ?array $body = null): array
     {
+        $network = new \TypesenseSearch\Multisite\NetworkSettingsRepository();
+        if ($network->isNetworkActivated() && !$network->canUse()) {
+            return ['ok' => false, 'message' => 'Typesense is disabled for this site.', 'body' => ''];
+        }
         $args = [
             'method'  => $method,
             'timeout' => 10,

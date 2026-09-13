@@ -18,6 +18,12 @@ use TypesenseSearch\Logger\IndexingLog;
  */
 class IndexAction
 {
+    public function __construct(
+        private \TypesenseSearch\Multisite\NetworkSettingsRepository $network = new \TypesenseSearch\Multisite\NetworkSettingsRepository(),
+        private \TypesenseSearch\Multisite\SiteProvisioner $provisioner = new \TypesenseSearch\Multisite\SiteProvisioner(),
+    ) {
+    }
+
     /**
      * Run the index operation.
      *
@@ -92,6 +98,17 @@ class IndexAction
                     $indexScope
                 )
             );
+        }
+
+        // Initial indexing also completes legacy/pending network setup in this --url context.
+        $network = $this->network;
+        if (!$isDryRun && $network->isNetworkActivated() && !$network->canUse()) {
+            try {
+                $this->provisioner->setup();
+            } catch (\Throwable $e) {
+                \WP_CLI::error(\TypesenseSearch\Multisite\SetupException::describe($e));
+                return;
+            }
         }
 
         // ── Count totals per post type for the progress bar ─────────────────

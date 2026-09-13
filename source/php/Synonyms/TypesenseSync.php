@@ -79,19 +79,16 @@ class TypesenseSync
      */
     private function ruleToSynonymItem(array $rule): array
     {
-        $item = [
+        // Typesense matches a synonym item's locale against the locale of the
+        // fields it's applied to. Collection::getSchema() always stamps the
+        // site locale on the searchable fields (independent of stemming), so
+        // synonym items must always carry the same locale or Typesense will
+        // silently skip the synonym instead of erroring.
+        return [
             'id'       => 'wp-synonym-' . (int) $rule['id'],
             'synonyms' => array_values(array_map('strval', (array) ($rule['terms'] ?? []))),
+            'locale'   => Collection::getSiteLocale(),
         ];
-
-        // Typesense resolves locale-specific synonyms using the locale of the
-        // highest-weighted query_by field. Keep synonym items aligned with the
-        // locale added to searchable fields when stemming is enabled.
-        if ($this->settings->isStemmingEnabled()) {
-            $item['locale'] = Collection::getStemmingLocale();
-        }
-
-        return $item;
     }
 
     /**

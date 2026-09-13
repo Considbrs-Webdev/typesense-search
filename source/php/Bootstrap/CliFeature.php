@@ -23,6 +23,7 @@ class CliFeature
     {
         if (defined('WP_CLI') && constant('WP_CLI') === true) {
             \WP_CLI::add_command('typesense', new IndexCommand($this->settings, $this->searchStatistics));
+            \WP_CLI::add_command('typesense network', new \TypesenseSearch\CLI\NetworkCommand());
         }
     }
 }

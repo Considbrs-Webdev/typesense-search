@@ -19,6 +19,8 @@ if (! defined('WPINC')) {
     die;
 }
 
+define('TYPESENSESEARCH_BASENAME', plugin_basename(__FILE__));
+
 define('TYPESENSESEARCH_PATH', plugin_dir_path(__FILE__));
 define('TYPESENSESEARCH_URL', plugins_url('', __FILE__));
 define('TYPESENSESEARCH_VIEW_PATH', plugin_dir_path(__FILE__) . 'views');

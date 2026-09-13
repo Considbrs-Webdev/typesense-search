@@ -33,6 +33,7 @@ abstract class TestCase extends PhpUnitTestCase
 
     private function stubCommonWordPressFunctions(): void
     {
+        Functions\when('is_multisite')->justReturn(false);
         Functions\when('__')->returnArg(1);
         Functions\when('sanitize_key')->alias(static function (mixed $key): string {
             $key = strtolower((string) $key);

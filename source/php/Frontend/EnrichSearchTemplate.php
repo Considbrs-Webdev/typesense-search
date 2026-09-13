@@ -23,7 +23,7 @@ class EnrichSearchTemplate
 	 */
 	public function addTypesenseViewData(array $data): array
 	{
-		if (!is_search()) {
+		if (!$this->settings->canUseTypesense() || !is_search()) {
 			return $data;
 		}
 

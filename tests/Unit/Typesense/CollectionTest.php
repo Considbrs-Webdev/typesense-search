@@ -18,6 +18,7 @@ class CollectionTest extends TestCase
         parent::setUp();
 
         Functions\when('apply_filters')->alias(static fn (string $hook, mixed $value, mixed ...$args) => $value);
+        Functions\when('get_locale')->justReturn('sv_SE');
     }
 
     private function settings(array $overrides = []): SettingsRepository
@@ -83,19 +84,17 @@ class CollectionTest extends TestCase
 
     // ── stem / locale ────────────────────────────────────────────────────────
 
-    public function test_schema_omits_stem_and_locale_when_stemming_disabled(): void
+    public function test_schema_includes_locale_but_omits_stem_when_stemming_disabled(): void
     {
         $schema = Collection::getSchema('my_collection', $this->settings(), $this->capabilities());
         $fields = $this->fieldsByName($schema);
 
         self::assertArrayNotHasKey('stem', $fields['title']);
-        self::assertArrayNotHasKey('locale', $fields['title']);
+        self::assertSame('sv', $fields['title']['locale']);
     }
 
     public function test_schema_applies_stem_and_locale_only_to_searchable_text_fields(): void
     {
-        Functions\when('get_locale')->justReturn('sv_SE');
-
         $schema = Collection::getSchema(
             'my_collection',
             $this->settings(['stemming' => true]),

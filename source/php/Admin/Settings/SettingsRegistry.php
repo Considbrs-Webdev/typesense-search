@@ -19,16 +19,26 @@ class SettingsRegistry
      */
     public function registerSettings(): void
     {
-        foreach ([
+        $networkMode = (new \TypesenseSearch\Multisite\NetworkSettingsRepository())->isNetworkActivated();
+        foreach ($networkMode ? [] : [
             OptionKeys::OPTION_REMOTE,
             OptionKeys::OPTION_INDEX_NAME,
-            OptionKeys::OPTION_ADMIN_KEY,
             OptionKeys::OPTION_SEARCH_KEY,
             OptionKeys::OPTION_FRONTEND_HOST,
         ] as $option) {
             register_setting(OptionKeys::OPTION_GROUP_CONNECTION, $option, [
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
+                'default'           => '',
+            ]);
+        }
+
+        if (!$networkMode) {
+            // A blank submission must keep the saved secret rather than wipe it —
+            // needs its own sanitize callback, see Sanitizers::sanitizeAdminKey().
+            register_setting(OptionKeys::OPTION_GROUP_CONNECTION, OptionKeys::OPTION_ADMIN_KEY, [
+                'type'              => 'string',
+                'sanitize_callback' => [$this, 'sanitizeAdminKey'],
                 'default'           => '',
             ]);
         }
@@ -83,12 +93,6 @@ class SettingsRegistry
             'default'           => 'radio',
         ]);
 
-        register_setting(OptionKeys::OPTION_GROUP_CONTENT, OptionKeys::OPTION_STEMMING_ENABLED, [
-            'type'              => 'integer',
-            'sanitize_callback' => [$this, 'sanitizeStemmingEnabled'],
-            'default'           => 0,
-        ]);
-
         register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_QUERY_BY_WEIGHTS, [
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitizeQueryByWeights'],
@@ -104,6 +108,12 @@ class SettingsRegistry
         register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_SYNONYMS_ENABLED, [
             'type'              => 'integer',
             'sanitize_callback' => [$this, 'sanitizeSynonymsEnabled'],
+            'default'           => 0,
+        ]);
+
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_STEMMING_ENABLED, [
+            'type'              => 'integer',
+            'sanitize_callback' => [$this, 'sanitizeStemmingEnabled'],
             'default'           => 0,
         ]);
 

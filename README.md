@@ -6,6 +6,8 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 - **License:** MIT
 - **Requires:** WordPress 5.6+, PHP 8.1+
 
+Pending multisite improvements and agreed setup-flow changes: [Multisite refactor checklist](docs/multisite-refactor.md).
+
 ---
 
 ## Table of contents
@@ -41,6 +43,14 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
    - [8.3 Index external content](#83-index-external-content)
    - [8.4 Customise hit templates](#84-customise-hit-templates)
 9. [WordPress hooks and filters reference](#9-wordpress-hooks-and-filters-reference)
+10. [Multisite network mode](#10-multisite-network-mode)
+    - [10.1 Site state, naming and configuration](#101-site-state-naming-and-configuration)
+    - [10.2 Custom integrations and shared-core installations](#102-custom-integrations-and-shared-core-installations)
+11. [API key roles and security](#11-api-key-roles-and-security)
+    - [11.1 The four key roles](#111-the-four-key-roles)
+    - [11.2 Creating the provisioning key and admin key](#112-creating-the-provisioning-key-and-admin-key)
+    - [11.3 Configuring the provisioning key](#113-configuring-the-provisioning-key)
+    - [11.4 Rotating keys](#114-rotating-keys)
 
 ---
 
@@ -102,8 +112,10 @@ When a constant is defined:
 | `TYPESENSE_HOST`          | `typesense_search_remote`        | Full URL to the Typesense server               |
 | `TYPESENSE_FRONTEND_HOST` | `typesense_search_frontend_host` | Optional public host sent to the browser       |
 | `TYPESENSE_COLLECTION`    | `typesense_search_index_name`    | Name of the Typesense collection               |
-| `TYPESENSE_ADMIN_KEY`     | `typesense_search_admin_key`     | Full-access Admin API key (server-side only)   |
+| `TYPESENSE_ADMIN_KEY`     | `typesense_search_admin_key`     | Admin/indexing API key (server-side only)      |
 | `TYPESENSE_SEARCH_KEY`    | `typesense_search_search_key`    | Search-only key passed to front-end JavaScript |
+
+> **Security:** `TYPESENSE_ADMIN_KEY` is used only for collections and documents — never for key management. Automatic search-key generation uses a separate, more privileged provisioning key that is never stored as an option. See [§11 API key roles and security](#11-api-key-roles-and-security).
 
 #### Setup
 
@@ -131,11 +143,15 @@ These settings tell the plugin how to reach your Typesense instance.
 | ----------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
 | Remote URL              | `typesense_search_remote`        | Base URL of your Typesense server, e.g. `https://search.example.com`              |
 | Index (collection) name | `typesense_search_index_name`    | The Typesense collection to read from and write to                                |
-| Admin API key           | `typesense_search_admin_key`     | Full-access key — used server-side for indexing and collection management         |
+| Admin (indexing) API key | `typesense_search_admin_key`     | Server-side key for collections and documents only — never key management         |
 | Search API key          | `typesense_search_search_key`    | Read-only key — passed to the front-end JavaScript                                |
 | Frontend host           | `typesense_search_frontend_host` | Optional override of the host sent to the browser (useful behind reverse proxies) |
 
-The admin key is kept server-side. The search key is the only credential exposed to the browser.
+The admin key is kept server-side and is never rendered back into this form once saved — leave the field blank to keep it, or tick "Clear the saved key" to remove it. The search key is the only credential exposed to the browser.
+
+"Generate search key" uses a separate provisioning key (see [§11](#11-api-key-roles-and-security)) and is hidden when none is configured — enter a manually created search-only key instead.
+
+> **Multisite:** in network mode these settings are managed by the network administrator under **Network Admin → Settings → Typesense Search**, and this tab becomes read-only for the current site. See [§10 Multisite network mode](#10-multisite-network-mode).
 
 ### 4.3 Settings tab
 
@@ -269,6 +285,8 @@ indexing. The log can be cleared from this tab.
 ### 4.9 Status tab
 
 Checks whether the current configuration is valid and the collection exists. Can create the collection if it is missing.
+
+> **Multisite:** in network mode this tab checks the shared connection or the current site's active key instead, and legacy connection/key AJAX actions are unavailable. See [§10 Multisite network mode](#10-multisite-network-mode).
 
 ---
 
@@ -1189,3 +1207,279 @@ Both hooks are wired in `IndexingHooks` during bootstrap, so they are available 
 | `Municipio/TypesenseSearch/hitTemplateView`     | `string $view, string $key`      | Override the Blade view path for a given template key (e.g. map `'my-event'` to `'my-theme.search.hit-event'`)                       |
 | `Municipio/TypesenseSearch/postTypeToTemplate`  | `array<string,string> $mapping`  | Map Typesense `post_type` values to template keys. Entries not listed fall back to `'default'`                                       |
 | `Municipio/TypesenseSearch/placeholderMappings` | `array<string,string> $mappings` | Add custom `{TOKEN}` → document field mappings that the front-end JavaScript uses when rendering hit cards (see §8.4 for an example) |
+
+## 10. Multisite network mode
+
+Network-activate Typesense Search to manage the shared connection under
+**Network Admin → Settings → Typesense Search**. Local-only activation in a
+multisite installation retains the existing single-site behavior.
+
+1. Save the shared Typesense host, admin key and optional frontend host on the
+   Connection tab. A blank admin-key field keeps the existing secret; the saved
+   secret is never rendered back into the page.
+2. Select sites on the Sites tab and save. New sites are disabled by default.
+   Keep the page open: the browser submits authenticated setup requests one site
+   at a time and returns to Network Admin between sites. Each request verifies
+   network administration permission and a WordPress nonce. The server does not
+   call itself and no unauthenticated setup endpoint or TLS override is used.
+   If automatic submission is unavailable, use **Continue setup**.
+3. Setup creates or reuses the site's owned index and search key, synchronizes
+   synonyms and pinned results, and activates the mapping. Search can use an
+   empty index as soon as the server and index are available.
+4. Index content separately, initially and on subsequent runs:
+
+   Enable the desired post types in the site's Typesense Search settings first.
+   A new site's setup can finish with no post types selected; the index remains
+   empty until content types are enabled and indexed. `--post-type` does not
+   enable a disabled content type.
+
+   ```sh
+   wp --url=https://example.com/subsite/ typesense index --yes --batch-size=100
+   # Add --include-pdf and/or --include-external when needed.
+   ```
+
+   `typesense network setup` performs setup from CLI. Legacy `network prepare`
+   and `network activate` are setup aliases; `network index` uses the same
+   indexing engine as `typesense index`. No manual review or activation is required.
+5. Check the shared connection on Connection or each site's status on Sites.
+   Checks run only on request. Setup failures appear on the affected site; retry
+   setup or save the selection again. Closing the page interrupts the remaining
+   sequence. On mapped domains, the administrator must be logged in on the target
+   site as well; an absent/expired session or invalid nonce stops that request.
+
+An indexing error or interrupted run does not deactivate a working site. Search
+may return incomplete results until indexing finishes; rerun the same command
+to update the documents. Server and index availability still determine whether
+the frontend can use Typesense. A setup error on one site is recorded in its row
+and ordinary setup failures do not stop the remaining sites in the sequence.
+
+Post types, PDFs, Modularity, search appearance, facets, quick search, statistics,
+synonyms and pinned-result rules remain site-local. The local Connection and
+Status tabs show that the network administrator owns those settings. Legacy
+connection/key AJAX actions are unavailable in network mode; local indexing
+operations only use the current site's effective collection.
+
+### 10.1 Site state, naming and configuration
+
+Collections use `{domain}[-{path}]__{environment}_b{blog_id}`, normalized to ASCII
+and bounded to 128 characters while retaining the environment/site suffix. This
+supports path-based sites, subdomains and mapped domains. Site IDs distinguish
+sites in one WordPress installation; independent installations sharing the same
+cluster must use distinct URL/environment identities or separate clusters.
+
+Set `WP_ENVIRONMENT_TYPE` correctly before copying a production database to
+local/staging. WordPress defaults to `production` if it is not set. The plugin
+records the canonical home URL, environment and server when preparing a site.
+A mismatch blocks the old mapping until setup completes for the new context. A clone with *identical* URL, environment and
+server configuration cannot be distinguished automatically.
+
+In network mode, `TYPESENSE_HOST`, `TYPESENSE_ADMIN_KEY`, `TYPESENSE_FRONTEND_HOST`
+and `TYPESENSE_NETWORK_PREFIX` override their shared database settings. Global
+`TYPESENSE_COLLECTION` and `TYPESENSE_SEARCH_KEY` conflict with site isolation:
+remove them before setting up sites. All constants keep their existing
+behavior outside network mode. Disabled sites cannot bypass network policy with
+legacy local credentials or constants.
+
+An optional index prefix can be set network-wide on the Connection tab (or via
+the `TYPESENSE_NETWORK_PREFIX` constant), for example `eslov_`. It is prepended
+to every site's resolved collection name: `{prefix}_{domain}[-{path}]__{environment}_b{blog_id}`.
+Only lowercase letters, digits, hyphens and underscores are kept; other
+characters are dropped. This has no effect outside network mode, where the
+collection name is set directly.
+
+The authoritative active/candidate mapping is stored atomically in the site's
+`typesense_network_state` option (not autoloaded). Legacy local connection,
+collection and key options are left untouched so local activation can resume
+its original configuration after network activation ends. No existing index is
+silently adopted, renamed or deleted. On first transition to network mode,
+sites awaiting setup use ordinary WordPress search until setup completes; this is not a
+zero-downtime migration of an existing local Typesense frontend.
+
+Disabling a site stops Typesense frontend behavior and plugin-managed indexing,
+including CLI and synchronization. It preserves local settings, remote documents
+and previously issued keys. Re-enabling a configured site reuses its mapping;
+run indexing to catch up on changes made while it was disabled. Disabling does
+not revoke an already public search key.
+
+To remove a disabled site's saved index and search key, expand **Delete index
+and search key** in its Index column, review the index name, confirm and submit.
+The operation requires network administration permission and refuses deletion if
+the site is enabled, the saved URL/environment/server identity has changed, or
+index ownership cannot be verified. Only keys matching the saved key prefix and
+exact search-only collection scope are eligible; ambiguous matches stop deletion.
+WordPress content and local settings are preserved. Resources saved for other
+server/environment identities are left for explicit cleanup in that environment.
+A failed deletion retains the saved mapping so it can be retried. After successful
+deletion, re-enable the site and index its content again.
+
+Setup can be retried after failures. A revoked search key is replaced on
+an explicit setup retry. No network-wide content indexing loop is performed. If a process was killed and left a lock, first ensure
+it has ended, then run:
+
+```sh
+wp --url=https://example.com/subsite/ option delete typesense_network_provision_lock
+```
+
+Normal completion, exceptions and ordinary CLI exits release their own lock.
+Concurrent provisioning for the same site is rejected. Uninstall removes new
+network configuration and local provisioning metadata, but never remote indexes.
+
+### 10.2 Custom integrations and shared-core installations
+
+Provisioning and indexing execute in the target site's own request so its theme,
+plugins and schema filters are loaded. A bare `switch_to_blog()` does not load
+another site's plugins or theme. Use `--url` for complete per-site indexing.
+Custom strategies should use the supplied SettingsRepository/TypesenseClientService
+and honor `canUseTypesense()`; plugins making independent Typesense requests are
+responsible for enforcing this policy themselves.
+
+For path-based networks which store one shared core URL (for example `/wp`) as
+every site's `siteurl`, network actions use the subsite's `/subsite/wp-admin/`
+route. Other installations use WordPress's normal admin URL. Custom routing can
+adjust `typesense_search_network_site_admin_url` (URL, site ID, path). This plugin
+does not change site URLs, database tables or server rewrite rules to establish
+multisite itself.
+
+---
+
+## 11. API key roles and security
+
+The admin/indexing key that WordPress, cron and WP-CLI use for ordinary
+indexing never administers API keys. Creating and deleting search keys uses a
+separate, more privileged **provisioning key** that is never stored as a
+WordPress option, never rendered into HTML or AJAX/REST responses, and never
+driven by request input (a form-supplied host/key can't redirect it).
+
+### 11.1 The four key roles
+
+| Role | Where it comes from | Verified Typesense actions (30.2) |
+| --- | --- | --- |
+| Bootstrap/server admin key | Created once when the Typesense server itself is set up | Everything — used only to create the provisioning key below, never held by the plugin |
+| **Provisioning key** | `TYPESENSE_PROVISIONING_KEY` constant or environment variable only — never an option | `keys:create`, `keys:list`, `keys:delete`; scope `["*"]` |
+| **Admin/indexing key** | `TYPESENSE_ADMIN_KEY` (single site) / the network connection setting | `collections:*`, `documents:search`, `documents:create`, `documents:delete`, `synonym_sets:*`, `curation_sets:*`, `debug:list`; collection/document operations scoped to this installation's collection(s) |
+| **Public search key** | Generated by the provisioning key, one per site/installation | `documents:search` only, on exactly one collection |
+
+Two results from testing against a real Typesense 30.2 instance are worth
+calling out because they are easy to get wrong by reading the action names
+alone:
+
+- Regular per-document indexing (`documents->upsert()`, the only way this
+  plugin writes documents) is authorized by **`documents:create`**, not
+  `documents:upsert` — Typesense checks the route (`POST /documents`), not the
+  `?action=` query value.
+- The `collections:*` wildcard action is required for the schema `PATCH`
+  request used to attach synonym sets and curation sets — none of
+  `collections:create`/`get`/`delete`/`list`, alone or combined, authorize it.
+  This is why the admin/indexing key needs `collections:*` rather than the
+  three granular actions, even though it stays strictly scoped to this
+  installation's own collection(s).
+- Managing synonym sets and curation sets themselves (`PUT`/`GET`/`DELETE` on
+  `/synonym_sets` and `/curation_sets`) needs its own explicit
+  `synonym_sets:*` / `curation_sets:*` actions — `collections:*` does not
+  cover them, no matter how the `collections` field is scoped.
+
+Collection scoping does **not** protect global resources: API keys, synonym
+sets and curation sets are never isolated by a collection prefix. Only the
+provisioning key role is trusted with `keys:*`, and only for that reason.
+
+### 11.2 Creating the provisioning key and admin key
+
+Both keys are created once, directly on the Typesense server, using the
+server's own bootstrap/admin key (never stored by this plugin). Pick a
+collection prefix for the installation — it does not need to match anything
+in WordPress, it only needs to match what you configure as
+`TYPESENSE_NETWORK_PREFIX` (or the plain `TYPESENSE_COLLECTION` name for a
+single-site install) — and scope the admin key to it with a regex in the
+`collections` field:
+
+```sh
+# Provisioning key — only creates/lists/deletes API keys, never touches documents.
+curl "https://search.example.com/keys" \
+  -X POST \
+  -H "X-TYPESENSE-API-KEY: your-bootstrap-admin-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "description": "provisioning_key",
+        "actions": ["keys:create", "keys:list", "keys:delete"],
+        "collections": ["*"]
+      }'
+
+# Admin/indexing key — scoped to every collection starting with the chosen prefix.
+curl "https://search.example.com/keys" \
+  -X POST \
+  -H "X-TYPESENSE-API-KEY: your-bootstrap-admin-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "description": "admin_key",
+        "actions": ["collections:*", "documents:search", "documents:create", "documents:delete", "synonym_sets:*", "curation_sets:*", "debug:list"],
+        "collections": ["your-prefix_.*"]
+      }'
+```
+
+Both endpoints return the key's `value` only in this create response — it is
+never shown again. Save it immediately (e.g. into your secrets manager),
+then configure it as described below.
+
+The indexing key needs `debug:list` to read the server version from `GET /debug`.
+The plugin currently uses this version to determine support for pinned results
+(curation sets), synonym sets and stemming. If this request is denied, the
+version is unknown and those capability checks return false, even on a server
+that supports the features. This permission reads node information; it does
+not grant API key management and is not isolated by the collection prefix.
+See [Typesense's documented actions](https://typesense.org/docs/30.0/api/api-keys.html#misc-actions).
+
+For an existing indexing key without `debug:list`, create a replacement with
+the actions above, update the plugin's configured indexing key, verify the
+connection and feature availability, then revoke the old key. Typesense API
+keys cannot be updated in place.
+
+### 11.3 Configuring the provisioning key
+
+```sh
+# Recommended: only for the CLI run that actually provisions a site.
+TYPESENSE_PROVISIONING_KEY=your-provisioning-key \
+  wp --url=https://example.com/subsite/ typesense network setup
+```
+
+Or permanently (less isolation — the key becomes available to the whole PHP
+process, including if that process is ever compromised):
+
+```php
+// wp-content/config/typesense.php
+define('TYPESENSE_PROVISIONING_KEY', 'your-provisioning-key');
+// Optional: pin the destination the provisioning key may be sent to.
+define('TYPESENSE_PROVISIONING_REMOTE', 'https://search.example.com');
+```
+
+A defined constant always wins over the environment variable — even an empty
+constant, which means "explicitly unavailable" rather than "fall back to the
+environment".
+
+**A CLI-injected provisioning key only reaches that one CLI invocation.** It
+does **not** reach the browser-driven flow started by clicking **Save** on the
+site selection in Network Admin — that runs as ordinary authenticated POSTs
+inside the web server's own PHP process, which never sees a variable exported
+only into a CLI shell. Automatic setup from the admin screens therefore
+requires the permanent configuration above. Without a provisioning key
+(neither form), setup fails clearly at the key-creation step; ordinary
+indexing (`wp typesense index` / `network index`) of already-provisioned sites
+is unaffected and needs no provisioning key at all.
+
+The provisioning key is needed when the plugin creates frontend search keys
+during site setup, generates or repairs a search key, or lists/deletes keys
+during cleanup and deprovisioning. It is not needed for frontend searches,
+ordinary indexing of already-provisioned sites, synonym/curation synchronization,
+or server-version checks. Those use the public search key or indexing key.
+
+### 11.4 Rotating keys
+
+1. Create a replacement key (provisioning key rotation: on the Typesense
+   server; search key rotation: via "Generate search key"/"Fix search key" or
+   the network Sites tab).
+2. Configure it (constant/environment variable, or save the new search key).
+3. Verify it works (Status tab / "Check shared connection" / site status
+   check).
+4. Revoke the old key on the Typesense server.
+
+A cached frontend can keep using an old search key until its cache clears —
+account for that before revoking it.

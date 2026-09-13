@@ -1,8 +1,15 @@
 # Typesense Search Feature Roadmap
 
-Planned features that extend the plugin beyond its current search and indexing
-scope. Each section describes the goal, the data model, the architectural
-shape, and the open decisions that need to be resolved before implementation.
+Reviewed against local revision `10c5d6a` on 2026-09-07. Both features below
+remain **unimplemented proposals**, not commitments or ready-to-build specs.
+Pinned results and synonyms already exist; they do not implement these features.
+The `typesense_search_notices` string in SearchStatisticsActions is an admin
+notice group, not a search-notices feature or table.
+
+[Multisite network mode](multisite-network-mode-plan.md) is now implemented
+and locally verified; complete its rollout before adding these features. Each future feature must respect the resulting site-use
+policy and keep data, permissions and caches scoped to the current site.
+No new runtime features are introduced by this roadmap review.
 
 ---
 
@@ -23,16 +30,18 @@ Examples of what this enables:
 
 ### Data model
 
-One row per notice in a new `typesense_search_notices` table:
+Proposed: one row per notice in a new `$wpdb->prefix` +
+`typesense_search_notices` table. Match existing database conventions with
+validated JSON encoded in longtext rather than requiring a native JSON type:
 
 | column        | type                      | notes                                  |
 |---------------|---------------------------|----------------------------------------|
 | id            | bigint PK AUTO_INCREMENT  |                                        |
-| type          | enum('infobox','links')   |                                        |
+| type          | varchar(20)   |                                        |
 | title         | varchar(191)              |                                        |
 | body          | text (nullable)           | infobox type only                      |
-| links         | JSON (nullable)           | `[{"label":"...","url":"..."}]`        |
-| trigger_terms | JSON                      | array of normalized terms that match   |
+| links         | longtext (nullable)           | `[{"label":"...","url":"..."}]`        |
+| trigger_terms | longtext                  | array of normalized terms that match   |
 | active        | tinyint(1) DEFAULT 1      |                                        |
 | created_at    | datetime                  |                                        |
 | updated_at    | datetime                  |                                        |
@@ -51,8 +60,9 @@ source/php/SearchNotices/
     Database.php          table definition and migrations
     Repository.php        CRUD; lookup by normalized query
     RestController.php    GET /typesense-search/v1/notices?q=... (public, nonce-free)
-                          POST/PUT/DELETE .../notices/{id} (manage_options)
-    AdminPage.php         registers menu item and enqueues assets
+                          POST .../notices; PUT/DELETE .../notices/{id}
+                          (manage_options + REST authentication/nonce)
+source/php/Admin/SearchNoticesPage.php  menu and assets, like PinnedResultsPage
 
 source/js/search-notices/
     types.ts
@@ -72,7 +82,14 @@ After a search resolves, the frontend calls the REST endpoint with the
 current query. If a matching notice is returned, it is rendered above the
 result list. The call should be debounced with the search itself to avoid
 an extra round-trip on every keystroke — one call per completed search is
-enough.
+enough. Ignore stale responses after the query changes and clear the notice
+when the query is cleared. A failed notice request must not hide search results.
+
+Validate notice type, terms, link URLs and text lengths on write. Define an
+allowed body-markup policy and escape rendered content. The public endpoint
+returns only active matching notices, never administrative data. Scope caching
+to site/query and invalidate it on edits. Include table migration/uninstall and
+an explicit feature toggle in the implementation.
 
 ### Open decisions
 
@@ -80,6 +97,8 @@ enough.
   above; revisit if lookup performance becomes a concern.
 - **Partial / prefix matching** — initial implementation is exact
   (normalized) match only. Glob or prefix rules can be added later.
+- **Placement/order** — decide whether v1 covers only full search or also quick
+  search, and define ordering when several notices match.
 - **Typesense sync** — notices live only in WordPress; no Typesense side
   needed (unlike pinned results which map to curation sets).
 
@@ -91,21 +110,26 @@ enough.
 
 When a search yields zero or very few results, show the visitor a suggested
 alternative query: "Did you mean: *söka parkering*?" The suggestion is drawn
-from queries that other visitors have searched for successfully, using the
-existing search log as the data source.
+from an explicitly approved set of successful queries. The existing search
+log can inform an editor's candidate selection, but must not automatically
+become a public suggestion dictionary: it can contain personal text, unsuitable
+queries or deliberately submitted terms. Candidate approval/storage is a product
+and implementation decision required before this feature can be built.
 
 ### How the suggestion is found
 
-1. The frontend detects that a completed search returned fewer than N hits
-   (threshold configurable, default: 0, i.e. only on true zero-hit results).
-2. It calls a new REST endpoint with the failing query.
-3. The endpoint fetches the top-K most-searched unique queries from the log
-   that have `last_found > 0` (candidates with actual results).
-4. It computes string similarity between the failing query and each candidate
-   using PHP `similar_text()` (fast, no extension required). The candidate
-   with the highest similarity score above a minimum threshold is returned.
-5. The frontend renders "Menade du: *<suggestion>*?" as a clickable link
-   that replaces the current query.
+1. When enabled, the frontend detects a completed search with a hit count
+   less than or equal to the configured threshold (default 0: zero hits only).
+2. It calls the endpoint with a bounded query; stale responses are ignored.
+3. The endpoint uses a cached, site-specific approved candidate pool. If
+   statistics inform ranking, aggregate by normalized query and successful
+   sessions (`last_found > 0`); a log row is not a unique query. Define freshness
+   and approval rules before selecting a representative display phrase.
+4. A pure suggestion engine compares candidates, excluding the original query,
+   and returns a match only above the agreed threshold. Algorithm selection is
+   provisional; test Swedish Unicode strings and realistic typo examples.
+5. Render “Menade du: …?” as an escaped, clickable suggestion that replaces the
+   query. Failure or an empty pool leaves the normal result UI unchanged.
 
 ### REST endpoint
 
@@ -121,14 +145,20 @@ Public (no authentication). Returns:
 
 or `204 No Content` when no good suggestion is found.
 
-The endpoint is rate-limited by the candidate pool size in PHP — it reads at
-most a configurable number of rows (default 500 most-searched terms) and
-never performs a full table scan.
+A candidate limit (proposed maximum 500) bounds comparisons; it is **not**
+request rate limiting and does not guarantee a bounded database scan. Aggregated
+GROUP BY/ORDER BY queries can still read many rows despite LIMIT. Inspect the
+query plan on representative data and cache/precompute the pool instead of
+aggregating the event log for every visitor request. Add explicit public-request
+limits, query-length validation and cache invalidation on approval changes,
+log deletion/retention and feature disablement where those affect the pool.
+Never return raw log rows, session identifiers or statistics through this route.
 
 ### Architecture
 
-The feature is small enough to live inside `SearchStatistics/` rather than
-warranting its own top-level namespace:
+The engine/controller could initially live inside `SearchStatistics/`.
+Reassess ownership when the approved-dictionary model is decided; the sketch
+below does not include its storage or administration:
 
 ```
 source/php/SearchStatistics/
@@ -146,28 +176,41 @@ Bootstrap wiring: a new `registerSuggestionEndpoint()` call inside
 
 ### Settings
 
-Two new options (under the existing "Advanced settings" tab, or a dedicated
+Four proposed options (under the existing "Advanced settings" tab, or a dedicated
 sub-section):
 
 | option key                                  | default | description                                  |
 |---------------------------------------------|---------|----------------------------------------------|
 | `typesense_search_suggestion_enabled`        | 0       | master switch                                |
 | `typesense_search_suggestion_threshold`      | 0       | max hits before a suggestion is offered      |
-| `typesense_search_suggestion_min_similarity` | 60      | minimum `similar_text` score (0–100)         |
-| `typesense_search_suggestion_candidate_pool` | 500     | how many log rows are pulled as candidates   |
+| `typesense_search_suggestion_min_similarity` | 60      | minimum score (0–100); algorithm pending         |
+| `typesense_search_suggestion_candidate_pool` | 500     | maximum approved unique candidates compared   |
 
 ### Open decisions
 
-- **Similarity algorithm** — `similar_text()` is simple and requires no
-  extension. `levenshtein()` is an alternative that may handle short queries
-  and typos more accurately but has O(n·m) cost. Can be swapped inside
-  `SuggestionEngine` without changing anything else.
-- **Candidate freshness** — the pool could be filtered to queries seen within
-  the last N days (reusing the retention window) to avoid surfacing stale
-  suggestions.
-- **When search logging is disabled** — the endpoint returns 204 immediately;
-  no suggestion is possible without log data. The frontend should handle this
-  gracefully and not show any UI element.
-- **Language / Swedish-specific normalization** — both the failing query and
-  the candidates pass through `Repository::normalizeQuery()` before comparison
-  so diacritic and case differences are already handled.
+- **Candidate publication** — decide who approves suggestions and where that
+  approved dictionary is stored. Minimum frequency alone does not guarantee
+  that a term is suitable for publication. Include this administration work in
+  the estimate; the feature is larger than two engine/controller classes.
+- **Similarity algorithm** — `similar_text()` and `levenshtein()` are candidates,
+  not a settled choice. Benchmark bounded inputs and test multibyte Swedish
+  text; do not label either a fast Unicode-aware solution without verification.
+- **Candidate freshness** — past successful searches do not prove that results
+  still exist. Define revalidation/expiry when content or the index changes.
+- **When logging is disabled** — for a log-dependent v1, return 204 and do not
+  initiate frontend requests. If an independent approved dictionary is chosen,
+  explicitly decide whether it should continue working without logging.
+- **Normalization** — Repository::normalizeQuery() currently collapses
+  whitespace, optionally applies Unicode NFC, and lowercases (multibyte when
+  available). It does **not** strip accents or equate å/ä/ö with a/o. Preserve
+  that behavior unless an explicit language policy and tests justify a change.
+- **Existing search behavior** — compare the proposed experience with current
+  typo tolerance and synonym behavior before committing to a separate service.
+
+## Verification required for either feature
+
+Test site isolation, feature disablement, unauthorized writes, safe output,
+empty/no-match states, stale frontend responses and failures of the extra
+request. For suggestions also test candidate approval, cache invalidation,
+Unicode quality and representative query cost. These are future implementation
+checks; no feature tests or live changes were run during this document audit.
