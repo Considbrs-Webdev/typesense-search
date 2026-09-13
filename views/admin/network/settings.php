@@ -29,7 +29,8 @@ $provisioningAvailable = ProvisioningCredentials::isAvailableFor($connection['re
 .typesense-network-table summary { cursor: pointer; font-weight: 500; }
 .typesense-network-table details[open] { padding: 12px; background: #fff; border: 1px solid #dcdcde; border-radius: 3px; }
 .typesense-network-site-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.typesense-network-actions { margin: 16px 0 0; }
+.typesense-network-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 16px 0 0; }
+.typesense-network-actions form { display: contents; }
 </style>
 <div class="wrap typesense-network ts-settings">
 <div class="typesense-network-heading"><h1><?php esc_html_e('Typesense Search — Network settings', 'typesense-search'); ?></h1><span class="typesense-network-environment"><?php echo esc_html(sprintf(__('Environment: %s', 'typesense-search'), wp_get_environment_type())); ?></span></div>
@@ -62,7 +63,7 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <?php endif; ?>
 <?php if (isset($_GET['saved'])) : ?><div class="notice notice-success inline"><p><?php esc_html_e('Settings saved.', 'typesense-search'); ?></p></div><?php endif; ?>
 <?php if ($tab === 'connection') : ?>
-<form method="post" action="<?php echo esc_url(network_admin_url('edit.php?action=typesense_network_save')); ?>">
+<form id="typesense-network-connection" method="post" action="<?php echo esc_url(network_admin_url('edit.php?action=typesense_network_save')); ?>">
 <?php wp_nonce_field('typesense_network_save'); ?><input type="hidden" name="section" value="connection">
 
 <div class="ts-settings__card">
@@ -135,11 +136,12 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
     </div>
 </div>
 
-<?php submit_button(__('Save changes', 'typesense-search'), 'primary ts-settings__submit'); ?></form>
-<p class="typesense-network-actions">
+</form>
+<div class="typesense-network-actions">
+<button type="submit" form="typesense-network-connection" class="button button-primary"><?php esc_html_e('Save changes', 'typesense-search'); ?></button>
 <form method="post" action="<?php echo esc_url(network_admin_url('edit.php?action=typesense_network_save')); ?>">
 <?php wp_nonce_field('typesense_network_save'); ?><input type="hidden" name="section" value="status"><button class="button"><?php esc_html_e('Check shared connection', 'typesense-search'); ?></button></form>
-</p>
+</div>
 
 <?php else : ?>
 <div class="ts-settings__card">
