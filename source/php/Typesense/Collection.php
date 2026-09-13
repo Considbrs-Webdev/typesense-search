@@ -83,16 +83,21 @@ class Collection
             $schema['synonym_sets'] = ['wordpress-synonyms-' . $collectionName];
         }
 
-        if ($settings->isStemmingEnabled() && $capabilities->supportsStemming()) {
-            $locale = self::getSiteLocale();
-            foreach ($schema['fields'] as &$field) {
-                if (in_array($field['name'], ['title', 'content', 'excerpt', 'extra_terms'], true)) {
-                    $field['stem']   = true;
-                    $field['locale'] = $locale;
+        // Locale is always stamped on the searchable fields, independent of
+        // stemming, so that synonym items (which also always carry the site
+        // locale, see TypesenseSync::ruleToSynonymItem()) never mismatch the
+        // locale Typesense tokenized the fields with.
+        $stemmingActive = $settings->isStemmingEnabled() && $capabilities->supportsStemming();
+        $locale         = self::getSiteLocale();
+        foreach ($schema['fields'] as &$field) {
+            if (in_array($field['name'], ['title', 'content', 'excerpt', 'extra_terms'], true)) {
+                $field['locale'] = $locale;
+                if ($stemmingActive) {
+                    $field['stem'] = true;
                 }
             }
-            unset($field);
         }
+        unset($field);
 
         /**
          * Filters the Typesense collection schema before the collection is created.
