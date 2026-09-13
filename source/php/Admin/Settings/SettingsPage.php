@@ -165,7 +165,7 @@ class SettingsPage
         $supportsPinnedResults    = $activeTab === 'advanced-settings' ? $capabilities->supportsCurationSets() : false;
         $supportsSynonyms         = $activeTab === 'advanced-settings' ? $capabilities->supportsSynonymSets() : false;
         $supportsStemming         = $activeTab === 'advanced-settings' ? $capabilities->supportsStemming() : false;
-        $stemmingLocale           = Collection::getStemmingLocale();
+        $stemmingLocale           = Collection::getSiteLocale();
         $provisioningAvailable    = ProvisioningCredentials::isAvailableFor((new SettingsRepository())->getRemote());
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';
