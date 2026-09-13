@@ -1373,6 +1373,10 @@ alone:
   This is why the admin/indexing key needs `collections:*` rather than the
   three granular actions, even though it stays strictly scoped to this
   installation's own collection(s).
+- Managing synonym sets and curation sets themselves (`PUT`/`GET`/`DELETE` on
+  `/synonym_sets` and `/curation_sets`) needs its own explicit
+  `synonym_sets:*` / `curation_sets:*` actions — `collections:*` does not
+  cover them, no matter how the `collections` field is scoped.
 
 Collection scoping does **not** protect global resources: API keys, synonym
 sets and curation sets are never isolated by a collection prefix. Only the
@@ -1407,7 +1411,7 @@ curl "https://search.example.com/keys" \
   -H "Content-Type: application/json" \
   -d '{
         "description": "admin_key",
-        "actions": ["collections:*", "documents:search", "documents:create", "documents:delete"],
+        "actions": ["collections:*", "documents:search", "documents:create", "documents:delete", "synonym_sets:*", "curation_sets:*"],
         "collections": ["your-prefix_.*"]
       }'
 ```
