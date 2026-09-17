@@ -26,7 +26,11 @@ class CollectionNameResolver
         }
         $slug = strtolower($url['host'] . (isset($url['port']) ? '-' . $url['port'] : '') . ($url['path'] ?? ''));
         $slug = trim((string) preg_replace('/[^a-z0-9]+/', '-', $slug), '-');
-        $prefix = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($prefix)), '-');
+        // Unlike the domain slug above, hyphens and underscores here must survive as typed:
+        // admins scope the admin key's `collections` regex to this exact configured prefix
+        // (see README §11.2), so silently turning "_" into "-" would desync the key's scope
+        // from the real collection name.
+        $prefix = trim((string) preg_replace('/[^a-z0-9_-]/', '', strtolower($prefix)), '-_');
         if ($prefix !== '') {
             $slug = $slug !== '' ? $prefix . '_' . $slug : $prefix;
         }

@@ -127,6 +127,17 @@ class NetworkModeTest extends TestCase
         self::assertSame('example-test__development_b1', CollectionNameResolver::name('https://example.test', 'development', 1, ''));
     }
 
+    public function test_naming_preserves_underscores_inside_the_prefix(): void
+    {
+        // An admin key's `collections` regex is scoped to the literal configured
+        // prefix (README §11.2) — an internal "_" must not turn into "-", or the
+        // resolved collection name falls outside the key's authorized scope.
+        self::assertSame(
+            'eslov_stage_example-test__development_b1',
+            CollectionNameResolver::name('https://example.test', 'development', 1, 'eslov_stage_')
+        );
+    }
+
     public function test_network_prefix_is_read_from_settings_and_included_in_identity(): void
     {
         $this->networkOptions[NetworkSettingsRepository::PREFIX] = 'Eslöv!';
