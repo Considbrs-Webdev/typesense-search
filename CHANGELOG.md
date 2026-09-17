@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-09-17
+
+### Fixed
+
+- Network-mode collection names could drop underscores from a configured `TYPESENSE_NETWORK_PREFIX`, desyncing them from the admin key's authorized collection scope and causing site setup and status checks to fail with a misleading "server rejected the API key" error even when the keys were correct.
+
 ## [1.6.0] - 2026-09-13
 
 ### Added
