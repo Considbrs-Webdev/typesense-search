@@ -145,9 +145,21 @@ $shadow-focus: 0 0 0 1px $blue;
     background: $white !important;
 
     .dashicons {
+      display: block;
+      flex: 0 0 20px;
       width: 20px;
       height: 20px;
       font-size: 20px;
+      line-height: 1 !important;
+
+      &::before {
+        display: block;
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        line-height: 1 !important;
+        vertical-align: top;
+      }
     }
 
     &.is-syncing,
