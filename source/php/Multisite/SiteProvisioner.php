@@ -108,9 +108,11 @@ class SiteProvisioner
             $schemaContext['key'] = 'provisioning';
             $this->network->withCandidate($schemaContext, fn () => $this->gateway->create($connection, $name));
         }
+        $verified = false;
         if (!empty($candidate['key'])) {
             try {
                 $this->gateway->verify($connection, $candidate);
+                $verified = true;
             } catch (\Typesense\Exceptions\RequestUnauthorized $e) {
                 $candidate['key'] = ''; // Explicit retry repairs a revoked key.
             }
@@ -131,7 +133,10 @@ class SiteProvisioner
             $state['candidate'] = $candidate;
             $this->save($state);
         }
-        $this->gateway->verify($connection, $candidate);
+        // An existing key was already verified above; only a newly issued key needs checking.
+        if (!$verified) {
+            $this->gateway->verify($connection, $candidate);
+        }
         $candidate['prepared'] = true;
         $state['candidate'] = $candidate;
         $this->save($state);

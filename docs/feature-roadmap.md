@@ -6,9 +6,9 @@ Pinned results and synonyms already exist; they do not implement these features.
 The `typesense_search_notices` string in SearchStatisticsActions is an admin
 notice group, not a search-notices feature or table.
 
-[Multisite network mode](multisite-network-mode-plan.md) is now implemented
-and locally verified; complete its rollout before adding these features. Each future feature must respect the resulting site-use
-policy and keep data, permissions and caches scoped to the current site.
+Multisite network mode is implemented (README §10). Each future feature must
+respect its site-use policy and keep data, permissions and caches scoped to the
+current site.
 No new runtime features are introduced by this roadmap review.
 
 ---

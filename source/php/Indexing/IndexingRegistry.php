@@ -148,7 +148,8 @@ class IndexingRegistry
      * Run syncAll() on a single external strategy by identifier.
      *
      * Returns the number of items indexed, or -1 when the identifier is not
-     * registered.
+     * registered or Typesense is not usable for the current site (e.g. disabled
+     * by the multisite network policy).
      *
      * @param string $identifier Strategy identifier (e.g. 'eservice').
      * @return int
@@ -171,7 +172,8 @@ class IndexingRegistry
      * Run syncAll() on every registered external strategy.
      *
      * Returns an associative array of [ identifier => count ] with the number
-     * of items indexed per strategy.
+     * of items indexed per strategy. Returns an empty array when Typesense is
+     * not usable for the current site.
      *
      * @return array<string, int>
      */
