@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Typesense Search 1.5.0\n"
+"Project-Id-Version: Typesense Search 1.6.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-13T09:31:15+00:00\n"
+"POT-Creation-Date: 2026-09-23T17:05:01+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -53,7 +53,7 @@ msgstr ""
 
 #: source/php/Admin/Ajax/AjaxHelpers.php:44
 #: source/php/Admin/Ajax/AjaxHelpers.php:59
-#: source/php/Admin/NetworkSettingsPage.php:273
+#: source/php/Admin/NetworkSettingsPage.php:294
 msgid "Unauthorized."
 msgstr ""
 
@@ -270,6 +270,16 @@ msgstr ""
 msgid "New search key created and saved. The status checks should now pass."
 msgstr ""
 
+#: source/php/Admin/ExternalPagesPage.php:40
+#: source/php/Admin/ExternalPagesPage.php:41
+#: source/php/Frontend/I18n.php:252
+msgid "External pages"
+msgstr ""
+
+#: source/php/Admin/ExternalPagesPage.php:103
+msgid "External pages are not available."
+msgstr ""
+
 #: source/php/Admin/MetaBox.php:67
 msgid "Search settings"
 msgstr ""
@@ -306,7 +316,7 @@ msgstr ""
 
 #: source/php/Admin/NetworkSettingsPage.php:74
 #: source/php/Multisite/NetworkSettingsRepository.php:114
-#: source/php/Multisite/SiteProvisioner.php:199
+#: source/php/Multisite/SiteProvisioner.php:204
 msgid "Configure the network connection first."
 msgstr ""
 
@@ -314,107 +324,107 @@ msgstr ""
 msgid "Server reports an unhealthy status."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:79
+#: source/php/Admin/NetworkSettingsPage.php:81
 msgid "Server connection and admin key are working."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:84
+#: source/php/Admin/NetworkSettingsPage.php:86
 msgid "Provisioning key management verified."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:86
+#: source/php/Admin/NetworkSettingsPage.php:88
 msgid "Key management was not verified: no provisioning key is configured."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:98
+#: source/php/Admin/NetworkSettingsPage.php:100
 msgid "Enter a valid HTTP or HTTPS URL."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:120
+#: source/php/Admin/NetworkSettingsPage.php:122
 msgid "Invalid site selection."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:139
+#: source/php/Admin/NetworkSettingsPage.php:144
 msgid "Invalid site context."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:145
+#: source/php/Admin/NetworkSettingsPage.php:150
 msgid "This setup sequence has expired or changed. Save the site selection again."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:156
+#: source/php/Admin/NetworkSettingsPage.php:161
 msgid "Typesense is now active for this site."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:159
+#: source/php/Admin/NetworkSettingsPage.php:164
 msgid "Confirm deletion of the index and search key first."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:162
+#: source/php/Admin/NetworkSettingsPage.php:167
 msgid "The index and site search key were deleted. Re-enable the site and run indexing to restore its search content."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:170
+#: source/php/Admin/NetworkSettingsPage.php:175
 msgid "The server reports an unhealthy status."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:173
-#: views/admin/network/settings.php:159
+#: source/php/Admin/NetworkSettingsPage.php:180
+#: views/admin/network/settings.php:163
 msgid "Server connection, admin key and site search key are working."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:175
+#: source/php/Admin/NetworkSettingsPage.php:182
 msgid "Unknown operation."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:249
+#: source/php/Admin/NetworkSettingsPage.php:270
 #: source/php/Frontend/I18n.php:153
 msgid "Disabled"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:249
+#: source/php/Admin/NetworkSettingsPage.php:270
 msgid "Active"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:250
+#: source/php/Admin/NetworkSettingsPage.php:271
 msgid "Setup failed"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:250
+#: source/php/Admin/NetworkSettingsPage.php:271
 msgid "Waiting for setup"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:252
+#: source/php/Admin/NetworkSettingsPage.php:273
 msgid "Setup is complete. Search uses Typesense when the server and index are available."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:253
+#: source/php/Admin/NetworkSettingsPage.php:274
 msgid "WordPress search is used until setup is complete. Save the site selection to start setup."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:255
+#: source/php/Admin/NetworkSettingsPage.php:276
 msgid "Setup failed. Retry setup."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:257
+#: source/php/Admin/NetworkSettingsPage.php:278
 msgid "Automatic setup has been requested, but has not started yet. Refresh this page to see the result."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:258
+#: source/php/Admin/NetworkSettingsPage.php:279
 msgid "Automatic setup is in progress. Refresh this page to see the result."
 msgstr ""
 
-#: source/php/Admin/PinnedResultsPage.php:43
+#: source/php/Admin/PinnedResultsPage.php:46
 #: source/php/Frontend/I18n.php:136
 msgid "Pinned search results"
 msgstr ""
 
-#: source/php/Admin/PinnedResultsPage.php:44
+#: source/php/Admin/PinnedResultsPage.php:47
 #: source/php/Frontend/I18n.php:145
 msgid "Pinned results"
 msgstr ""
 
-#: source/php/Admin/PinnedResultsPage.php:106
+#: source/php/Admin/PinnedResultsPage.php:109
 msgid "Pinned results are not available."
 msgstr ""
 
@@ -544,6 +554,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: source/php/Admin/Settings/Sanitizers.php:29
+#: source/php/Frontend/I18n.php:254
 msgid "Title"
 msgstr ""
 
@@ -552,6 +563,7 @@ msgid "Excerpt"
 msgstr ""
 
 #: source/php/Admin/Settings/Sanitizers.php:31
+#: source/php/Frontend/I18n.php:258
 msgid "Content"
 msgstr ""
 
@@ -580,7 +592,7 @@ msgid "Logging"
 msgstr ""
 
 #: source/php/Admin/Settings/SettingsPage.php:36
-#: views/admin/network/settings.php:148
+#: views/admin/network/settings.php:152
 msgid "Status"
 msgstr ""
 
@@ -592,18 +604,56 @@ msgstr ""
 msgid "General"
 msgstr ""
 
-#: source/php/Admin/SynonymsPage.php:43
-#: source/php/Admin/SynonymsPage.php:44
+#: source/php/Admin/SynonymsPage.php:46
+#: source/php/Admin/SynonymsPage.php:47
 #: source/php/Frontend/I18n.php:207
 msgid "Synonyms"
 msgstr ""
 
-#: source/php/Admin/SynonymsPage.php:106
+#: source/php/Admin/SynonymsPage.php:109
 msgid "Synonyms are not available."
 msgstr ""
 
 #: source/php/CLI/NetworkCommand.php:57
 msgid "Network mode is not enabled. Use typesense index."
+msgstr ""
+
+#: source/php/ExternalPages/IndexingStrategy.php:58
+#: source/php/PinnedResults/TypesenseSync.php:29
+#: source/php/Synonyms/TypesenseSync.php:30
+msgid "Typesense connection settings are incomplete."
+msgstr ""
+
+#. translators: %d: number of external pages that failed to sync
+#: source/php/ExternalPages/IndexingStrategy.php:99
+msgid "%d external page could not be synced."
+msgid_plural "%d external pages could not be synced."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of external pages
+#: source/php/ExternalPages/IndexingStrategy.php:110
+msgid "Synced %d external page."
+msgid_plural "Synced %d external pages."
+msgstr[0] ""
+msgstr[1] ""
+
+#: source/php/ExternalPages/IndexingStrategy.php:141
+msgid "External page"
+msgstr ""
+
+#: source/php/ExternalPages/Repository.php:59
+#: source/php/Frontend/I18n.php:270
+msgid "Enter a title for the external page."
+msgstr ""
+
+#: source/php/ExternalPages/Repository.php:63
+#: source/php/Frontend/I18n.php:271
+msgid "Enter a valid URL starting with http:// or https://."
+msgstr ""
+
+#: source/php/ExternalPages/RestController.php:143
+msgid "External pages are not enabled."
 msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:36
@@ -897,11 +947,13 @@ msgstr ""
 
 #: source/php/Frontend/I18n.php:138
 #: source/php/Frontend/I18n.php:202
+#: source/php/Frontend/I18n.php:247
 msgid "Sync to Typesense"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:139
 #: source/php/Frontend/I18n.php:203
+#: source/php/Frontend/I18n.php:248
 msgid "Syncing..."
 msgstr ""
 
@@ -940,21 +992,25 @@ msgstr ""
 
 #: source/php/Frontend/I18n.php:149
 #: source/php/Frontend/I18n.php:211
+#: source/php/Frontend/I18n.php:260
 msgid "New"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:150
 #: source/php/Frontend/I18n.php:212
+#: source/php/Frontend/I18n.php:261
 msgid "Synced"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:151
 #: source/php/Frontend/I18n.php:213
+#: source/php/Frontend/I18n.php:262
 msgid "Error"
 msgstr ""
 
 #: source/php/Frontend/I18n.php:152
 #: source/php/Frontend/I18n.php:214
+#: source/php/Frontend/I18n.php:263
 msgid "Pending"
 msgstr ""
 
@@ -1004,7 +1060,8 @@ msgstr ""
 
 #: source/php/Frontend/I18n.php:165
 #: source/php/Frontend/I18n.php:216
-#: views/admin/network/settings.php:136
+#: source/php/Frontend/I18n.php:265
+#: views/admin/network/settings.php:141
 msgid "Save changes"
 msgstr ""
 
@@ -1014,11 +1071,13 @@ msgstr ""
 
 #: source/php/Frontend/I18n.php:167
 #: source/php/Frontend/I18n.php:217
+#: source/php/Frontend/I18n.php:266
 msgid "Saving..."
 msgstr ""
 
 #: source/php/Frontend/I18n.php:168
 #: source/php/Frontend/I18n.php:218
+#: source/php/Frontend/I18n.php:267
 msgid "Saved"
 msgstr ""
 
@@ -1072,6 +1131,7 @@ msgid "Missing synonyms configuration."
 msgstr ""
 
 #: source/php/Frontend/I18n.php:192
+#: source/php/Frontend/I18n.php:241
 msgid "Instructions"
 msgstr ""
 
@@ -1174,6 +1234,99 @@ msgstr ""
 msgid "Remove word"
 msgstr ""
 
+#: source/php/Frontend/I18n.php:240
+msgid "Missing external pages configuration."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:242
+msgid "Add pages that do not exist in WordPress, such as a booking system or a page on another domain, so they show up as hits in search results."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:243
+msgid "Changes reach the search index when you sync to Typesense."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:244
+#: views/admin/external-pages-page.php:14
+msgid "Loading external pages..."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:245
+msgid "Could not load external pages."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:246
+msgid "Add external page"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:249
+msgid "Search external pages..."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:250
+msgid "No external pages yet."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:251
+msgid "No external pages match your filter."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:253
+msgid "External page editor"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:255
+msgid "Shown as the heading of the search hit."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:256
+msgid "URL"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:257
+msgid "Where the search hit links to. Must start with http:// or https://."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:259
+msgid "Plain text that is searched and used for the hit excerpt."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:264
+msgid "New external page"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:268
+msgid "Delete external page"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:269
+msgid "Delete this external page?"
+msgstr ""
+
+#: source/php/Frontend/I18n.php:272
+msgid "External page saved. Sync to Typesense when you are ready."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:273
+msgid "Could not save external page."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:274
+msgid "External page deleted. Sync to Typesense to apply the change."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:275
+msgid "Could not delete external page."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:276
+msgid "External pages synced."
+msgstr ""
+
+#: source/php/Frontend/I18n.php:277
+msgid "Could not sync external pages."
+msgstr ""
+
 #: source/php/Indexing/Strategies/PdfIndexingStrategy.php:119
 msgid "PDF document"
 msgstr ""
@@ -1212,6 +1365,10 @@ msgstr ""
 
 #: source/php/Multisite/ProvisioningGateway.php:158
 msgid "Pinned-result synchronization failed."
+msgstr ""
+
+#: source/php/Multisite/ProvisioningGateway.php:169
+msgid "External page synchronization failed."
 msgstr ""
 
 #: source/php/Multisite/SetupDispatcher.php:21
@@ -1256,27 +1413,27 @@ msgstr ""
 msgid "The collection already exists but is not owned by this provisioning state. Choose an unused target or review it manually."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:173
+#: source/php/Multisite/SiteProvisioner.php:178
 msgid "Setup is incomplete for the current URL, environment and server. Save the site selection to retry setup."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:176
+#: source/php/Multisite/SiteProvisioner.php:181
 msgid "The index no longer belongs to this site. Check the index ownership before retrying setup."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:185
+#: source/php/Multisite/SiteProvisioner.php:190
 msgid "Could not save provisioning state."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:192
+#: source/php/Multisite/SiteProvisioner.php:197
 msgid "Disable the site and save the site selection before deleting its index and search key."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:195
+#: source/php/Multisite/SiteProvisioner.php:200
 msgid "Select this site in Network Admin and remove global collection/search-key constants first."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:204
+#: source/php/Multisite/SiteProvisioner.php:209
 msgid "Another provisioning operation holds this site lock. If its process has ended, remove typesense_network_provision_lock with WP-CLI and retry."
 msgstr ""
 
@@ -1290,11 +1447,6 @@ msgstr ""
 
 #: source/php/PinnedResults/RestController.php:168
 msgid "Pinned results are not enabled or this Typesense server does not support curation sets."
-msgstr ""
-
-#: source/php/PinnedResults/TypesenseSync.php:29
-#: source/php/Synonyms/TypesenseSync.php:30
-msgid "Typesense connection settings are incomplete."
 msgstr ""
 
 #. translators: %d: number of pinned-result rules
@@ -1370,64 +1522,64 @@ msgstr ""
 msgid "The provisioning key is restricted to a different, server-configured destination than the one currently configured. Update the connection settings or the provisioning destination so they match."
 msgstr ""
 
-#: views/admin/network/settings.php:35
+#: views/admin/network/settings.php:36
 msgid "Typesense Search — Network settings"
 msgstr ""
 
-#: views/admin/network/settings.php:35
+#: views/admin/network/settings.php:36
 msgid "Environment: %s"
 msgstr ""
 
-#: views/admin/network/settings.php:36
+#: views/admin/network/settings.php:37
 msgid "Connect the network to a shared Typesense server, then choose which sites get their own index."
 msgstr ""
 
-#: views/admin/network/settings.php:38
+#: views/admin/network/settings.php:39
 #: views/admin/settings-tabs/connection.php:139
 msgid "Connection"
 msgstr ""
 
-#: views/admin/network/settings.php:38
+#: views/admin/network/settings.php:39
 msgid "Sites"
 msgstr ""
 
-#: views/admin/network/settings.php:48
+#: views/admin/network/settings.php:49
 msgid "Setting up site %1$d of %2$d. Keep this page open until setup completes."
 msgstr ""
 
-#: views/admin/network/settings.php:56
+#: views/admin/network/settings.php:57
 msgid "Continue setup"
 msgstr ""
 
-#: views/admin/network/settings.php:61
+#: views/admin/network/settings.php:62
 msgid "Remove TYPESENSE_COLLECTION and TYPESENSE_SEARCH_KEY constants before using network mode. Each site needs its own collection and key."
 msgstr ""
 
-#: views/admin/network/settings.php:63
+#: views/admin/network/settings.php:64
 msgid "Settings saved."
 msgstr ""
 
-#: views/admin/network/settings.php:70
+#: views/admin/network/settings.php:71
 #: views/admin/settings-tabs/connection.php:27
 msgid "Server"
 msgstr ""
 
-#: views/admin/network/settings.php:71
+#: views/admin/network/settings.php:72
 msgid "Every site on the network shares this Typesense server. Set an index prefix if the same server is also used outside this network."
 msgstr ""
 
-#: views/admin/network/settings.php:74
+#: views/admin/network/settings.php:75
 msgid "Typesense host"
 msgstr ""
 
-#: views/admin/network/settings.php:74
+#: views/admin/network/settings.php:75
 #: views/admin/settings-tabs/connection.php:83
 msgid "Frontend host (optional)"
 msgstr ""
 
-#: views/admin/network/settings.php:81
-#: views/admin/network/settings.php:91
-#: views/admin/network/settings.php:130
+#: views/admin/network/settings.php:82
+#: views/admin/network/settings.php:92
+#: views/admin/network/settings.php:133
 #: views/admin/settings-tabs/connection.php:74
 #: views/admin/settings-tabs/connection.php:102
 #: views/admin/settings-tabs/connection.php:131
@@ -1436,129 +1588,129 @@ msgstr ""
 msgid "Set via constant — read only."
 msgstr ""
 
-#: views/admin/network/settings.php:87
+#: views/admin/network/settings.php:88
 msgid "Index prefix (optional)"
 msgstr ""
 
-#: views/admin/network/settings.php:90
+#: views/admin/network/settings.php:91
 msgid "Prepended to every site collection name, e.g. eslov_. Lowercase letters, numbers, hyphens and underscores only."
 msgstr ""
 
-#: views/admin/network/settings.php:99
+#: views/admin/network/settings.php:100
 msgid "API keys"
 msgstr ""
 
-#: views/admin/network/settings.php:100
+#: views/admin/network/settings.php:101
 msgid "Two keys work together: one sets up new sites, the other keeps their content indexed."
 msgstr ""
 
-#: views/admin/network/settings.php:103
+#: views/admin/network/settings.php:104
 msgid "A provisioning key runs the automatic setup: saving the site selection on the Sites tab creates each site’s Typesense collection and its own search key."
 msgstr ""
 
-#: views/admin/network/settings.php:104
+#: views/admin/network/settings.php:105
 msgid "The admin key below then indexes and maintains content in those collections. It only manages collections and documents — never other keys."
 msgstr ""
 
-#: views/admin/network/settings.php:109
+#: views/admin/network/settings.php:110
 msgid "Provisioning key configured: automatic setup can create and remove per-site search keys."
 msgstr ""
 
 #. translators: %s is the constant name TYPESENSE_PROVISIONING_KEY
-#: views/admin/network/settings.php:116
+#: views/admin/network/settings.php:118
 msgid "No provisioning key configured: automatic setup will fail at the key-creation step. Set %s (permanently, or for a single \"wp ... typesense network setup\" run) before saving the site selection on the Sites tab. See the security section in the README."
 msgstr ""
 
-#: views/admin/network/settings.php:126
+#: views/admin/network/settings.php:129
 msgid "Admin key (indexing)"
 msgstr ""
 
-#: views/admin/network/settings.php:129
+#: views/admin/network/settings.php:132
 msgid "A key is configured. Leave blank to keep it."
 msgstr ""
 
-#: views/admin/network/settings.php:129
+#: views/admin/network/settings.php:132
 msgid "Enter the server admin API key."
 msgstr ""
 
-#: views/admin/network/settings.php:139
+#: views/admin/network/settings.php:143
 msgid "Check shared connection"
 msgstr ""
 
-#: views/admin/network/settings.php:144
+#: views/admin/network/settings.php:148
 msgid "Select sites and save to set up their indexes and search keys. Keep the page open until setup completes."
 msgstr ""
 
-#: views/admin/network/settings.php:144
+#: views/admin/network/settings.php:148
 msgid "Index content separately with WP-CLI. Disabling a site preserves its index and search key until you choose to delete them."
 msgstr ""
 
-#: views/admin/network/settings.php:148
+#: views/admin/network/settings.php:152
 msgid "Selected"
 msgstr ""
 
-#: views/admin/network/settings.php:148
+#: views/admin/network/settings.php:152
 msgid "Site"
 msgstr ""
 
-#: views/admin/network/settings.php:148
+#: views/admin/network/settings.php:152
 msgid "Index"
 msgstr ""
 
-#: views/admin/network/settings.php:154
+#: views/admin/network/settings.php:158
 msgid "Enable site %d"
 msgstr ""
 
-#: views/admin/network/settings.php:159
+#: views/admin/network/settings.php:163
 msgid "Last check: %s"
 msgstr ""
 
-#: views/admin/network/settings.php:160
+#: views/admin/network/settings.php:164
 msgid "Server and index have not been checked for this configuration."
 msgstr ""
 
-#: views/admin/network/settings.php:166
+#: views/admin/network/settings.php:170
 msgid "Retry"
 msgstr ""
 
-#: views/admin/network/settings.php:167
+#: views/admin/network/settings.php:171
 msgid "Check status"
 msgstr ""
 
-#: views/admin/network/settings.php:171
+#: views/admin/network/settings.php:175
 msgid "Index access verified at the last check."
 msgstr ""
 
-#: views/admin/network/settings.php:171
+#: views/admin/network/settings.php:175
 msgid "Saved index name. Existence has not been verified by a current status check."
 msgstr ""
 
-#: views/admin/network/settings.php:173
+#: views/admin/network/settings.php:177
 msgid "Indexing with WP-CLI"
 msgstr ""
 
-#: views/admin/network/settings.php:174
+#: views/admin/network/settings.php:178
 msgid "Use the same command for the first indexing run and later reindexing. Indexing results do not control activation; an empty or partially filled index can return incomplete results."
 msgstr ""
 
-#: views/admin/network/settings.php:180
-#: views/admin/network/settings.php:189
+#: views/admin/network/settings.php:184
+#: views/admin/network/settings.php:193
 msgid "Delete index and search key"
 msgstr ""
 
-#: views/admin/network/settings.php:187
+#: views/admin/network/settings.php:191
 msgid "Permanently delete index %s and its site search key. WordPress content is preserved. Re-enabling requires indexing again."
 msgstr ""
 
-#: views/admin/network/settings.php:188
+#: views/admin/network/settings.php:192
 msgid "I confirm deletion of this index and search key."
 msgstr ""
 
-#: views/admin/network/settings.php:194
+#: views/admin/network/settings.php:198
 msgid "No sites found."
 msgstr ""
 
-#: views/admin/network/settings.php:196
+#: views/admin/network/settings.php:201
 msgid "Save site selection"
 msgstr ""
 
@@ -1621,11 +1773,12 @@ msgstr ""
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:80
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:127
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:154
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:180
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:206
 #: views/admin/settings-tabs/quick-search.php:42
-#: views/admin/settings-tabs/settings.php:79
-#: views/admin/settings-tabs/settings.php:117
-#: views/admin/settings-tabs/settings.php:171
-#: views/admin/settings-tabs/settings.php:202
+#: views/admin/settings-tabs/settings.php:84
+#: views/admin/settings-tabs/settings.php:138
+#: views/admin/settings-tabs/settings.php:169
 msgid "On"
 msgstr ""
 
@@ -1635,11 +1788,12 @@ msgstr ""
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:81
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:128
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:155
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:181
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:207
 #: views/admin/settings-tabs/quick-search.php:43
-#: views/admin/settings-tabs/settings.php:80
-#: views/admin/settings-tabs/settings.php:118
-#: views/admin/settings-tabs/settings.php:172
-#: views/admin/settings-tabs/settings.php:203
+#: views/admin/settings-tabs/settings.php:85
+#: views/admin/settings-tabs/settings.php:139
+#: views/admin/settings-tabs/settings.php:170
 msgid "Off"
 msgstr ""
 
@@ -1710,7 +1864,7 @@ msgstr ""
 #: views/admin/settings-tabs/advanced-settings.php:261
 #: views/admin/settings-tabs/connection.php:292
 #: views/admin/settings-tabs/quick-search.php:158
-#: views/admin/settings-tabs/settings.php:215
+#: views/admin/settings-tabs/settings.php:182
 msgid "Save settings"
 msgstr ""
 
@@ -1784,6 +1938,23 @@ msgstr ""
 
 #: views/admin/settings-tabs/advanced/search-result-behavior.php:159
 msgid "Enable synonym rules so a search for one word also matches related words you define. After saving, manage them from Typesense search > Synonyms."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:166
+msgid "Enable external pages"
+msgstr ""
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:185
+msgid "Let editors add searchable entries for pages that do not exist in WordPress, such as booking systems or pages on other domains. After saving, manage them from Typesense search > External pages."
+msgstr ""
+
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:192
+msgid "Enable stemming"
+msgstr ""
+
+#. translators: %s: two-letter language code detected from the site's locale, e.g. "sv"
+#: views/admin/settings-tabs/advanced/search-result-behavior.php:214
+msgid "Matches word variations (e.g. \"running\" also matches \"run\") on the title, content, excerpt, and extra search terms fields, using your site's detected language (\"%s\"). Changing this setting requires rebuilding your Typesense collection — run \"wp typesense rebuild\" after saving."
 msgstr ""
 
 #: views/admin/settings-tabs/connection.php:28
@@ -2042,40 +2213,31 @@ msgstr ""
 msgid "How the sort options are displayed on the search page. \"Radio buttons\" shows inline options; \"Dropdown\" uses a select element like the facet filters."
 msgstr ""
 
-#: views/admin/settings-tabs/settings.php:65
-msgid "Enable stemming"
-msgstr ""
-
-#. translators: %s: two-letter language code detected from the site's locale, e.g. "sv"
-#: views/admin/settings-tabs/settings.php:87
-msgid "Matches word variations (e.g. \"running\" also matches \"run\") on the title, content, excerpt, and extra search terms fields, using your site's detected language (\"%s\"). Changing this setting requires rebuilding your Typesense collection — run \"wp typesense rebuild\" after saving."
-msgstr ""
-
-#: views/admin/settings-tabs/settings.php:99
+#: views/admin/settings-tabs/settings.php:66
 msgid "Index Modularity content"
 msgstr ""
 
-#: views/admin/settings-tabs/settings.php:123
+#: views/admin/settings-tabs/settings.php:90
 msgid "When enabled, content that is added via Modularity modules will be included in the Typesense index. If disabled, content placed in module slots like sidebars will not be indexed for search."
 msgstr ""
 
-#: views/admin/settings-tabs/settings.php:134
+#: views/admin/settings-tabs/settings.php:101
 msgid "Post types"
 msgstr ""
 
-#: views/admin/settings-tabs/settings.php:135
+#: views/admin/settings-tabs/settings.php:102
 msgid "Choose which content types should be synced to Typesense. Disabled types are excluded from indexing and search results."
 msgstr ""
 
-#: views/admin/settings-tabs/settings.php:138
+#: views/admin/settings-tabs/settings.php:105
 msgid "PDF indexing requires the pdftotext binary to be installed on the server."
 msgstr ""
 
-#: views/admin/settings-tabs/settings.php:145
+#: views/admin/settings-tabs/settings.php:112
 msgid "No public post types found."
 msgstr ""
 
-#: views/admin/settings-tabs/settings.php:184
+#: views/admin/settings-tabs/settings.php:151
 msgid "PDF files"
 msgstr ""
 
