@@ -10,6 +10,8 @@ const entries = {
     'js/pinned-results-admin':  './source/js/pinned-results-admin.ts',
     'css/synonyms-admin':     './source/sass/synonyms-admin.scss',
     'js/synonyms-admin':      './source/js/synonyms-admin.ts',
+    'css/external-pages-admin': './source/sass/external-pages-admin.scss',
+    'js/external-pages-admin':  './source/js/external-pages-admin.ts',
     'css/quick-search':      './source/sass/quick-search.scss',
     'js/quick-search':       './source/js/quick-search.ts',
 };

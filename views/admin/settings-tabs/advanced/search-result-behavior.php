@@ -162,6 +162,31 @@ use TypesenseSearch\Admin\Settings;
         </div>
         <?php endif; ?>
 
+        <div class="ts-field">
+            <div class="ts-field__label"><?php esc_html_e('Enable external pages', 'typesense-search'); ?></div>
+            <div class="ts-field__body">
+                <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_EXTERNAL_PAGES_ENABLED); ?>" value="0" />
+                <label for="ts-external-pages-enabled" class="ts-toggle">
+                    <input
+                        type="checkbox"
+                        id="ts-external-pages-enabled"
+                        name="<?php echo esc_attr(Settings::OPTION_EXTERNAL_PAGES_ENABLED); ?>"
+                        value="1"
+                        <?php checked(1, (int) get_option(Settings::OPTION_EXTERNAL_PAGES_ENABLED, 0)); ?>
+                        class="ts-toggle__input"
+                    />
+                    <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
+                    <span class="ts-toggle__status">
+                        <span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span>
+                        <span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span>
+                    </span>
+                </label>
+                <p class="ts-field__description">
+                    <?php esc_html_e('Let editors add searchable entries for pages that do not exist in WordPress, such as booking systems or pages on other domains. After saving, manage them from Typesense search > External pages.', 'typesense-search'); ?>
+                </p>
+            </div>
+        </div>
+
         <?php if ($supportsStemming) : ?>
         <div class="ts-field">
             <div class="ts-field__label"><?php esc_html_e('Enable stemming', 'typesense-search'); ?></div>

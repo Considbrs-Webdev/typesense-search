@@ -118,6 +118,11 @@ trait Sanitizers
         return absint($value) ? 1 : 0;
     }
 
+    public function sanitizeExternalPagesEnabled(mixed $value): int
+    {
+        return absint($value) ? 1 : 0;
+    }
+
     public function sanitizeStemmingEnabled(mixed $value): int
     {
         if (!(new ServerCapabilities(new AdminApi(new SettingsRepository())))->supportsStemming()) {

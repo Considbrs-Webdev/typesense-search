@@ -230,4 +230,51 @@ class I18n
             'removeTerm'         => __('Remove word', 'typesense-search'),
         ];
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function externalPagesStrings(): array
+    {
+        return [
+            'missingConfig'       => __('Missing external pages configuration.', 'typesense-search'),
+            'instructionsHeading' => __('Instructions', 'typesense-search'),
+            'introText'           => __('Add pages that do not exist in WordPress, such as a booking system or a page on another domain, so they show up as hits in search results.', 'typesense-search'),
+            'introSync'           => __('Changes reach the search index when you sync to Typesense.', 'typesense-search'),
+            'loadingPages'        => __('Loading external pages...', 'typesense-search'),
+            'couldNotLoadPages'   => __('Could not load external pages.', 'typesense-search'),
+            'addPage'             => __('Add external page', 'typesense-search'),
+            'syncToTypesense'     => __('Sync to Typesense', 'typesense-search'),
+            'syncing'             => __('Syncing...', 'typesense-search'),
+            'searchPages'         => __('Search external pages...', 'typesense-search'),
+            'noPages'             => __('No external pages yet.', 'typesense-search'),
+            'noFilteredPages'     => __('No external pages match your filter.', 'typesense-search'),
+            'externalPages'       => __('External pages', 'typesense-search'),
+            'editorLabel'         => __('External page editor', 'typesense-search'),
+            'titleLabel'          => __('Title', 'typesense-search'),
+            'titleHelp'           => __('Shown as the heading of the search hit.', 'typesense-search'),
+            'urlLabel'            => __('URL', 'typesense-search'),
+            'urlHelp'             => __('Where the search hit links to. Must start with http:// or https://.', 'typesense-search'),
+            'contentLabel'        => __('Content', 'typesense-search'),
+            'contentHelp'         => __('Plain text that is searched and used for the hit excerpt.', 'typesense-search'),
+            'newStatus'           => __('New', 'typesense-search'),
+            'syncedStatus'        => __('Synced', 'typesense-search'),
+            'errorStatus'         => __('Error', 'typesense-search'),
+            'pendingStatus'       => __('Pending', 'typesense-search'),
+            'newPage'             => __('New external page', 'typesense-search'),
+            'saveChanges'         => __('Save changes', 'typesense-search'),
+            'saving'              => __('Saving...', 'typesense-search'),
+            'saved'               => __('Saved', 'typesense-search'),
+            'deletePage'          => __('Delete external page', 'typesense-search'),
+            'confirmDeletePage'   => __('Delete this external page?', 'typesense-search'),
+            'missingTitleError'   => __('Enter a title for the external page.', 'typesense-search'),
+            'invalidUrlError'     => __('Enter a valid URL starting with http:// or https://.', 'typesense-search'),
+            'savedNotice'         => __('External page saved. Sync to Typesense when you are ready.', 'typesense-search'),
+            'saveError'           => __('Could not save external page.', 'typesense-search'),
+            'deletedNotice'       => __('External page deleted. Sync to Typesense to apply the change.', 'typesense-search'),
+            'deleteError'         => __('Could not delete external page.', 'typesense-search'),
+            'syncSuccess'         => __('External pages synced.', 'typesense-search'),
+            'syncError'           => __('Could not sync external pages.', 'typesense-search'),
+        ];
+    }
 }

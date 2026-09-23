@@ -27,5 +27,6 @@ class AdminFeature
         new Admin\MetaBox($this->settings);
         new Admin\PinnedResultsPage($this->settings, $capabilities);
         new Admin\SynonymsPage($this->settings, $capabilities);
+        new Admin\ExternalPagesPage($this->settings);
     }
 }
