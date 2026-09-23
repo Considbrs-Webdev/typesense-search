@@ -34,7 +34,10 @@ class PinnedResultsPage
 
     public function addPage(): void
     {
-        if (!$this->shouldShow()) {
+        // Only the setting is checked here: it can only be enabled when the server
+        // supported the feature, and this runs on every admin request, so a
+        // server version lookup would mean a remote call each time.
+        if (!$this->settings->isPinnedResultsEnabled()) {
             return;
         }
 
