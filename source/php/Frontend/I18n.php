@@ -80,9 +80,11 @@ class I18n
 
             // Statistics – post-type row
             // %s is replaced with the post type label in JS
+            /* translators: %s: post type label */
             'confirmClearType'     => __('Remove all "%s" documents from the Typesense index? This cannot be undone.', 'typesense-search'),
             'clearBtn'             => __('Clear', 'typesense-search'),
             // %s is replaced with the post type label in JS
+            /* translators: %s: post type label */
             'confirmReindexType'   => __('Re-index all "%s" documents? Existing entries will be re-processed and overwritten.', 'typesense-search'),
             'reindexBtn'           => __('Reindex', 'typesense-search'),
             'reindexExternalTitle' => __('Managed by an external strategy — use WP-CLI to reindex.', 'typesense-search'),

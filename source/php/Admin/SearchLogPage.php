@@ -76,7 +76,7 @@ class SearchLogPage
             <?php endif; ?>
 
             <?php if ($table->getDeletedItems() > 0) : ?>
-                <div class="notice notice-success is-dismissible"><p><?php echo esc_html(sprintf(_n('%d search was deleted.', '%d searches were deleted.', $table->getDeletedItems(), 'typesense-search'), $table->getDeletedItems())); ?></p></div>
+                <div class="notice notice-success is-dismissible"><p><?php echo esc_html(sprintf(/* translators: %d: number of deleted searches */ _n('%d search was deleted.', '%d searches were deleted.', $table->getDeletedItems(), 'typesense-search'), $table->getDeletedItems())); ?></p></div>
             <?php endif; ?>
 
             <ul class="subsubsub">

@@ -130,7 +130,7 @@ $searchStatistics = $searchStatisticsEnabled ? (new Repository())->getWidgetData
                     <?php else : ?>
                         <ol class="ts-search-statistics-list">
                             <?php foreach ($searchStatistics['failed'] as $row) : ?>
-                                <li><strong><?php echo esc_html((string) $row['query_text']); ?></strong><span><?php echo esc_html(sprintf(_n('%d unique session', '%d unique sessions', (int) $row['count'], 'typesense-search'), (int) $row['count'])); ?></span></li>
+                                <li><strong><?php echo esc_html((string) $row['query_text']); ?></strong><span><?php echo esc_html(sprintf(/* translators: %d: number of unique sessions */ _n('%d unique session', '%d unique sessions', (int) $row['count'], 'typesense-search'), (int) $row['count'])); ?></span></li>
                             <?php endforeach; ?>
                         </ol>
                     <?php endif; ?>
@@ -142,7 +142,7 @@ $searchStatistics = $searchStatisticsEnabled ? (new Repository())->getWidgetData
                     <?php else : ?>
                         <ol class="ts-search-statistics-list">
                             <?php foreach ($searchStatistics['popular'] as $row) : ?>
-                                <li><strong><?php echo esc_html((string) $row['query_text']); ?></strong><span><?php echo esc_html(sprintf(_n('%d unique session', '%d unique sessions', (int) $row['count'], 'typesense-search'), (int) $row['count'])); ?></span></li>
+                                <li><strong><?php echo esc_html((string) $row['query_text']); ?></strong><span><?php echo esc_html(sprintf(/* translators: %d: number of unique sessions */ _n('%d unique session', '%d unique sessions', (int) $row['count'], 'typesense-search'), (int) $row['count'])); ?></span></li>
                             <?php endforeach; ?>
                         </ol>
                     <?php endif; ?>
