@@ -1,6 +1,6 @@
 # Typesense Search Feature Roadmap
 
-Reviewed against local revision `10c5d6a` on 2026-09-07. Both features below
+Reviewed against local revision `10c5d6a` on 2026-09-07. The three features below
 remain **unimplemented proposals**, not commitments or ready-to-build specs.
 Pinned results and synonyms already exist; they do not implement these features.
 The `typesense_search_notices` string in SearchStatisticsActions is an admin
@@ -207,10 +207,113 @@ sub-section):
 - **Existing search behavior** — compare the proposed experience with current
   typo tolerance and synonym behavior before committing to a separate service.
 
-## Verification required for either feature
+---
+
+## Feature C: External pages
+
+### Goal
+
+Editors can register pages that do not exist in WordPress (for example a
+booking system, a third-party service or a page on another domain) so they
+show up as hits in search results. An admin page, modelled on the existing
+Pinned results and Synonyms pages, lets editors add, edit and remove these
+entries. The user-facing name of the type is **External page**.
+
+Each External page has:
+
+- **Title** — shown as the hit heading.
+- **Content** — searchable text, also used for the hit excerpt.
+- **URL** — where the hit links to.
+
+### Data model
+
+Proposed: one row per external page in a new `$wpdb->prefix` +
+`typesense_search_external_pages` table, following the conventions of the other
+custom tables (see the DB schema note in CLAUDE.md; a new table needs no
+backward-compatible migration until it has been released).
+
+| column     | type                     | notes                              |
+|------------|--------------------------|------------------------------------|
+| id         | bigint PK AUTO_INCREMENT |                                    |
+| title      | varchar(191)             | required                           |
+| content    | longtext                 | plain text; markup policy below    |
+| url        | varchar(2083)            | required, absolute http(s) URL     |
+| created_at | datetime                 |                                    |
+| updated_at | datetime                 |                                    |
+
+### Indexing
+
+The entries are indexed into Typesense alongside regular content so they are
+returned by the normal search request. Two ways to do it, to be decided (see
+open decisions):
+
+1. **External indexing strategy** — implement `ExternalIndexingStrategyInterface`
+   and register it in `IndexingFeature`. Sync runs on save/delete of an entry
+   and via `runExternalSync($id)` / `runAllExternalSyncs()` (cron and CLI).
+   This fits the existing pull-driven model best.
+2. Query-time merge from the database. Rejected as the default: it bypasses
+   ranking, typo tolerance, synonyms and pagination.
+
+Indexed documents need a stable id that cannot collide with WordPress post ids
+(for example an `external-<id>` prefix), a post-type-like value of
+`external_page` for filtering and labelling, and the permalink field set to the
+stored URL. Deleting an entry removes its document.
+
+### Architecture
+
+Follows the same structure as `PinnedResults/`:
+
+```
+source/php/ExternalPages/
+    Database.php          table definition and migrations
+    Repository.php        CRUD
+    IndexingStrategy.php  ExternalIndexingStrategyInterface implementation
+source/php/Admin/ExternalPagesPage.php  menu and assets, like PinnedResultsPage
+source/php/Admin/Ajax/                  one class per action (save, delete, list)
+
+source/js/external-pages/
+    types.ts
+    state.ts
+    api.ts
+    render.ts
+    events.ts
+source/js/external-pages-admin.ts       thin entry
+```
+
+Bootstrap wiring goes in a new `Bootstrap/ExternalPagesFeature.php`, following
+`PinnedResultsFeature`. Writes require `manage_options` and a nonce.
+
+### Frontend integration
+
+Hits from External pages render like other results, with the URL as the link
+target and an "External page" label so visitors can tell the destination is
+not a regular page on the site. Result templates and the quick-search overlay
+must handle documents without a WordPress post id. Decide whether external
+links open in the same tab and whether they get `rel="noopener"`.
+
+Validate on write: non-empty title, URL scheme limited to `http`/`https`,
+length limits, and a content markup policy (plain text recommended). Escape all
+rendered output.
+
+### Open decisions
+
+- **Same collection or separate** — indexing into the existing collection is
+  simplest for ranking and pagination, but schema fields (dates, taxonomies,
+  post type facets) must tolerate documents that lack them.
+- **Facet/filter behaviour** — whether "External page" appears as its own
+  post-type facet in the filter UI.
+- **Multisite** — entries are scoped to the current site; respect the network
+  site-use policy and collection naming.
+- **Bulk import** — CSV or CLI import for many entries is out of scope for v1.
+- **Pinned results and synonyms** — confirm that pinning an external page works
+  (pinned results currently refer to WordPress post ids).
+
+## Verification required for every feature
 
 Test site isolation, feature disablement, unauthorized writes, safe output,
 empty/no-match states, stale frontend responses and failures of the extra
 request. For suggestions also test candidate approval, cache invalidation,
-Unicode quality and representative query cost. These are future implementation
+Unicode quality and representative query cost. For External pages also test
+index sync on create/edit/delete, URL validation, id collisions with posts and
+rendering of hits without a WordPress post id. These are future implementation
 checks; no feature tests or live changes were run during this document audit.
