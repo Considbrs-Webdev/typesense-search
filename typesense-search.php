@@ -4,7 +4,7 @@
  * Plugin Name:       Typesense Search
  * Plugin URI:        https://github.com/considbrs-webdev/typesense-search
  * Description:       A Typesense Search Plugin for WordPress and Municipio.
- * Version: 1.6.1
+ * Version: 1.7.0
  * Requires PHP:      8.3
  * Author:            Consid Borås AB
  * Author URI:        https://github.com/considbrs-webdev

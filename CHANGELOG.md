@@ -5,6 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-09-24
+
+### Added
+
+- External pages: editors can add searchable entries for pages that do not exist in
+  WordPress (for example a booking system or a page on another domain) under
+  Typesense search > External pages. Entries are stored in WordPress, synced to
+  Typesense with the "Sync to Typesense" button, and show up in search results labelled
+  "External page". Enable the feature under Advanced settings.
+- Swedish translations for External pages, and a regenerated translation template.
+
+### Fixed
+
+- The "Sync to Typesense" button icon on the Pinned results and Synonyms pages could
+  drop below the button text with some admin themes.
+- Uninstalling the plugin now also removes the synonyms table and its options.
+
 ## [1.6.1] - 2026-09-17
 
 ### Fixed
