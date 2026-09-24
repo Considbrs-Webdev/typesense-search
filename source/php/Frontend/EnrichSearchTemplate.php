@@ -37,8 +37,11 @@ class EnrichSearchTemplate
 			'searchTitle' => __("Search", 'typesense-search'),
 			'searchLabel' => __("Enter search term", 'typesense-search'),
 			'searchPlaceholder' => __("Search term here..", 'typesense-search'),
+			/* translators: 1: search term, 2: result count text (e.g. "3 results") */
 			'searchSummaryTemplate' => __("Your search for <strong>%1\$s</strong> returned %2\$s", 'typesense-search'),
+			/* translators: %d: number of results */
 			'resultSingular' => __("%d result", 'typesense-search'),
+			/* translators: %d: number of results */
 			'resultPlural' => __("%d results", 'typesense-search'),
 			'noResults' => __("No Results", 'typesense-search'),
 			'noResultsMessage' => __("No results found for your search.", 'typesense-search'),

@@ -2,6 +2,8 @@
 
 namespace TypesenseSearch\Bootstrap;
 
+use TypesenseSearch\ExternalPages\IndexingStrategy as ExternalPagesIndexingStrategy;
+use TypesenseSearch\ExternalPages\Repository as ExternalPagesRepository;
 use TypesenseSearch\Indexing\DisabledContentPruner;
 use TypesenseSearch\Indexing\Enrichers\JobPostingEnricher;
 use TypesenseSearch\Indexing\Enrichers\ModularityEnricher;
@@ -56,6 +58,15 @@ class IndexingFeature
          *       }, 10, 4);
          */
         do_action('Municipio/TypesenseSearch/RegisterStrategies', $this->registry, $this->clientService, $this->settings, $this->logger);
+
+        if ($this->settings->isExternalPagesEnabled()) {
+            $this->registry->registerExternal(new ExternalPagesIndexingStrategy(
+                $this->clientService,
+                $this->settings,
+                $this->logger,
+                new ExternalPagesRepository()
+            ));
+        }
 
         new IndexingHooks($this->registry);
         (new DisabledContentPruner($this->clientService, $this->settings, $this->logger))->register();

@@ -158,5 +158,16 @@ class ProvisioningGateway
                 throw new \TypesenseSearch\Multisite\SetupException(__('Pinned-result synchronization failed.', 'typesense-search'));
             }
         }
+        if ($settings->isExternalPagesEnabled()) {
+            $strategy = new \TypesenseSearch\ExternalPages\IndexingStrategy(
+                new \TypesenseSearch\Services\TypesenseClientService($settings),
+                $settings,
+                new \TypesenseSearch\Logger\ErrorLogLogger(),
+                new \TypesenseSearch\ExternalPages\Repository()
+            );
+            if (!$strategy->sync()['ok']) {
+                throw new \TypesenseSearch\Multisite\SetupException(__('External page synchronization failed.', 'typesense-search'));
+            }
+        }
     }
 }

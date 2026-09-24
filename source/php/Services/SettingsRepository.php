@@ -157,6 +157,11 @@ class SettingsRepository
         return (bool) get_option(Settings::OPTION_SYNONYMS_ENABLED, 0);
     }
 
+    public function isExternalPagesEnabled(): bool
+    {
+        return (bool) get_option(Settings::OPTION_EXTERNAL_PAGES_ENABLED, 0);
+    }
+
     public function isStemmingEnabled(): bool
     {
         return (bool) get_option(Settings::OPTION_STEMMING_ENABLED, 0);

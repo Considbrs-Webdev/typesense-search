@@ -2639,3 +2639,109 @@ msgstr "Sista ansökningsdag"
 #~ "När anslutningen sparas startar automatisk uppsättning för valda "
 #~ "webbplatser. Spara webbplatsvalet igen efter att en webbplatsadress eller "
 #~ "miljö har ändrats. Befintliga index bevaras."
+
+msgid "External pages"
+msgstr "Externa sidor"
+
+msgid "External page"
+msgstr "Extern sida"
+
+msgid "External pages are not available."
+msgstr "Externa sidor är inte tillgängliga."
+
+msgid "External pages are not enabled."
+msgstr "Externa sidor är inte aktiverade."
+
+msgid "Enable external pages"
+msgstr "Aktivera externa sidor"
+
+msgid "Let editors add searchable entries for pages that do not exist in WordPress, such as booking systems or pages on other domains. After saving, manage them from Typesense search > External pages."
+msgstr "Låt redaktörer lägga till sökbara poster för sidor som inte finns i WordPress, till exempel bokningssystem eller sidor på andra domäner. Efter att du sparat hanterar du dem under Typesense search > Externa sidor."
+
+msgid "Loading external pages..."
+msgstr "Laddar externa sidor..."
+
+msgid "Enter a title for the external page."
+msgstr "Ange en titel för den externa sidan."
+
+msgid "Enter a valid URL starting with http:// or https://."
+msgstr "Ange en giltig URL som börjar med http:// eller https://."
+
+msgid "External page synchronization failed."
+msgstr "Synkroniseringen av externa sidor misslyckades."
+
+msgid "Missing external pages configuration."
+msgstr "Konfiguration för externa sidor saknas."
+
+msgid "Add pages that do not exist in WordPress, such as a booking system or a page on another domain, so they show up as hits in search results."
+msgstr "Lägg till sidor som inte finns i WordPress, till exempel ett bokningssystem eller en sida på en annan domän, så att de visas som träffar i sökresultaten."
+
+msgid "Changes reach the search index when you sync to Typesense."
+msgstr "Ändringar når sökindexet när du synkar till Typesense."
+
+msgid "Could not load external pages."
+msgstr "Kunde inte ladda externa sidor."
+
+msgid "Add external page"
+msgstr "Lägg till extern sida"
+
+msgid "Search external pages..."
+msgstr "Sök externa sidor..."
+
+msgid "No external pages yet."
+msgstr "Inga externa sidor ännu."
+
+msgid "No external pages match your filter."
+msgstr "Inga externa sidor matchar ditt filter."
+
+msgid "External page editor"
+msgstr "Redigerare för extern sida"
+
+msgid "Shown as the heading of the search hit."
+msgstr "Visas som rubrik för sökträffen."
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Where the search hit links to. Must start with http:// or https://."
+msgstr "Dit sökträffen länkar. Måste börja med http:// eller https://."
+
+msgid "Plain text that is searched and used for the hit excerpt."
+msgstr "Ren text som söks och används som utdrag i träffen."
+
+msgid "New external page"
+msgstr "Ny extern sida"
+
+msgid "Delete external page"
+msgstr "Radera extern sida"
+
+msgid "Delete this external page?"
+msgstr "Radera den här externa sidan?"
+
+msgid "External page saved. Sync to Typesense when you are ready."
+msgstr "Extern sida sparad. Synka till Typesense när du är redo."
+
+msgid "Could not save external page."
+msgstr "Kunde inte spara extern sida."
+
+msgid "External page deleted. Sync to Typesense to apply the change."
+msgstr "Extern sida raderad. Synka till Typesense för att tillämpa ändringen."
+
+msgid "Could not delete external page."
+msgstr "Kunde inte radera extern sida."
+
+msgid "External pages synced."
+msgstr "Externa sidor synkade."
+
+msgid "Could not sync external pages."
+msgstr "Kunde inte synka externa sidor."
+
+msgid "Synced %d external page."
+msgid_plural "Synced %d external pages."
+msgstr[0] "Synkade %d extern sida."
+msgstr[1] "Synkade %d externa sidor."
+
+msgid "%d external page could not be synced."
+msgid_plural "%d external pages could not be synced."
+msgstr[0] "%d extern sida kunde inte synkas."
+msgstr[1] "%d externa sidor kunde inte synkas."

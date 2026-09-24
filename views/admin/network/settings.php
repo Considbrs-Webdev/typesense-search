@@ -33,7 +33,7 @@ $provisioningAvailable = ProvisioningCredentials::isAvailableFor($connection['re
 .typesense-network-actions form { display: contents; }
 </style>
 <div class="wrap typesense-network ts-settings">
-<div class="typesense-network-heading"><h1><?php esc_html_e('Typesense Search — Network settings', 'typesense-search'); ?></h1><span class="typesense-network-environment"><?php echo esc_html(sprintf(__('Environment: %s', 'typesense-search'), wp_get_environment_type())); ?></span></div>
+<div class="typesense-network-heading"><h1><?php esc_html_e('Typesense Search — Network settings', 'typesense-search'); ?></h1><span class="typesense-network-environment"><?php echo esc_html(sprintf(/* translators: %s: WordPress environment type, e.g. production */ __('Environment: %s', 'typesense-search'), wp_get_environment_type())); ?></span></div>
 <p class="ts-settings__subtitle"><?php esc_html_e('Connect the network to a shared Typesense server, then choose which sites get their own index.', 'typesense-search'); ?></p>
 <nav class="nav-tab-wrapper ts-settings__tabs">
 <?php foreach (['connection' => __('Connection', 'typesense-search'), 'sites' => __('Sites', 'typesense-search')] as $slug => $label) : ?>
@@ -46,7 +46,7 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <div class="notice <?php echo !empty($notice['success']) ? 'notice-success' : 'notice-error'; ?> inline"><p><?php echo esc_html(__($notice['message'], 'typesense-search')); ?></p></div>
 <?php endif; ?>
 <?php if (!empty($run)) : $nextId = (int) $run['sites'][0]; ?>
-<div class="notice notice-info inline"><p><?php echo esc_html(sprintf(__('Setting up site %1$d of %2$d. Keep this page open until setup completes.', 'typesense-search'), $run['total'] - count($run['sites']) + 1, $run['total'])); ?></p>
+<div class="notice notice-info inline"><p><?php echo esc_html(sprintf(/* translators: 1: number of the site being set up, 2: total number of sites */ __('Setting up site %1$d of %2$d. Keep this page open until setup completes.', 'typesense-search'), $run['total'] - count($run['sites']) + 1, $run['total'])); ?></p>
 <p><?php echo esc_html(get_home_url($nextId)); ?></p>
 <form id="typesense-setup-next" method="post" action="<?php echo esc_url(\TypesenseSearch\Multisite\SiteUrls::admin($nextId, 'admin-post.php')); ?>">
 <input type="hidden" name="action" value="<?php echo esc_attr(NetworkSettingsPage::ACTION); ?>">
@@ -155,12 +155,12 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
     $isSelected = in_array($id, $selected, true);
     $row = $this->siteStatus($id, $isSelected, $network);
 ?>
-<tr><td><input aria-label="<?php echo esc_attr(sprintf(__('Enable site %d', 'typesense-search'), $id)); ?>" type="checkbox" form="typesense-sites" name="sites[]" value="<?php echo $id; ?>" <?php checked($isSelected); ?> <?php disabled($tab !== 'sites'); ?>></td>
+<tr><td><input aria-label="<?php echo esc_attr(sprintf(/* translators: %d: site ID */ __('Enable site %d', 'typesense-search'), $id)); ?>" type="checkbox" form="typesense-sites" name="sites[]" value="<?php echo $id; ?>" <?php checked($isSelected); ?> <?php disabled($tab !== 'sites'); ?>></td>
 <td><a href="<?php echo esc_url(\TypesenseSearch\Multisite\SiteUrls::admin($id)); ?>"><?php echo esc_html(get_home_url($id)); ?></a></td>
 <td><span class="typesense-network-state"><span aria-hidden="true" class="typesense-network-status typesense-network-status--<?php echo esc_attr($row['tone']); ?>"></span><strong><?php echo esc_html($row['label']); ?></strong></span>
 <?php if ($row['detail'] !== '') : ?><p class="description"><?php echo esc_html($row['detail']); ?></p><?php endif; ?>
 <?php if ($row['check']) : ?>
-<p><?php echo esc_html(sprintf(__('Last check: %s', 'typesense-search'), wp_date(get_option('date_format') . ' ' . get_option('time_format'), $row['check']['time']))); ?><br><?php echo esc_html(!empty($row['check']['success']) ? __('Server connection, admin key and site search key are working.', 'typesense-search') : __($row['check']['message'], 'typesense-search')); ?></p>
+<p><?php echo esc_html(sprintf(/* translators: %s: date and time of the last check */ __('Last check: %s', 'typesense-search'), wp_date(get_option('date_format') . ' ' . get_option('time_format'), $row['check']['time']))); ?><br><?php echo esc_html(!empty($row['check']['success']) ? __('Server connection, admin key and site search key are working.', 'typesense-search') : __($row['check']['message'], 'typesense-search')); ?></p>
 <?php elseif ($row['ready']) : ?><p class="description"><?php esc_html_e('Server and index have not been checked for this configuration.', 'typesense-search'); ?></p><?php endif; ?>
 
 <?php if ($row['retry'] || $row['ready']) : ?>
@@ -188,7 +188,7 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <input type="hidden" name="tab" value="sites"><input type="hidden" name="operation" value="delete">
 <input type="hidden" name="delete_fingerprint" value="<?php echo esc_attr($row['delete_fingerprint']); ?>">
 <?php wp_nonce_field(NetworkSettingsPage::ACTION . '_' . $id); ?>
-<p><?php echo esc_html(sprintf(__('Permanently delete index %s and its site search key. WordPress content is preserved. Re-enabling requires indexing again.', 'typesense-search'), $row['collection'])); ?></p>
+<p><?php echo esc_html(sprintf(/* translators: %s: Typesense collection name */ __('Permanently delete index %s and its site search key. WordPress content is preserved. Re-enabling requires indexing again.', 'typesense-search'), $row['collection'])); ?></p>
 <p><label><input type="checkbox" name="confirm_delete" value="1" required> <?php esc_html_e('I confirm deletion of this index and search key.', 'typesense-search'); ?></label></p>
 <button class="button" type="submit"><?php esc_html_e('Delete index and search key', 'typesense-search'); ?></button>
 </form></details>

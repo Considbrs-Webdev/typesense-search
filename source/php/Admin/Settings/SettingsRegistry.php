@@ -111,6 +111,12 @@ class SettingsRegistry
             'default'           => 0,
         ]);
 
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_EXTERNAL_PAGES_ENABLED, [
+            'type'              => 'integer',
+            'sanitize_callback' => [$this, 'sanitizeExternalPagesEnabled'],
+            'default'           => 0,
+        ]);
+
         register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_STEMMING_ENABLED, [
             'type'              => 'integer',
             'sanitize_callback' => [$this, 'sanitizeStemmingEnabled'],

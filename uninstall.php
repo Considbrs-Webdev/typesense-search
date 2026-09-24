@@ -25,6 +25,12 @@ function typesense_search_uninstall_data_for_site(?int $blogId = null): void
     $pinnedResultsTable = $wpdb->prefix . 'typesense_pinned_results';
     $wpdb->query("DROP TABLE IF EXISTS {$pinnedResultsTable}"); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+    $synonymsTable = $wpdb->prefix . 'typesense_synonyms';
+    $wpdb->query("DROP TABLE IF EXISTS {$synonymsTable}"); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+    $externalPagesTable = $wpdb->prefix . 'typesense_external_pages';
+    $wpdb->query("DROP TABLE IF EXISTS {$externalPagesTable}"); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
     foreach ([
         'typesense_network_state',
         'typesense_network_provision_lock',
@@ -34,6 +40,10 @@ function typesense_search_uninstall_data_for_site(?int $blogId = null): void
         'typesense_search_statistics_db_version',
         'typesense_search_pinned_results_db_version',
         'typesense_search_pinned_results_enabled',
+        'typesense_search_synonyms_db_version',
+        'typesense_search_synonyms_enabled',
+        'typesense_search_external_pages_db_version',
+        'typesense_search_external_pages_enabled',
         'typesense_search_logging_enabled',
         'typesense_search_logging_dashboard_widgets',
         'typesense_search_logging_require_consent',

@@ -3,6 +3,8 @@
 namespace TypesenseSearch\Indexing;
 
 use TypesenseSearch\Admin\Settings\OptionKeys;
+use TypesenseSearch\ExternalPages\IndexingStrategy as ExternalPagesIndexingStrategy;
+use TypesenseSearch\ExternalPages\Repository as ExternalPagesRepository;
 use TypesenseSearch\Logger\LoggerInterface;
 use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Services\TypesenseClientService;
@@ -38,6 +40,13 @@ class DisabledContentPruner
             10,
             2
         );
+
+        add_action(
+            'update_option_' . OptionKeys::OPTION_EXTERNAL_PAGES_ENABLED,
+            [$this, 'onExternalPagesUpdated'],
+            10,
+            2
+        );
     }
 
     /**
@@ -62,6 +71,18 @@ class DisabledContentPruner
     {
         if ((bool) $oldValue && !(bool) $newValue) {
             $this->deleteByFilter('type:=attachment');
+        }
+    }
+
+    /**
+     * Delete indexed external pages when the feature is disabled and mark the
+     * stored pages pending so re-enabling shows they need a new sync.
+     */
+    public function onExternalPagesUpdated(mixed $oldValue, mixed $newValue): void
+    {
+        if ((bool) $oldValue && !(bool) $newValue) {
+            $this->deleteByFilter('type:=' . ExternalPagesIndexingStrategy::TYPE);
+            (new ExternalPagesRepository())->markAllPending();
         }
     }
 

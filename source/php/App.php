@@ -6,6 +6,7 @@ use TypesenseSearch\Bootstrap\AdminFeature;
 use TypesenseSearch\Bootstrap\CliFeature;
 use TypesenseSearch\Bootstrap\FrontendFeature;
 use TypesenseSearch\Bootstrap\IndexingFeature;
+use TypesenseSearch\Bootstrap\ExternalPagesFeature;
 use TypesenseSearch\Bootstrap\PinnedResultsFeature;
 use TypesenseSearch\Bootstrap\SearchStatisticsFeature;
 use TypesenseSearch\Bootstrap\SynonymsFeature;
@@ -62,6 +63,8 @@ class App {
         (new PinnedResultsFeature($settings))->register();
 
         (new SynonymsFeature($settings))->register();
+
+        (new ExternalPagesFeature($settings, $clientService, $logger))->register();
 
         $indexingFeature = new IndexingFeature($settings, $clientService, $logger);
         $indexingFeature->register();
