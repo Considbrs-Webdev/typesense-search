@@ -128,8 +128,7 @@ class IndexingStrategy extends AbstractExternalIndexingStrategy
             return false;
         }
 
-        $content   = (string) ($item['content'] ?? '');
-        $updatedAt = strtotime((string) ($item['updated_at'] ?? '') . ' UTC');
+        $content = (string) ($item['content'] ?? '');
 
         return new IndexableDocument([
             'id'        => $this->getExternalId($item),
@@ -139,7 +138,6 @@ class IndexingStrategy extends AbstractExternalIndexingStrategy
             'url'       => $url,
             'type'      => self::TYPE,
             'type_name' => __('External page', 'typesense-search'),
-            'date'      => $updatedAt !== false ? $updatedAt : 0,
         ]);
     }
 

@@ -48,7 +48,7 @@ class IndexingStrategyTest extends TestCase
         self::assertSame('external_page', $document->get('type'));
         self::assertSame('External page', $document->get('type_name'));
         self::assertSame('https://booking.example.com/rooms', $document->get('url'));
-        self::assertSame(strtotime('2026-01-02 03:04:05 UTC'), $document->get('date'));
+        self::assertNull($document->get('date'), 'External pages have no date, so hits must not show one.');
     }
 
     public function test_document_is_skipped_without_title_or_url(): void
