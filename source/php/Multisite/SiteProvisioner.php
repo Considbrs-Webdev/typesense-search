@@ -71,6 +71,28 @@ class SiteProvisioner
         }, true);
     }
 
+    /**
+     * Forget a disabled site's saved index mapping without contacting Typesense.
+     * For state that no longer matches the server, prefix or URL (e.g. after a
+     * database migration), where the index cannot be deleted through the plugin.
+     * The old index and key stay on the server.
+     */
+    public function reset(): void
+    {
+        if (!$this->network->isNetworkActivated()) {
+            throw new SetupException(__('Network mode is not enabled.', 'typesense-search'));
+        }
+        if ($this->network->selected()) {
+            throw new SetupException(__('Disable the site and save the site selection before resetting its saved index.', 'typesense-search'));
+        }
+        $this->withLock(function (): void {
+            delete_option(NetworkSettingsRepository::STATE);
+            delete_option(SetupDispatcher::JOB);
+            delete_option(SetupDispatcher::STATUS);
+            delete_option(\TypesenseSearch\Admin\NetworkSettingsPage::CHECK);
+        });
+    }
+
     public function prepare(): void
     {
         $this->locked(fn () => $this->prepareMapping());
@@ -203,6 +225,11 @@ class SiteProvisioner
         if ($connection['remote'] === '' || $connection['admin_key'] === '') {
             throw new \TypesenseSearch\Multisite\SetupException(__('Configure the network connection first.', 'typesense-search'));
         }
+        $this->withLock($operation);
+    }
+
+    private function withLock(callable $operation): void
+    {
         // No automatic lock stealing: a long running indexing process may still own it.
         $token = bin2hex(random_bytes(16));
         if (!add_option(NetworkSettingsRepository::LOCK, $token, '', false)) {

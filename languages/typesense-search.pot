@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Typesense Search 1.6.1\n"
+"Project-Id-Version: Typesense Search 1.7.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/typesense-search\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-23T17:06:15+00:00\n"
+"POT-Creation-Date: 2026-09-28T10:46:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: typesense-search\n"
@@ -53,7 +53,7 @@ msgstr ""
 
 #: source/php/Admin/Ajax/AjaxHelpers.php:44
 #: source/php/Admin/Ajax/AjaxHelpers.php:59
-#: source/php/Admin/NetworkSettingsPage.php:294
+#: source/php/Admin/NetworkSettingsPage.php:302
 msgid "Unauthorized."
 msgstr ""
 
@@ -316,7 +316,7 @@ msgstr ""
 
 #: source/php/Admin/NetworkSettingsPage.php:74
 #: source/php/Multisite/NetworkSettingsRepository.php:114
-#: source/php/Multisite/SiteProvisioner.php:204
+#: source/php/Multisite/SiteProvisioner.php:226
 msgid "Configure the network connection first."
 msgstr ""
 
@@ -364,54 +364,62 @@ msgstr ""
 msgid "The index and site search key were deleted. Re-enable the site and run indexing to restore its search content."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:175
+#: source/php/Admin/NetworkSettingsPage.php:170
+msgid "Confirm the reset of the saved index first."
+msgstr ""
+
+#: source/php/Admin/NetworkSettingsPage.php:173
+msgid "The saved index was reset. Enable the site and save the site selection to set up a new index, then run indexing."
+msgstr ""
+
+#: source/php/Admin/NetworkSettingsPage.php:181
 msgid "The server reports an unhealthy status."
 msgstr ""
 
 #. translators: %s: date and time of the last check
-#: source/php/Admin/NetworkSettingsPage.php:180
+#: source/php/Admin/NetworkSettingsPage.php:186
 #: views/admin/network/settings.php:163
 msgid "Server connection, admin key and site search key are working."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:182
+#: source/php/Admin/NetworkSettingsPage.php:188
 msgid "Unknown operation."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:270
+#: source/php/Admin/NetworkSettingsPage.php:276
 #: source/php/Frontend/I18n.php:155
 msgid "Disabled"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:270
+#: source/php/Admin/NetworkSettingsPage.php:276
 msgid "Active"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:271
+#: source/php/Admin/NetworkSettingsPage.php:277
 msgid "Setup failed"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:271
+#: source/php/Admin/NetworkSettingsPage.php:277
 msgid "Waiting for setup"
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:273
+#: source/php/Admin/NetworkSettingsPage.php:279
 msgid "Setup is complete. Search uses Typesense when the server and index are available."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:274
+#: source/php/Admin/NetworkSettingsPage.php:280
 msgid "WordPress search is used until setup is complete. Save the site selection to start setup."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:276
+#: source/php/Admin/NetworkSettingsPage.php:282
 msgid "Setup failed. Retry setup."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:278
+#: source/php/Admin/NetworkSettingsPage.php:284
 msgid "Automatic setup has been requested, but has not started yet. Refresh this page to see the result."
 msgstr ""
 
-#: source/php/Admin/NetworkSettingsPage.php:279
+#: source/php/Admin/NetworkSettingsPage.php:285
 msgid "Automatic setup is in progress. Refresh this page to see the result."
 msgstr ""
 
@@ -616,7 +624,7 @@ msgstr ""
 msgid "Synonyms are not available."
 msgstr ""
 
-#: source/php/CLI/NetworkCommand.php:57
+#: source/php/CLI/NetworkCommand.php:59
 msgid "Network mode is not enabled. Use typesense index."
 msgstr ""
 
@@ -640,7 +648,7 @@ msgid_plural "Synced %d external pages."
 msgstr[0] ""
 msgstr[1] ""
 
-#: source/php/ExternalPages/IndexingStrategy.php:141
+#: source/php/ExternalPages/IndexingStrategy.php:140
 msgid "External page"
 msgstr ""
 
@@ -1416,31 +1424,39 @@ msgstr ""
 msgid "The index does not belong to this site. Nothing was deleted."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:97
+#: source/php/Multisite/SiteProvisioner.php:83
+msgid "Network mode is not enabled."
+msgstr ""
+
+#: source/php/Multisite/SiteProvisioner.php:86
+msgid "Disable the site and save the site selection before resetting its saved index."
+msgstr ""
+
+#: source/php/Multisite/SiteProvisioner.php:119
 msgid "The collection already exists but is not owned by this provisioning state. Choose an unused target or review it manually."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:178
+#: source/php/Multisite/SiteProvisioner.php:200
 msgid "Setup is incomplete for the current URL, environment and server. Save the site selection to retry setup."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:181
+#: source/php/Multisite/SiteProvisioner.php:203
 msgid "The index no longer belongs to this site. Check the index ownership before retrying setup."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:190
+#: source/php/Multisite/SiteProvisioner.php:212
 msgid "Could not save provisioning state."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:197
+#: source/php/Multisite/SiteProvisioner.php:219
 msgid "Disable the site and save the site selection before deleting its index and search key."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:200
+#: source/php/Multisite/SiteProvisioner.php:222
 msgid "Select this site in Network Admin and remove global collection/search-key constants first."
 msgstr ""
 
-#: source/php/Multisite/SiteProvisioner.php:209
+#: source/php/Multisite/SiteProvisioner.php:236
 msgid "Another provisioning operation holds this site lock. If its process has ended, remove typesense_network_provision_lock with WP-CLI and retry."
 msgstr ""
 
@@ -1722,10 +1738,23 @@ msgid "I confirm deletion of this index and search key."
 msgstr ""
 
 #: views/admin/network/settings.php:198
+#: views/admin/network/settings.php:206
+msgid "Reset saved index"
+msgstr ""
+
+#: views/admin/network/settings.php:204
+msgid "Forget the saved index name and search key for this site, for example after a database migration or a changed network prefix. Typesense is not contacted: the old index and key remain on the server and must be removed there if they are no longer needed. The next setup creates a new index with the current prefix."
+msgstr ""
+
+#: views/admin/network/settings.php:205
+msgid "I confirm the reset of the saved index for this site."
+msgstr ""
+
+#: views/admin/network/settings.php:211
 msgid "No sites found."
 msgstr ""
 
-#: views/admin/network/settings.php:201
+#: views/admin/network/settings.php:214
 msgid "Save site selection"
 msgstr ""
 

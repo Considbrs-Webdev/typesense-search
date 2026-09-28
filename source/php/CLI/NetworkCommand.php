@@ -19,10 +19,11 @@ class NetworkCommand
      * ## OPTIONS
      *
      * <operation>
-     * : setup, prepare, index, or activate. prepare/activate are compatibility aliases for setup.
+     * : setup, prepare, index, activate, or reset. prepare/activate are compatibility aliases for setup.
+     * reset forgets a disabled site's saved index and search key without contacting Typesense.
      *
      * [--yes]
-     * : Skip the indexing confirmation prompt.
+     * : Skip the indexing or reset confirmation prompt.
      *
      * [--include-pdf]
      * : Include PDFs when indexing the site.
@@ -38,6 +39,7 @@ class NetworkCommand
      *     wp --url=https://example.com/subsite/ typesense network setup
      *     wp --url=https://example.com/subsite/ typesense network index --yes
      *     wp --url=https://example.com/subsite/ typesense network activate --yes
+     *     wp --url=https://example.com/subsite/ typesense network reset --yes
      */
     public function __invoke(array $args, array $assocArgs): void
     {
@@ -59,8 +61,12 @@ class NetworkCommand
                     \WP_CLI::warning('Compatibility alias: use typesense index for initial and recurring indexing.');
                     $this->indexAction->handle([], $assocArgs);
                     break;
+                case 'reset':
+                    \WP_CLI::confirm('Forget the saved index and search key for this site? The old index and key stay on the Typesense server.', $assocArgs);
+                    $provisioner->reset();
+                    break;
                 default:
-                    \WP_CLI::error('Use setup or index (prepare and activate remain setup aliases).');
+                    \WP_CLI::error('Use setup, index or reset (prepare and activate remain setup aliases).');
             }
             \WP_CLI::success('Network collection operation completed.');
         } catch (\Throwable $e) {

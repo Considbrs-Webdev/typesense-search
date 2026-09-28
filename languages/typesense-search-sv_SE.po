@@ -2745,3 +2745,24 @@ msgid "%d external page could not be synced."
 msgid_plural "%d external pages could not be synced."
 msgstr[0] "%d extern sida kunde inte synkas."
 msgstr[1] "%d externa sidor kunde inte synkas."
+
+msgid "Network mode is not enabled."
+msgstr "Nätverksläget är inte aktiverat."
+
+msgid "Disable the site and save the site selection before resetting its saved index."
+msgstr "Avaktivera sajten och spara sajtvalet innan det sparade indexet nollställs."
+
+msgid "Confirm the reset of the saved index first."
+msgstr "Bekräfta först att det sparade indexet ska nollställas."
+
+msgid "The saved index was reset. Enable the site and save the site selection to set up a new index, then run indexing."
+msgstr "Det sparade indexet har nollställts. Aktivera sajten och spara sajtvalet för att sätta upp ett nytt index, och kör sedan indexeringen."
+
+msgid "Reset saved index"
+msgstr "Nollställ sparat index"
+
+msgid "Forget the saved index name and search key for this site, for example after a database migration or a changed network prefix. Typesense is not contacted: the old index and key remain on the server and must be removed there if they are no longer needed. The next setup creates a new index with the current prefix."
+msgstr "Glöm sajtens sparade indexnamn och söknyckel, till exempel efter en databasmigrering eller ett ändrat nätverksprefix. Typesense kontaktas inte: det gamla indexet och nyckeln ligger kvar på servern och måste tas bort där om de inte längre behövs. Nästa setup skapar ett nytt index med det aktuella prefixet."
+
+msgid "I confirm the reset of the saved index for this site."
+msgstr "Jag bekräftar att sajtens sparade index ska nollställas."

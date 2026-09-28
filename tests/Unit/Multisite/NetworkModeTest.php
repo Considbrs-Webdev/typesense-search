@@ -529,6 +529,38 @@ class NetworkModeTest extends TestCase
         (new SiteProvisioner($network, $gateway))->delete($fingerprint);
     }
 
+    public function test_reset_forgets_stale_mapping_locally_without_contacting_typesense(): void
+    {
+        $this->networkOptions[NetworkSettingsRepository::ENABLED] = [2];
+        // Saved under an old prefix, so it no longer matches the current identity and cannot be deleted.
+        $stale = ['identity' => ['prefix' => 'old_'], 'collection' => 'old_example-test__development_b1', 'key' => 'k', 'owner' => 'o'];
+        $this->options[1][NetworkSettingsRepository::STATE] = ['active' => $stale, 'candidate' => $stale];
+        $this->options[1][\TypesenseSearch\Multisite\SetupDispatcher::STATUS] = ['status' => 'error'];
+        $this->options[1][\TypesenseSearch\Admin\NetworkSettingsPage::CHECK] = ['success' => false];
+        $this->options[1]['typesense_search_index_name'] = 'legacy-local';
+        // The old server may be unreachable after a migration; reset must not need it.
+        $this->networkOptions[NetworkSettingsRepository::REMOTE] = '';
+        $gateway = $this->createMock(ProvisioningGateway::class);
+        $gateway->expects(self::never())->method(self::anything());
+        (new SiteProvisioner(new NetworkSettingsRepository(), $gateway))->reset();
+        self::assertSame(['typesense_search_index_name' => 'legacy-local'], $this->options[1]);
+    }
+
+    public function test_reset_rejects_enabled_site_and_respects_lock(): void
+    {
+        $state = ['active' => $this->mapping()];
+        $this->options[1][NetworkSettingsRepository::STATE] = $state;
+        $provisioner = new SiteProvisioner(new NetworkSettingsRepository(), $this->createMock(ProvisioningGateway::class));
+        try { $provisioner->reset(); self::fail(); }
+        catch (\TypesenseSearch\Multisite\SetupException $e) { self::assertStringContainsString('Disable the site', $e->getMessage()); }
+        $this->networkOptions[NetworkSettingsRepository::ENABLED] = [2];
+        $this->options[1][NetworkSettingsRepository::LOCK] = 'running';
+        try { $provisioner->reset(); self::fail(); }
+        catch (\TypesenseSearch\Multisite\SetupException $e) { self::assertStringContainsString('holds this site lock', $e->getMessage()); }
+        self::assertSame($state, $this->options[1][NetworkSettingsRepository::STATE]);
+        self::assertSame('running', $this->options[1][NetworkSettingsRepository::LOCK]);
+    }
+
     public function test_matchDeletionKeys_prefers_exact_key_id_when_present(): void
     {
         $mapping = ['key' => 'irrelevant-once-key-id-is-set', 'collection' => 'site-1', 'key_id' => '7'];

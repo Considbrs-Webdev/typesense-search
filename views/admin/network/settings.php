@@ -193,6 +193,19 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <button class="button" type="submit"><?php esc_html_e('Delete index and search key', 'typesense-search'); ?></button>
 </form></details>
 <?php endif; ?>
+
+<?php if ($row['resettable']) : ?>
+<details><summary><?php esc_html_e('Reset saved index', 'typesense-search'); ?></summary>
+<form method="post" action="<?php echo esc_url(\TypesenseSearch\Multisite\SiteUrls::admin($id, 'admin-post.php')); ?>">
+<input type="hidden" name="action" value="<?php echo esc_attr(NetworkSettingsPage::ACTION); ?>">
+<input type="hidden" name="site_id" value="<?php echo $id; ?>"><input type="hidden" name="network_id" value="<?php echo (int) $networkId; ?>">
+<input type="hidden" name="tab" value="sites"><input type="hidden" name="operation" value="reset">
+<?php wp_nonce_field(NetworkSettingsPage::ACTION . '_' . $id); ?>
+<p><?php esc_html_e('Forget the saved index name and search key for this site, for example after a database migration or a changed network prefix. Typesense is not contacted: the old index and key remain on the server and must be removed there if they are no longer needed. The next setup creates a new index with the current prefix.', 'typesense-search'); ?></p>
+<p><label><input type="checkbox" name="confirm_reset" value="1" required> <?php esc_html_e('I confirm the reset of the saved index for this site.', 'typesense-search'); ?></label></p>
+<button class="button" type="submit"><?php esc_html_e('Reset saved index', 'typesense-search'); ?></button>
+</form></details>
+<?php endif; ?>
 </td></tr>
 <?php endforeach; ?>
 <?php if (!$sites) : ?><tr><td colspan="4"><?php esc_html_e('No sites found.', 'typesense-search'); ?></td></tr><?php endif; ?>

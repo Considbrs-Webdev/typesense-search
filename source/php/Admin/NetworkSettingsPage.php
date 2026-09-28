@@ -165,6 +165,12 @@ class NetworkSettingsPage
                 }
                 $provisioner->delete(is_string($_POST['delete_fingerprint'] ?? null) ? $_POST['delete_fingerprint'] : '');
                 $message = __('The index and site search key were deleted. Re-enable the site and run indexing to restore its search content.', 'typesense-search');
+            } elseif ($operation === 'reset') {
+                if (($_POST['confirm_reset'] ?? '') !== '1') {
+                    throw new \TypesenseSearch\Multisite\SetupException(__('Confirm the reset of the saved index first.', 'typesense-search'));
+                }
+                $provisioner->reset();
+                $message = __('The saved index was reset. Enable the site and save the site selection to set up a new index, then run indexing.', 'typesense-search');
             } elseif ($operation === 'status') {
                 if (!$network->canUse()) {
                     throw new \TypesenseSearch\Multisite\SetupException($network->unavailableReason());
@@ -285,7 +291,9 @@ class NetworkSettingsPage
             'collection' => (string) ($saved['collection'] ?? ''),
             'deletable' => !$selected && !empty($saved['collection']) && !empty($saved['owner'])
                 && ($saved['identity'] ?? null) === $identity && !$network->conflict(),
-            'delete_fingerprint' => self::checkFingerprint($connection, $saved)];
+            'delete_fingerprint' => self::checkFingerprint($connection, $saved),
+            // Also offered when the saved identity no longer matches (e.g. a changed prefix or URL), which blocks deletion.
+            'resettable' => !$selected && $state !== []];
     }
 
     private function authorize(): void
