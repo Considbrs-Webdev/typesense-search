@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-09-28
+
+### Added
+
+- Network admins can reset a disabled site's saved index (collection, search key and
+  setup status) under "Reset saved index" on the network settings page, without
+  contacting Typesense. Useful when a database migration or a changed network prefix
+  left stale state that could neither be deleted nor replaced. Also available as
+  `wp typesense network reset`.
+
+### Fixed
+
+- Quick search titles showed HTML entities such as `&#8211;` when the search term was
+  not in the title.
+- Titles and content are now indexed with HTML entities decoded, so entities no longer
+  affect matching or get cut in half in snippets. Reindex each site to apply this to
+  existing documents.
+- Highlighted snippets in search results are now escaped before they are displayed.
+
 ## [1.7.0] - 2026-09-24
 
 ### Added
