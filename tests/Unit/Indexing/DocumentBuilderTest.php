@@ -73,4 +73,42 @@ class DocumentBuilderTest extends TestCase
         self::assertTrue($document['global_filter']);
         self::assertSame(123, $document['page_filter']);
     }
+
+    public function test_build_indexes_plain_text_with_entities_decoded_after_tags_are_stripped(): void
+    {
+        $post = new \WP_Post(
+            ID: 7,
+            post_title: 'Bananveckan &#8211; Banankampen',
+            post_content: '',
+            post_type: 'page',
+            post_date_gmt: '2024-01-01 00:00:00'
+        );
+
+        Functions\when('has_post_thumbnail')->justReturn(false);
+        Functions\when('get_the_excerpt')->justReturn('Fika &amp; lek');
+        Functions\when('get_permalink')->justReturn('https://example.test/banan');
+        Functions\when('get_post_type_object')->justReturn((object) ['label' => 'Pages']);
+        Functions\when('get_option')->justReturn('Y-m-d');
+        Functions\when('date_i18n')->justReturn('2024-01-01');
+        Functions\when('get_post_meta')->justReturn('');
+        Functions\when('apply_filters')->alias(static function (string $hook, mixed $value) {
+            // An escaped tag is text written by the editor, not markup to strip.
+            return $hook === 'the_content' ? '<p>Skriv &lt;b&gt; &#8220;här&#8221;&nbsp;nu</p>' : $value;
+        });
+
+        $document = DocumentBuilder::build($post)->toArray();
+
+        self::assertSame('Bananveckan – Banankampen', $document['title']);
+        self::assertSame("Skriv <b> “här”\u{00A0}nu", $document['content']);
+        self::assertSame('Fika & lek', $document['excerpt']);
+    }
+
+    public function test_excerpt_is_measured_and_cut_after_decoding(): void
+    {
+        Functions\when('apply_filters')->alias(static fn (string $hook, mixed $value) => $hook === ExcerptHelper::FILTER_LENGTH ? 12 : $value);
+
+        // Nine characters once decoded, so it fits; raw it is 21 and would be cut mid-entity.
+        self::assertSame('A – B – C', ExcerptHelper::build('A &#8211; B &#8211; C'));
+        self::assertSame('Aaa – Bbb – [...]', ExcerptHelper::build('Aaa &#8211; Bbb &#8211; Ccc'));
+    }
 }

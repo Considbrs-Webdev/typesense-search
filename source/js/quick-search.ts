@@ -7,7 +7,7 @@ import type { TypesenseSearchConfig, SearchHit } from "./typesense-search/types"
 import { loadWebAwesomeLocale } from "./typesense-search/webawesome-locale";
 import { getQueryByWeights, INFIX, QUERY_BY } from "./typesense-search/search-params";
 import { createSearchStatisticsTracker } from "./typesense-search/search-statistics";
-import { decodeHtmlEntities } from "./typesense-search/html";
+import { decodeHtmlEntities, escapeHtmlPreservingMarks } from "./typesense-search/html";
 
 interface QuickSearchSelectorEntry {
   selector: string;
@@ -231,9 +231,9 @@ function attachQuickSearch(
     nameEl.className = "ts-qs-item__name";
     const titleSnippet = hit.highlight?.title?.snippet;
     if (titleSnippet) {
-      nameEl.innerHTML = titleSnippet;
+      nameEl.innerHTML = escapeHtmlPreservingMarks(titleSnippet);
     } else {
-      // Titles can be stored with entities (e.g. &#8211;) – decode like the main search does.
+      // Documents indexed before titles were decoded can still contain entities (e.g. &#8211;).
       nameEl.textContent = decodeHtmlEntities(title);
     }
 

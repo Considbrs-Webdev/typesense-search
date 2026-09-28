@@ -63,7 +63,8 @@ class ExcerptHelper
      */
     public static function build(string $text, ?\WP_Post $post = null): string
     {
-        $clean = wp_strip_all_tags($text);
+        // Decode before measuring so the length counts characters and a cut never splits an entity.
+        $clean = PlainText::decode(wp_strip_all_tags($text));
         if ($clean === '') {
             return '';
         }

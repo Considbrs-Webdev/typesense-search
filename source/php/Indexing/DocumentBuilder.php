@@ -4,6 +4,7 @@ namespace TypesenseSearch\Indexing;
 
 use TypesenseSearch\Admin\MetaBox;
 use TypesenseSearch\Helper\ExcerptHelper;
+use TypesenseSearch\Helper\PlainText;
 use TypesenseSearch\Indexing\IndexableDocument;
 
 /**
@@ -88,8 +89,8 @@ class DocumentBuilder
 
         $document = [
             'id'                  => (string) $post->ID,
-            'title'               => (string) $post->post_title,
-            'content'             => wp_strip_all_tags((string) apply_filters('the_content', $post->post_content)),
+            'title'               => PlainText::decode((string) $post->post_title),
+            'content'             => PlainText::decode(wp_strip_all_tags((string) apply_filters('the_content', $post->post_content))),
             'excerpt'             => ExcerptHelper::build(get_the_excerpt($post), $post),
             'url'                 => (string) get_permalink($post),
             'type'                => (string) $post->post_type,

@@ -4,6 +4,7 @@ namespace TypesenseSearch\Indexing\Strategies;
 
 use TypesenseSearch\Admin\MetaBox;
 use TypesenseSearch\Helper\ExcerptHelper;
+use TypesenseSearch\Helper\PlainText;
 use TypesenseSearch\Helper\PdfToText;
 use TypesenseSearch\Indexing\IndexableDocument;
 
@@ -111,7 +112,7 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
 
         return new IndexableDocument([
             'id'                  => (string) $post->ID,
-            'title'               => (string) $post->post_title,
+            'title'               => PlainText::decode((string) $post->post_title),
             'content'             => $content,
             'excerpt'             => ExcerptHelper::build($content, $post),
             'url'                 => (string) wp_get_attachment_url($post->ID),
@@ -300,7 +301,7 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
             return '';
         }
 
-        return (string) $topPost->post_title;
+        return PlainText::decode((string) $topPost->post_title);
     }
 
     /**

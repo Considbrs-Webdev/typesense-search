@@ -13,12 +13,14 @@ export type PlaceholderFn = (
 export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
   SEARCH_HIT_HEADING: (d, h) => {
     const snippet = h?.title?.snippet;
-    const text = snippet ?? String(d.title ?? "");
     if (!isExternalDocument(d)) {
       return snippet
-        ? { value: text, highlighted: true }
-        : text;
+        ? { value: escapeHtmlPreservingMarks(snippet), highlighted: true }
+        : String(d.title ?? "");
     }
+    const text = snippet
+      ? escapeHtmlPreservingMarks(snippet)
+      : escapeHtml(decodeHtmlEntities(String(d.title ?? "")));
     const icon =
       ' <i class="fa-solid fa-up-right-from-square ts-external-link-icon" aria-hidden="true"></i>';
     return { value: text + icon, highlighted: true };
@@ -42,14 +44,16 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
         "[...]";
 
       // If user explicitly sets 'none', don't add truncation markers.
+      const safeSnippet = escapeHtmlPreservingMarks(snippet);
       if (truncator === "none") {
-        return { value: snippet, highlighted: true };
+        return { value: safeSnippet, highlighted: true };
       }
 
-      const prefix = atStart ? "" : `${truncator} `;
-      const suffix = atEnd ? "" : ` ${truncator}`;
+      const safeTruncator = escapeHtml(truncator);
+      const prefix = atStart ? "" : `${safeTruncator} `;
+      const suffix = atEnd ? "" : ` ${safeTruncator}`;
 
-      return { value: `${prefix}${snippet}${suffix}`, highlighted: true };
+      return { value: `${prefix}${safeSnippet}${suffix}`, highlighted: true };
     }
     return String(d.excerpt ?? "");
   },
@@ -216,10 +220,10 @@ export function replacePlaceholders(
     const out = fn(doc, highlight);
     let value: string;
     if (typeof out === "object" && out.highlighted) {
-      // out.value may contain intentional HTML (e.g. <strong>, <span>)
-      // assume we've escaped internal text when building it and decode entities
-      // so we can insert the HTML as-is.
-      value = decodeHtmlEntities(String(out.value));
+      // out.value is intentional HTML (e.g. <mark>, <strong>) whose text the
+      // placeholder has already escaped. Decoding it again would turn escaped
+      // text such as "&lt;" back into markup.
+      value = String(out.value);
     } else {
       value = escapeHtml(decodeHtmlEntities(String(out)));
     }

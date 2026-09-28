@@ -3,6 +3,7 @@
 namespace TypesenseSearch\Indexing\Enrichers;
 
 use TypesenseSearch\Admin\MetaBox;
+use TypesenseSearch\Helper\PlainText;
 use TypesenseSearch\Indexing\DocumentBuilder;
 
 /**
@@ -76,7 +77,7 @@ class PageEnricher
         if ($topMostParentPost) {
             $document['top_most_parent'] = $this->isExcludedAsSection($topMostParentPost)
                 ? ''
-                : (string) $topMostParentPost->post_title;
+                : PlainText::decode((string) $topMostParentPost->post_title);
         }
 
         return $document;
@@ -120,11 +121,11 @@ class PageEnricher
         foreach (array_reverse($ancestors) as $ancestorId) {
             $ancestorPost = get_post((int) $ancestorId);
             if ($ancestorPost) {
-                $segments[] = (string) $ancestorPost->post_title;
+                $segments[] = PlainText::decode((string) $ancestorPost->post_title);
             }
         }
 
-        $segments[] = (string) $post->post_title;
+        $segments[] = PlainText::decode((string) $post->post_title);
 
         $document['path'] = implode(' / ', $segments);
 
