@@ -7,6 +7,7 @@ import type { TypesenseSearchConfig, SearchHit } from "./typesense-search/types"
 import { loadWebAwesomeLocale } from "./typesense-search/webawesome-locale";
 import { getQueryByWeights, INFIX, QUERY_BY } from "./typesense-search/search-params";
 import { createSearchStatisticsTracker } from "./typesense-search/search-statistics";
+import { decodeHtmlEntities } from "./typesense-search/html";
 
 interface QuickSearchSelectorEntry {
   selector: string;
@@ -232,7 +233,8 @@ function attachQuickSearch(
     if (titleSnippet) {
       nameEl.innerHTML = titleSnippet;
     } else {
-      nameEl.textContent = title;
+      // Titles can be stored with entities (e.g. &#8211;) – decode like the main search does.
+      nameEl.textContent = decodeHtmlEntities(title);
     }
 
     const typeEl = document.createElement("span");
