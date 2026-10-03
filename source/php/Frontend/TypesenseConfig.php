@@ -92,6 +92,10 @@ class TypesenseConfig
 			'webAwesomeLocale'        => self::webAwesomeLocale(),
 		];
 
+		if ($isSearch) {
+			$config['documentTitle'] = $this->documentTitleConfig();
+		}
+
 		if ($this->settings->isSearchLoggingEnabled()) {
 			$config['searchLogging'] = [
 				'enabled'       => true,
@@ -187,5 +191,38 @@ class TypesenseConfig
 				'before'
 			);
 		}
+	}
+
+	/**
+	 * Build the document title templates used by the frontend to keep the
+	 * title in sync with the current search term.
+	 *
+	 * The server renders a neutral title ("Search — Site name", see
+	 * NeutralSearchPage). The template swaps the neutral part for the core
+	 * "Search Results for “%s”" phrase and keeps the rest (separator, site name).
+	 *
+	 * @return array{template: string, empty: string}
+	 */
+	private function documentTitleConfig(): array
+	{
+		$charset = get_bloginfo('charset');
+		$neutral = __('Search', 'typesense-search');
+		$title   = html_entity_decode(wp_get_document_title(), ENT_QUOTES, $charset);
+		$phrase  = html_entity_decode(__('Search Results for &#8220;%s&#8221;', 'default'), ENT_QUOTES, $charset);
+
+		$suffix = str_starts_with($title, $neutral)
+			? substr($title, strlen($neutral))
+			: ' — ' . get_bloginfo('name');
+
+		$template = $phrase . $suffix;
+		$empty    = $neutral . $suffix;
+
+		return [
+			'template' => $template,
+			/**
+			 * Filters the document title used when the search field is empty.
+			 */
+			'empty'    => (string) apply_filters('typesense_search/empty_document_title', $empty),
+		];
 	}
 }

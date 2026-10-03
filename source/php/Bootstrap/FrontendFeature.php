@@ -21,5 +21,6 @@ class FrontendFeature
         new Frontend\Assets();
         new Frontend\EnrichSearchTemplate($this->settings);
         new Frontend\TypesenseConfig($this->settings);
+        new Frontend\NeutralSearchPage($this->settings);
     }
 }

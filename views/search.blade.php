@@ -14,7 +14,7 @@
     </section>
 
     {{-- Search interface --}}
-    <section class="o-container u-margin__top--2 u-margin__bottom--8" data-js-search-page-container>
+    <section class="o-container u-margin__top--2 u-margin__bottom--8" data-js-search-page-container aria-busy="true">
         <div class="o-grid">
             <div class="o-grid-12">
 
@@ -59,8 +59,9 @@
 
                                     {{-- Summary sentence: "Din sökning X gav Y träffar" (populated by JS) --}}
                                     <p class="ts-search-summary" data-js-search-summary
-                                        data-lang-template="{{ $lang->searchSummaryTemplate }}" hidden
-                                        aria-live="polite" aria-atomic="true"></p>
+                                        data-lang-template="{{ $lang->searchSummaryTemplate }}"
+                                        data-lang-plural="{{ $lang->resultPlural }}"
+                                        role="status" aria-live="polite" aria-atomic="true"></p>
 
                                     {{-- Count span: used internally by search.ts + as data source for summary --}}
                                     <span data-js-search-results-count data-lang-singular="{{ $lang->resultSingular }}"

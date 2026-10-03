@@ -573,3 +573,14 @@
     display: flex;
   }
 }
+
+.ts-search-summary:empty {
+  margin: 0;
+}
+
+// Hide the search interface until the first search has finished. aria-busy is
+// set server-side and removed by JS; the loader (role="status") announces the
+// loading state in the meantime.
+[data-js-search-page-container][aria-busy="true"] .ts-search {
+  display: none;
+}

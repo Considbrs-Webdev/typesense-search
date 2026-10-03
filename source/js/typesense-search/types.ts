@@ -24,6 +24,7 @@ export interface TypesenseSearchConfig {
   searchLogging?: SearchStatisticsConfig;
   /** Web Awesome translation module key (e.g. `sv`); omit for English internals. */
   webAwesomeLocale?: string | null;
+  documentTitle?: { template: string; empty: string };
 }
 
 export interface SearchStatisticsConfig {

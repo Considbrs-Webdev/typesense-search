@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- The search interface stays hidden behind the loader until the first search has finished (`aria-busy` is set server-side).
+- The page title on the search page now follows the search term as you type (uses the existing debounce setting).
+
+### Changed
+
+- The server-rendered search page no longer contains the search term (neutral title, no search feed link, empty search query), so it can be cached once. Translation links are updated by JS to the current URL.
+- The search page is sent with `no-store` / `X-Accel-Expires: 0` when Typesense is not ready, so the fallback page is not cached.
+- The main WordPress search query is skipped on the search page when Typesense is ready (filter: `typesense_search/skip_main_search_query`).
+
+### Fixed
+
+- The results summary is now a persistent live region (`role="status"`) and also announces "0 results", so screen readers hear search and title changes.
+- The search term in the results summary is now HTML-escaped (prevented script injection through `?s=`).
+
 ## [1.8.0] - 2026-09-28
 
 ### Added

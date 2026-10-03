@@ -16,6 +16,12 @@ import { createSearchStatisticsTracker } from "./typesense-search/search-statist
 // Helpers
 // ---------------------------------------------------------------------------
 
+function escapeHtml(value: string): string {
+  const el = document.createElement("div");
+  el.textContent = value;
+  return el.innerHTML;
+}
+
 function resolveResultsEl(container: HTMLElement): HTMLElement {
   let el = container.querySelector<HTMLElement>("[data-js-search-results]");
   if (!el) {
@@ -42,6 +48,15 @@ function init(): void {
   );
   if (!container) return;
 
+  // If we cannot start, release the server-rendered loading state instead of
+  // leaving the page stuck on the spinner.
+  const release = (): void => {
+    container.removeAttribute("aria-busy");
+    container
+      .querySelector<HTMLElement>("[data-js-loader]")
+      ?.setAttribute("hidden", "");
+  };
+
   const inputEl = container.querySelector<HTMLElement>(
     "[data-js-search-page-search-input]",
   );
@@ -52,11 +67,11 @@ function init(): void {
   const resultsEl = resolveResultsEl(container);
   const loaderEl = container.querySelector<HTMLElement>("[data-js-loader]");
 
-  if (!inputEl) return;
+  if (!inputEl) return release();
 
   const client = createClient(config);
   const templates = getHitTemplates(container);
-  if (!client) return;
+  if (!client) return release();
   const searchStatistics = createSearchStatisticsTracker(config.searchLogging);
 
   const facets = setupFacets(config.facets ?? []);
@@ -113,13 +128,23 @@ function init(): void {
           const countText = countEl?.textContent?.trim() ?? "";
           const template = summaryEl.dataset.langTemplate ?? "";
 
-          if (query && countText && template) {
+          // Keep the live region in the DOM (never hidden) so that changes,
+          // including "0 results", are announced by screen readers.
+          const zeroText = (summaryEl.dataset.langPlural ?? "").replace(
+            "%d",
+            "0",
+          );
+          // An error message also leaves the count empty; don't report that as
+          // "0 results".
+          const hasError = !!resultsEl.querySelector(".ts-search-error");
+          const resultText = hasError ? "" : countText || zeroText;
+
+          if (query && resultText && template) {
             summaryEl.innerHTML = template
-              .replace("%1$s", query)
-              .replace("%2$s", countText);
-            summaryEl.hidden = false;
+              .replace("%1$s", () => escapeHtml(query))
+              .replace("%2$s", resultText);
           } else {
-            summaryEl.hidden = true;
+            summaryEl.textContent = "";
           }
         }
 
@@ -127,6 +152,36 @@ function init(): void {
       })
       .catch(() => {
         finishFirstLoad();
+      });
+  };
+
+  // ── Document title ───────────────────────────────────────────────────────
+
+  const titleConfig = config.documentTitle;
+  const updateDocumentTitle = (): void => {
+    if (!titleConfig?.template) return;
+    const query = getUrlState().query.trim();
+    document.title = query
+      ? titleConfig.template.split("%s").join(query)
+      : titleConfig.empty;
+  };
+
+  // ── Language (translate) links ───────────────────────────────────────────
+  // The server HTML is cached without a search term, so translation links that
+  // embed the page URL must be pointed at the current URL.
+
+  const updateTranslateLinks = (): void => {
+    document
+      .querySelectorAll<HTMLAnchorElement>('a[href*="translate.google.com"]')
+      .forEach((link) => {
+        try {
+          const url = new URL(link.href);
+          if (!url.searchParams.has("u")) return;
+          url.searchParams.set("u", window.location.href);
+          link.href = url.toString();
+        } catch {
+          // Ignore malformed URLs.
+        }
       });
   };
 
@@ -180,10 +235,14 @@ function init(): void {
   }
 
   window.addEventListener("urlstatechange", () => {
+    updateDocumentTitle();
+    updateTranslateLinks();
     syncUiFromUrl();
     triggerSearch();
   });
   window.addEventListener("popstate", () => {
+    updateDocumentTitle();
+    updateTranslateLinks();
     syncUiFromUrl();
     triggerSearch();
   });
@@ -225,6 +284,8 @@ function init(): void {
     loaderEl.hidden = false;
   }
 
+  updateDocumentTitle();
+  updateTranslateLinks();
   syncUiFromUrl();
   triggerSearch();
 }
