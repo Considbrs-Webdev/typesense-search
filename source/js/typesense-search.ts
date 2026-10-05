@@ -227,6 +227,13 @@ function init(): void {
   );
   inputEl.addEventListener("wa-clear", () => onInput(""));
 
+  inputEl.closest("form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    // Submit immediately, cancelling any pending search-as-you-type update.
+    clearTimeout(debounceTimer);
+    updateUrlState({ query: (inputEl as any).value ?? "", page: 1 });
+  });
+
   if (sortEl) {
     sortEl.addEventListener("change", () => {
       if (programmaticUpdates.has(sortEl)) return;
