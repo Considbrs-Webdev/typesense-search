@@ -50,10 +50,17 @@ the previous latest entry), following the existing format.
 ## 4. Verify
 
 ```bash
+composer install    # if vendor/ is missing, so the tests can actually run
 php -l typesense-search.php
 composer test
 npm run build       # confirm the frontend still builds even though dist isn't committed
 ```
+
+**The tests must pass before any release is created.** Do not commit, push, merge, tag or
+publish while `composer test` fails — and never skip it because it can't run: install
+dependencies instead. If tests fail, stop, report the failures to the user, and fix them
+first (as their own commit, not part of the release commit). A skipped or failing test run
+means no release.
 
 ## 5. Commit
 
