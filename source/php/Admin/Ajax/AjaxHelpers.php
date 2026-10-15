@@ -2,6 +2,9 @@
 
 namespace TypesenseSearch\Admin\Ajax;
 
+use TypesenseSearch\Admin\Settings\OptionKeys;
+use TypesenseSearch\ConstantsLoader;
+
 /**
  * Shared AJAX guard helpers used by every action class in this namespace.
  *
@@ -61,6 +64,16 @@ trait AjaxHelpers
 
         $remote   = sanitize_text_field(wp_unslash($_POST['remote'] ?? ''));
         $adminKey = sanitize_text_field(wp_unslash($_POST['admin_key'] ?? ''));
+
+        // Constant-locked fields render as read-only placeholders (e.g. bullets),
+        // and a saved admin key is never echoed back into its field. In both cases
+        // the form value is not the real credential, so use the stored one.
+        if (ConstantsLoader::isDefinedAsConstant(OptionKeys::OPTION_REMOTE) || $remote === '') {
+            $remote = $this->settings->getRemote() ?: $remote;
+        }
+        if (ConstantsLoader::isDefinedAsConstant(OptionKeys::OPTION_ADMIN_KEY) || $adminKey === '') {
+            $adminKey = $this->settings->getAdminKey() ?: $adminKey;
+        }
 
         if (empty($remote) || empty($adminKey)) {
             wp_send_json_error([
