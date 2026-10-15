@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace TypesenseSearch\Tests\Unit\Admin\Ajax;
 
 use Brain\Monkey\Functions;
+use Mockery;
+use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Admin\Ajax\AjaxHelpers;
+use TypesenseSearch\Admin\Settings\OptionKeys;
 use TypesenseSearch\Tests\TestCase;
 
 /**
@@ -23,6 +26,9 @@ class AjaxHelpersTest extends TestCase
     /** @var object Anonymous test-double that exposes AjaxHelpers via public wrappers */
     private object $subject;
 
+    /** @var SettingsRepository&\Mockery\MockInterface */
+    private $settings;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -30,8 +36,16 @@ class AjaxHelpersTest extends TestCase
         // Create the subject once. Brain\Monkey stubs are global and apply
         // whenever the wrapped WP functions are called, so it is safe to create
         // the object before any individual test stubs are set up.
-        $this->subject = new class {
+        $this->settings = Mockery::mock(SettingsRepository::class);
+        $this->settings->shouldReceive('getRemote')->andReturn('')->byDefault();
+        $this->settings->shouldReceive('getAdminKey')->andReturn('')->byDefault();
+
+        $this->subject = new class ($this->settings) {
             use AjaxHelpers;
+
+            public function __construct(private readonly SettingsRepository $settings)
+            {
+            }
 
             public function callRequirePermission(string $nonce): void
             {
@@ -229,5 +243,52 @@ class AjaxHelpersTest extends TestCase
         $this->subject->callRequireConnectionFields('connection_nonce');
 
         self::assertSame('connection_nonce', $capturedNonce);
+    }
+
+    public function test_requireConnectionFields_falls_back_to_saved_admin_key_when_field_is_blank(): void
+    {
+        $_POST['remote']    = 'https://typesense.example.com';
+        $_POST['admin_key'] = '';
+
+        $this->settings->shouldReceive('getAdminKey')->andReturn('saved-key');
+
+        Functions\when('check_ajax_referer')->justReturn(true);
+        Functions\when('current_user_can')->justReturn(true);
+        Functions\when('wp_unslash')->returnArg(1);
+        Functions\expect('wp_send_json_error')->never();
+
+        $fields = $this->subject->callRequireConnectionFields('my_nonce');
+
+        self::assertSame('saved-key', $fields['adminKey']);
+    }
+
+    public function test_requireConnectionFields_uses_saved_credentials_when_constant_locked(): void
+    {
+        $_POST['remote']    = '••••';
+        $_POST['admin_key'] = '••••••••••••••••••••';
+
+        $this->settings->shouldReceive('getRemote')->andReturn('https://typesense.example.com');
+        $this->settings->shouldReceive('getAdminKey')->andReturn('real-key');
+
+        $overrides = new \ReflectionProperty(\TypesenseSearch\ConstantsLoader::class, 'overrides');
+        $overrides->setAccessible(true);
+        $overrides->setValue(null, [
+            OptionKeys::OPTION_REMOTE    => 'https://typesense.example.com',
+            OptionKeys::OPTION_ADMIN_KEY => 'real-key',
+        ]);
+
+        Functions\when('check_ajax_referer')->justReturn(true);
+        Functions\when('current_user_can')->justReturn(true);
+        Functions\when('wp_unslash')->returnArg(1);
+        Functions\expect('wp_send_json_error')->never();
+
+        try {
+            $fields = $this->subject->callRequireConnectionFields('my_nonce');
+        } finally {
+            $overrides->setValue(null, []);
+        }
+
+        self::assertSame('https://typesense.example.com', $fields['remote']);
+        self::assertSame('real-key', $fields['adminKey']);
     }
 }
