@@ -5,7 +5,12 @@
 import { createClient } from "./typesense-search/client";
 import type { TypesenseSearchConfig, SearchHit } from "./typesense-search/types";
 import { loadWebAwesomeLocale } from "./typesense-search/webawesome-locale";
-import { getQueryByWeights, INFIX, QUERY_BY } from "./typesense-search/search-params";
+import {
+  EXCLUDE_FIELDS,
+  getQueryByWeights,
+  INFIX,
+  QUERY_BY,
+} from "./typesense-search/search-params";
 import { createSearchStatisticsTracker } from "./typesense-search/search-statistics";
 import { decodeHtmlEntities, escapeHtmlPreservingMarks } from "./typesense-search/html";
 
@@ -489,6 +494,7 @@ function attachQuickSearch(
           q: query,
           query_by: QUERY_BY,
           infix: INFIX,
+          exclude_fields: EXCLUDE_FIELDS,
           ...(queryByWeights ? { query_by_weights: queryByWeights } : {}),
           per_page: hitsPerPage,
         });

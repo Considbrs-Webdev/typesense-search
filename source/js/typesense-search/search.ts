@@ -14,7 +14,7 @@ import type {
 import type { UrlState } from "./url-state";
 import { renderHit } from "./templates";
 import { renderPagination } from "./pagination";
-import { getQueryByWeights, INFIX, QUERY_BY } from "./search-params";
+import { buildModeSearchParams } from "./search-params";
 
 function buildFilterBy(facetFilters: Record<string, string[]>): string {
   return Object.entries(facetFilters)
@@ -120,22 +120,20 @@ export async function runSearch(
   try {
     const filterBy = buildFilterBy(state.facetFilters);
     const sortBy = buildSortBy(state.sort);
+    const modeParams = buildModeSearchParams(state.mode, hasQuery, config);
 
     // Main search promise.
-    const queryByWeights = getQueryByWeights(config);
     const mainSearchPromise = shouldSearch
       ? (client
           .collections(config.collection)
           .documents()
           .search({
             q,
-            query_by: QUERY_BY,
-            infix: INFIX,
+            ...modeParams,
             highlight_full_fields: "title,excerpt,content",
             highlight_affix_num_tokens: config.highlightAffixNumTokens ?? 15,
             per_page: config.hitsPerPage,
             page: state.page,
-            ...(queryByWeights ? { query_by_weights: queryByWeights } : {}),
             ...(filterBy ? { filter_by: filterBy } : {}),
             ...(sortBy ? { sort_by: sortBy } : {}),
           }) as Promise<SearchResponse<HitDocument>>)
@@ -155,8 +153,7 @@ export async function runSearch(
         .documents()
         .search({
           q,
-          query_by: QUERY_BY,
-          ...(queryByWeights ? { query_by_weights: queryByWeights } : {}),
+          ...modeParams,
           per_page: 0,
           facet_by: field,
           max_facet_values: 200,

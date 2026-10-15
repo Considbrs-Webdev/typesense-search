@@ -107,9 +107,23 @@ class CollectionTest extends TestCase
             self::assertSame('sv', $fields[$name]['locale'], "Expected '{$name}' to have locale=sv");
         }
 
-        foreach (['id', 'url', 'type', 'type_name', 'date', 'top_most_parent', 'thumbnail', '.*'] as $name) {
+        foreach (['id', 'url', 'type', 'type_name', 'date', 'top_most_parent', 'thumbnail', 'embedding', '.*'] as $name) {
             self::assertArrayNotHasKey('stem', $fields[$name], "Did not expect '{$name}' to have a stem key");
         }
+    }
+
+    public function test_schema_includes_auto_embedding_field(): void
+    {
+        $schema = Collection::getSchema('my_collection', $this->settings(), $this->capabilities());
+        $fields = $this->fieldsByName($schema);
+
+        self::assertArrayHasKey('embedding', $fields);
+        self::assertSame('float[]', $fields['embedding']['type']);
+        self::assertSame(['title', 'excerpt', 'content', 'extra_terms'], $fields['embedding']['embed']['from']);
+        self::assertSame(
+            'ts/paraphrase-multilingual-mpnet-base-v2',
+            $fields['embedding']['embed']['model_config']['model_name']
+        );
     }
 
     public function test_schema_omits_stem_when_stemming_enabled_but_unsupported(): void

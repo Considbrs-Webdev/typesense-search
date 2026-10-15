@@ -66,6 +66,16 @@ class Collection
                 ['name' => 'top_most_parent',      'type' => 'string',   'optional' => true, 'facet' => true],
                 ['name' => 'thumbnail', 'type' => 'string',  'optional' => true, 'index' => false],
                 ['name' => 'extra_terms', 'type' => 'string',  'optional' => true, 'infix' => true],
+                [
+                    'name'  => 'embedding',
+                    'type'  => 'float[]',
+                    'embed' => [
+                        'from'         => ['title', 'excerpt', 'content', 'extra_terms'],
+                        'model_config' => [
+                            'model_name' => 'ts/paraphrase-multilingual-mpnet-base-v2',
+                        ],
+                    ],
+                ],
                 // Catch-all: any extra field sent during indexing is auto-typed
                 // and added to the schema on first use.
                 ['name' => '.*',        'type' => 'auto'],

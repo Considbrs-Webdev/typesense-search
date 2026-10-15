@@ -31,9 +31,9 @@ class ClientFactory
      *
      * @param string $remote   Full URL, e.g. https://search.example.com:8108
      * @param string $apiKey   Admin or search-only API key.
-     * @param int    $timeout  Connection timeout in seconds (default 5).
+     * @param int    $timeout  Connection timeout in seconds (default 120).
      */
-    public static function build(string $remote, string $apiKey, int $timeout = 5): Client
+    public static function build(string $remote, string $apiKey, int $timeout = 120): Client
     {
         $parsed   = parse_url($remote);
         $protocol = $parsed['scheme'] ?? 'https';

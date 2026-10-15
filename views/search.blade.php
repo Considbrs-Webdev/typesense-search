@@ -91,6 +91,17 @@
                                         aria-label="{{ $lang->closeFilter }}">&times;</button>
                                 </div>
 
+                                {{-- Search mode (pilot) --}}
+                                <div class="ts-sort-section">
+                                    <h3 id="ts-mode-heading" class="ts-sort-heading">{{ $lang->searchModeBy ?? 'Search mode (pilot)' }}</h3>
+                                    <wa-radio-group value="hybrid" data-js-search-mode
+                                        aria-labelledby="ts-mode-heading">
+                                        <wa-radio value="hybrid">{{ $lang->searchModeHybrid ?? 'Hybrid (Keyword + AI Vector)' }}</wa-radio>
+                                        <wa-radio value="keyword">{{ $lang->searchModeKeyword ?? 'Keyword (Lexical)' }}</wa-radio>
+                                        <wa-radio value="semantic">{{ $lang->searchModeSemantic ?? 'Semantic (AI Vector only)' }}</wa-radio>
+                                    </wa-radio-group>
+                                </div>
+
                                 {{-- Sort — style controlled by admin setting (sortDisplay: 'radio'|'dropdown') --}}
                                 @if (($sortDisplay ?? 'radio') === 'dropdown')
                                     <wa-select size="medium" label="{{ $lang->sortBy }}" value="relevance" data-js-sort>

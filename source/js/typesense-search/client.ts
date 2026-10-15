@@ -31,7 +31,7 @@ export function createClient(
     return new TypesenseClient({
       nodes: [{ host, port, protocol, path }],
       apiKey: cfg.searchKey,
-      connectionTimeoutSeconds: 5,
+      connectionTimeoutSeconds: 15,
     });
   } catch (e) {
     console.error("[TypesenseSearch] Invalid host config:", e);

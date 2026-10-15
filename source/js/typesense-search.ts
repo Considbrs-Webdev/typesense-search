@@ -7,7 +7,12 @@ import "@awesome.me/webawesome/dist/components/radio/radio.js";
 import { createClient } from "./typesense-search/client";
 import { createSearchRunner } from "./typesense-search/search";
 import { getHitTemplates } from "./typesense-search/templates";
-import { getUrlState, updateUrlState } from "./typesense-search/url-state";
+import {
+  DEFAULT_SEARCH_MODE,
+  getUrlState,
+  updateUrlState,
+} from "./typesense-search/url-state";
+import type { SearchMode } from "./typesense-search/url-state";
 import { setupFacets, programmaticUpdates } from "./typesense-search/facets";
 import { loadWebAwesomeLocale } from "./typesense-search/webawesome-locale";
 import { createSearchStatisticsTracker } from "./typesense-search/search-statistics";
@@ -61,6 +66,7 @@ function init(): void {
     "[data-js-search-page-search-input]",
   );
   const sortEl = container.querySelector<HTMLElement>("[data-js-sort]");
+  const modeEl = container.querySelector<HTMLElement>("[data-js-search-mode]");
   const paginationEl = container.querySelector<HTMLElement>(
     "[data-js-search-pagination]",
   );
@@ -188,7 +194,7 @@ function init(): void {
   // ── URL → UI sync ────────────────────────────────────────────────────────
 
   const syncUiFromUrl = (): void => {
-    const { query, sort, facetFilters } = getUrlState();
+    const { query, sort, mode, facetFilters } = getUrlState();
 
     (inputEl as any).value = query;
 
@@ -198,6 +204,14 @@ function init(): void {
         (sortEl as any).value = sort || "relevance";
         requestAnimationFrame(() => programmaticUpdates.delete(sortEl));
       });
+    }
+
+    if (modeEl) {
+      programmaticUpdates.add(modeEl);
+      const nextMode = mode || DEFAULT_SEARCH_MODE;
+      modeEl.setAttribute("value", nextMode);
+      (modeEl as any).value = nextMode;
+      setTimeout(() => programmaticUpdates.delete(modeEl), 0);
     }
 
     facets.sync(facetFilters);
@@ -238,6 +252,18 @@ function init(): void {
     sortEl.addEventListener("change", () => {
       if (programmaticUpdates.has(sortEl)) return;
       updateUrlState({ sort: (sortEl as any).value || "relevance", page: 1 });
+    });
+  }
+
+  if (modeEl) {
+    modeEl.addEventListener("change", () => {
+      if (programmaticUpdates.has(modeEl)) return;
+      const val = (modeEl as any).value;
+      const mode: SearchMode =
+        val === "keyword" || val === "hybrid" || val === "semantic"
+          ? val
+          : DEFAULT_SEARCH_MODE;
+      updateUrlState({ mode, page: 1 });
     });
   }
 
