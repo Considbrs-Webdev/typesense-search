@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] - 2026-10-15
+
+### Fixed
+
+- "Test connection" and "Create collection" on the Connection tab no longer report the Admin API key as rejected when the host or key is defined by a constant (e.g. `TYPESENSE_ADMIN_KEY`) or when the saved key is left blank in the field. They now use the stored credentials in those cases.
+
 ## [1.9.1] - 2026-10-05
 
 ### Fixed
