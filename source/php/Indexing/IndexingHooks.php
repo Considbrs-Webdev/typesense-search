@@ -36,6 +36,9 @@ class IndexingHooks
 {
     private IndexingRegistry $registry;
 
+    /** @var array<int, int[]> Descendant IDs of pages being deleted, keyed by page ID. */
+    private array $descendantsOfDeleted = [];
+
     public function __construct(IndexingRegistry $registry)
     {
         $this->registry = $registry;
@@ -53,6 +56,11 @@ class IndexingHooks
 
         // Fires just before a post is permanently deleted from the database.
         add_action('before_delete_post', [$this, 'onPostDeindexed']);
+
+        // WordPress reparents a deleted page's children to its parent, which
+        // changes their URL and path. Remember them beforehand, re-index after.
+        add_action('before_delete_post', [$this, 'rememberDescendantsOfDeletedPage']);
+        add_action('deleted_post', [$this, 'reindexDescendantsOfDeletedPage']);
 
         // External API: allow any plugin/theme to trigger index or deindex.
         //   do_action('typesense_search/index_post', $post_id);
@@ -215,6 +223,44 @@ class IndexingHooks
     }
 
     /**
+     * Capture the IDs of a page's published descendants before it is deleted.
+     *
+     * @param int $postId WordPress post ID.
+     */
+    public function rememberDescendantsOfDeletedPage(int $postId): void
+    {
+        $post = get_post($postId);
+        if (!$post || $post->post_type !== 'page') {
+            return;
+        }
+
+        $this->descendantsOfDeleted[$postId] = array_map('intval', wp_list_pluck(get_pages([
+            'child_of'    => $postId,
+            'post_status' => 'publish',
+        ]), 'ID'));
+    }
+
+    /**
+     * Re-index the descendants captured before the page was deleted, now that
+     * WordPress has moved them to the deleted page's parent.
+     *
+     * @param int $postId WordPress post ID.
+     */
+    public function reindexDescendantsOfDeletedPage(int $postId): void
+    {
+        $ids = $this->descendantsOfDeleted[$postId] ?? [];
+        unset($this->descendantsOfDeleted[$postId]);
+
+        if (empty($ids) || !(new \TypesenseSearch\Services\SettingsRepository())->canUseTypesense()) {
+            return;
+        }
+
+        foreach ($ids as $id) {
+            $this->reindexPost($id);
+        }
+    }
+
+    /**
      * Re-index every published descendant page (and its attached PDFs).
      *
      * @param int $postId Ancestor page ID.
@@ -228,19 +274,32 @@ class IndexingHooks
         ]);
 
         foreach ($descendants as $descendant) {
-            $strategy = $this->registry->resolve($descendant);
-            if ($strategy === null) {
-                continue;
-            }
-
-            if ($strategy->shouldIndex($descendant)) {
-                $strategy->index($descendant);
-            } else {
-                $strategy->deindex($descendant->ID);
-            }
-
-            $this->cascadePdfReindex($descendant->ID);
+            $this->reindexPost($descendant->ID);
         }
+    }
+
+    /**
+     * Index or deindex one published post (and its PDFs) per its strategy.
+     */
+    private function reindexPost(int $postId): void
+    {
+        $post = get_post($postId);
+        if (!$post || $post->post_status !== 'publish') {
+            return;
+        }
+
+        $strategy = $this->registry->resolve($post);
+        if ($strategy === null) {
+            return;
+        }
+
+        if ($strategy->shouldIndex($post)) {
+            $strategy->index($post);
+        } else {
+            $strategy->deindex($post->ID);
+        }
+
+        $this->cascadePdfReindex($post->ID);
     }
 
     /**
