@@ -103,6 +103,12 @@ class IndexingHooks
             // post so their top_most_parent field stays in sync.
             $this->cascadePdfReindex($post->ID);
 
+            // Cascade: descendants derive their URL, path and section from
+            // this page's ancestors, so rebuild them when it moves or renames.
+            if ($update && $postBefore && $this->ancestorFieldsChanged($post, $postBefore)) {
+                $this->reindexDescendants($post->ID);
+            }
+
             return;
         }
 
@@ -205,6 +211,16 @@ class IndexingHooks
             return;
         }
 
+        $this->reindexDescendants($postId);
+    }
+
+    /**
+     * Re-index every published descendant page (and its attached PDFs).
+     *
+     * @param int $postId Ancestor page ID.
+     */
+    private function reindexDescendants(int $postId): void
+    {
         $descendants = get_pages([
             'child_of'    => $postId,
             'post_status' => 'publish',
@@ -225,6 +241,18 @@ class IndexingHooks
 
             $this->cascadePdfReindex($descendant->ID);
         }
+    }
+
+    /**
+     * Whether a page change affects fields its descendants inherit
+     * (permalink, ancestor URLs/titles).
+     */
+    private function ancestorFieldsChanged(\WP_Post $post, \WP_Post $before): bool
+    {
+        return $post->post_type === 'page'
+            && ($post->post_name !== $before->post_name
+                || (int) $post->post_parent !== (int) $before->post_parent
+                || $post->post_title !== $before->post_title);
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────
