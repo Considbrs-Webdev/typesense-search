@@ -33,6 +33,24 @@ class AjaxHelpersTest extends TestCase
         $this->subject = new class {
             use AjaxHelpers;
 
+            /** @var object SettingsRepository stand-in (empty stored credentials). */
+            public object $settings;
+
+            public function __construct()
+            {
+                $this->settings = new class {
+                    public function getRemote(): string
+                    {
+                        return '';
+                    }
+
+                    public function getAdminKey(): string
+                    {
+                        return '';
+                    }
+                };
+            }
+
             public function callRequirePermission(string $nonce): void
             {
                 $this->requirePermission($nonce);
