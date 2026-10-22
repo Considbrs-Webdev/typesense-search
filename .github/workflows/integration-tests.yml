@@ -1,0 +1,97 @@
+name: Integration tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    name: WordPress + Typesense integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      mysql:
+        image: mysql:8.0.36
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=12
+
+      typesense:
+        image: typesense/typesense:27.1
+        env:
+          TYPESENSE_DATA_DIR: /data
+          TYPESENSE_API_KEY: typesense-integration-test-key
+          TYPESENSE_ENABLE_CORS: "true"
+        ports:
+          - 8108:8108
+        options: >-
+          --tmpfs /data:rw
+        # Official image has no curl/wget; readiness is checked from the job below.
+
+    env:
+      TYPESENSE_HOST: http://127.0.0.1:8108
+      TYPESENSE_API_KEY: typesense-integration-test-key
+      WP_TESTS_DIR: /tmp/typesense-search-wp-tests/wordpress-tests-lib
+      WP_TESTS_TMPDIR: /tmp/typesense-search-wp-tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: curl, dom, json, libxml, mbstring, mysqli, xml, zip
+          tools: composer:v2
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v6
+        with:
+          path: vendor
+          key: composer-integration-8.3-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-integration-8.3-
+
+      - name: Cache WordPress test library
+        uses: actions/cache@v6
+        with:
+          path: |
+            /tmp/typesense-search-wp-tests/wordpress
+            /tmp/typesense-search-wp-tests/wordpress-tests-lib
+          key: wp-tests-6.7.2-${{ runner.os }}
+          restore-keys: wp-tests-6.7.2-${{ runner.os }}-
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y subversion default-mysql-client
+
+      - name: Wait for MySQL and Typesense
+        run: |
+          for i in $(seq 1 30); do
+            mysqladmin ping -h 127.0.0.1 -uroot -proot --silent && break
+            sleep 2
+          done
+          mysqladmin ping -h 127.0.0.1 -uroot -proot --silent
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8108/health && exit 0
+            sleep 2
+          done
+          echo "Typesense did not become ready in time" >&2
+          exit 1
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Install WordPress test suite
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 6.7.2 true
+
+      - name: Run integration tests
+        run: composer test:integration
