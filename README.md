@@ -87,6 +87,47 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 
 ---
 
+## Integration tests (WordPress + Typesense)
+
+These tests live under `tests/Integration/` and run against **real** WordPress (`wp-phpunit`) and a **real** Typesense instance — no Brain Monkey mocks. Each scenario mutates content, waits until the index matches `DocumentBuilder` (or times out), and compares `url`, `path`, `path_urls`, `top_most_parent`, and `content` field-by-field via `IndexDiff`.
+
+### Pinned versions
+
+| Service   | Image / version                          |
+| --------- | ---------------------------------------- |
+| MySQL     | `mysql:8.0.36` (host port **3307** locally) |
+| Typesense | `typesense/typesense:27.1` (host port **8118** locally) |
+| WordPress | **6.7.2** (downloaded by `bin/install-wp-tests.sh`) |
+
+### Run locally with Docker
+
+```bash
+# 1. Start MySQL + Typesense (non-default ports)
+docker compose -f docker-compose.integration.yml up -d
+
+# 2. Install PHP dependencies (includes Guzzle + PHPUnit polyfills for Typesense + wp-phpunit)
+composer install
+
+# 3. Install WordPress + the PHPUnit test library (once per machine)
+export WP_TESTS_DIR=/tmp/typesense-search-wp-tests/wordpress-tests-lib
+bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3307 6.7.2 false
+
+# 4. Run the suite
+export TYPESENSE_HOST=http://127.0.0.1:8118
+export TYPESENSE_API_KEY=typesense-integration-test-key
+composer test:integration
+```
+
+Unit tests remain `composer test` (Brain Monkey, no Docker).
+
+### CI
+
+GitHub Actions workflow [`.github/workflows/integration-tests.yml`](.github/workflows/integration-tests.yml) runs on `pull_request` and `workflow_dispatch` with the same pinned images as service containers. WordPress test library paths are cached between runs.
+
+Some scenarios are marked **skipped** when they reproduce open index-sync bugs ([#3](https://github.com/Considbrs-Webdev/typesense-search/issues/3)–[#7](https://github.com/Considbrs-Webdev/typesense-search/issues/7), [#9](https://github.com/Considbrs-Webdev/typesense-search/issues/9)); the skip message includes a field-level diff. When a bug is fixed, the corresponding test should start passing without changing the test body.
+
+---
+
 ## 4. Settings
 
 The settings page is at **Settings → Typesense Search** and is split into seven tabs.

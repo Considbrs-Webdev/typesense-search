@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+         bootstrap="tests/Integration/bootstrap.php"
+         backupGlobals="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true">
+    <testsuites>
+        <testsuite name="Typesense Search Integration Tests">
+            <directory suffix="Test.php">tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="TYPESENSE_HOST" value="http://127.0.0.1:8118" force="false"/>
+        <env name="TYPESENSE_API_KEY" value="typesense-integration-test-key" force="false"/>
+    </php>
+</phpunit>

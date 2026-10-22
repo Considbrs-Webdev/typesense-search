@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 composer test
 composer test:dox
 composer test:coverage
+composer test:integration   # requires Docker MySQL + Typesense (see README)
 ./vendor/bin/phpunit --filter ClassName
 
 # JS build
