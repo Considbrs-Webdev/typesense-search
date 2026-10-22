@@ -32,11 +32,7 @@ jobs:
           TYPESENSE_ENABLE_CORS: "true"
         ports:
           - 8108:8108
-        options: >-
-          --health-cmd="curl -sf http://127.0.0.1:8108/health"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=12
+        # Official image has no curl/wget; readiness is checked from the job below.
 
     env:
       TYPESENSE_HOST: http://127.0.0.1:8108
@@ -74,6 +70,20 @@ jobs:
 
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y subversion default-mysql-client
+
+      - name: Wait for MySQL and Typesense
+        run: |
+          for i in $(seq 1 30); do
+            mysqladmin ping -h 127.0.0.1 -uroot -proot --silent && break
+            sleep 2
+          done
+          mysqladmin ping -h 127.0.0.1 -uroot -proot --silent
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8108/health && exit 0
+            sleep 2
+          done
+          echo "Typesense did not become ready in time" >&2
+          exit 1
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
