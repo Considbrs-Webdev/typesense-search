@@ -32,6 +32,8 @@ jobs:
           TYPESENSE_ENABLE_CORS: "true"
         ports:
           - 8108:8108
+        options: >-
+          --tmpfs /data:rw
         # Official image has no curl/wget; readiness is checked from the job below.
 
     env:
