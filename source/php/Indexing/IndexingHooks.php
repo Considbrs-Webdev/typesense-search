@@ -62,6 +62,11 @@ class IndexingHooks
         add_action('before_delete_post', [$this, 'rememberDescendantsOfDeletedPage']);
         add_action('deleted_post', [$this, 'reindexDescendantsOfDeletedPage']);
 
+        // Modularity module content is appended to the pages that display the
+        // module, so editing or removing a module must re-index those pages.
+        add_action('wp_after_insert_post', [$this, 'onModuleSaved'], 30, 2);
+        add_action('deleted_post', [$this, 'onModuleDeleted'], 10, 2);
+
         // External API: allow any plugin/theme to trigger index or deindex.
         //   do_action('typesense_search/index_post', $post_id);
         //   do_action('typesense_search/deindex_post', $post_id);
@@ -220,6 +225,71 @@ class IndexingHooks
         }
 
         $this->reindexDescendants($postId);
+    }
+
+    /**
+     * Re-index pages displaying a Modularity module after it is saved or trashed.
+     *
+     * @param int       $postId Module post ID.
+     * @param \WP_Post $post   Module post object.
+     */
+    public function onModuleSaved(int $postId, \WP_Post $post): void
+    {
+        $this->reindexPagesUsingModule($post);
+    }
+
+    /**
+     * Re-index pages that displayed a Modularity module after it was deleted.
+     *
+     * @param int            $postId Module post ID.
+     * @param \WP_Post|null $post   Deleted post object (WP 5.5+).
+     */
+    public function onModuleDeleted($postId, $post = null): void
+    {
+        if ($post instanceof \WP_Post) {
+            $this->reindexPagesUsingModule($post);
+        }
+    }
+
+    private function reindexPagesUsingModule(\WP_Post $module): void
+    {
+        if (
+            strpos((string) $module->post_type, 'mod-') !== 0
+            || !class_exists('\\Modularity\\Editor')
+            || wp_is_post_revision($module->ID)
+        ) {
+            return;
+        }
+
+        $settings = new \TypesenseSearch\Services\SettingsRepository();
+        if (!$settings->canUseTypesense() || !$settings->isIndexModularityEnabled()) {
+            return;
+        }
+
+        foreach ($this->findPostsUsingModule($module->ID) as $id) {
+            $this->reindexPost($id);
+        }
+    }
+
+    /**
+     * Modularity stores a post's modules in the serialized `modularity-modules`
+     * meta, each entry holding the module's `postid`.
+     *
+     * @return int[]
+     */
+    private function findPostsUsingModule(int $moduleId): array
+    {
+        global $wpdb;
+
+        $ids = $wpdb->get_col($wpdb->prepare(
+            "SELECT DISTINCT post_id FROM {$wpdb->postmeta}
+             WHERE meta_key = 'modularity-modules'
+             AND (meta_value LIKE %s OR meta_value LIKE %s)",
+            '%' . $wpdb->esc_like('"postid";i:' . $moduleId . ';') . '%',
+            '%' . $wpdb->esc_like('"postid";s:' . strlen((string) $moduleId) . ':"' . $moduleId . '";') . '%'
+        ));
+
+        return array_map('intval', (array) $ids);
     }
 
     /**
