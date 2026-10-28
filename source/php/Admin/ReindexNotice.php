@@ -31,6 +31,7 @@ class ReindexNotice
             add_action('update_option_' . $option, [$this, 'flag']);
         }
 
+        add_action('typesense_search/indexing_run_completed', [$this, 'clearAfterRun'], 10, 2);
         add_action('admin_notices', [$this, 'renderNotice']);
         add_action('admin_post_' . self::DISMISS_ACTION, [$this, 'dismiss']);
     }
@@ -38,6 +39,18 @@ class ReindexNotice
     public function flag(): void
     {
         update_option(self::OPTION_FLAG, '1', false);
+    }
+
+    /**
+     * A manual (admin/CLI) run that finished without failures has refreshed the
+     * indexed URLs, so the notice no longer applies. Save-triggered runs only
+     * touch a single post and must not clear it.
+     */
+    public function clearAfterRun(string $source, int $failed): void
+    {
+        if ($failed === 0 && in_array($source, ['admin', 'cli'], true)) {
+            delete_option(self::OPTION_FLAG);
+        }
     }
 
     public function renderNotice(): void

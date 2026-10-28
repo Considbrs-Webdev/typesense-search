@@ -28,6 +28,27 @@ class ReindexNoticeTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    public function test_successful_manual_run_clears_the_flag(): void
+    {
+        foreach (['admin', 'cli'] as $source) {
+            Functions\expect('delete_option')->once()->with(ReindexNotice::OPTION_FLAG);
+
+            (new ReindexNotice())->clearAfterRun($source, 0);
+        }
+
+        $this->addToAssertionCount(1);
+    }
+
+    public function test_failed_or_save_triggered_run_keeps_the_flag(): void
+    {
+        Functions\expect('delete_option')->never();
+
+        (new ReindexNotice())->clearAfterRun('admin', 2);
+        (new ReindexNotice())->clearAfterRun('wp-save', 0);
+
+        $this->addToAssertionCount(1);
+    }
+
     public function test_notice_is_hidden_without_flag(): void
     {
         Functions\when('current_user_can')->justReturn(true);
