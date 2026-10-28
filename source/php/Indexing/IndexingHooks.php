@@ -4,6 +4,8 @@ namespace TypesenseSearch\Indexing;
 
 use TypesenseSearch\Admin\MetaBox;
 use TypesenseSearch\Indexing\Strategies\PdfIndexingStrategy;
+use TypesenseSearch\Logger\ErrorLogLogger;
+use TypesenseSearch\Logger\LoggerInterface;
 
 /**
  * Class IndexingHooks
@@ -40,9 +42,12 @@ class IndexingHooks
     /** @var array<int, int[]> Descendant IDs of pages being deleted, keyed by page ID. */
     private array $descendantsOfDeleted = [];
 
-    public function __construct(IndexingRegistry $registry)
+    private LoggerInterface $logger;
+
+    public function __construct(IndexingRegistry $registry, ?LoggerInterface $logger = null)
     {
         $this->registry = $registry;
+        $this->logger = $logger ?? new ErrorLogLogger();
 
         // Let each strategy register its own content-specific hooks.
         $this->registry->registerAllHooks();
@@ -62,6 +67,11 @@ class IndexingHooks
         // changes their URL and path. Remember them beforehand, re-index after.
         add_action('before_delete_post', [$this, 'rememberDescendantsOfDeletedPage']);
         add_action('deleted_post', [$this, 'reindexDescendantsOfDeletedPage']);
+
+        // Modularity module content is appended to the pages that display the
+        // module, so editing or removing a module must re-index those pages.
+        add_action('wp_after_insert_post', [$this, 'onModuleSaved'], 30, 2);
+        add_action('deleted_post', [$this, 'onModuleDeleted'], 10, 2);
 
         // External API: allow any plugin/theme to trigger index or deindex.
         //   do_action('typesense_search/index_post', $post_id);
@@ -243,6 +253,50 @@ class IndexingHooks
     }
 
     /**
+     * Re-index pages displaying a Modularity module after it is saved or trashed.
+     *
+     * @param int       $postId Module post ID.
+     * @param \WP_Post $post   Module post object.
+     */
+    public function onModuleSaved(int $postId, \WP_Post $post): void
+    {
+        $this->reindexPagesUsingModule($post);
+    }
+
+    /**
+     * Re-index pages that displayed a Modularity module after it was deleted.
+     *
+     * @param int            $postId Module post ID.
+     * @param \WP_Post|null $post   Deleted post object (WP 5.5+).
+     */
+    public function onModuleDeleted($postId, $post = null): void
+    {
+        if ($post instanceof \WP_Post) {
+            $this->reindexPagesUsingModule($post);
+        }
+    }
+
+    private function reindexPagesUsingModule(\WP_Post $module): void
+    {
+        if (
+            strpos((string) $module->post_type, 'mod-') !== 0
+            || !class_exists('\\Modularity\\Editor')
+            || wp_is_post_revision($module->ID)
+        ) {
+            return;
+        }
+
+        $settings = new \TypesenseSearch\Services\SettingsRepository();
+        if (!$settings->canUseTypesense() || !$settings->isIndexModularityEnabled()) {
+            return;
+        }
+
+        foreach ($this->findPostsUsingModule($module->ID) as $id) {
+            $this->reindexPost($id);
+        }
+    }
+
+    /**
      * Fires the section-exclusion cascade when the flag meta is first added
      * with a truthy value (adding '0' is the default state, not a change).
      *
@@ -271,6 +325,29 @@ class IndexingHooks
         if ($metaKey === MetaBox::META_EXCLUDE_AS_SECTION) {
             do_action('typesense_search/section_exclusion_changed', (int) $postId);
         }
+    }
+
+    /**
+     * Uses Modularity's own usage lookup, which also covers shortcode embeds.
+     *
+     * @return int[]
+     */
+    private function findPostsUsingModule(int $moduleId): array
+    {
+        if (!class_exists('\\Modularity\\Helper\\ModuleUsageById')) {
+            $this->logger->warning(
+                'TypesenseSearch: Modularity\\Helper\\ModuleUsageById not found; pages using module ' . $moduleId . ' were not re-indexed.'
+            );
+
+            return [];
+        }
+
+        $usage = \Modularity\Helper\ModuleUsageById::getModuleUsageById($moduleId);
+
+        return array_values(array_unique(array_map(
+            static fn ($row) => (int) $row->post_id,
+            (array) $usage
+        )));
     }
 
     /**

@@ -205,6 +205,34 @@ class IndexingHooksTest extends TestCase
         $this->hooks->onSectionExclusionMetaChanged(1, 5, 'other_key', '1');
     }
 
+    public function test_saving_a_module_reindexes_pages_that_use_it(): void
+    {
+        eval('namespace Modularity; if (!class_exists(\'\\Modularity\\Editor\')) { class Editor {} }');
+        eval('namespace Modularity\\Helper; if (!class_exists(\'\\Modularity\\Helper\\ModuleUsageById\')) { class ModuleUsageById { public static $rows = []; public static function getModuleUsageById(int $id) { return self::$rows; } } }');
+        Functions\when('wp_is_post_revision')->justReturn(false);
+        Functions\when('get_option')->justReturn(['index_modularity' => '1']);
+        $this->page(7, 'page-using-module');
+
+        \Modularity\Helper\ModuleUsageById::$rows = [(object) ['post_id' => '7'], (object) ['post_id' => '7']];
+
+        $indexed = [];
+        $this->strategy->shouldReceive('index')->andReturnUsing(function ($post) use (&$indexed) {
+            $indexed[] = $post->ID;
+            return true;
+        });
+
+        $module = new IndexingHooksTestPost(99, 'Module', '', '', 'mod-text');
+        $this->hooks->onModuleSaved(99, $module);
+
+        self::assertSame([7], $indexed);
+    }
+
+    public function test_saving_a_regular_post_does_not_look_for_module_usage(): void
+    {
+        $this->strategy->shouldReceive('index')->never();
+        $this->hooks->onModuleSaved(1, new IndexingHooksTestPost(1, 'T', '', '', 'page'));
+    }
+
     private function page(int $id, string $slug, int $parent = 0, bool $store = true): IndexingHooksTestPost
     {
         $post = new IndexingHooksTestPost($id, 'Title', '', '', 'page');
