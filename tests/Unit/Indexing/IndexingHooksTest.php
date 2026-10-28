@@ -167,16 +167,12 @@ class IndexingHooksTest extends TestCase
     public function test_saving_a_module_reindexes_pages_that_use_it(): void
     {
         eval('namespace Modularity; if (!class_exists(\'\\Modularity\\Editor\')) { class Editor {} }');
+        eval('namespace Modularity\\Helper; if (!class_exists(\'\\Modularity\\Helper\\ModuleUsageById\')) { class ModuleUsageById { public static $rows = []; public static function getModuleUsageById(int $id) { return self::$rows; } } }');
         Functions\when('wp_is_post_revision')->justReturn(false);
         Functions\when('get_option')->justReturn(['index_modularity' => '1']);
         $this->page(7, 'page-using-module');
 
-        $wpdb = Mockery::mock();
-        $wpdb->postmeta = 'wp_postmeta';
-        $wpdb->shouldReceive('esc_like')->andReturnUsing(fn ($s) => $s);
-        $wpdb->shouldReceive('prepare')->andReturn('SQL');
-        $wpdb->shouldReceive('get_col')->with('SQL')->andReturn(['7']);
-        $GLOBALS['wpdb'] = $wpdb;
+        \Modularity\Helper\ModuleUsageById::$rows = [(object) ['post_id' => '7'], (object) ['post_id' => '7']];
 
         $indexed = [];
         $this->strategy->shouldReceive('index')->andReturnUsing(function ($post) use (&$indexed) {
@@ -187,7 +183,6 @@ class IndexingHooksTest extends TestCase
         $module = new IndexingHooksTestPost(99, 'Module', '', '', 'mod-text');
         $this->hooks->onModuleSaved(99, $module);
 
-        unset($GLOBALS['wpdb']);
         self::assertSame([7], $indexed);
     }
 

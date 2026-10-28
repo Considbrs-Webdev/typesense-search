@@ -272,24 +272,22 @@ class IndexingHooks
     }
 
     /**
-     * Modularity stores a post's modules in the serialized `modularity-modules`
-     * meta, each entry holding the module's `postid`.
+     * Uses Modularity's own usage lookup, which also covers shortcode embeds.
      *
      * @return int[]
      */
     private function findPostsUsingModule(int $moduleId): array
     {
-        global $wpdb;
+        if (!class_exists('\\Modularity\\Helper\\ModuleUsageById')) {
+            return [];
+        }
 
-        $ids = $wpdb->get_col($wpdb->prepare(
-            "SELECT DISTINCT post_id FROM {$wpdb->postmeta}
-             WHERE meta_key = 'modularity-modules'
-             AND (meta_value LIKE %s OR meta_value LIKE %s)",
-            '%' . $wpdb->esc_like('"postid";i:' . $moduleId . ';') . '%',
-            '%' . $wpdb->esc_like('"postid";s:' . strlen((string) $moduleId) . ':"' . $moduleId . '";') . '%'
-        ));
+        $usage = \Modularity\Helper\ModuleUsageById::getModuleUsageById($moduleId);
 
-        return array_map('intval', (array) $ids);
+        return array_values(array_unique(array_map(
+            static fn ($row) => (int) $row->post_id,
+            (array) $usage
+        )));
     }
 
     /**
