@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- The plugin now works on plain WordPress sites without Municipio or Modularity. The search page is rendered with plain PHP views (`views/plain/`) for classic themes, and inside the theme's header and footer template parts for block themes.
+- Themes can override the search page and hit cards by adding `typesense-search/template.php`, `typesense-search/search.php`, `typesense-search/pagination.php` and `typesense-search/hits/hit-{key}.php`.
+- A small stylesheet for the plain search page that inherits the theme's typography and colors (customise with `--ts-plain-*` CSS variables).
+- A `<noscript>` search form for visitors without JavaScript. It submits with `ts_nojs=1` and is answered by the regular WordPress search, uncached.
+- A PSR-18 HTTP client backed by the WordPress HTTP API, used only when no PSR-18 client is installed on the site.
+- New filters: `typesense_search/use_plain_template` and `typesense_search/block_template_parts`.
+
+### Fixed
+
+- The site no longer crashes with a fatal error on every request (including WP-CLI) when Municipio or Modularity is not installed (`JobPostingEnricher`).
+- The search term and page title are kept on the regular WordPress search page when Typesense is not ready.
+- The document title template used by the search script no longer gets a duplicated "Results for" suffix.
+- "No PSR-18 clients found" when connecting on sites without an HTTP client package.
+
 ## [1.9.2] - 2026-10-15
 
 ### Fixed
