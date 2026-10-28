@@ -49,6 +49,7 @@ class ClientFactory
                     'protocol' => $protocol,
                 ],
             ],
+            'client'                     => new WordPressHttpClient($timeout),
             'connection_timeout_seconds' => $timeout,
             'num_retries'                => 1,
             'retry_interval_seconds'     => 0,
