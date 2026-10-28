@@ -44,6 +44,7 @@ function typesense_search_uninstall_data_for_site(?int $blogId = null): void
         'typesense_search_synonyms_enabled',
         'typesense_search_external_pages_db_version',
         'typesense_search_external_pages_enabled',
+        'typesense_search_reindex_needed',
         'typesense_search_logging_enabled',
         'typesense_search_logging_dashboard_widgets',
         'typesense_search_logging_require_consent',

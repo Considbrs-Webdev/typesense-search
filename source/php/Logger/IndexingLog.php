@@ -61,6 +61,8 @@ class IndexingLog
 
         update_option(self::OPTION_NAME, $log, false);
         self::$currentRunId = null;
+
+        do_action('typesense_search/indexing_run_completed', $log['last_run']['source'], $failed);
     }
 
     public static function recordMessage(string $level, string $message): void

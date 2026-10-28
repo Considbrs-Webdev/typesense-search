@@ -2770,3 +2770,15 @@ msgstr "Glöm sajtens sparade indexnamn och söknyckel, till exempel efter en da
 
 msgid "I confirm the reset of the saved index for this site."
 msgstr "Jag bekräftar att sajtens sparade index ska nollställas."
+
+#: source/php/Admin/ReindexNotice.php:58
+msgid "Typesense Search: the permalink structure, site address or front page has changed. Indexed URLs are out of date until the content is re-indexed."
+msgstr "Typesense-sök: permalänkstrukturen, webbplatsadressen eller startsidan har ändrats. Indexerade webbadresser är inaktuella tills innehållet har indexerats om."
+
+#: source/php/Admin/ReindexNotice.php:62
+msgid "Open search settings"
+msgstr "Öppna sökinställningar"
+
+#: source/php/Admin/ReindexNotice.php:71
+msgid "You do not have permission to do this."
+msgstr "Du har inte behörighet att göra detta."
