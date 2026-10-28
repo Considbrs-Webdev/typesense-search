@@ -39,7 +39,7 @@ class NeutralSearchPage
 	 */
 	private function isNeutral(): bool
 	{
-		return $this->isActive() && ClientFactory::isReadyWithCollection();
+		return $this->isActive() && !NoJsFallback::isRequested() && ClientFactory::isReadyWithCollection();
 	}
 
 	/**
@@ -102,7 +102,7 @@ class NeutralSearchPage
 	 */
 	public function preventCachingFallback(): void
 	{
-		if (!$this->isActive() || ClientFactory::isReadyWithCollection()) {
+		if (!$this->isActive() || (ClientFactory::isReadyWithCollection() && !NoJsFallback::isRequested())) {
 			return;
 		}
 

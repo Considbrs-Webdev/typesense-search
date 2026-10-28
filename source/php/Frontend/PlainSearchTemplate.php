@@ -33,7 +33,7 @@ class PlainSearchTemplate
 	 */
 	public function isActive(): bool
 	{
-		if (is_admin() || !is_search() || !$this->settings->canUseTypesense() || !ClientFactory::isReadyWithCollection()) {
+		if (is_admin() || !is_search() || !$this->settings->canUseTypesense() || NoJsFallback::isRequested() || !ClientFactory::isReadyWithCollection()) {
 			return false;
 		}
 

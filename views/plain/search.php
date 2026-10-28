@@ -19,6 +19,16 @@ if (!defined('WPINC')) {
     <h1 class="ts-search__heading"><?php echo esc_html($lang->searchTitle); ?></h1>
 </section>
 
+<noscript>
+    <form class="ts-search ts-nojs" method="get" action="<?php echo esc_url($homeUrl ?? home_url('/')); ?>">
+        <p><?php echo esc_html($lang->noJsNotice); ?></p>
+        <label for="ts-nojs-field"><?php echo esc_html($lang->searchLabel); ?></label>
+        <input id="ts-nojs-field" type="search" name="s" required>
+        <input type="hidden" name="<?php echo esc_attr($lang->noJsArg); ?>" value="1">
+        <button type="submit"><?php echo esc_html($lang->search); ?></button>
+    </form>
+</noscript>
+
 <section class="ts-plain__container" data-js-search-page-container aria-busy="true">
     <form class="ts-search" method="get" action="<?php echo esc_url($homeUrl ?? home_url('/')); ?>">
         <div class="wa-stack wa-gap-xl">
