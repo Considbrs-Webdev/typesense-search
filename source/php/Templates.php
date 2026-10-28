@@ -15,7 +15,7 @@ class Templates
 
     public function addViewPaths($arr)
     {
-        if (is_admin() || !is_search() || !ClientFactory::isReadyWithCollection()) {
+        if (is_admin() || !is_search() || Frontend\NoJsFallback::isRequested() || !ClientFactory::isReadyWithCollection()) {
             return $arr;
         }
 

@@ -34,11 +34,20 @@ class NeutralSearchPage
 	}
 
 	/**
+	 * Active and Typesense renders the results. Otherwise the regular WordPress
+	 * search page is shown and must keep the real search term.
+	 */
+	private function isNeutral(): bool
+	{
+		return $this->isActive() && !NoJsFallback::isRequested() && ClientFactory::isReadyWithCollection();
+	}
+
+	/**
 	 * Return an empty search query everywhere on the frontend search page.
 	 */
 	public function blankSearchQuery($query)
 	{
-		return $this->isActive() ? '' : $query;
+		return $this->isNeutral() ? '' : $query;
 	}
 
 	/**
@@ -46,7 +55,7 @@ class NeutralSearchPage
 	 */
 	public function neutralTitle($title)
 	{
-		return $this->isActive() ? __('Search', 'typesense-search') : $title;
+		return $this->isNeutral() ? __('Search', 'typesense-search') : $title;
 	}
 
 	/**
@@ -54,7 +63,7 @@ class NeutralSearchPage
 	 */
 	public function removeSearchFeedLink(): void
 	{
-		if ($this->isActive()) {
+		if ($this->isNeutral()) {
 			remove_action('wp_head', 'feed_links_extra', 3);
 		}
 	}
@@ -73,9 +82,8 @@ class NeutralSearchPage
 		if (
 			!$query instanceof \WP_Query
 			|| !$query->is_main_query()
-			|| !$this->isActive()
+			|| !$this->isNeutral()
 			|| !apply_filters('typesense_search/skip_main_search_query', true)
-			|| !ClientFactory::isReadyWithCollection()
 		) {
 			return $posts;
 		}
@@ -94,7 +102,7 @@ class NeutralSearchPage
 	 */
 	public function preventCachingFallback(): void
 	{
-		if (!$this->isActive() || ClientFactory::isReadyWithCollection()) {
+		if (!$this->isActive() || (ClientFactory::isReadyWithCollection() && !NoJsFallback::isRequested())) {
 			return;
 		}
 

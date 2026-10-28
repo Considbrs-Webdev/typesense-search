@@ -4,6 +4,7 @@ import { mergeConfig } from "vite";
 const entries = {
     'css/typesense-search':  './source/sass/typesense-search.scss',
     'js/typesense-search':   './source/js/typesense-search.ts',
+    'css/typesense-search-plain': './source/sass/typesense-search-plain.scss',
     'css/admin-settings':    './source/sass/admin-settings.scss',
     'js/admin-settings':     './source/js/admin-settings.ts',
     'css/pinned-results-admin': './source/sass/pinned-results-admin.scss',

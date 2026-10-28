@@ -1,0 +1,55 @@
+// Minimal structure for the plain (non-Municipio) search page. Typography and
+// colors are inherited from the active theme; override via the --ts-plain-* variables.
+
+.ts-plain {
+  --ts-plain-border: color-mix(in srgb, currentColor 20%, transparent);
+  --ts-plain-radius: 0.5rem;
+  --ts-plain-gap: 0.5rem;
+  --ts-plain-padding: 1rem;
+
+  &__container {
+    max-width: 75rem;
+    margin-inline: auto;
+    padding: 1rem;
+  }
+}
+
+.ts-plain-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ts-plain-gap);
+  padding: var(--ts-plain-padding);
+  border: 1px solid var(--ts-plain-border);
+  border-radius: var(--ts-plain-radius);
+  color: inherit;
+  font: inherit;
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ts-plain-gap);
+    font-size: 0.875em;
+  }
+
+  &__badge {
+    padding: 0.1em 0.6em;
+    border-radius: 999px;
+    background: var(--ts-badge-background, currentColor);
+    color: var(--ts-badge-color, Canvas);
+  }
+
+  &__heading {
+    margin: 0;
+    font-size: 1.25em;
+  }
+
+  &__excerpt {
+    margin: 0;
+  }
+
+  &__path {
+    font-size: 0.875em;
+    opacity: 0.75;
+  }
+}

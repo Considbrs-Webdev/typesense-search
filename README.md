@@ -1,6 +1,6 @@
 # Typesense Search
 
-A WordPress plugin that integrates [Typesense](https://typesense.org) as the search back-end for WordPress sites running the [Municipio](https://getmunicipio.com) theme. It keeps a Typesense collection in sync with your WordPress content in real-time and exposes a configurable front-end search UI.
+A WordPress plugin that integrates [Typesense](https://typesense.org) as the search back-end for WordPress sites. It works on any WordPress installation and has first-class support for the [Municipio](https://getmunicipio.com) theme. It keeps a Typesense collection in sync with your WordPress content in real-time and exposes a configurable front-end search UI.
 
 - **Author:** Consid Borås AB
 - **License:** MIT
@@ -62,6 +62,8 @@ A WordPress plugin that integrates [Typesense](https://typesense.org) as the sea
 - Can record privacy-conscious local search statistics for both the full search page and quick search, with dashboard widgets and a searchable log under **Tools → Search log**.
 - Exposes WP-CLI commands for bulk indexing, dry-run previews, and index maintenance.
 - Is designed to be extended: add fields to existing documents via WordPress filters, write custom indexing strategies for new content types, or index content from **external sources** (APIs, feeds, third-party systems) alongside WordPress content.
+
+- Works with **Municipio** (Blade views), **block themes** and **classic themes**. See [§8.5](#85-search-page-on-plain-wordpress-sites).
 
 ---
 
@@ -1161,6 +1163,31 @@ add_filter(
 );
 ```
 
+### 8.5 Search page on plain WordPress sites
+
+Without Municipio the search page is rendered by plain PHP views in `views/plain/`:
+
+- **Classic themes:** `views/plain/template.php` wraps the page in `get_header()` / `get_footer()`.
+- **Block themes:** the page is rendered inside the block template canvas, between the theme's `header` and `footer` template parts. Use the `typesense_search/block_template_parts` filter if the theme uses other slugs.
+- **Municipio:** the Blade views are used as before.
+
+The plain template is used when Typesense is ready and Municipio is not the active theme. Force it on or off with the `typesense_search/use_plain_template` filter.
+
+**Overriding views in your theme** — copy a file from `views/plain/` to `typesense-search/` in your (child) theme:
+
+| Theme file                                | Purpose                                        |
+| ----------------------------------------- | ---------------------------------------------- |
+| `typesense-search/template.php`           | Page wrapper (classic themes only)             |
+| `typesense-search/search.php`             | Search page markup                             |
+| `typesense-search/pagination.php`          | Pagination templates                           |
+| `typesense-search/hits/hit-{key}.php`     | Hit card for a template key (e.g. `default`)   |
+
+Keep the `data-js-*` attributes and `{SEARCH_HIT_*}` placeholders; the front-end script depends on them. Hit cards are styled by `typesense-search-plain.css`, which inherits the theme's typography and colors. Customise with `--ts-plain-border`, `--ts-plain-radius`, `--ts-plain-gap` and `--ts-plain-padding`.
+
+**Without JavaScript** the page shows a `<noscript>` search form that submits `?s=…&ts_nojs=1`. Those requests are answered by the regular WordPress search using the theme's own search template, with the real search term and `no-store` headers. The Typesense page itself stays term-independent and cacheable.
+
+**HTTP client:** the Typesense PHP client needs a PSR-18 client. If one is installed (Municipio ships Guzzle) it is used; otherwise the plugin falls back to a client built on the WordPress HTTP API, so no extra package is required.
+
 ---
 
 ## 9. WordPress hooks and filters reference
@@ -1196,6 +1223,13 @@ Both hooks are wired in `IndexingHooks` during bootstrap, so they are available 
 | `Municipio/TypesenseSearch/DocumentBuilder/build`                   | `array $document, WP_Post $post`      | Add or transform fields on every indexed post                                                       |
 | `Municipio/TypesenseSearch/DocumentBuilder/{post_type}/build`       | `array $document, WP_Post $post`      | Add or transform fields for a specific post type (replace `{post_type}` with the slug, e.g. `page`) |
 | `Municipio/TypesenseSearch/PdfAttachmentAdapter/max_content_length` | `int $maxLength, WP_Post $attachment` | Override the 50 000-character PDF content cap                                                       |
+
+#### Search page filters
+
+| Hook                                       | Parameters                              | Purpose                                                                                       |
+| ------------------------------------------ | --------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `typesense_search/use_plain_template`      | `bool $use`                             | Force the plain PHP search template on or off (default: on unless Municipio is active)        |
+| `typesense_search/block_template_parts`    | `array{header: string, footer: string}` | Template part slugs wrapped around the search page in block themes                            |
 
 #### Hit template filters
 

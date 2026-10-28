@@ -727,6 +727,10 @@ msgstr "Föregående sida"
 msgid "Next page"
 msgstr "Nästa sida"
 
+#: source/php/Frontend/EnrichSearchTemplate.php
+msgid "JavaScript is turned off. Use the basic search below."
+msgstr "JavaScript är avstängt. Använd den enkla sökningen nedan."
+
 #: source/php/Frontend/EnrichSearchTemplate.php:54
 #: source/php/Frontend/I18n.php:39
 msgid "Loading search…"
