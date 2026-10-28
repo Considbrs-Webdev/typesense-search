@@ -3,6 +3,8 @@
 namespace TypesenseSearch\Indexing;
 
 use TypesenseSearch\Indexing\Strategies\PdfIndexingStrategy;
+use TypesenseSearch\Logger\ErrorLogLogger;
+use TypesenseSearch\Logger\LoggerInterface;
 
 /**
  * Class IndexingHooks
@@ -39,9 +41,12 @@ class IndexingHooks
     /** @var array<int, int[]> Descendant IDs of pages being deleted, keyed by page ID. */
     private array $descendantsOfDeleted = [];
 
-    public function __construct(IndexingRegistry $registry)
+    private LoggerInterface $logger;
+
+    public function __construct(IndexingRegistry $registry, ?LoggerInterface $logger = null)
     {
         $this->registry = $registry;
+        $this->logger = $logger ?? new ErrorLogLogger();
 
         // Let each strategy register its own content-specific hooks.
         $this->registry->registerAllHooks();
@@ -279,6 +284,10 @@ class IndexingHooks
     private function findPostsUsingModule(int $moduleId): array
     {
         if (!class_exists('\\Modularity\\Helper\\ModuleUsageById')) {
+            $this->logger->warning(
+                'TypesenseSearch: Modularity\\Helper\\ModuleUsageById not found; pages using module ' . $moduleId . ' were not re-indexed.'
+            );
+
             return [];
         }
 
