@@ -210,9 +210,16 @@ class TypesenseConfig
 		$title   = html_entity_decode(wp_get_document_title(), ENT_QUOTES, $charset);
 		$phrase  = html_entity_decode(__('Search Results for &#8220;%s&#8221;', 'default'), ENT_QUOTES, $charset);
 
-		$suffix = str_starts_with($title, $neutral)
-			? substr($title, strlen($neutral))
-			: ' — ' . get_bloginfo('name');
+		// Core renders the blanked search as "Search Results for “” – Site".
+		$blankPhrase = sprintf($phrase, '');
+
+		if (str_starts_with($title, $blankPhrase)) {
+			$suffix = substr($title, strlen($blankPhrase));
+		} elseif (str_starts_with($title, $neutral)) {
+			$suffix = substr($title, strlen($neutral));
+		} else {
+			$suffix = ' — ' . get_bloginfo('name');
+		}
 
 		$template = $phrase . $suffix;
 		$empty    = $neutral . $suffix;

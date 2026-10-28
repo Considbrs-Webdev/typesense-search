@@ -13,6 +13,16 @@
         </div>
     </section>
 
+    <noscript>
+        <form class="ts-search ts-nojs" method="get" action="{{ $homeUrl ?? '/' }}">
+            <p>{{ $lang->noJsNotice }}</p>
+            <label for="ts-nojs-field">{{ $lang->searchLabel }}</label>
+            <input id="ts-nojs-field" type="search" name="s" required>
+            <input type="hidden" name="{{ $lang->noJsArg }}" value="1">
+            <button type="submit">{{ $lang->search }}</button>
+        </form>
+    </noscript>
+
     {{-- Search interface --}}
     <section class="o-container u-margin__top--2 u-margin__bottom--8" data-js-search-page-container aria-busy="true">
         <div class="o-grid">

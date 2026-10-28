@@ -25,6 +25,12 @@ class JobPostingEnricher
     public function __construct()
     {
         add_action('wp_loaded', function () {
+            // The JobPosting schema mapping comes from Municipio/Modularity;
+            // plain WordPress installs have nothing to enrich.
+            if (!self::isAvailable()) {
+                return;
+            }
+
             $wpService  = \Modularity\Helper\WpService::get();
             $acfService = \Modularity\Helper\AcfService::get();
 
@@ -40,6 +46,16 @@ class JobPostingEnricher
                 );
             }
         });
+    }
+
+    /**
+     * Whether the classes needed to resolve JobPosting post types exist.
+     */
+    private static function isAvailable(): bool
+    {
+        return class_exists(SchemaToPostTypeResolver::class)
+            && class_exists('\\Modularity\\Helper\\WpService')
+            && class_exists('\\Modularity\\Helper\\AcfService');
     }
 
     /**

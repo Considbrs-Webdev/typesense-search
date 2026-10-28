@@ -2,7 +2,10 @@
 
 namespace TypesenseSearch\Indexing;
 
+use TypesenseSearch\Admin\MetaBox;
 use TypesenseSearch\Indexing\Strategies\PdfIndexingStrategy;
+use TypesenseSearch\Logger\ErrorLogLogger;
+use TypesenseSearch\Logger\LoggerInterface;
 
 /**
  * Class IndexingHooks
@@ -39,9 +42,12 @@ class IndexingHooks
     /** @var array<int, int[]> Descendant IDs of pages being deleted, keyed by page ID. */
     private array $descendantsOfDeleted = [];
 
-    public function __construct(IndexingRegistry $registry)
+    private LoggerInterface $logger;
+
+    public function __construct(IndexingRegistry $registry, ?LoggerInterface $logger = null)
     {
         $this->registry = $registry;
+        $this->logger = $logger ?? new ErrorLogLogger();
 
         // Let each strategy register its own content-specific hooks.
         $this->registry->registerAllHooks();
@@ -62,6 +68,11 @@ class IndexingHooks
         add_action('before_delete_post', [$this, 'rememberDescendantsOfDeletedPage']);
         add_action('deleted_post', [$this, 'reindexDescendantsOfDeletedPage']);
 
+        // Modularity module content is appended to the pages that display the
+        // module, so editing or removing a module must re-index those pages.
+        add_action('wp_after_insert_post', [$this, 'onModuleSaved'], 30, 2);
+        add_action('deleted_post', [$this, 'onModuleDeleted'], 10, 2);
+
         // External API: allow any plugin/theme to trigger index or deindex.
         //   do_action('typesense_search/index_post', $post_id);
         //   do_action('typesense_search/deindex_post', $post_id);
@@ -72,6 +83,12 @@ class IndexingHooks
         // changes. Descendant pages and PDFs derive their section from this
         // ancestor, so they need to be rebuilt too.
         add_action('typesense_search/section_exclusion_changed', [$this, 'onSectionExclusionChanged']);
+
+        // The flag can also be changed outside the metabox (WP-CLI, imports,
+        // direct update_post_meta), so react to the meta itself.
+        add_action('added_post_meta', [$this, 'onSectionExclusionMetaAdded'], 10, 4);
+        add_action('updated_post_meta', [$this, 'onSectionExclusionMetaChanged'], 10, 4);
+        add_action('deleted_post_meta', [$this, 'onSectionExclusionMetaChanged'], 10, 4);
     }
 
     /**
@@ -123,6 +140,13 @@ class IndexingHooks
         // Transitioning away from published (unpublishing) → remove from index.
         if ($oldStatus === 'publish') {
             $strategy->deindex($post->ID);
+
+            // Cascade: published descendants keep their post_parent when the
+            // page is unpublished or trashed, but their ancestor-derived
+            // fields (path, URL, section) must be rebuilt.
+            if ($post->post_type === 'page') {
+                $this->reindexDescendants($post->ID);
+            }
         }
     }
 
@@ -163,6 +187,12 @@ class IndexingHooks
             $strategy->index($post);
         } else {
             $strategy->deindex($post->ID);
+        }
+
+        // Raw SQL moves (e.g. Nested Pages) can relocate a whole branch, so
+        // descendants need their ancestor-derived fields rebuilt as well.
+        if ($post->post_type === 'page') {
+            $this->reindexDescendants($post->ID);
         }
     }
 
@@ -220,6 +250,104 @@ class IndexingHooks
         }
 
         $this->reindexDescendants($postId);
+    }
+
+    /**
+     * Re-index pages displaying a Modularity module after it is saved or trashed.
+     *
+     * @param int       $postId Module post ID.
+     * @param \WP_Post $post   Module post object.
+     */
+    public function onModuleSaved(int $postId, \WP_Post $post): void
+    {
+        $this->reindexPagesUsingModule($post);
+    }
+
+    /**
+     * Re-index pages that displayed a Modularity module after it was deleted.
+     *
+     * @param int            $postId Module post ID.
+     * @param \WP_Post|null $post   Deleted post object (WP 5.5+).
+     */
+    public function onModuleDeleted($postId, $post = null): void
+    {
+        if ($post instanceof \WP_Post) {
+            $this->reindexPagesUsingModule($post);
+        }
+    }
+
+    private function reindexPagesUsingModule(\WP_Post $module): void
+    {
+        if (
+            strpos((string) $module->post_type, 'mod-') !== 0
+            || !class_exists('\\Modularity\\Editor')
+            || wp_is_post_revision($module->ID)
+        ) {
+            return;
+        }
+
+        $settings = new \TypesenseSearch\Services\SettingsRepository();
+        if (!$settings->canUseTypesense() || !$settings->isIndexModularityEnabled()) {
+            return;
+        }
+
+        foreach ($this->findPostsUsingModule($module->ID) as $id) {
+            $this->reindexPost($id);
+        }
+    }
+
+    /**
+     * Fires the section-exclusion cascade when the flag meta is first added
+     * with a truthy value (adding '0' is the default state, not a change).
+     *
+     * @param int    $metaId    Meta row ID.
+     * @param int    $postId    Post ID.
+     * @param string $metaKey   Meta key.
+     * @param mixed  $metaValue Meta value.
+     */
+    public function onSectionExclusionMetaAdded($metaId, $postId, $metaKey, $metaValue): void
+    {
+        if ($metaKey === MetaBox::META_EXCLUDE_AS_SECTION && (string) $metaValue === '1') {
+            do_action('typesense_search/section_exclusion_changed', (int) $postId);
+        }
+    }
+
+    /**
+     * Fires the section-exclusion cascade when the flag meta is updated or deleted.
+     *
+     * @param mixed  $metaId    Meta row ID(s).
+     * @param int    $postId    Post ID.
+     * @param string $metaKey   Meta key.
+     * @param mixed  $metaValue Meta value.
+     */
+    public function onSectionExclusionMetaChanged($metaId, $postId, $metaKey, $metaValue): void
+    {
+        if ($metaKey === MetaBox::META_EXCLUDE_AS_SECTION) {
+            do_action('typesense_search/section_exclusion_changed', (int) $postId);
+        }
+    }
+
+    /**
+     * Uses Modularity's own usage lookup, which also covers shortcode embeds.
+     *
+     * @return int[]
+     */
+    private function findPostsUsingModule(int $moduleId): array
+    {
+        if (!class_exists('\\Modularity\\Helper\\ModuleUsageById')) {
+            $this->logger->warning(
+                'TypesenseSearch: Modularity\\Helper\\ModuleUsageById not found; pages using module ' . $moduleId . ' were not re-indexed.'
+            );
+
+            return [];
+        }
+
+        $usage = \Modularity\Helper\ModuleUsageById::getModuleUsageById($moduleId);
+
+        return array_values(array_unique(array_map(
+            static fn ($row) => (int) $row->post_id,
+            (array) $usage
+        )));
     }
 
     /**

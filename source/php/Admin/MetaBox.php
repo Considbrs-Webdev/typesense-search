@@ -184,14 +184,11 @@ class MetaBox
 
         // ── Exclude as section flag (pages only) ───────────────────────────
         if ($post->post_type === 'page') {
-            $previousExcludeAsSection = get_post_meta($postId, self::META_EXCLUDE_AS_SECTION, true) === '1';
             $excludeAsSection = isset($_POST[self::META_EXCLUDE_AS_SECTION]) && $_POST[self::META_EXCLUDE_AS_SECTION] === '1' ? '1' : '0';
 
             update_post_meta($postId, self::META_EXCLUDE_AS_SECTION, $excludeAsSection);
-
-            if ($previousExcludeAsSection !== ($excludeAsSection === '1')) {
-                do_action('typesense_search/section_exclusion_changed', $postId);
-            }
+            // typesense_search/section_exclusion_changed is fired by
+            // IndexingHooks when this meta is added, updated or deleted.
         }
 
         // ── Extra search terms ────────────────────────────────────────────────

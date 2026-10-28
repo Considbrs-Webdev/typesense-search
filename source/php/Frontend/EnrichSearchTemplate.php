@@ -54,6 +54,8 @@ class EnrichSearchTemplate
 			'closeFilter' => __("Close filter", 'typesense-search'),
 			'paginationPrevious' => __('Previous page', 'typesense-search'),
 			'paginationNext' => __('Next page', 'typesense-search'),
+			'noJsNotice' => __('JavaScript is turned off. Use the basic search below.', 'typesense-search'),
+			'noJsArg' => NoJsFallback::QUERY_ARG,
 			'loadingSearch' => __('Loading search…', 'typesense-search'),
 		]);
 

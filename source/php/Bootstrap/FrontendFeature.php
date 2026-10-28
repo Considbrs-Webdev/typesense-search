@@ -19,8 +19,9 @@ class FrontendFeature
     public function register(): void
     {
         new Frontend\Assets();
-        new Frontend\EnrichSearchTemplate($this->settings);
+        $enrich = new Frontend\EnrichSearchTemplate($this->settings);
         new Frontend\TypesenseConfig($this->settings);
         new Frontend\NeutralSearchPage($this->settings);
+        new Frontend\PlainSearchTemplate($this->settings, $enrich);
     }
 }

@@ -164,6 +164,75 @@ class IndexingHooksTest extends TestCase
         $this->hooks->reindexDescendantsOfDeletedPage(1);
     }
 
+    public function test_unpublishing_a_page_reindexes_its_published_descendants(): void
+    {
+        $parent = $this->page(1, 'parent');
+        $parent->post_status = 'trash';
+        $this->page(2, 'child', 1);
+        $this->stubDescendants(1, [2]);
+
+        $this->strategy->shouldReceive('deindex')->with(1)->once()->andReturn(true);
+        $this->strategy->shouldReceive('index')->with(Mockery::on(fn ($p) => $p->ID === 2))->once()->andReturn(true);
+
+        $this->hooks->onAfterInsertPost(1, $parent, true, $this->page(1, 'parent', 0, false));
+    }
+
+    public function test_external_index_post_reindexes_descendants(): void
+    {
+        Functions\when('clean_post_cache')->justReturn();
+        $this->page(1, 'moved');
+        $this->page(2, 'child', 1);
+        $this->stubDescendants(1, [2]);
+
+        $indexed = [];
+        $this->strategy->shouldReceive('index')->andReturnUsing(function ($post) use (&$indexed) {
+            $indexed[] = $post->ID;
+            return true;
+        });
+
+        $this->hooks->onExternalIndexPost(1);
+
+        self::assertSame([1, 2], $indexed);
+    }
+
+    public function test_section_exclusion_meta_changes_fire_the_cascade_action(): void
+    {
+        Functions\expect('do_action')->with('typesense_search/section_exclusion_changed', 5)->twice();
+
+        $this->hooks->onSectionExclusionMetaAdded(1, 5, '_typesense_exclude_as_section', '1');
+        $this->hooks->onSectionExclusionMetaChanged(1, 5, '_typesense_exclude_as_section', '0');
+        $this->hooks->onSectionExclusionMetaAdded(1, 5, '_typesense_exclude_as_section', '0');
+        $this->hooks->onSectionExclusionMetaChanged(1, 5, 'other_key', '1');
+    }
+
+    public function test_saving_a_module_reindexes_pages_that_use_it(): void
+    {
+        eval('namespace Modularity; if (!class_exists(\'\\Modularity\\Editor\')) { class Editor {} }');
+        eval('namespace Modularity\\Helper; if (!class_exists(\'\\Modularity\\Helper\\ModuleUsageById\')) { class ModuleUsageById { public static $rows = []; public static function getModuleUsageById(int $id) { return self::$rows; } } }');
+        Functions\when('wp_is_post_revision')->justReturn(false);
+        Functions\when('get_option')->justReturn(['index_modularity' => '1']);
+        $this->page(7, 'page-using-module');
+
+        \Modularity\Helper\ModuleUsageById::$rows = [(object) ['post_id' => '7'], (object) ['post_id' => '7']];
+
+        $indexed = [];
+        $this->strategy->shouldReceive('index')->andReturnUsing(function ($post) use (&$indexed) {
+            $indexed[] = $post->ID;
+            return true;
+        });
+
+        $module = new IndexingHooksTestPost(99, 'Module', '', '', 'mod-text');
+        $this->hooks->onModuleSaved(99, $module);
+
+        self::assertSame([7], $indexed);
+    }
+
+    public function test_saving_a_regular_post_does_not_look_for_module_usage(): void
+    {
+        $this->strategy->shouldReceive('index')->never();
+        $this->hooks->onModuleSaved(1, new IndexingHooksTestPost(1, 'T', '', '', 'page'));
+    }
+
     private function page(int $id, string $slug, int $parent = 0, bool $store = true): IndexingHooksTestPost
     {
         $post = new IndexingHooksTestPost($id, 'Title', '', '', 'page');
