@@ -61,7 +61,47 @@ class PlainSearchTemplate
 			return $template;
 		}
 
+		if (function_exists('wp_is_block_theme') && wp_is_block_theme()) {
+			$this->useBlockThemeTemplate();
+
+			return $template;
+		}
+
 		return TYPESENSESEARCH_VIEW_PATH . '/plain/template.php';
+	}
+
+	/**
+	 * Render the search page inside the block theme's own template canvas.
+	 *
+	 * Block themes have no header.php/footer.php, so get_header() would fall
+	 * back to the legacy markup. Instead the page is wrapped by the theme's
+	 * header and footer template parts.
+	 */
+	private function useBlockThemeTemplate(): void
+	{
+		global $_wp_current_template_content;
+
+		ob_start();
+		self::render('search.php', self::getViewData());
+		$html = (string) ob_get_clean();
+
+		/**
+		 * Filters the template part slugs wrapped around the search page in block themes.
+		 *
+		 * @param array{header: string, footer: string} $parts
+		 */
+		$parts = (array) apply_filters('typesense_search/block_template_parts', ['header' => 'header', 'footer' => 'footer']);
+
+		$_wp_current_template_content = sprintf(
+			'<!-- wp:template-part {"slug":"%1$s","tagName":"header"} /-->'
+			. '<!-- wp:group {"tagName":"main","className":"ts-plain","layout":{"type":"constrained"}} -->'
+			. '<main class="wp-block-group ts-plain"><!-- wp:html -->%2$s<!-- /wp:html --></main>'
+			. '<!-- /wp:group -->'
+			. '<!-- wp:template-part {"slug":"%3$s","tagName":"footer"} /-->',
+			esc_attr($parts['header'] ?? 'header'),
+			$html,
+			esc_attr($parts['footer'] ?? 'footer')
+		);
 	}
 
 	public function enqueueStyles(): void
