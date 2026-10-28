@@ -2,6 +2,9 @@
 
 namespace TypesenseSearch\Typesense;
 
+use Http\Discovery\Exception\NotFoundException as DiscoveryNotFoundException;
+use Http\Discovery\Psr18ClientDiscovery;
+use Psr\Http\Client\ClientInterface;
 use Typesense\Client;
 use TypesenseSearch\Admin\Settings;
 use TypesenseSearch\Services\SettingsRepository;
@@ -49,10 +52,27 @@ class ClientFactory
                     'protocol' => $protocol,
                 ],
             ],
+            'client'                     => self::httpClient($timeout),
             'connection_timeout_seconds' => $timeout,
             'num_retries'                => 1,
             'retry_interval_seconds'     => 0,
         ]);
+    }
+
+    /**
+     * Pick the HTTP transport for the Typesense client.
+     *
+     * Prefers a PSR-18 client already installed on the site (e.g. the one that
+     * ships with Municipio) so no second HTTP library is involved, and falls
+     * back to the WordPress HTTP API on plain installs where none exists.
+     */
+    private static function httpClient(int $timeout): ClientInterface
+    {
+        try {
+            return Psr18ClientDiscovery::find();
+        } catch (DiscoveryNotFoundException) {
+            return new WordPressHttpClient($timeout);
+        }
     }
 
     /**

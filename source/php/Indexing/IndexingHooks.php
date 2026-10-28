@@ -2,6 +2,7 @@
 
 namespace TypesenseSearch\Indexing;
 
+use TypesenseSearch\Admin\MetaBox;
 use TypesenseSearch\Indexing\Strategies\PdfIndexingStrategy;
 use TypesenseSearch\Logger\ErrorLogLogger;
 use TypesenseSearch\Logger\LoggerInterface;
@@ -82,6 +83,12 @@ class IndexingHooks
         // changes. Descendant pages and PDFs derive their section from this
         // ancestor, so they need to be rebuilt too.
         add_action('typesense_search/section_exclusion_changed', [$this, 'onSectionExclusionChanged']);
+
+        // The flag can also be changed outside the metabox (WP-CLI, imports,
+        // direct update_post_meta), so react to the meta itself.
+        add_action('added_post_meta', [$this, 'onSectionExclusionMetaAdded'], 10, 4);
+        add_action('updated_post_meta', [$this, 'onSectionExclusionMetaChanged'], 10, 4);
+        add_action('deleted_post_meta', [$this, 'onSectionExclusionMetaChanged'], 10, 4);
     }
 
     /**
@@ -133,6 +140,13 @@ class IndexingHooks
         // Transitioning away from published (unpublishing) → remove from index.
         if ($oldStatus === 'publish') {
             $strategy->deindex($post->ID);
+
+            // Cascade: published descendants keep their post_parent when the
+            // page is unpublished or trashed, but their ancestor-derived
+            // fields (path, URL, section) must be rebuilt.
+            if ($post->post_type === 'page') {
+                $this->reindexDescendants($post->ID);
+            }
         }
     }
 
@@ -173,6 +187,12 @@ class IndexingHooks
             $strategy->index($post);
         } else {
             $strategy->deindex($post->ID);
+        }
+
+        // Raw SQL moves (e.g. Nested Pages) can relocate a whole branch, so
+        // descendants need their ancestor-derived fields rebuilt as well.
+        if ($post->post_type === 'page') {
+            $this->reindexDescendants($post->ID);
         }
     }
 
@@ -273,6 +293,37 @@ class IndexingHooks
 
         foreach ($this->findPostsUsingModule($module->ID) as $id) {
             $this->reindexPost($id);
+        }
+    }
+
+    /**
+     * Fires the section-exclusion cascade when the flag meta is first added
+     * with a truthy value (adding '0' is the default state, not a change).
+     *
+     * @param int    $metaId    Meta row ID.
+     * @param int    $postId    Post ID.
+     * @param string $metaKey   Meta key.
+     * @param mixed  $metaValue Meta value.
+     */
+    public function onSectionExclusionMetaAdded($metaId, $postId, $metaKey, $metaValue): void
+    {
+        if ($metaKey === MetaBox::META_EXCLUDE_AS_SECTION && (string) $metaValue === '1') {
+            do_action('typesense_search/section_exclusion_changed', (int) $postId);
+        }
+    }
+
+    /**
+     * Fires the section-exclusion cascade when the flag meta is updated or deleted.
+     *
+     * @param mixed  $metaId    Meta row ID(s).
+     * @param int    $postId    Post ID.
+     * @param string $metaKey   Meta key.
+     * @param mixed  $metaValue Meta value.
+     */
+    public function onSectionExclusionMetaChanged($metaId, $postId, $metaKey, $metaValue): void
+    {
+        if ($metaKey === MetaBox::META_EXCLUDE_AS_SECTION) {
+            do_action('typesense_search/section_exclusion_changed', (int) $postId);
         }
     }
 

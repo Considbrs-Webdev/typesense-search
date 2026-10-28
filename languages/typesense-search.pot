@@ -745,6 +745,9 @@ msgstr ""
 
 #: source/php/Frontend/EnrichSearchTemplate.php:57
 #: source/php/Frontend/I18n.php:39
+msgid "JavaScript is turned off. Use the basic search below."
+msgstr ""
+
 msgid "Loading search…"
 msgstr ""
 
