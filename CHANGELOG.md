@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.10.0] - 2026-11-05
 
 ### Added
 
@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A `<noscript>` search form for visitors without JavaScript. It submits with `ts_nojs=1` and is answered by the regular WordPress search, uncached.
 - A PSR-18 HTTP client backed by the WordPress HTTP API, used only when no PSR-18 client is installed on the site.
 - New filters: `typesense_search/use_plain_template` and `typesense_search/block_template_parts`.
+- An admin notice warns when a permalink structure, home URL or front page change leaves indexed URLs stale and a re-index is needed. The notice is translated to Swedish and cleared after a successful manual index run.
+
+### Changed
+
+- Pages are now re-indexed when they display a Modularity module that is saved or deleted.
+- Descendant pages are re-indexed when a parent page's slug, parent or title changes, when it is unpublished or trashed, when it is permanently deleted, and after an external index.
+- Changes to the section-exclusion meta now trigger re-indexing of the affected pages.
 
 ### Fixed
 
