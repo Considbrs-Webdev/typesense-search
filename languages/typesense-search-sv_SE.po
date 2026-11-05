@@ -1738,6 +1738,12 @@ msgstr "Försök igen"
 msgid "Check status"
 msgstr "Kontrollera status"
 
+msgid "Re-initialize"
+msgstr "Återinitialisera"
+
+msgid "Runs the setup again for this site: recreates a missing index and search key, then syncs the settings. Run indexing afterwards."
+msgstr "Kör uppsättningen igen för sajten: återskapar ett saknat index och en söknyckel, och synkar sedan inställningarna. Kör indexering efteråt."
+
 #: views/admin/network/settings.php:171
 msgid "Index access verified at the last check."
 msgstr "Åtkomst till indexet verifierades vid senaste kontrollen."
