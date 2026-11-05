@@ -151,6 +151,7 @@ class NetworkSettingsPage
             return;
         }
         $success = true;
+        $missing = false; // Set when a status check proves the index is gone from the server.
         $network = new NetworkSettingsRepository();
         $connection = $network->connection();
         $mapping = $network->mapping();
@@ -189,13 +190,14 @@ class NetworkSettingsPage
             }
         } catch (\Throwable $e) {
             $success = false;
+            $missing = $operation === 'status' && $e instanceof \Typesense\Exceptions\ObjectNotFound;
             // Only our own actionable messages are displayed; SDK errors can contain credentials/URLs.
             $message = \TypesenseSearch\Multisite\SetupException::describe($e);
         }
         if ($operation === 'status') {
             update_option(self::CHECK, [
                 'fingerprint' => self::checkFingerprint($connection, $mapping),
-                'time' => time(), 'success' => $success, 'message' => $message,
+                'time' => time(), 'success' => $success, 'message' => $message, 'missing' => $missing,
             ], false);
         }
         if ($runId !== '') {

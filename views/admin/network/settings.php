@@ -168,7 +168,8 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <input type="hidden" name="action" value="<?php echo esc_attr(NetworkSettingsPage::ACTION); ?>"><input type="hidden" name="site_id" value="<?php echo $id; ?>"><input type="hidden" name="network_id" value="<?php echo (int) $networkId; ?>"><input type="hidden" name="tab" value="<?php echo esc_attr($tab); ?>">
 <?php wp_nonce_field(NetworkSettingsPage::ACTION . '_' . $id); ?>
 <?php if ($row['retry']) : ?><button class="button" name="operation" value="setup"><?php esc_html_e('Retry', 'typesense-search'); ?></button><?php endif; ?>
-<?php if ($row['ready']) : ?><button class="button" name="operation" value="status"><?php esc_html_e('Check status', 'typesense-search'); ?></button><button class="button" name="operation" value="setup" title="<?php echo esc_attr__('Runs the setup again for this site: recreates a missing index and search key, then syncs the settings. Run indexing afterwards.', 'typesense-search'); ?>"><?php esc_html_e('Re-initialize', 'typesense-search'); ?></button><?php endif; ?>
+<?php if ($row['ready']) : ?><button class="button" name="operation" value="status"><?php esc_html_e('Check status', 'typesense-search'); ?></button><?php endif; ?>
+<?php if (!empty($row['check']['missing'])) : ?><button class="button" name="operation" value="setup" title="<?php echo esc_attr__('Runs the setup again for this site: recreates a missing index and search key, then syncs the settings. Run indexing afterwards.', 'typesense-search'); ?>"><?php esc_html_e('Re-initialize', 'typesense-search'); ?></button><?php endif; ?>
 </form>
 <?php endif; ?>
 </td>
