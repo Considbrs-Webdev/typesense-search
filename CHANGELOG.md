@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.1] - 2026-11-06
+
+### Fixed
+
+- Deleting an attachment no longer sends a Typesense deindex request for every non-PDF file. Bulk deletes of posts with many attachments (for example events with thousands of images) were extremely slow and flooded the log with "Failed to deindex" errors.
+
 ## [1.10.0] - 2026-11-05
 
 ### Added
