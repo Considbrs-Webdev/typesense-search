@@ -191,6 +191,13 @@ class PdfIndexingStrategy extends AbstractIndexingStrategy
      */
     public function onDeleteAttachment(int $attachmentId): void
     {
+        // Only PDFs are ever indexed by this strategy. Skipping everything
+        // else avoids one Typesense request per deleted image/document, which
+        // makes bulk deletes (e.g. events with many attachments) extremely slow.
+        if (get_post_mime_type($attachmentId) !== 'application/pdf') {
+            return;
+        }
+
         $this->deindex($attachmentId);
     }
 
