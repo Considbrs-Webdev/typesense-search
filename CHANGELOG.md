@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.10.1] - 2026-11-08
 
+### Added
+
+- A **Re-initialize** button on the network site status page. It reruns the setup for a site (recreates a missing index and search key, then syncs the settings) and is only shown when the last status check found the index missing on the server. Run indexing afterwards. Translated to Swedish.
+
 ### Fixed
 
 - Deleting an attachment no longer sends a Typesense deindex request for every non-PDF file. Bulk deletes of posts with many attachments (for example events with thousands of images) were extremely slow and flooded the log with "Failed to deindex" errors.
