@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.2] - 2026-11-09
+
+### Fixed
+
+- Creating the collection no longer fails with "Curation set ... not found" (or the equivalent for synonym sets) on a server where the pinned results or synonyms sets don't exist yet. Empty sets are now created first and filled by the regular sync.
+
 ## [1.10.1] - 2026-11-08
 
 ### Added
