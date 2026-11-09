@@ -136,7 +136,51 @@ class Collection
         ?SettingsRepository $settings = null,
         ?ServerCapabilities $capabilities = null
     ): void {
-        $client->collections->create(self::getSchema($collectionName, $settings, $capabilities));
+        $settings ??= new SettingsRepository();
+        $schema     = self::getSchema($collectionName, $settings, $capabilities);
+
+        // Typesense rejects a schema that references curation/synonym sets
+        // that don't exist yet, so make sure empty ones exist first. The
+        // regular sync fills them with items later.
+        $adminApi = new AdminApi($settings);
+        foreach (['curation_sets', 'synonym_sets'] as $key) {
+            if (empty($schema[$key]) || !is_array($schema[$key])) {
+                continue;
+            }
+            $remaining = [];
+            foreach ($schema[$key] as $setName) {
+                if (self::ensureSetExists($adminApi, $settings, $key, (string) $setName)) {
+                    $remaining[] = $setName;
+                }
+            }
+            if ($remaining === []) {
+                unset($schema[$key]);
+            } else {
+                $schema[$key] = $remaining;
+            }
+        }
+
+        $client->collections->create($schema);
+    }
+
+    /**
+     * Creates an empty curation/synonym set when it doesn't exist.
+     *
+     * @return bool True when the set exists (or was created).
+     */
+    private static function ensureSetExists(AdminApi $adminApi, SettingsRepository $settings, string $type, string $setName): bool
+    {
+        $remote = rtrim($settings->getRemote(), '/');
+        if ($remote === '' || $setName === '') {
+            return false;
+        }
+
+        $url = "{$remote}/{$type}/" . rawurlencode($setName);
+        if (($adminApi->request('GET', $url)['ok'] ?? false) === true) {
+            return true;
+        }
+
+        return ($adminApi->request('PUT', $url, ['items' => []])['ok'] ?? false) === true;
     }
 
     /**
