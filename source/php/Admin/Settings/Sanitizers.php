@@ -170,11 +170,23 @@ trait Sanitizers
 
     public function sanitizeVectorStrategy(mixed $value): string
     {
+        if ($value === null) {
+            return VectorSearchPresets::sanitizeStrategy(
+                get_option(OptionKeys::OPTION_VECTOR_STRATEGY, VectorSearchPresets::DEFAULT_STRATEGY)
+            );
+        }
+
         return VectorSearchPresets::sanitizeStrategy($value);
     }
 
     public function sanitizeVectorRankingProfile(mixed $value): string
     {
+        if ($value === null) {
+            return VectorSearchPresets::sanitizeProfile(
+                get_option(OptionKeys::OPTION_VECTOR_RANKING_PROFILE, VectorSearchPresets::DEFAULT_PROFILE)
+            );
+        }
+
         return VectorSearchPresets::sanitizeProfile($value);
     }
 
@@ -183,7 +195,41 @@ trait Sanitizers
      */
     public function sanitizeVectorCustomParams(mixed $value): array
     {
-        return VectorSearchPresets::sanitizeCustomParams($value);
+        $settingsRepo = new SettingsRepository();
+        $model        = $settingsRepo->getVectorModel();
+
+        if (
+            !$settingsRepo->network()->isNetworkActivated()
+            && !\TypesenseSearch\ConstantsLoader::isDefinedAsConstant(OptionKeys::OPTION_VECTOR_MODEL)
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by options.php via settings_fields().
+            && isset($_POST[OptionKeys::OPTION_VECTOR_MODEL])
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            && is_string($_POST[OptionKeys::OPTION_VECTOR_MODEL])
+        ) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            $postedModel = trim(sanitize_text_field(stripslashes($_POST[OptionKeys::OPTION_VECTOR_MODEL])));
+            if ($postedModel !== '' && EmbeddingModels::isUsableModel($postedModel)) {
+                $model = EmbeddingModels::sanitizeModel($postedModel, $model);
+            }
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by options.php via settings_fields().
+        $rawProfile = $_POST[OptionKeys::OPTION_VECTOR_RANKING_PROFILE]
+            ?? get_option(OptionKeys::OPTION_VECTOR_RANKING_PROFILE, VectorSearchPresets::DEFAULT_PROFILE);
+        $activeProfile = VectorSearchPresets::sanitizeProfile(
+            is_string($rawProfile) ? stripslashes($rawProfile) : $rawProfile
+        );
+
+        if ($activeProfile !== VectorSearchPresets::PROFILE_CUSTOM) {
+            return VectorSearchPresets::sanitizeCustomParams($value, $model, $activeProfile);
+        }
+
+        $saved  = get_option(OptionKeys::OPTION_VECTOR_CUSTOM_PARAMS, []);
+        $merged = is_array($saved)
+            ? array_merge($saved, is_array($value) ? $value : [])
+            : $value;
+
+        return VectorSearchPresets::sanitizeCustomParams($merged, $model, VectorSearchPresets::PROFILE_BALANCED);
     }
 
     /**
