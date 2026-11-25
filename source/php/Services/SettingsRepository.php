@@ -167,6 +167,52 @@ class SettingsRepository
         return (bool) get_option(Settings::OPTION_STEMMING_ENABLED, 0);
     }
 
+    public function isVectorSearchEnabled(): bool
+    {
+        return (bool) get_option(Settings::OPTION_VECTOR_ENABLED, 0);
+    }
+
+    public function getVectorModel(): string
+    {
+        $network = $this->network();
+        if ($network->isNetworkActivated()) {
+            return $network->vectorModel();
+        }
+
+        return \TypesenseSearch\Typesense\EmbeddingModels::sanitizeModel(
+            get_option(Settings::OPTION_VECTOR_MODEL, \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL)
+        );
+    }
+
+    public function getVectorDefaultMode(): string
+    {
+        return \TypesenseSearch\Typesense\EmbeddingModels::sanitizeSearchMode(
+            get_option(Settings::OPTION_VECTOR_DEFAULT_MODE, \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_SEARCH_MODE)
+        );
+    }
+
+    public function isVectorModeSwitcherEnabled(): bool
+    {
+        return (bool) get_option(Settings::OPTION_VECTOR_MODE_SWITCHER, 0);
+    }
+
+    /**
+     * True only when embedded search is enabled AND verified live schema state
+     * confirms the active collection has an `embedding` field with the configured model.
+     */
+    public function isVectorSearchReady(): bool
+    {
+        if (!$this->canUseTypesense() || !$this->isVectorSearchEnabled()) {
+            return false;
+        }
+
+        return \TypesenseSearch\Typesense\SchemaInspector::isEmbeddingReady(
+            $this->getRemote(),
+            $this->getCollectionName(),
+            $this->getVectorModel()
+        );
+    }
+
     // ── Search statistics ──────────────────────────────────────────────────
 
     public function isSearchLoggingEnabled(): bool

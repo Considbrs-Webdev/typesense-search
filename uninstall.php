@@ -44,6 +44,11 @@ function typesense_search_uninstall_data_for_site(?int $blogId = null): void
         'typesense_search_synonyms_enabled',
         'typesense_search_external_pages_db_version',
         'typesense_search_external_pages_enabled',
+        'typesense_search_vector_enabled',
+        'typesense_search_vector_model',
+        'typesense_search_vector_default_mode',
+        'typesense_search_vector_mode_switcher',
+        'typesense_search_schema_state',
         'typesense_search_reindex_needed',
         'typesense_search_logging_enabled',
         'typesense_search_logging_dashboard_widgets',
@@ -63,7 +68,15 @@ function typesense_search_uninstall_data_for_site(?int $blogId = null): void
 
 if (is_multisite()) {
     foreach (get_networks(['fields' => 'ids', 'number' => 0]) as $networkId) {
-        foreach (['typesense_network_remote', 'typesense_network_admin_key', 'typesense_network_frontend_host', 'typesense_network_enabled_sites'] as $option) {
+        foreach ([
+            'typesense_network_remote',
+            'typesense_network_admin_key',
+            'typesense_network_frontend_host',
+            'typesense_network_prefix',
+            'typesense_network_vector_model',
+            'typesense_network_multisearch',
+            'typesense_network_enabled_sites',
+        ] as $option) {
             delete_network_option((int) $networkId, $option);
         }
     }

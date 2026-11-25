@@ -27,6 +27,8 @@ class CollectionTest extends TestCase
         $settings->shouldReceive('isPinnedResultsEnabled')->andReturn($overrides['pinnedResults'] ?? false);
         $settings->shouldReceive('isSynonymsEnabled')->andReturn($overrides['synonyms'] ?? false);
         $settings->shouldReceive('isStemmingEnabled')->andReturn($overrides['stemming'] ?? false);
+        $settings->shouldReceive('isVectorSearchEnabled')->andReturn($overrides['vector'] ?? false);
+        $settings->shouldReceive('getVectorModel')->andReturn($overrides['vectorModel'] ?? \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL);
 
         return $settings;
     }
@@ -37,6 +39,7 @@ class CollectionTest extends TestCase
         $capabilities->shouldReceive('supportsCurationSets')->andReturn($overrides['curationSets'] ?? true);
         $capabilities->shouldReceive('supportsSynonymSets')->andReturn($overrides['synonymSets'] ?? true);
         $capabilities->shouldReceive('supportsStemming')->andReturn($overrides['stemming'] ?? true);
+        $capabilities->shouldReceive('supportsAutoEmbedding')->andReturn($overrides['autoEmbedding'] ?? true);
 
         return $capabilities;
     }
@@ -148,5 +151,44 @@ class CollectionTest extends TestCase
         );
 
         self::assertSame('en', $this->fieldsByName($schema)['content']['locale']);
+    }
+
+    // ── auto-embedding (vector search) ───────────────────────────────────────
+
+    public function test_schema_omits_embedding_field_when_vector_search_disabled(): void
+    {
+        $schema = Collection::getSchema('my_collection', $this->settings(), $this->capabilities());
+        $fields = $this->fieldsByName($schema);
+
+        self::assertArrayNotHasKey('embedding', $fields);
+    }
+
+    public function test_schema_includes_embedding_field_with_configured_model_when_enabled(): void
+    {
+        $schema = Collection::getSchema(
+            'my_collection',
+            $this->settings(['vector' => true, 'vectorModel' => 'ts/multilingual-e5-small', 'stemming' => true]),
+            $this->capabilities(['autoEmbedding' => true, 'stemming' => true])
+        );
+        $fields = $this->fieldsByName($schema);
+
+        self::assertArrayHasKey('embedding', $fields);
+        self::assertSame('float[]', $fields['embedding']['type']);
+        self::assertSame(['title', 'excerpt', 'content', 'extra_terms'], $fields['embedding']['embed']['from']);
+        self::assertSame('ts/multilingual-e5-small', $fields['embedding']['embed']['model_config']['model_name']);
+        self::assertArrayNotHasKey('stem', $fields['embedding']);
+        self::assertArrayNotHasKey('locale', $fields['embedding']);
+        self::assertSame('.*', $schema['fields'][count($schema['fields']) - 1]['name']);
+    }
+
+    public function test_schema_omits_embedding_field_when_enabled_but_server_unsupported(): void
+    {
+        $schema = Collection::getSchema(
+            'my_collection',
+            $this->settings(['vector' => true]),
+            $this->capabilities(['autoEmbedding' => false])
+        );
+
+        self::assertArrayNotHasKey('embedding', $this->fieldsByName($schema));
     }
 }

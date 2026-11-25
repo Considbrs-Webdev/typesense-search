@@ -114,6 +114,24 @@ class NetworkSettingsPage
             if ($network->constant('TYPESENSE_NETWORK_PREFIX') === '') {
                 update_network_option($networkId, NetworkSettingsRepository::PREFIX, sanitize_key(wp_unslash($_POST['prefix'] ?? '')));
             }
+            if ($network->constant('TYPESENSE_VECTOR_MODEL') === '' && isset($_POST['vector_model_choice'])) {
+                $choice = sanitize_text_field(wp_unslash($_POST['vector_model_choice']));
+                $rawModel = $choice === \TypesenseSearch\Typesense\EmbeddingModels::CUSTOM_CHOICE
+                    ? trim(sanitize_text_field(wp_unslash($_POST['vector_model_custom'] ?? '')))
+                    : trim($choice);
+                if (!\TypesenseSearch\Typesense\EmbeddingModels::isUsableModel($rawModel)) {
+                    $errorMessage = \TypesenseSearch\Typesense\EmbeddingModels::isValidModelName($rawModel)
+                        && \TypesenseSearch\Typesense\EmbeddingModels::requiresExternalApiKey($rawModel)
+                        ? __('External embedding models require the TYPESENSE_EMBEDDING_API_KEY constant or environment variable.', 'typesense-search')
+                        : __('Enter a valid embedding model identifier (for example "ts/paraphrase-multilingual-mpnet-base-v2").', 'typesense-search');
+                    $this->finish($errorMessage, false, 'connection');
+                }
+                update_network_option(
+                    $networkId,
+                    NetworkSettingsRepository::VECTOR_MODEL,
+                    \TypesenseSearch\Typesense\EmbeddingModels::sanitizeModel($rawModel, $network->vectorModel())
+                );
+            }
         } else {
             $ids = array_values(array_unique(array_map('absint', (array) ($_POST['sites'] ?? []))));
             foreach ($ids as $id) {

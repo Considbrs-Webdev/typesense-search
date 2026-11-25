@@ -85,4 +85,35 @@ class SettingsRepositoryTest extends TestCase
 
         self::assertSame(3650, $this->repository->getSearchStatisticsRetentionDays());
     }
+
+    public function test_is_vector_search_ready_requires_both_toggle_and_matching_verified_schema(): void
+    {
+        $options = [
+            Settings::OPTION_VECTOR_ENABLED => 1,
+            Settings::OPTION_VECTOR_MODEL   => 'ts/multilingual-e5-small',
+            Settings::OPTION_REMOTE         => 'https://search.example.com',
+            Settings::OPTION_INDEX_NAME     => 'site_col',
+        ];
+        Functions\when('get_option')->alias(static function (string $k, mixed $d = false) use (&$options): mixed {
+            return $options[$k] ?? $d;
+        });
+
+        // Toggle is ON, but live schema state is not verified yet -> must fail closed (false).
+        self::assertFalse($this->repository->isVectorSearchReady());
+
+        // Verified schema exists, but with a different model -> still false.
+        $options[\TypesenseSearch\Typesense\SchemaInspector::OPTION_SCHEMA_STATE] = [
+            'remote'          => 'https://search.example.com',
+            'collection'      => 'site_col',
+            'has_embedding'   => true,
+            'embedding_model' => 'ts/paraphrase-multilingual-mpnet-base-v2',
+            'has_stemming'    => false,
+            'verified_at'     => 1000,
+        ];
+        self::assertFalse($this->repository->isVectorSearchReady());
+
+        // Verified schema matches active collection + model -> true.
+        $options[\TypesenseSearch\Typesense\SchemaInspector::OPTION_SCHEMA_STATE]['embedding_model'] = 'ts/multilingual-e5-small';
+        self::assertTrue($this->repository->isVectorSearchReady());
+    }
 }

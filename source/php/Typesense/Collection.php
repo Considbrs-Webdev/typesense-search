@@ -75,6 +75,22 @@ class Collection
         $settings     ??= new SettingsRepository();
         $capabilities ??= new ServerCapabilities(new AdminApi($settings));
 
+        if ($settings->isVectorSearchEnabled() && $capabilities->supportsAutoEmbedding()) {
+            // Insert before the trailing `.*` catch-all field.
+            $catchAll = array_pop($schema['fields']);
+            $schema['fields'][] = [
+                'name'  => 'embedding',
+                'type'  => 'float[]',
+                'embed' => [
+                    'from'         => EmbeddingModels::EMBED_SOURCE_FIELDS,
+                    'model_config' => EmbeddingModels::buildModelConfig($settings->getVectorModel()),
+                ],
+            ];
+            if ($catchAll !== null) {
+                $schema['fields'][] = $catchAll;
+            }
+        }
+
         if ($settings->isPinnedResultsEnabled() && $capabilities->supportsCurationSets()) {
             $schema['curation_sets'] = ['wordpress-pinned-results-' . $collectionName];
         }
@@ -160,7 +176,11 @@ class Collection
             }
         }
 
-        $client->collections->create($schema);
+        $created = $client->collections->create($schema);
+        SchemaInspector::recordFromSchema(
+            $settings->getRemote(),
+            is_array($created) ? $created : $schema
+        );
     }
 
     /**
@@ -220,5 +240,6 @@ class Collection
         } catch (ObjectNotFound $e) {
             // Already gone — treat as success.
         }
+        SchemaInspector::clearState();
     }
 }

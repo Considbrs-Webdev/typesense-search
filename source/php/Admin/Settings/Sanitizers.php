@@ -4,6 +4,7 @@ namespace TypesenseSearch\Admin\Settings;
 
 use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\AdminApi;
+use TypesenseSearch\Typesense\EmbeddingModels;
 use TypesenseSearch\Typesense\ServerCapabilities;
 
 /**
@@ -130,6 +131,45 @@ trait Sanitizers
         }
 
         return absint($value) ? 1 : 0;
+    }
+
+    public function sanitizeVectorEnabled(mixed $value): int
+    {
+        if (!(new ServerCapabilities(new AdminApi(new SettingsRepository())))->supportsAutoEmbedding()) {
+            return 0;
+        }
+
+        return absint($value) ? 1 : 0;
+    }
+
+    public function sanitizeVectorModel(mixed $value): string
+    {
+        $raw = is_string($value) ? trim(sanitize_text_field($value)) : '';
+        $previous = (string) get_option(OptionKeys::OPTION_VECTOR_MODEL, EmbeddingModels::DEFAULT_MODEL);
+
+        if ($raw !== '' && !EmbeddingModels::isUsableModel($raw)) {
+            if (function_exists('add_settings_error')) {
+                $reason = EmbeddingModels::isValidModelName($raw) && EmbeddingModels::requiresExternalApiKey($raw)
+                    ? __(
+                        'External embedding models require the TYPESENSE_EMBEDDING_API_KEY constant or environment variable. Kept the previous embedding model.',
+                        'typesense-search'
+                    )
+                    : __(
+                        'Invalid embedding model name. Enter a preset or a valid model identifier such as "ts/model-name". Kept the previous embedding model.',
+                        'typesense-search'
+                    );
+                add_settings_error(OptionKeys::OPTION_VECTOR_MODEL, 'invalid_vector_model', $reason, 'error');
+            }
+
+            return EmbeddingModels::sanitizeModel($previous);
+        }
+
+        return EmbeddingModels::sanitizeModel($raw, $previous);
+    }
+
+    public function sanitizeVectorDefaultMode(mixed $value): string
+    {
+        return EmbeddingModels::sanitizeSearchMode($value);
     }
 
     /**

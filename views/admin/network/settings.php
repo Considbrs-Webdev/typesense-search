@@ -136,6 +136,61 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
     </div>
 </div>
 
+<?php
+$vectorModelLocked  = $network->constant('TYPESENSE_VECTOR_MODEL') !== '';
+$networkVectorModel = $network->vectorModel();
+$vectorPresets      = \TypesenseSearch\Typesense\EmbeddingModels::presets();
+$isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
+?>
+<div class="ts-settings__card">
+    <div class="ts-settings__card-header">
+        <h2><?php esc_html_e('Embedded search model', 'typesense-search'); ?></h2>
+        <p><?php esc_html_e('Shared embedding model used whenever individual sites enable embedded (vector/hybrid) search. Keeping one model across the network guarantees cross-site multi-search compatibility and avoids loading duplicate models into Typesense memory.', 'typesense-search'); ?></p>
+    </div>
+    <div class="ts-settings__fields">
+        <div class="ts-field">
+            <label for="network-vector-model-choice" class="ts-field__label"><?php esc_html_e('Embedding model', 'typesense-search'); ?></label>
+            <div class="ts-field__body">
+                <?php if ($vectorModelLocked) : ?>
+                    <input class="regular-text ts-field__input ts-field__input--env-locked" type="text" id="network-vector-model-choice" value="<?php echo esc_attr($networkVectorModel); ?>" disabled>
+                    <p class="ts-field__env-notice"><span aria-hidden="true">🔒</span> <?php esc_html_e('Set via TYPESENSE_VECTOR_MODEL constant — read only.', 'typesense-search'); ?></p>
+                <?php else : ?>
+                    <select id="network-vector-model-choice" name="vector_model_choice" class="ts-field__input">
+                        <?php foreach ($vectorPresets as $slug => $label) : ?>
+                            <option value="<?php echo esc_attr($slug); ?>" <?php selected($isPresetVector ? $networkVectorModel : '', $slug); ?>>
+                                <?php echo esc_html($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                        <option value="<?php echo esc_attr(\TypesenseSearch\Typesense\EmbeddingModels::CUSTOM_CHOICE); ?>" <?php selected(false, $isPresetVector); ?>>
+                            <?php esc_html_e('Custom model…', 'typesense-search'); ?>
+                        </option>
+                    </select>
+                    <input
+                        class="regular-text ts-field__input"
+                        type="text"
+                        id="network-vector-model-custom"
+                        name="vector_model_custom"
+                        placeholder="ts/paraphrase-multilingual-mpnet-base-v2"
+                        value="<?php echo esc_attr($isPresetVector ? '' : $networkVectorModel); ?>"
+                        <?php echo $isPresetVector ? 'hidden' : ''; ?>
+                    >
+                    <p class="ts-field__description"><?php esc_html_e('Sites opt in to embedded search on their own Advanced settings page. Changing this model requires running "wp typesense rebuild" on each opted-in site.', 'typesense-search'); ?></p>
+                    <script>
+                    (function () {
+                        var select = document.getElementById('network-vector-model-choice');
+                        var custom = document.getElementById('network-vector-model-custom');
+                        if (!select || !custom) return;
+                        select.addEventListener('change', function () {
+                            custom.hidden = select.value !== '<?php echo esc_js(\TypesenseSearch\Typesense\EmbeddingModels::CUSTOM_CHOICE); ?>';
+                        });
+                    })();
+                    </script>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
 </form>
 <div class="typesense-network-actions">
 <button type="submit" form="typesense-network-connection" class="button button-primary"><?php esc_html_e('Save changes', 'typesense-search'); ?></button>

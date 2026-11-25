@@ -219,5 +219,152 @@ use TypesenseSearch\Admin\Settings;
             </div>
         </div>
         <?php endif; ?>
+
+        <?php if (!empty($supportsAutoEmbedding)) :
+            $vectorEnabled       = (int) get_option(Settings::OPTION_VECTOR_ENABLED, 0);
+            $vectorDefaultMode   = \TypesenseSearch\Typesense\EmbeddingModels::sanitizeSearchMode(
+                get_option(Settings::OPTION_VECTOR_DEFAULT_MODE, \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_SEARCH_MODE)
+            );
+            $vectorModeSwitcher  = (int) get_option(Settings::OPTION_VECTOR_MODE_SWITCHER, 0);
+            $presets             = $vectorModelPresets ?? \TypesenseSearch\Typesense\EmbeddingModels::presets();
+            $currentModel        = $effectiveVectorModel ?? \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL;
+            $isNetworkMode       = !empty($networkMode);
+            $modelConstantLocked = \TypesenseSearch\ConstantsLoader::isDefinedAsConstant(Settings::OPTION_VECTOR_MODEL);
+            $isPresetModel       = array_key_exists($currentModel, $presets);
+        ?>
+        <div class="ts-field">
+            <div class="ts-field__label"><?php esc_html_e('Enable embedded search', 'typesense-search'); ?></div>
+            <div class="ts-field__body">
+                <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_VECTOR_ENABLED); ?>" value="0" />
+                <label for="ts-vector-enabled" class="ts-toggle">
+                    <input
+                        type="checkbox"
+                        id="ts-vector-enabled"
+                        name="<?php echo esc_attr(Settings::OPTION_VECTOR_ENABLED); ?>"
+                        value="1"
+                        <?php checked(1, $vectorEnabled); ?>
+                        class="ts-toggle__input"
+                    />
+                    <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
+                    <span class="ts-toggle__status">
+                        <span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span>
+                        <span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span>
+                    </span>
+                </label>
+                <p class="ts-field__description">
+                    <?php esc_html_e('Adds AI vector embeddings to your Typesense collection for semantic and hybrid search. Enabling this or changing the model requires running "wp typesense rebuild"; live search safely stays in keyword mode until the collection is rebuilt.', 'typesense-search'); ?>
+                </p>
+            </div>
+        </div>
+
+        <div id="ts-vector-settings-fields"<?php echo $vectorEnabled ? '' : ' hidden'; ?>>
+            <div class="ts-field">
+                <label for="ts-vector-model-mode" class="ts-field__label">
+                    <?php esc_html_e('Embedding model', 'typesense-search'); ?>
+                </label>
+                <div class="ts-field__body">
+                    <?php if ($isNetworkMode) : ?>
+                        <code><?php echo esc_html($currentModel); ?></code>
+                        <p class="ts-field__description">
+                            <?php esc_html_e('Managed by the network administrator so all sites on the shared Typesense server use a compatible embedding model.', 'typesense-search'); ?>
+                            <?php if (current_user_can('manage_network_options')) : ?>
+                                <a href="<?php echo esc_url(network_admin_url('settings.php?page=typesense-network&tab=connection')); ?>">
+                                    <?php esc_html_e('Network settings', 'typesense-search'); ?>
+                                </a>
+                            <?php endif; ?>
+                        </p>
+                    <?php elseif ($modelConstantLocked) : ?>
+                        <input
+                            type="text"
+                            id="ts-vector-model-mode"
+                            class="regular-text ts-field__input ts-field__input--env-locked"
+                            value="<?php echo esc_attr($currentModel); ?>"
+                            disabled
+                        />
+                        <p class="ts-field__env-notice"><span aria-hidden="true">🔒</span> <?php esc_html_e('Set via TYPESENSE_VECTOR_MODEL constant — read only.', 'typesense-search'); ?></p>
+                    <?php else : ?>
+                        <select id="ts-vector-model-mode" class="ts-field__input">
+                            <?php foreach ($presets as $slug => $label) : ?>
+                                <option value="<?php echo esc_attr($slug); ?>" <?php selected($isPresetModel ? $currentModel : '', $slug); ?>>
+                                    <?php echo esc_html($label); ?>
+                                </option>
+                            <?php endforeach; ?>
+                            <option value="<?php echo esc_attr(\TypesenseSearch\Typesense\EmbeddingModels::CUSTOM_CHOICE); ?>" <?php selected(false, $isPresetModel); ?>>
+                                <?php esc_html_e('Custom model…', 'typesense-search'); ?>
+                            </option>
+                        </select>
+                        <input
+                            type="hidden"
+                            id="ts-vector-model"
+                            name="<?php echo esc_attr(Settings::OPTION_VECTOR_MODEL); ?>"
+                            value="<?php echo esc_attr($currentModel); ?>"
+                        />
+                        <input
+                            type="text"
+                            id="ts-vector-model-custom"
+                            class="regular-text ts-field__input"
+                            placeholder="ts/paraphrase-multilingual-mpnet-base-v2"
+                            value="<?php echo esc_attr($isPresetModel ? '' : $currentModel); ?>"
+                            <?php echo $isPresetModel ? 'hidden' : ''; ?>
+                        />
+                        <p class="ts-field__description">
+                            <?php esc_html_e('Choose a built-in Typesense local model (downloaded automatically on the Typesense server), or select "Custom model…" to specify another valid "ts/…" model.', 'typesense-search'); ?>
+                        </p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="ts-field">
+                <label for="ts-vector-default-mode" class="ts-field__label">
+                    <?php esc_html_e('Default search mode', 'typesense-search'); ?>
+                </label>
+                <div class="ts-field__body">
+                    <select
+                        id="ts-vector-default-mode"
+                        name="<?php echo esc_attr(Settings::OPTION_VECTOR_DEFAULT_MODE); ?>"
+                        class="ts-field__input"
+                    >
+                        <option value="hybrid" <?php selected('hybrid', $vectorDefaultMode); ?>>
+                            <?php esc_html_e('Hybrid (Keyword + AI Vector)', 'typesense-search'); ?>
+                        </option>
+                        <option value="keyword" <?php selected('keyword', $vectorDefaultMode); ?>>
+                            <?php esc_html_e('Keyword (Lexical)', 'typesense-search'); ?>
+                        </option>
+                        <option value="semantic" <?php selected('semantic', $vectorDefaultMode); ?>>
+                            <?php esc_html_e('Semantic (AI Vector only)', 'typesense-search'); ?>
+                        </option>
+                    </select>
+                    <p class="ts-field__description">
+                        <?php esc_html_e('Search mode used by default when embedded search is active on the collection.', 'typesense-search'); ?>
+                    </p>
+                </div>
+            </div>
+
+            <div class="ts-field">
+                <div class="ts-field__label"><?php esc_html_e('Show mode switcher on search page', 'typesense-search'); ?></div>
+                <div class="ts-field__body">
+                    <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_VECTOR_MODE_SWITCHER); ?>" value="0" />
+                    <label for="ts-vector-mode-switcher" class="ts-toggle">
+                        <input
+                            type="checkbox"
+                            id="ts-vector-mode-switcher"
+                            name="<?php echo esc_attr(Settings::OPTION_VECTOR_MODE_SWITCHER); ?>"
+                            value="1"
+                            <?php checked(1, $vectorModeSwitcher); ?>
+                            class="ts-toggle__input"
+                        />
+                        <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
+                        <span class="ts-toggle__status">
+                            <span class="ts-toggle__status-on"><?php esc_html_e('On', 'typesense-search'); ?></span>
+                            <span class="ts-toggle__status-off"><?php esc_html_e('Off', 'typesense-search'); ?></span>
+                        </span>
+                    </label>
+                    <p class="ts-field__description">
+                        <?php esc_html_e('Allow visitors to switch between Hybrid, Keyword, and Semantic modes in the search filter panel.', 'typesense-search'); ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>

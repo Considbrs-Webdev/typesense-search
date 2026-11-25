@@ -29,5 +29,6 @@ class AdminFeature
         new Admin\SynonymsPage($this->settings, $capabilities);
         new Admin\ExternalPagesPage($this->settings);
         (new Admin\ReindexNotice())->register();
+        (new Admin\SchemaRebuildNotice($this->settings))->register();
     }
 }

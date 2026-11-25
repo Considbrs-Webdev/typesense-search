@@ -8,6 +8,7 @@ use TypesenseSearch\Helper\CacheBust;
 use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\AdminApi;
 use TypesenseSearch\Typesense\Collection;
+use TypesenseSearch\Typesense\EmbeddingModels;
 use TypesenseSearch\Typesense\ProvisioningCredentials;
 use TypesenseSearch\Typesense\ServerCapabilities;
 
@@ -161,12 +162,17 @@ class SettingsPage
         $quickSearchEnabled       = (int) get_option(OptionKeys::OPTION_QUICK_SEARCH_ENABLED, 0);
         $quickSearchSelectors     = (array) get_option(OptionKeys::OPTION_QUICK_SEARCH_SELECTORS, []);
         $quickSearchHitsPerPage   = (int) get_option(OptionKeys::OPTION_QUICK_SEARCH_HITS_PER_PAGE, 5);
-        $capabilities             = new ServerCapabilities(new AdminApi(new SettingsRepository()));
+        $settingsRepo             = new SettingsRepository();
+        $capabilities             = new ServerCapabilities(new AdminApi($settingsRepo));
         $supportsPinnedResults    = $activeTab === 'advanced-settings' ? $capabilities->supportsCurationSets() : false;
         $supportsSynonyms         = $activeTab === 'advanced-settings' ? $capabilities->supportsSynonymSets() : false;
         $supportsStemming         = $activeTab === 'advanced-settings' ? $capabilities->supportsStemming() : false;
+        $supportsAutoEmbedding    = $activeTab === 'advanced-settings' ? $capabilities->supportsAutoEmbedding() : false;
         $stemmingLocale           = Collection::getSiteLocale();
-        $provisioningAvailable    = ProvisioningCredentials::isAvailableFor((new SettingsRepository())->getRemote());
+        $vectorModelPresets       = EmbeddingModels::presets();
+        $effectiveVectorModel     = $settingsRepo->getVectorModel();
+        $networkMode              = $settingsRepo->network()->isNetworkActivated();
+        $provisioningAvailable    = ProvisioningCredentials::isAvailableFor($settingsRepo->getRemote());
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';
     }

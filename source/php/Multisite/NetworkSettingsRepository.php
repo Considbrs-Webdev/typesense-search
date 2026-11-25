@@ -9,6 +9,8 @@ class NetworkSettingsRepository
     public const ADMIN_KEY = 'typesense_network_admin_key';
     public const FRONTEND_HOST = 'typesense_network_frontend_host';
     public const PREFIX = 'typesense_network_prefix';
+    public const VECTOR_MODEL = 'typesense_network_vector_model';
+    public const MULTISEARCH = 'typesense_network_multisearch';
     public const ENABLED = 'typesense_network_enabled_sites';
     public const STATE = 'typesense_network_state';
     public const LOCK = 'typesense_network_provision_lock';
@@ -61,6 +63,22 @@ class NetworkSettingsRepository
     {
         $prefix = $this->constant('TYPESENSE_NETWORK_PREFIX') ?: (string) get_network_option($this->networkId(), self::PREFIX, '');
         return sanitize_key($prefix);
+    }
+
+    /** Shared embedding model across the network so cross-site vector union queries use one model. */
+    public function vectorModel(): string
+    {
+        $constant = $this->constant('TYPESENSE_VECTOR_MODEL');
+        if ($constant !== '') {
+            return \TypesenseSearch\Typesense\EmbeddingModels::sanitizeModel($constant);
+        }
+        $saved = (string) get_network_option(
+            $this->networkId(),
+            self::VECTOR_MODEL,
+            \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL
+        );
+
+        return \TypesenseSearch\Typesense\EmbeddingModels::sanitizeModel($saved);
     }
 
     public function identity(): array

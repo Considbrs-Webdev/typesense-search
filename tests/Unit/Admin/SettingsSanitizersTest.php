@@ -146,6 +146,33 @@ class SettingsSanitizersTest extends TestCase
         self::assertSame(0, $this->settings->sanitizeStemmingEnabled(0));
     }
 
+    public function test_sanitize_vector_enabled_returns_zero_when_server_has_no_version(): void
+    {
+        Functions\when('get_option')->justReturn('');
+
+        self::assertSame(0, $this->settings->sanitizeVectorEnabled(1));
+        self::assertSame(0, $this->settings->sanitizeVectorEnabled(0));
+    }
+
+    public function test_sanitize_vector_model_preserves_previous_model_and_reports_error_on_invalid_input(): void
+    {
+        Functions\when('get_option')->justReturn('ts/multilingual-e5-small');
+        $recordedError = null;
+        Functions\when('add_settings_error')->alias(static function (string $setting, string $code, string $message) use (&$recordedError): void {
+            $recordedError = [$setting, $code, $message];
+        });
+
+        self::assertSame('ts/multilingual-e5-small', $this->settings->sanitizeVectorModel('invalid model!'));
+        self::assertNotNull($recordedError);
+        self::assertSame(Settings::OPTION_VECTOR_MODEL, $recordedError[0]);
+    }
+
+    public function test_sanitize_vector_default_mode_accepts_known_modes(): void
+    {
+        self::assertSame('semantic', $this->settings->sanitizeVectorDefaultMode('semantic'));
+        self::assertSame('hybrid', $this->settings->sanitizeVectorDefaultMode('unknown'));
+    }
+
     public function test_sanitize_admin_key_keeps_saved_value_when_field_is_left_blank(): void
     {
         Functions\when('get_option')->justReturn('previously-saved-key');

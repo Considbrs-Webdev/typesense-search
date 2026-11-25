@@ -123,6 +123,32 @@ class SettingsRegistry
             'default'           => 0,
         ]);
 
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_ENABLED, [
+            'type'              => 'integer',
+            'sanitize_callback' => [$this, 'sanitizeVectorEnabled'],
+            'default'           => 0,
+        ]);
+
+        if (!$networkMode) {
+            register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_MODEL, [
+                'type'              => 'string',
+                'sanitize_callback' => [$this, 'sanitizeVectorModel'],
+                'default'           => \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL,
+            ]);
+        }
+
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_DEFAULT_MODE, [
+            'type'              => 'string',
+            'sanitize_callback' => [$this, 'sanitizeVectorDefaultMode'],
+            'default'           => \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_SEARCH_MODE,
+        ]);
+
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_MODE_SWITCHER, [
+            'type'              => 'integer',
+            'sanitize_callback' => static fn (mixed $v): int => absint($v) ? 1 : 0,
+            'default'           => 0,
+        ]);
+
         foreach ([
             OptionKeys::OPTION_SEARCH_LOGGING_ENABLED,
             OptionKeys::OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS,
