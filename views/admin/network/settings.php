@@ -381,7 +381,7 @@ $isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
 <td><span class="typesense-network-state"><span aria-hidden="true" class="typesense-network-status typesense-network-status--<?php echo esc_attr($row['tone']); ?>"></span><strong><?php echo esc_html($row['label']); ?></strong></span>
 <?php if ($row['detail'] !== '') : ?><p class="description"><?php echo esc_html($row['detail']); ?></p><?php endif; ?>
 <?php if ($row['check']) : ?>
-<p><?php echo esc_html(sprintf(/* translators: %s: date and time of the last check */ __('Last check: %s', 'typesense-search'), wp_date(get_option('date_format') . ' ' . get_option('time_format'), $row['check']['time']))); ?><br><?php echo esc_html(!empty($row['check']['success']) ? __('Server connection, admin key and site search key are working.', 'typesense-search') : __($row['check']['message'], 'typesense-search')); ?></p>
+<p><?php echo esc_html(sprintf(/* translators: %s: date and time of the last check */ __('Last check: %s', 'typesense-search'), wp_date(get_option('date_format') . ' ' . get_option('time_format'), $row['check']['time']))); ?><br><?php echo esc_html(!empty($row['check']['success']) ? (!empty($row['check']['message']) ? (string) $row['check']['message'] : __('Server connection, admin key and site search key are working.', 'typesense-search')) : __($row['check']['message'], 'typesense-search')); ?></p>
 <?php elseif ($row['ready']) : ?><p class="description"><?php esc_html_e('Server and index have not been checked for this configuration.', 'typesense-search'); ?></p><?php endif; ?>
 
 <?php if ($row['retry'] || $row['ready']) : ?>
@@ -394,7 +394,7 @@ $isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
 </form>
 <?php endif; ?>
 </td>
-<td><?php if ($row['collection'] !== '') : ?><code><?php echo esc_html($row['collection']); ?></code><p class="description"><?php echo esc_html(!empty($row['check']['success']) ? __('Index access verified at the last check.', 'typesense-search') : __('Saved index name. Existence has not been verified by a current status check.', 'typesense-search')); ?></p><?php else : ?>&ndash;<?php endif; ?>
+<td><?php if ($row['collection'] !== '') : ?><code><?php echo esc_html($row['collection']); ?></code><p class="description"><?php echo esc_html((!empty($row['check']['success']) || !empty($row['check']['index_verified'])) ? __('Index access verified at the last check.', 'typesense-search') : __('Saved index name. Existence has not been verified by a current status check.', 'typesense-search')); ?></p><?php else : ?>&ndash;<?php endif; ?>
 <?php if ($isSelected) : ?>
 <details><summary><?php esc_html_e('Indexing with WP-CLI', 'typesense-search'); ?></summary>
 <p><?php esc_html_e('Use the same command for the first indexing run and later reindexing. Indexing results do not control activation; an empty or partially filled index can return incomplete results.', 'typesense-search'); ?></p>

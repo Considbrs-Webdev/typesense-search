@@ -36,6 +36,7 @@ interface RawUnionResponse {
   found?: number;
   hits?: Array<
     SearchHit & {
+      search_index?: number;
       collection?: string;
       collection_index?: number;
     }
@@ -62,13 +63,21 @@ function normalizeBaseUrl(rawUrl: string): string {
 }
 
 function resolveHitCollection(
-  hit: SearchHit & { collection?: string; collection_index?: number },
+  hit: SearchHit & {
+    search_index?: number;
+    collection?: string;
+    collection_index?: number;
+  },
   collections: MultiSearchCollectionConfig[],
   sortedByHomeLength: Array<{
     base: string;
     config: MultiSearchCollectionConfig;
   }>,
 ): MultiSearchCollectionConfig | undefined {
+  if (typeof hit.search_index === "number" && collections[hit.search_index]) {
+    return collections[hit.search_index];
+  }
+
   if (typeof hit.collection === "string" && hit.collection !== "") {
     const byName = collections.find((c) => c.collection === hit.collection);
     if (byName) return byName;
@@ -102,7 +111,13 @@ function resolveHitCollection(
  * so hit templates and quick search can attribute results from sibling sites.
  */
 export function annotateMultiSearchHits(
-  hits: Array<SearchHit & { collection?: string; collection_index?: number }>,
+  hits: Array<
+    SearchHit & {
+      search_index?: number;
+      collection?: string;
+      collection_index?: number;
+    }
+  >,
   collections: MultiSearchCollectionConfig[],
 ): SearchHit[] {
   if (collections.length === 0 || hits.length === 0) return hits;
@@ -386,7 +401,32 @@ export async function executeDisjunctiveFacets(
 
   if (isMultiSearchActive(config)) {
     const collections = config.multiSearch?.collections ?? [];
-    const legFields: string[] = [];
+    const legMeta: Array<{
+      field: string;
+      col: MultiSearchCollectionConfig;
+      filterByOthers: string;
+      isPrimaryCollection: boolean;
+    }> = [];
+
+    const buildLegSearch = (
+      col: MultiSearchCollectionConfig,
+      field: string,
+      filterByOthers: string,
+      modeParamsToUse: ModeSearchParams,
+    ): Record<string, unknown> => ({
+      collection: col.collection,
+      "x-typesense-api-key": col.searchKey,
+      q,
+      ...modeParamsToUse,
+      per_page: 0,
+      facet_by: field,
+      max_facet_values: 200,
+      ...(filterByOthers ? { filter_by: filterByOthers } : {}),
+      ...(col.enableCurations
+        ? {}
+        : { enable_curations: false, enable_overrides: false }),
+    });
+
     const searches: Array<Record<string, unknown>> = [];
 
     for (const field of facetFields) {
@@ -395,22 +435,17 @@ export async function executeDisjunctiveFacets(
       );
       const filterByOthers = buildFilterBy(otherFilters);
 
-      for (const col of collections) {
-        legFields.push(field);
-        searches.push({
-          collection: col.collection,
-          "x-typesense-api-key": col.searchKey,
-          q,
-          ...primaryModeParams,
-          per_page: 0,
-          facet_by: field,
-          max_facet_values: 200,
-          ...(filterByOthers ? { filter_by: filterByOthers } : {}),
-          ...(col.enableCurations
-            ? {}
-            : { enable_curations: false, enable_overrides: false }),
+      collections.forEach((col, colIndex) => {
+        legMeta.push({
+          field,
+          col,
+          filterByOthers,
+          isPrimaryCollection: colIndex === 0,
         });
-      }
+        searches.push(
+          buildLegSearch(col, field, filterByOthers, primaryModeParams),
+        );
+      });
     }
 
     try {
@@ -419,32 +454,88 @@ export async function executeDisjunctiveFacets(
         { searches },
         {},
       );
+      const legResults = [...(federated.results ?? [])];
 
-      const aggregated = new Map<string, Map<string, number>>();
-      facetFields.forEach((f) => aggregated.set(f, new Map()));
+      // Federated `/multi_search` returns HTTP 200 with per-leg `code >= 400`
+      // when a collection rejects a vector query. Retry failed legs lexically.
+      if (lexicalFallbackParams) {
+        const failedIndices: number[] = [];
+        legMeta.forEach((_, idx) => {
+          const leg = legResults[idx];
+          if (!leg || (typeof leg.code === "number" && leg.code >= 400)) {
+            failedIndices.push(idx);
+          }
+        });
 
-      (federated.results ?? []).forEach((legResult, idx) => {
-        const field = legFields[idx];
-        if (!field || !legResult?.facet_counts) return;
-        const bucket = aggregated.get(field);
-        if (!bucket) return;
-
-        for (const item of extractSingleFacetCounts(
-          legResult.facet_counts,
-          field,
-        )) {
-          bucket.set(item.value, (bucket.get(item.value) ?? 0) + item.count);
+        if (failedIndices.length > 0) {
+          const retrySearches = failedIndices.map((idx) => {
+            const meta = legMeta[idx];
+            return buildLegSearch(
+              meta.col,
+              meta.field,
+              meta.filterByOthers,
+              lexicalFallbackParams,
+            );
+          });
+          const retryResponse =
+            await client.apiCall.post<RawFederatedFacetResponse>(
+              "/multi_search",
+              { searches: retrySearches },
+              {},
+            );
+          (retryResponse.results ?? []).forEach((retryLeg, retryIdx) => {
+            const originalIdx = failedIndices[retryIdx];
+            if (originalIdx !== undefined && retryLeg) {
+              legResults[originalIdx] = retryLeg;
+            }
+          });
         }
-      });
+      }
 
-      const facetData: FacetData = {};
-      facetFields.forEach((field) => {
-        const bucket = aggregated.get(field) ?? new Map<string, number>();
-        facetData[field] = Array.from(bucket.entries()).map(
-          ([value, count]) => ({ value, count }),
+      const anyPrimaryLegSucceeded = legMeta.some((meta, idx) => {
+        if (!meta.isPrimaryCollection) return false;
+        const leg = legResults[idx];
+        return Boolean(
+          leg &&
+            (typeof leg.code !== "number" || leg.code < 400) &&
+            leg.facet_counts,
         );
       });
-      return facetData;
+
+      if (anyPrimaryLegSucceeded) {
+        const aggregated = new Map<string, Map<string, number>>();
+        facetFields.forEach((f) => aggregated.set(f, new Map()));
+
+        legResults.forEach((legResult, idx) => {
+          const meta = legMeta[idx];
+          if (!meta || !legResult?.facet_counts) return;
+          if (typeof legResult.code === "number" && legResult.code >= 400) {
+            return;
+          }
+          const bucket = aggregated.get(meta.field);
+          if (!bucket) return;
+
+          for (const item of extractSingleFacetCounts(
+            legResult.facet_counts,
+            meta.field,
+          )) {
+            bucket.set(item.value, (bucket.get(item.value) ?? 0) + item.count);
+          }
+        });
+
+        const facetData: FacetData = {};
+        facetFields.forEach((field) => {
+          const bucket = aggregated.get(field) ?? new Map<string, number>();
+          facetData[field] = Array.from(bucket.entries()).map(
+            ([value, count]) => ({ value, count }),
+          );
+        });
+        return facetData;
+      }
+
+      console.warn(
+        "[TypesenseSearch] Federated facet legs failed for primary collection; falling back to single-collection facets.",
+      );
     } catch (err) {
       console.warn(
         "[TypesenseSearch] Federated facet query failed; falling back to primary collection facets.",

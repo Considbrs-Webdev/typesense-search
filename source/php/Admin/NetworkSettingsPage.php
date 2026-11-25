@@ -178,6 +178,7 @@ class NetworkSettingsPage
         }
         $success = true;
         $missing = false; // Set when a status check proves the index is gone from the server.
+        $indexVerified = false;
         $network = new NetworkSettingsRepository();
         $connection = $network->connection();
         $mapping = $network->mapping();
@@ -210,29 +211,30 @@ class NetworkSettingsPage
                 // The health endpoint requires no key at all; only an authenticated call actually proves the admin key works.
                 $client->collections->retrieve();
                 (new \TypesenseSearch\Multisite\ProvisioningGateway())->verify($connection, $mapping);
+                $indexVerified  = true;
                 $verifiedSchema = \TypesenseSearch\Typesense\SchemaInspector::refreshLiveState(
                     $client,
                     $connection['remote'],
                     (string) ($mapping['collection'] ?? '')
                 );
-                $message = __('Server connection, admin key and site search key are working.', 'typesense-search');
+                $message      = __('Server connection, admin key and site search key are working.', 'typesense-search');
                 $siteSettings = new \TypesenseSearch\Services\SettingsRepository();
-                if ($siteSettings->isVectorSearchEnabled()) {
-                    $compat = \TypesenseSearch\Typesense\SchemaInspector::evaluateCompatibility(
-                        true,
-                        $network->vectorModel(),
-                        $siteSettings->isStemmingEnabled(),
-                        $verifiedSchema
+                $compat       = \TypesenseSearch\Typesense\SchemaInspector::evaluateCompatibility(
+                    $siteSettings->isVectorSearchEnabled(),
+                    $network->vectorModel(),
+                    $siteSettings->isStemmingEnabled(),
+                    $verifiedSchema
+                );
+                if (!$compat['ok']) {
+                    $success = false;
+                    $message = __('Index access verified, but collection schema needs a rebuild:', 'typesense-search')
+                        . ' ' . implode(' ', $compat['reasons']);
+                } elseif ($siteSettings->isVectorSearchEnabled()) {
+                    $message .= ' ' . sprintf(
+                        /* translators: %s: embedding model name */
+                        __('Embedded search verified (%s).', 'typesense-search'),
+                        $network->vectorModel()
                     );
-                    if ($compat['ok']) {
-                        $message .= ' ' . sprintf(
-                            /* translators: %s: embedding model name */
-                            __('Embedded search verified (%s).', 'typesense-search'),
-                            $network->vectorModel()
-                        );
-                    } else {
-                        $message .= ' ' . implode(' ', $compat['reasons']);
-                    }
                 }
             } else {
                 throw new \TypesenseSearch\Multisite\SetupException(__('Unknown operation.', 'typesense-search'));
@@ -245,8 +247,12 @@ class NetworkSettingsPage
         }
         if ($operation === 'status') {
             update_option(self::CHECK, [
-                'fingerprint' => self::checkFingerprint($connection, $mapping),
-                'time' => time(), 'success' => $success, 'message' => $message, 'missing' => $missing,
+                'fingerprint'    => self::checkFingerprint($connection, $mapping),
+                'time'           => time(),
+                'success'        => $success,
+                'message'        => $message,
+                'missing'        => $missing,
+                'index_verified' => $indexVerified,
             ], false);
         }
         if ($runId !== '') {
