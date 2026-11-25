@@ -3,7 +3,7 @@
 namespace TypesenseSearch\Typesense;
 
 /**
- * Validated registry and helpers for Typesense auto-embedding models and modes.
+ * Validated registry and helpers for Typesense auto-embedding models.
  */
 class EmbeddingModels
 {
@@ -11,18 +11,6 @@ class EmbeddingModels
     public const CUSTOM_CHOICE = '__custom__';
 
     public const EMBED_SOURCE_FIELDS = ['title', 'excerpt', 'content', 'extra_terms'];
-
-    public const MODE_HYBRID   = 'hybrid';
-    public const MODE_KEYWORD  = 'keyword';
-    public const MODE_SEMANTIC = 'semantic';
-
-    public const SEARCH_MODES = [
-        self::MODE_HYBRID,
-        self::MODE_KEYWORD,
-        self::MODE_SEMANTIC,
-    ];
-
-    public const DEFAULT_SEARCH_MODE = self::MODE_HYBRID;
 
     private const MODEL_PATTERN = '~^(ts|openai|palm|gcp|azure)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$~';
     private const MAX_LENGTH    = 191;
@@ -116,13 +104,6 @@ class EmbeddingModels
         }
 
         return self::DEFAULT_MODEL;
-    }
-
-    public static function sanitizeSearchMode(mixed $value): string
-    {
-        $mode = is_string($value) ? trim($value) : '';
-
-        return in_array($mode, self::SEARCH_MODES, true) ? $mode : self::DEFAULT_SEARCH_MODE;
     }
 
     /**

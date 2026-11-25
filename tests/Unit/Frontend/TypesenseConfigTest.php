@@ -77,18 +77,18 @@ class TypesenseConfigTest extends TestCase
         $network->shouldReceive('isNetworkActivated')->andReturn(false);
 
         $settings = $this->baseSettingsMock($network);
-        $settings->shouldReceive('getVectorDefaultMode')->andReturn('hybrid');
+        $settings->shouldReceive('getVectorStrategy')->andReturn('parallel');
+        $settings->shouldReceive('getVectorResolvedParams')->andReturn(
+            \TypesenseSearch\Typesense\VectorSearchPresets::resolveParams('balanced')
+        );
         $settings->shouldReceive('isVectorSearchReady')->andReturn(false);
-        $settings->shouldReceive('isVectorModeSwitcherEnabled')->andReturn(true);
 
         (new TypesenseConfig($settings))->localizeConfig();
         $decoded = $this->decodeInlineConfig($inlineJs);
 
-        self::assertSame([
-            'enabled'          => false,
-            'defaultMode'      => 'keyword',
-            'showModeSwitcher' => false,
-        ], $decoded['vectorSearch']);
+        self::assertFalse($decoded['vectorSearch']['enabled']);
+        self::assertSame('keyword', $decoded['vectorSearch']['strategy']);
+        self::assertSame(0.30, $decoded['vectorSearch']['alpha']);
         self::assertArrayNotHasKey('multiSearch', $decoded);
     }
 
@@ -101,18 +101,21 @@ class TypesenseConfigTest extends TestCase
         $network->shouldReceive('isNetworkActivated')->andReturn(false);
 
         $settings = $this->baseSettingsMock($network);
-        $settings->shouldReceive('getVectorDefaultMode')->andReturn('semantic');
+        $settings->shouldReceive('getVectorStrategy')->andReturn('parallel');
+        $settings->shouldReceive('getVectorResolvedParams')->andReturn(
+            \TypesenseSearch\Typesense\VectorSearchPresets::resolveParams('strict')
+        );
         $settings->shouldReceive('isVectorSearchReady')->andReturn(true);
-        $settings->shouldReceive('isVectorModeSwitcherEnabled')->andReturn(true);
 
         (new TypesenseConfig($settings))->localizeConfig();
         $decoded = $this->decodeInlineConfig($inlineJs);
 
-        self::assertSame([
-            'enabled'          => true,
-            'defaultMode'      => 'semantic',
-            'showModeSwitcher' => true,
-        ], $decoded['vectorSearch']);
+        self::assertTrue($decoded['vectorSearch']['enabled']);
+        self::assertSame('parallel', $decoded['vectorSearch']['strategy']);
+        self::assertSame(0.20, $decoded['vectorSearch']['alpha']);
+        self::assertSame(0.45, $decoded['vectorSearch']['distanceThreshold']);
+        self::assertSame(2, $decoded['vectorSearch']['spotlightMaxHits']);
+        self::assertSame(0.36, $decoded['vectorSearch']['spotlightDistanceThreshold']);
         self::assertArrayNotHasKey('multiSearch', $decoded);
     }
 
@@ -125,9 +128,11 @@ class TypesenseConfigTest extends TestCase
         $network->shouldReceive('isNetworkActivated')->andReturn(true);
 
         $settings = $this->baseSettingsMock($network);
-        $settings->shouldReceive('getVectorDefaultMode')->andReturn('hybrid');
+        $settings->shouldReceive('getVectorStrategy')->andReturn('blended');
+        $settings->shouldReceive('getVectorResolvedParams')->andReturn(
+            \TypesenseSearch\Typesense\VectorSearchPresets::resolveParams('balanced')
+        );
         $settings->shouldReceive('isVectorSearchReady')->andReturn(true);
-        $settings->shouldReceive('isVectorModeSwitcherEnabled')->andReturn(false);
         $settings->shouldReceive('getMultiSearchResolution')->andReturn([
             'configured' => true,
             'enabled'    => true,
@@ -139,6 +144,7 @@ class TypesenseConfigTest extends TestCase
                     'collection'       => 'col_main',
                     'search_key'       => 'scoped_key_main',
                     'enable_curations' => true,
+                    'subsite_profile'  => 'standard',
                 ],
                 [
                     'blog_id'          => 2,
@@ -147,6 +153,7 @@ class TypesenseConfigTest extends TestCase
                     'collection'       => 'col_culture',
                     'search_key'       => 'scoped_key_culture',
                     'enable_curations' => false,
+                    'subsite_profile'  => 'tightened',
                 ],
             ],
         ]);
@@ -154,16 +161,15 @@ class TypesenseConfigTest extends TestCase
         (new TypesenseConfig($settings))->localizeConfig();
         $decoded = $this->decodeInlineConfig($inlineJs);
 
-        self::assertSame([
-            'enabled'          => true,
-            'defaultMode'      => 'hybrid',
-            'showModeSwitcher' => false,
-        ], $decoded['vectorSearch']);
+        self::assertTrue($decoded['vectorSearch']['enabled']);
+        self::assertSame('blended', $decoded['vectorSearch']['strategy']);
 
         self::assertTrue($decoded['multiSearch']['enabled']);
         self::assertCount(2, $decoded['multiSearch']['collections']);
         self::assertTrue($decoded['multiSearch']['collections'][0]['enableCurations']);
+        self::assertSame('standard', $decoded['multiSearch']['collections'][0]['subsiteProfile']);
         self::assertFalse($decoded['multiSearch']['collections'][1]['enableCurations']);
+        self::assertSame('tightened', $decoded['multiSearch']['collections'][1]['subsiteProfile']);
         self::assertSame('scoped_key_culture', $decoded['multiSearch']['collections'][1]['searchKey']);
     }
 }

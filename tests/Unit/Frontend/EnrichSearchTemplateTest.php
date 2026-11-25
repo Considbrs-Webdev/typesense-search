@@ -12,7 +12,7 @@ use TypesenseSearch\Tests\TestCase;
 
 class EnrichSearchTemplateTest extends TestCase
 {
-    public function test_hides_mode_switcher_when_vector_search_is_not_ready(): void
+    public function test_falls_back_to_keyword_strategy_when_vector_search_is_not_ready(): void
     {
         Functions\when('is_search')->justReturn(true);
         Functions\when('home_url')->justReturn('https://example.se/');
@@ -22,15 +22,14 @@ class EnrichSearchTemplateTest extends TestCase
         $settings->shouldReceive('canUseTypesense')->andReturn(true);
         $settings->shouldReceive('getSortDisplay')->andReturn('radio');
         $settings->shouldReceive('isVectorSearchReady')->andReturn(false);
-        $settings->shouldReceive('isVectorModeSwitcherEnabled')->andReturn(true);
 
         $data = (new EnrichSearchTemplate($settings))->addTypesenseViewData([]);
 
-        self::assertFalse($data['showSearchModeSwitcher']);
-        self::assertSame('keyword', $data['defaultSearchMode']);
+        self::assertArrayNotHasKey('showSearchModeSwitcher', $data);
+        self::assertSame('keyword', $data['vectorSearchStrategy']);
     }
 
-    public function test_exposes_mode_switcher_when_vector_search_is_ready_and_switcher_enabled(): void
+    public function test_exposes_active_strategy_and_spotlight_rescue_labels_when_vector_search_is_ready(): void
     {
         Functions\when('is_search')->justReturn(true);
         Functions\when('home_url')->justReturn('https://example.se/');
@@ -40,13 +39,12 @@ class EnrichSearchTemplateTest extends TestCase
         $settings->shouldReceive('canUseTypesense')->andReturn(true);
         $settings->shouldReceive('getSortDisplay')->andReturn('dropdown');
         $settings->shouldReceive('isVectorSearchReady')->andReturn(true);
-        $settings->shouldReceive('isVectorModeSwitcherEnabled')->andReturn(true);
-        $settings->shouldReceive('getVectorDefaultMode')->andReturn('hybrid');
+        $settings->shouldReceive('getVectorStrategy')->andReturn('parallel');
 
         $data = (new EnrichSearchTemplate($settings))->addTypesenseViewData([]);
 
-        self::assertTrue($data['showSearchModeSwitcher']);
-        self::assertSame('hybrid', $data['defaultSearchMode']);
-        self::assertSame('Search mode', $data['lang']->searchModeBy);
+        self::assertSame('parallel', $data['vectorSearchStrategy']);
+        self::assertSame('Suggested shortcuts', $data['lang']->spotlightHeading);
+        self::assertSame('Related pages', $data['lang']->rescueHeading);
     }
 }

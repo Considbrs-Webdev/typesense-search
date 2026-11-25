@@ -116,4 +116,23 @@ class SettingsRepositoryTest extends TestCase
         $options[\TypesenseSearch\Typesense\SchemaInspector::OPTION_SCHEMA_STATE]['embedding_model'] = 'ts/multilingual-e5-small';
         self::assertTrue($this->repository->isVectorSearchReady());
     }
+
+    public function test_get_vector_resolved_params_reflects_selected_preset_or_custom(): void
+    {
+        $options = [
+            Settings::OPTION_VECTOR_STRATEGY        => 'rescue',
+            Settings::OPTION_VECTOR_RANKING_PROFILE => 'strict',
+            Settings::OPTION_VECTOR_CUSTOM_PARAMS   => ['alpha' => 0.85],
+        ];
+        Functions\when('get_option')->alias(static function (string $k, mixed $d = false) use (&$options): mixed {
+            return $options[$k] ?? $d;
+        });
+
+        self::assertSame('rescue', $this->repository->getVectorStrategy());
+        self::assertSame('strict', $this->repository->getVectorRankingProfile());
+        self::assertSame(0.20, $this->repository->getVectorResolvedParams()['alpha']);
+
+        $options[Settings::OPTION_VECTOR_RANKING_PROFILE] = 'custom';
+        self::assertSame(0.85, $this->repository->getVectorResolvedParams()['alpha']);
+    }
 }

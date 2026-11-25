@@ -31,6 +31,12 @@ $provisioningAvailable = ProvisioningCredentials::isAvailableFor($connection['re
 .typesense-network-site-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .typesense-network-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 16px 0 0; }
 .typesense-network-actions form { display: contents; }
+.typesense-network-target-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; padding: 8px 10px; margin: 0 0 6px; border: 1px solid #e5e7eb; border-radius: 4px; background: #fff; transition: opacity 0.15s, background-color 0.15s; }
+.typesense-network-target-row.is-unchecked { background: #fafafa; }
+.typesense-network-target-row.is-unchecked .typesense-network-target-profile { opacity: 0.55; }
+.typesense-network-target-label { flex: 1 1 280px; min-width: 0; }
+.typesense-network-target-profile { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; font-size: 12px; color: #50575e; }
+.typesense-network-target-profile select { font-size: 12px; min-height: 30px; height: 30px; padding: 0 24px 0 8px; border-color: #c3c4c7; border-radius: 3px; }
 </style>
 <div class="wrap typesense-network ts-settings">
 <div class="typesense-network-heading"><h1><?php esc_html_e('Typesense Search — Network settings', 'typesense-search'); ?></h1><span class="typesense-network-environment"><?php echo esc_html(sprintf(/* translators: %s: WordPress environment type, e.g. production */ __('Environment: %s', 'typesense-search'), wp_get_environment_type())); ?></span></div>
@@ -203,9 +209,11 @@ $isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
 </div>
 
 <?php elseif ($tab === 'multi-search') :
-    $resolver       = new \TypesenseSearch\Multisite\MultiSearchResolver($network);
-    $multiSearchMap = $network->multiSearchMap();
-    $vectorModel    = $network->vectorModel();
+    $resolver            = new \TypesenseSearch\Multisite\MultiSearchResolver($network);
+    $multiSearchMap      = $network->multiSearchMap();
+    $multiSearchProfiles = $network->multiSearchProfiles();
+    $subsiteProfiles     = \TypesenseSearch\Typesense\VectorSearchPresets::subsiteProfiles();
+    $vectorModel         = $network->vectorModel();
     $enabledSites   = array_values(array_filter(
         $sites,
         static fn ($s): bool => in_array((int) $s->blog_id, $selected, true)
@@ -247,7 +255,18 @@ $isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
 <div class="ts-settings__card">
     <div class="ts-settings__card-header">
         <h2><?php esc_html_e('Cross-site multi-search', 'typesense-search'); ?></h2>
-        <p><?php esc_html_e('Choose which other enabled network sites each site searches alongside its own index. Only enabled, provisioned sites participate at query time.', 'typesense-search'); ?></p>
+        <p><?php esc_html_e('Choose which other enabled network sites each site searches alongside its own index, and pick a relevance profile for each included site.', 'typesense-search'); ?></p>
+        <div class="ts-settings__notice ts-settings__notice--info">
+            <p><strong><?php esc_html_e('Subsite relevance profiles (when embedded search is active):', 'typesense-search'); ?></strong></p>
+            <ol>
+                <?php foreach ($subsiteProfiles as $profileInfo) : ?>
+                    <li>
+                        <strong><?php echo esc_html($profileInfo['label']); ?>:</strong>
+                        <?php echo esc_html($profileInfo['description']); ?>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        </div>
     </div>
 
     <?php if (count($enabledSites) < 2) : ?>
@@ -262,8 +281,9 @@ $isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
             <input type="hidden" name="section" value="multi-search">
             <div class="ts-settings__fields">
                 <?php foreach ($siteMeta as $sourceId => $sourceInfo) :
-                    $configuredTargets = $multiSearchMap[$sourceId] ?? [];
-                    $resolution        = $resolver->resolveForSite($sourceId);
+                    $configuredTargets  = $multiSearchMap[$sourceId] ?? [];
+                    $configuredProfiles = $multiSearchProfiles[$sourceId] ?? [];
+                    $resolution         = $resolver->resolveForSite($sourceId);
                 ?>
                 <div class="ts-field">
                     <div class="ts-field__label">
@@ -290,13 +310,18 @@ $isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
                                 if ($targetId === $sourceId) {
                                     continue;
                                 }
-                                $isChecked     = in_array($targetId, $configuredTargets, true);
-                                $disableChoice = !$targetInfo['ready'] && !$isChecked;
+                                $isChecked       = in_array($targetId, $configuredTargets, true);
+                                $disableChoice   = !$targetInfo['ready'] && !$isChecked;
+                                $selectedProfile = \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeSubsiteProfile(
+                                    $configuredProfiles[$targetId] ?? \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_SUBSITE_PROFILE
+                                );
+                                $profileSelectId = sprintf('ts-ms-profile-%d-%d', (int) $sourceId, (int) $targetId);
                             ?>
-                            <p style="margin: 0 0 8px;">
-                                <label>
+                            <div class="typesense-network-target-row<?php echo $isChecked ? '' : ' is-unchecked'; ?>">
+                                <label class="typesense-network-target-label">
                                     <input
                                         type="checkbox"
+                                        class="typesense-network-target-checkbox"
                                         name="multisearch[<?php echo (int) $sourceId; ?>][]"
                                         value="<?php echo (int) $targetId; ?>"
                                         <?php checked($isChecked); ?>
@@ -314,7 +339,23 @@ $isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
                                         &mdash; <span class="description"><?php esc_html_e('Keyword index only', 'typesense-search'); ?></span>
                                     <?php endif; ?>
                                 </label>
-                            </p>
+                                <div class="typesense-network-target-profile">
+                                    <label for="<?php echo esc_attr($profileSelectId); ?>">
+                                        <?php esc_html_e('Profile:', 'typesense-search'); ?>
+                                    </label>
+                                    <select
+                                        id="<?php echo esc_attr($profileSelectId); ?>"
+                                        name="multisearch_profiles[<?php echo (int) $sourceId; ?>][<?php echo (int) $targetId; ?>]"
+                                        <?php disabled($disableChoice); ?>
+                                    >
+                                        <?php foreach ($subsiteProfiles as $profileSlug => $profileMeta) : ?>
+                                            <option value="<?php echo esc_attr($profileSlug); ?>" <?php selected($profileSlug, $selectedProfile); ?>>
+                                                <?php echo esc_html($profileMeta['short_label']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
                             <?php endforeach; ?>
                         </fieldset>
 
@@ -362,6 +403,16 @@ $isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
 <p class="typesense-network-actions">
     <button type="submit" form="typesense-multisearch" class="button button-primary"><?php esc_html_e('Save multi-search settings', 'typesense-search'); ?></button>
 </p>
+<script>
+(function () {
+    document.querySelectorAll('.typesense-network-target-checkbox').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+            var row = cb.closest('.typesense-network-target-row');
+            if (row) row.classList.toggle('is-unchecked', !cb.checked);
+        });
+    });
+})();
+</script>
 <?php endif; ?>
 
 <?php else : ?>

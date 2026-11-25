@@ -11,6 +11,7 @@ class NetworkSettingsRepository
     public const PREFIX = 'typesense_network_prefix';
     public const VECTOR_MODEL = 'typesense_network_vector_model';
     public const MULTISEARCH = 'typesense_network_multisearch';
+    public const MULTISEARCH_PROFILES = 'typesense_network_multisearch_profiles';
     public const ENABLED = 'typesense_network_enabled_sites';
     public const STATE = 'typesense_network_state';
     public const LOCK = 'typesense_network_provision_lock';
@@ -105,6 +106,40 @@ class NetworkSettingsRepository
             )));
             if ($cleanTargets !== []) {
                 $normalized[$sourceId] = $cleanTargets;
+            }
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Normalized network map of `source_blog_id => [target_blog_id => subsite_profile]`.
+     *
+     * @return array<int, array<int, string>>
+     */
+    public function multiSearchProfiles(): array
+    {
+        $raw = get_network_option($this->networkId(), self::MULTISEARCH_PROFILES, []);
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($raw as $sourceKey => $targetMap) {
+            $sourceId = absint($sourceKey);
+            if ($sourceId <= 0 || !is_array($targetMap)) {
+                continue;
+            }
+            $clean = [];
+            foreach ($targetMap as $targetKey => $profile) {
+                $targetId = absint($targetKey);
+                if ($targetId <= 0 || $targetId === $sourceId) {
+                    continue;
+                }
+                $clean[$targetId] = \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeSubsiteProfile($profile);
+            }
+            if ($clean !== []) {
+                $normalized[$sourceId] = $clean;
             }
         }
 

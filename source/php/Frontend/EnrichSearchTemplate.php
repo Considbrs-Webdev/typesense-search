@@ -50,10 +50,11 @@ class EnrichSearchTemplate
 			'relevance' => __("Relevance", 'typesense-search'),
 			'dateAsc' => __("Date Ascending", 'typesense-search'),
 			'dateDesc' => __("Date Descending", 'typesense-search'),
-			'searchModeBy' => __('Search mode', 'typesense-search'),
-			'searchModeHybrid' => __('Hybrid (Keyword + AI)', 'typesense-search'),
-			'searchModeKeyword' => __('Keyword', 'typesense-search'),
-			'searchModeSemantic' => __('Semantic (AI)', 'typesense-search'),
+			'spotlightHeading' => __('Suggested shortcuts', 'typesense-search'),
+			'spotlightBadge' => __('Best matches', 'typesense-search'),
+			'rescueHeading' => __('Related pages', 'typesense-search'),
+			'rescueZeroHitsHeading' => __('No exact word matches — showing related pages', 'typesense-search'),
+			'rescueDescription' => __('Pages that match the meaning of your search even if they use different words.', 'typesense-search'),
 			'filter' => __("Filter", 'typesense-search'),
 			'closeFilter' => __("Close filter", 'typesense-search'),
 			'paginationPrevious' => __('Previous page', 'typesense-search'),
@@ -68,10 +69,9 @@ class EnrichSearchTemplate
 		// Sort control style: 'radio' | 'dropdown' — controlled by admin setting
 		$data['sortDisplay'] = $this->settings->getSortDisplay();
 
-		// Embedded search mode switcher — only shown when live schema is verified ready AND visitor switcher is enabled
-		$vectorReady                    = $this->settings->isVectorSearchReady();
-		$data['showSearchModeSwitcher'] = $vectorReady && $this->settings->isVectorModeSwitcherEnabled();
-		$data['defaultSearchMode']      = $vectorReady ? $this->settings->getVectorDefaultMode() : 'keyword';
+		// Active embedded search UX strategy ('parallel' | 'blended' | 'rescue', or 'keyword' when inactive)
+		$vectorReady                  = $this->settings->isVectorSearchReady();
+		$data['vectorSearchStrategy'] = $vectorReady ? $this->settings->getVectorStrategy() : 'keyword';
 
 		// Home URL used by the search form
 		$data['homeUrl'] = $data['homeUrl'] ?? home_url('/');

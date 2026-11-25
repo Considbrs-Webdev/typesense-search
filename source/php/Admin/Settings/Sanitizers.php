@@ -6,6 +6,7 @@ use TypesenseSearch\Services\SettingsRepository;
 use TypesenseSearch\Typesense\AdminApi;
 use TypesenseSearch\Typesense\EmbeddingModels;
 use TypesenseSearch\Typesense\ServerCapabilities;
+use TypesenseSearch\Typesense\VectorSearchPresets;
 
 /**
  * Sanitizer callbacks for all plugin settings fields.
@@ -167,9 +168,22 @@ trait Sanitizers
         return EmbeddingModels::sanitizeModel($raw, $previous);
     }
 
-    public function sanitizeVectorDefaultMode(mixed $value): string
+    public function sanitizeVectorStrategy(mixed $value): string
     {
-        return EmbeddingModels::sanitizeSearchMode($value);
+        return VectorSearchPresets::sanitizeStrategy($value);
+    }
+
+    public function sanitizeVectorRankingProfile(mixed $value): string
+    {
+        return VectorSearchPresets::sanitizeProfile($value);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function sanitizeVectorCustomParams(mixed $value): array
+    {
+        return VectorSearchPresets::sanitizeCustomParams($value);
     }
 
     /**

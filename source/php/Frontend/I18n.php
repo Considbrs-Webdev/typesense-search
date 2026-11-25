@@ -36,7 +36,12 @@ class I18n
             'paginationNext'     => __('Next page', 'typesense-search'),
 
             // search page loader (role="status")
-            'loadingSearch'    => __('Loading search…', 'typesense-search'),
+            'loadingSearch'      => __('Loading search…', 'typesense-search'),
+
+            // Embedded search badges & rescue headings
+            'semanticMatchBadge' => __('Related match', 'typesense-search'),
+            'rescueHeading'      => __('Related pages', 'typesense-search'),
+            'rescueZeroHitsHeading' => __('No exact word matches — showing related pages', 'typesense-search'),
         ];
     }
 
@@ -49,13 +54,14 @@ class I18n
     public static function quickSearchStrings(): array
     {
         return [
-            'seeAllResults' => __('See all results', 'typesense-search'),
-            'noResults'     => __('No hits for your search term', 'typesense-search'),
-            'dialogTitle'   => __('Quick search', 'typesense-search'),
-            'dialogHint'    => __('Search suggestions open in this dialog. Press Escape or use the close button to return to the page.', 'typesense-search'),
-            'closeDialog'   => __('Close quick search', 'typesense-search'),
-            'searchLabel'   => __('Search', 'typesense-search'),
-            'submitSearch'  => __('Search', 'typesense-search'),
+            'seeAllResults'      => __('See all results', 'typesense-search'),
+            'noResults'          => __('No hits for your search term', 'typesense-search'),
+            'dialogTitle'        => __('Quick search', 'typesense-search'),
+            'dialogHint'         => __('Search suggestions open in this dialog. Press Escape or use the close button to return to the page.', 'typesense-search'),
+            'closeDialog'        => __('Close quick search', 'typesense-search'),
+            'searchLabel'        => __('Search', 'typesense-search'),
+            'submitSearch'       => __('Search', 'typesense-search'),
+            'semanticMatchBadge' => __('Related', 'typesense-search'),
         ];
     }
 

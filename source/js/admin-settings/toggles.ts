@@ -123,4 +123,30 @@ export function init(): void {
         });
         updateVectorModel();
     }
+
+    // ── Embedded search preset cards & custom parameters ─────────────────────
+
+    const customParamsPanel = document.getElementById('ts-vector-custom-params');
+    const profileInputs     = document.querySelectorAll<HTMLInputElement>('[data-js-vector-ranking-profile]');
+    const strategyInputs    = document.querySelectorAll<HTMLInputElement>('[data-js-vector-strategy]');
+    const strategyOnlyRows  = document.querySelectorAll<HTMLElement>('[data-vector-strategy-only]');
+
+    function syncCustomParamsVisibility(): void {
+        if (!customParamsPanel || profileInputs.length === 0) return;
+        const selectedProfile = Array.from(profileInputs).find((el) => el.checked)?.value ?? 'balanced';
+        customParamsPanel.hidden = selectedProfile !== 'custom';
+    }
+
+    function syncStrategySpecificCustomRows(): void {
+        if (strategyOnlyRows.length === 0 || strategyInputs.length === 0) return;
+        const selectedStrategy = Array.from(strategyInputs).find((el) => el.checked)?.value ?? 'parallel';
+        strategyOnlyRows.forEach((row) => {
+            row.hidden = row.dataset.vectorStrategyOnly !== selectedStrategy;
+        });
+    }
+
+    profileInputs.forEach((input) => input.addEventListener('change', syncCustomParamsVisibility));
+    strategyInputs.forEach((input) => input.addEventListener('change', syncStrategySpecificCustomRows));
+    syncCustomParamsVisibility();
+    syncStrategySpecificCustomRows();
 }

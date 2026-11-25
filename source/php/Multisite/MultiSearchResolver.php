@@ -4,6 +4,7 @@ namespace TypesenseSearch\Multisite;
 
 use TypesenseSearch\Admin\Settings\OptionKeys;
 use TypesenseSearch\Typesense\SchemaInspector;
+use TypesenseSearch\Typesense\VectorSearchPresets;
 
 /**
  * Resolves cross-site multi-search configuration and runtime eligibility
@@ -56,6 +57,67 @@ class MultiSearchResolver
         ksort($clean);
 
         return $clean;
+    }
+
+    /**
+     * Sanitize per-target relevance profiles (`source_blog_id => [target_blog_id => profile]`)
+     * against the already-sanitized target map so only active source-target pairs are kept.
+     *
+     * @param mixed             $rawProfiles
+     * @param array<int, int[]> $cleanMap
+     * @return array<int, array<int, string>>
+     */
+    public static function sanitizeProfiles(mixed $rawProfiles, array $cleanMap): array
+    {
+        if (!is_array($rawProfiles) || $cleanMap === []) {
+            return [];
+        }
+
+        $clean = [];
+        foreach ($cleanMap as $sourceId => $targetIds) {
+            $sourceRaw = $rawProfiles[$sourceId] ?? $rawProfiles[(string) $sourceId] ?? null;
+            if (!is_array($sourceRaw)) {
+                continue;
+            }
+
+            $profilesForSource = [];
+            foreach ($targetIds as $targetId) {
+                $rawProfile = $sourceRaw[$targetId] ?? $sourceRaw[(string) $targetId] ?? VectorSearchPresets::DEFAULT_SUBSITE_PROFILE;
+                $sanitized  = VectorSearchPresets::sanitizeSubsiteProfile($rawProfile);
+                if ($sanitized !== VectorSearchPresets::DEFAULT_SUBSITE_PROFILE) {
+                    $profilesForSource[$targetId] = $sanitized;
+                }
+            }
+
+            if ($profilesForSource !== []) {
+                ksort($profilesForSource);
+                $clean[$sourceId] = $profilesForSource;
+            }
+        }
+
+        ksort($clean);
+
+        return $clean;
+    }
+
+    /**
+     * Configured subsite relevance profiles keyed by target blog ID for a source blog ID.
+     *
+     * @return array<int, string>
+     */
+    public function configuredTargetProfilesFor(int $sourceBlogId): array
+    {
+        $targets  = $this->configuredTargetsFor($sourceBlogId);
+        $savedMap = $this->network->multiSearchProfiles()[$sourceBlogId] ?? [];
+        $result   = [];
+
+        foreach ($targets as $targetId) {
+            $result[$targetId] = VectorSearchPresets::sanitizeSubsiteProfile(
+                $savedMap[$targetId] ?? VectorSearchPresets::DEFAULT_SUBSITE_PROFILE
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -175,6 +237,7 @@ class MultiSearchResolver
 
         $collections    = [$sourceCheck['entry']];
         $skippedTargets = [];
+        $targetProfiles = $this->configuredTargetProfilesFor($sourceBlogId);
 
         foreach ($targetIds as $targetId) {
             $targetCheck = $this->inspectSite(
@@ -183,7 +246,8 @@ class MultiSearchResolver
                 $networkId,
                 isset($enabledSet[$targetId]),
                 $vectorModel,
-                false
+                false,
+                $targetProfiles[$targetId] ?? VectorSearchPresets::DEFAULT_SUBSITE_PROFILE
             );
 
             if ($targetCheck['entry'] !== null) {
@@ -210,13 +274,27 @@ class MultiSearchResolver
             ];
         }
 
-        $sourceEntry       = $collections[0];
-        $vectorCompatible  = false;
+        $sourceEntry        = $collections[0];
+        $vectorCompatible   = false;
         $vectorPausedReason = '';
+        $sourceStrategy     = VectorSearchPresets::sanitizeStrategy(
+            get_blog_option($sourceBlogId, OptionKeys::OPTION_VECTOR_STRATEGY, VectorSearchPresets::DEFAULT_STRATEGY)
+        );
 
         if ($sourceEntry['vector_enabled'] && $sourceEntry['vector_ready']) {
             $incompatibleLabels = [];
             foreach (array_slice($collections, 1) as $sibling) {
+                // In Top Matches (parallel) and Semantic Rescue strategies, the main union
+                // list is pure keyword and vector queries skip `keyword_only` siblings, so a
+                // `keyword_only` sibling does not require an embedded index. Blended hybrid
+                // union requires an embedding field on every union leg in Typesense.
+                if (
+                    $sibling['subsite_profile'] === VectorSearchPresets::SUBSITE_KEYWORD_ONLY
+                    && $sourceStrategy !== VectorSearchPresets::STRATEGY_BLENDED
+                ) {
+                    continue;
+                }
+
                 if (!$sibling['vector_enabled']) {
                     $incompatibleLabels[] = sprintf(
                         /* translators: %s: sibling site name */
@@ -279,7 +357,8 @@ class MultiSearchResolver
         int $networkId,
         bool $isSelected,
         string $vectorModel,
-        bool $enableCurations
+        bool $enableCurations,
+        string $subsiteProfile = VectorSearchPresets::DEFAULT_SUBSITE_PROFILE
     ): array {
         if ($this->network->conflict()) {
             return ['entry' => null, 'reason' => __('Global constants conflict with network mode.', 'typesense-search')];
@@ -334,6 +413,7 @@ class MultiSearchResolver
                 'collection'       => $collection,
                 'search_key'       => (string) $mapping['key'],
                 'enable_curations' => $enableCurations,
+                'subsite_profile'  => VectorSearchPresets::sanitizeSubsiteProfile($subsiteProfile),
                 'vector_enabled'   => $vectorEnabled,
                 'vector_ready'     => $vectorReady,
             ],

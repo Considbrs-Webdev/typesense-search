@@ -81,13 +81,4 @@ class EmbeddingModelsTest extends TestCase
             EmbeddingModels::sanitizeModel('invalid model', 'also invalid')
         );
     }
-
-    public function test_sanitize_search_mode(): void
-    {
-        self::assertSame('hybrid', EmbeddingModels::sanitizeSearchMode('hybrid'));
-        self::assertSame('keyword', EmbeddingModels::sanitizeSearchMode('keyword'));
-        self::assertSame('semantic', EmbeddingModels::sanitizeSearchMode('semantic'));
-        self::assertSame('hybrid', EmbeddingModels::sanitizeSearchMode('anything-else'));
-        self::assertSame('hybrid', EmbeddingModels::sanitizeSearchMode(null));
-    }
 }

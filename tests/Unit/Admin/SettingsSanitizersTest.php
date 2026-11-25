@@ -167,10 +167,17 @@ class SettingsSanitizersTest extends TestCase
         self::assertSame(Settings::OPTION_VECTOR_MODEL, $recordedError[0]);
     }
 
-    public function test_sanitize_vector_default_mode_accepts_known_modes(): void
+    public function test_sanitize_vector_strategy_and_profile_and_custom_params(): void
     {
-        self::assertSame('semantic', $this->settings->sanitizeVectorDefaultMode('semantic'));
-        self::assertSame('hybrid', $this->settings->sanitizeVectorDefaultMode('unknown'));
+        self::assertSame('blended', $this->settings->sanitizeVectorStrategy('blended'));
+        self::assertSame('parallel', $this->settings->sanitizeVectorStrategy('unknown'));
+
+        self::assertSame('strict', $this->settings->sanitizeVectorRankingProfile('strict'));
+        self::assertSame('balanced', $this->settings->sanitizeVectorRankingProfile('unknown'));
+
+        $custom = $this->settings->sanitizeVectorCustomParams(['alpha' => '0.45', 'k' => '80']);
+        self::assertSame(0.45, $custom['alpha']);
+        self::assertSame(80, $custom['k']);
     }
 
     public function test_sanitize_admin_key_keeps_saved_value_when_field_is_left_blank(): void

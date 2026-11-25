@@ -184,16 +184,64 @@ class SettingsRepository
         );
     }
 
-    public function getVectorDefaultMode(): string
+    public function getVectorStrategy(): string
     {
-        return \TypesenseSearch\Typesense\EmbeddingModels::sanitizeSearchMode(
-            get_option(Settings::OPTION_VECTOR_DEFAULT_MODE, \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_SEARCH_MODE)
+        return \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeStrategy(
+            get_option(Settings::OPTION_VECTOR_STRATEGY, \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_STRATEGY)
         );
     }
 
-    public function isVectorModeSwitcherEnabled(): bool
+    public function getVectorRankingProfile(): string
     {
-        return (bool) get_option(Settings::OPTION_VECTOR_MODE_SWITCHER, 0);
+        return \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeProfile(
+            get_option(Settings::OPTION_VECTOR_RANKING_PROFILE, \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_PROFILE)
+        );
+    }
+
+    /**
+     * @return array{
+     *     alpha: float,
+     *     distance_threshold: float,
+     *     k: int,
+     *     rerank_hybrid_matches: bool,
+     *     spotlight_max_hits: int,
+     *     spotlight_distance_threshold: float,
+     *     spotlight_min_words: int,
+     *     spotlight_dedupe: bool,
+     *     rescue_max_keyword_hits: int
+     * }
+     */
+    public function getVectorCustomParams(): array
+    {
+        return \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeCustomParams(
+            get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, [])
+        );
+    }
+
+    /**
+     * Effective ranking and UX threshold parameters for the active profile.
+     *
+     * @return array{
+     *     alpha: float,
+     *     distance_threshold: float,
+     *     k: int,
+     *     rerank_hybrid_matches: bool,
+     *     spotlight_max_hits: int,
+     *     spotlight_distance_threshold: float,
+     *     spotlight_min_words: int,
+     *     spotlight_dedupe: bool,
+     *     rescue_max_keyword_hits: int,
+     *     quick_alpha: float,
+     *     quick_distance_threshold: float,
+     *     quick_k: int
+     * }
+     */
+    public function getVectorResolvedParams(): array
+    {
+        return \TypesenseSearch\Typesense\VectorSearchPresets::resolveParams(
+            $this->getVectorRankingProfile(),
+            get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, [])
+        );
     }
 
     /**

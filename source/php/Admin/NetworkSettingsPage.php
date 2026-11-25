@@ -68,10 +68,13 @@ class NetworkSettingsPage
             wp_die(esc_html__('Invalid settings section.', 'typesense-search'));
         }
         if ($section === 'multi-search') {
-            $enabled = array_map('intval', (array) get_network_option($networkId, NetworkSettingsRepository::ENABLED, []));
-            $rawMap  = wp_unslash($_POST['multisearch'] ?? []); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-            $clean   = \TypesenseSearch\Multisite\MultiSearchResolver::sanitizeMap($rawMap, $enabled);
+            $enabled     = array_map('intval', (array) get_network_option($networkId, NetworkSettingsRepository::ENABLED, []));
+            $rawMap      = wp_unslash($_POST['multisearch'] ?? []); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+            $rawProfiles = wp_unslash($_POST['multisearch_profiles'] ?? []); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+            $clean       = \TypesenseSearch\Multisite\MultiSearchResolver::sanitizeMap($rawMap, $enabled);
+            $profiles    = \TypesenseSearch\Multisite\MultiSearchResolver::sanitizeProfiles($rawProfiles, $clean);
             update_network_option($networkId, NetworkSettingsRepository::MULTISEARCH, $clean);
+            update_network_option($networkId, NetworkSettingsRepository::MULTISEARCH_PROFILES, $profiles);
             wp_safe_redirect(network_admin_url('settings.php?page=' . self::SLUG . '&tab=multi-search&saved=1'));
             exit;
         }

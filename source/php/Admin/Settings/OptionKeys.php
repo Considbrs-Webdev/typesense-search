@@ -34,8 +34,9 @@ class OptionKeys
     public const OPTION_STEMMING_ENABLED       = 'typesense_search_stemming_enabled';
     public const OPTION_VECTOR_ENABLED         = 'typesense_search_vector_enabled';
     public const OPTION_VECTOR_MODEL           = 'typesense_search_vector_model';
-    public const OPTION_VECTOR_DEFAULT_MODE    = 'typesense_search_vector_default_mode';
-    public const OPTION_VECTOR_MODE_SWITCHER   = 'typesense_search_vector_mode_switcher';
+    public const OPTION_VECTOR_STRATEGY        = 'typesense_search_vector_strategy';
+    public const OPTION_VECTOR_RANKING_PROFILE = 'typesense_search_vector_ranking_profile';
+    public const OPTION_VECTOR_CUSTOM_PARAMS   = 'typesense_search_vector_custom_params';
     public const OPTION_PINNED_RESULTS_ENABLED = 'typesense_search_pinned_results_enabled';
     public const OPTION_SYNONYMS_ENABLED       = 'typesense_search_synonyms_enabled';
     public const OPTION_EXTERNAL_PAGES_ENABLED = 'typesense_search_external_pages_enabled';

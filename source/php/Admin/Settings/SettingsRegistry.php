@@ -137,16 +137,24 @@ class SettingsRegistry
             ]);
         }
 
-        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_DEFAULT_MODE, [
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_STRATEGY, [
             'type'              => 'string',
-            'sanitize_callback' => [$this, 'sanitizeVectorDefaultMode'],
-            'default'           => \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_SEARCH_MODE,
+            'sanitize_callback' => [$this, 'sanitizeVectorStrategy'],
+            'default'           => \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_STRATEGY,
         ]);
 
-        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_MODE_SWITCHER, [
-            'type'              => 'integer',
-            'sanitize_callback' => static fn (mixed $v): int => absint($v) ? 1 : 0,
-            'default'           => 0,
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_RANKING_PROFILE, [
+            'type'              => 'string',
+            'sanitize_callback' => [$this, 'sanitizeVectorRankingProfile'],
+            'default'           => \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_PROFILE,
+        ]);
+
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_CUSTOM_PARAMS, [
+            'type'              => 'array',
+            'sanitize_callback' => [$this, 'sanitizeVectorCustomParams'],
+            'default'           => \TypesenseSearch\Typesense\VectorSearchPresets::presetParams(
+                \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_PROFILE
+            ),
         ]);
 
         foreach ([

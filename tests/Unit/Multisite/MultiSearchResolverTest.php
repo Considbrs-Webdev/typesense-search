@@ -208,4 +208,46 @@ class MultiSearchResolverTest extends TestCase
         self::assertTrue($settings->isSiteVectorSearchReady());
         self::assertFalse($settings->isVectorSearchReady());
     }
+
+    public function test_resolves_subsite_profiles_and_allows_keyword_only_sibling_without_embeddings_in_parallel_strategy(): void
+    {
+        $cleanMap = MultiSearchResolver::sanitizeMap([1 => [2, 3]], [1, 2, 3]);
+        $cleanProfiles = MultiSearchResolver::sanitizeProfiles([
+            '1' => [
+                '2' => 'tightened',
+                '3' => 'keyword_only',
+                '99' => 'tightened',
+            ],
+        ], $cleanMap);
+
+        self::assertSame([
+            1 => [
+                2 => 'tightened',
+                3 => 'keyword_only',
+            ],
+        ], $cleanProfiles);
+
+        $this->networkOptions[NetworkSettingsRepository::MULTISEARCH]          = $cleanMap;
+        $this->networkOptions[NetworkSettingsRepository::MULTISEARCH_PROFILES] = $cleanProfiles;
+        $this->blogOptions[1][OptionKeys::OPTION_VECTOR_STRATEGY]              = 'parallel';
+        $this->markVectorReady(1, 'col_b1');
+        $this->markVectorReady(2, 'col_b2');
+        // Site 3 has NO embeddings, its subsite_profile is `keyword_only`, and Site 1 uses `parallel`.
+
+        $settings   = new SettingsRepository();
+        $resolution = $settings->getMultiSearchResolution();
+
+        self::assertTrue($resolution['enabled']);
+        self::assertTrue($resolution['vector_compatible']);
+        self::assertSame('standard', $resolution['collections'][0]['subsite_profile']);
+        self::assertSame('tightened', $resolution['collections'][1]['subsite_profile']);
+        self::assertSame('keyword_only', $resolution['collections'][2]['subsite_profile']);
+        self::assertTrue($settings->isVectorSearchReady());
+
+        // Switching Site 1 to `blended` requires embeddings on every union leg, so Site 3 pauses vector mode.
+        $this->blogOptions[1][OptionKeys::OPTION_VECTOR_STRATEGY] = 'blended';
+        $blendedResolution = $settings->getMultiSearchResolution();
+        self::assertFalse($blendedResolution['vector_compatible']);
+        self::assertStringContainsString('Tourism Portal', $blendedResolution['vector_paused_reason']);
+    }
 }
