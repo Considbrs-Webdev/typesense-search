@@ -3,63 +3,23 @@
 // Adapted from municipio-search/url-state.ts.
 // ---------------------------------------------------------------------------
 
-import type { SearchMode, TypesenseSearchConfig } from "./types";
-
-export type { SearchMode };
-
 export interface UrlState {
   query: string;
   page: number;
   sort: string;
-  mode: SearchMode;
   facetFilters: Record<string, string[]>;
 }
 
 const SORT_KEY = "sort";
-const MODE_KEY = "mode";
 const PAGE_KEY = "page";
 const FACET_PREFIX = "facet_";
 
-export function isValidSearchMode(value: unknown): value is SearchMode {
-  return value === "keyword" || value === "hybrid" || value === "semantic";
-}
-
-export function getDefaultSearchMode(
-  config: TypesenseSearchConfig | undefined = typeof window !== "undefined"
-    ? window.typesenseConfig
-    : undefined,
-): SearchMode {
-  if (!config?.vectorSearch?.enabled) {
-    return "keyword";
-  }
-  return isValidSearchMode(config.vectorSearch.defaultMode)
-    ? config.vectorSearch.defaultMode
-    : "hybrid";
-}
-
-function canVisitorSwitchMode(config?: TypesenseSearchConfig): boolean {
-  return Boolean(
-    config?.vectorSearch?.enabled && config.vectorSearch.showModeSwitcher,
-  );
-}
-
-export function getUrlState(
-  config: TypesenseSearchConfig | undefined = typeof window !== "undefined"
-    ? window.typesenseConfig
-    : undefined,
-): UrlState {
+export function getUrlState(): UrlState {
   const params = new URLSearchParams(window.location.search);
 
   const query = params.get("s") ?? params.get("q") ?? "";
   const page = Math.max(1, parseInt(params.get(PAGE_KEY) ?? "1", 10) || 1);
   const sort = params.get(SORT_KEY) ?? "relevance";
-
-  const defaultMode = getDefaultSearchMode(config);
-  const rawMode = params.get(MODE_KEY);
-  const mode: SearchMode =
-    canVisitorSwitchMode(config) && isValidSearchMode(rawMode)
-      ? rawMode
-      : defaultMode;
 
   const facetFilters: Record<string, string[]> = {};
   params.forEach((value, key) => {
@@ -70,23 +30,18 @@ export function getUrlState(
     }
   });
 
-  return { query, page, sort, mode, facetFilters };
+  return { query, page, sort, facetFilters };
 }
 
 export function updateUrlState(
   state: Partial<UrlState>,
   { push = false }: { push?: boolean } = {},
-  config: TypesenseSearchConfig | undefined = typeof window !== "undefined"
-    ? window.typesenseConfig
-    : undefined,
 ): void {
-  const current = getUrlState(config);
-  const defaultMode = getDefaultSearchMode(config);
+  const current = getUrlState();
   const merged: UrlState = {
     query: state.query !== undefined ? state.query : current.query,
     page: state.page !== undefined ? state.page : current.page,
     sort: state.sort !== undefined ? state.sort : current.sort,
-    mode: state.mode !== undefined ? state.mode : current.mode,
     facetFilters:
       state.facetFilters !== undefined
         ? state.facetFilters
@@ -103,14 +58,6 @@ export function updateUrlState(
 
   if (merged.sort && merged.sort !== "relevance")
     params.set(SORT_KEY, merged.sort);
-
-  if (
-    canVisitorSwitchMode(config) &&
-    isValidSearchMode(merged.mode) &&
-    merged.mode !== defaultMode
-  ) {
-    params.set(MODE_KEY, merged.mode);
-  }
 
   Object.entries(merged.facetFilters).forEach(([attr, values]) => {
     if (Array.isArray(values)) {

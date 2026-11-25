@@ -8,8 +8,8 @@ import type {
   FacetData,
   HitDocument,
   MultiSearchCollectionConfig,
+  QueryExecutionMode,
   SearchHit,
-  SearchMode,
   TypesenseSearchConfig,
 } from "./types";
 import { buildModeSearchParams } from "./search-params";
@@ -18,12 +18,14 @@ import type { ModeSearchParams } from "./search-params";
 export interface DocumentSearchOptions {
   q: string;
   hasQuery: boolean;
-  mode: SearchMode;
+  mode: QueryExecutionMode;
   page: number;
   perPage: number;
   filterBy?: string;
   sortBy?: string;
   highlightFullFields?: string;
+  /** Set to false on auxiliary vector queries (Spotlight / Rescue) so they never duplicate keyword results. */
+  allowLexicalFallback?: boolean;
 }
 
 export interface NormalizedSearchResult {
@@ -33,6 +35,8 @@ export interface NormalizedSearchResult {
 }
 
 interface RawUnionResponse {
+  code?: number;
+  error?: string;
   found?: number;
   hits?: Array<
     SearchHit & {
@@ -119,10 +123,11 @@ export function annotateMultiSearchHits(
     }
   >,
   collections: MultiSearchCollectionConfig[],
+  hostSiteIdOverride?: number,
 ): SearchHit[] {
   if (collections.length === 0 || hits.length === 0) return hits;
 
-  const hostSiteId = collections[0].siteId;
+  const hostSiteId = hostSiteIdOverride ?? collections[0].siteId;
   const sortedByHomeLength = collections
     .map((c) => ({ base: normalizeBaseUrl(c.homeUrl), config: c }))
     .filter((entry) => entry.base !== "")
@@ -184,27 +189,71 @@ async function runUnionMultiSearch(
   client: TypesenseClient,
   config: TypesenseSearchConfig,
   options: DocumentSearchOptions,
-  modeParams: ModeSearchParams,
+  effectiveMode: QueryExecutionMode,
 ): Promise<NormalizedSearchResult> {
-  const collections = config.multiSearch?.collections ?? [];
+  const allCollections = config.multiSearch?.collections ?? [];
+  const isPureVectorMode =
+    effectiveMode === "spotlight" || effectiveMode === "semantic";
+  const activeCollections = isPureVectorMode
+    ? allCollections.filter((col) => col.subsiteProfile !== "keyword_only")
+    : allCollections;
 
-  const searches = collections.map((col) => ({
-    collection: col.collection,
-    "x-typesense-api-key": col.searchKey,
-    q: options.q,
-    ...modeParams,
-    ...(options.highlightFullFields
-      ? {
-          highlight_full_fields: options.highlightFullFields,
-          highlight_affix_num_tokens: config.highlightAffixNumTokens ?? 15,
-        }
-      : {}),
-    ...(options.filterBy ? { filter_by: options.filterBy } : {}),
-    ...(options.sortBy ? { sort_by: options.sortBy } : {}),
-    ...(col.enableCurations
-      ? {}
-      : { enable_curations: false, enable_overrides: false }),
-  }));
+  if (activeCollections.length === 0) {
+    return { hits: [], found: 0, perPage: options.perPage };
+  }
+
+  const trimmedLength = options.q.trim().length;
+
+  if (
+    activeCollections.length === 1 &&
+    activeCollections[0].collection === config.collection
+  ) {
+    const singleParams = buildModeSearchParams(
+      effectiveMode,
+      options.hasQuery,
+      config,
+      activeCollections[0].subsiteProfile ?? "standard",
+      trimmedLength,
+    );
+    const singleResult = await runSingleCollectionSearch(
+      client,
+      config,
+      options,
+      singleParams,
+    );
+    return {
+      ...singleResult,
+      hits: annotateMultiSearchHits(singleResult.hits, allCollections),
+    };
+  }
+
+  const searches = activeCollections.map((col) => {
+    const legModeParams = buildModeSearchParams(
+      effectiveMode,
+      options.hasQuery,
+      config,
+      col.subsiteProfile ?? "standard",
+      trimmedLength,
+    );
+
+    return {
+      collection: col.collection,
+      "x-typesense-api-key": col.searchKey,
+      q: options.q,
+      ...legModeParams,
+      ...(options.highlightFullFields
+        ? {
+            highlight_full_fields: options.highlightFullFields,
+            highlight_affix_num_tokens: config.highlightAffixNumTokens ?? 15,
+          }
+        : {}),
+      ...(options.filterBy ? { filter_by: options.filterBy } : {}),
+      ...(options.sortBy ? { sort_by: options.sortBy } : {}),
+      ...(col.enableCurations
+        ? {}
+        : { enable_curations: false, enable_overrides: false }),
+    };
+  });
 
   // Call apiCall.post directly because typesense-js v2.0.3 strips
   // `remove_duplicates: false` inside `client.multiSearch.perform(...)`, which
@@ -222,14 +271,25 @@ async function runUnionMultiSearch(
     },
   );
 
-  const annotatedHits = annotateMultiSearchHits(
+  // Typesense `do_union` returns HTTP 200 with a top-level `code >= 400` when
+  // union validation or a leg fails. Surface it so fallback handling triggers.
+  if (typeof response.code === "number" && response.code >= 400) {
+    const unionError = new Error(
+      response.error ?? `Union multi_search failed with code ${response.code}`,
+    ) as Error & { httpStatus?: number };
+    unionError.httpStatus = response.code;
+    throw unionError;
+  }
+
+  const finalHits = annotateMultiSearchHits(
     response.hits ?? [],
-    collections,
+    activeCollections,
+    allCollections[0]?.siteId,
   );
 
   return {
-    hits: annotatedHits,
-    found: response.found ?? annotatedHits.length,
+    hits: finalHits,
+    found: response.found ?? finalHits.length,
     perPage: options.perPage,
   };
 }
@@ -244,23 +304,29 @@ export async function executeDocumentSearch(
   config: TypesenseSearchConfig,
   options: DocumentSearchOptions,
 ): Promise<NormalizedSearchResult> {
+  const trimmedLength = options.q.trim().length;
   const primaryModeParams = buildModeSearchParams(
     options.mode,
     options.hasQuery,
     config,
+    "standard",
+    trimmedLength,
   );
-  const lexicalFallbackParams = primaryModeParams.vector_query
-    ? buildModeSearchParams("keyword", options.hasQuery, config)
-    : null;
+  const allowLexicalFallback = options.allowLexicalFallback !== false;
+  const lexicalFallbackParams =
+    allowLexicalFallback && primaryModeParams.vector_query
+      ? buildModeSearchParams(
+          "keyword",
+          options.hasQuery,
+          config,
+          "standard",
+          trimmedLength,
+        )
+      : null;
 
   if (isMultiSearchActive(config)) {
     try {
-      return await runUnionMultiSearch(
-        client,
-        config,
-        options,
-        primaryModeParams,
-      );
+      return await runUnionMultiSearch(client, config, options, options.mode);
     } catch (err) {
       if (lexicalFallbackParams && isRecoverableQueryError(err)) {
         try {
@@ -268,12 +334,7 @@ export async function executeDocumentSearch(
             "[TypesenseSearch] Vector union query rejected; falling back to keyword union search.",
             err,
           );
-          return await runUnionMultiSearch(
-            client,
-            config,
-            options,
-            lexicalFallbackParams,
-          );
+          return await runUnionMultiSearch(client, config, options, "keyword");
         } catch {
           // Continue to single-collection fallback below.
         }
@@ -382,7 +443,7 @@ export async function executeDisjunctiveFacets(
   options: {
     q: string;
     hasQuery: boolean;
-    mode: SearchMode;
+    mode: QueryExecutionMode;
     facetFields: string[];
     facetFilters: Record<string, string[]>;
     buildFilterBy: (filters: Record<string, string[]>) => string;
@@ -394,9 +455,22 @@ export async function executeDisjunctiveFacets(
     return {};
   }
 
-  const primaryModeParams = buildModeSearchParams(mode, hasQuery, config);
+  const trimmedLength = q.trim().length;
+  const primaryModeParams = buildModeSearchParams(
+    mode,
+    hasQuery,
+    config,
+    "standard",
+    trimmedLength,
+  );
   const lexicalFallbackParams = primaryModeParams.vector_query
-    ? buildModeSearchParams("keyword", hasQuery, config)
+    ? buildModeSearchParams(
+        "keyword",
+        hasQuery,
+        config,
+        "standard",
+        trimmedLength,
+      )
     : null;
 
   if (isMultiSearchActive(config)) {
@@ -436,15 +510,20 @@ export async function executeDisjunctiveFacets(
       const filterByOthers = buildFilterBy(otherFilters);
 
       collections.forEach((col, colIndex) => {
+        const legParams = buildModeSearchParams(
+          mode,
+          hasQuery,
+          config,
+          col.subsiteProfile ?? "standard",
+          trimmedLength,
+        );
         legMeta.push({
           field,
           col,
           filterByOthers,
           isPrimaryCollection: colIndex === 0,
         });
-        searches.push(
-          buildLegSearch(col, field, filterByOthers, primaryModeParams),
-        );
+        searches.push(buildLegSearch(col, field, filterByOthers, legParams));
       });
     }
 

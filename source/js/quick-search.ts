@@ -6,7 +6,7 @@ import { createClient } from "./typesense-search/client";
 import type { TypesenseSearchConfig, SearchHit } from "./typesense-search/types";
 import { loadWebAwesomeLocale } from "./typesense-search/webawesome-locale";
 import { executeDocumentSearch } from "./typesense-search/multi-search";
-import { getDefaultSearchMode } from "./typesense-search/url-state";
+import { isSemanticOnlyMatch } from "./typesense-search/search-params";
 import { createSearchStatisticsTracker } from "./typesense-search/search-statistics";
 import { decodeHtmlEntities, escapeHtmlPreservingMarks } from "./typesense-search/html";
 
@@ -251,7 +251,18 @@ function attachQuickSearch(
     typeEl.textContent = typeName;
 
     item.appendChild(nameEl);
-    item.appendChild(typeEl);
+
+    if (isSemanticOnlyMatch(hit)) {
+      const matchBadgeEl = document.createElement("span");
+      matchBadgeEl.className = "ts-qs-item__match-badge";
+      matchBadgeEl.textContent =
+        window.typesenseQuickSearchI18n?.semanticMatchBadge ?? "Related";
+      item.appendChild(matchBadgeEl);
+    }
+
+    if (typeName) {
+      item.appendChild(typeEl);
+    }
 
     item.addEventListener("mouseenter", () => setActive(hitIndex));
     item.addEventListener("click", (e) => {
@@ -496,7 +507,7 @@ function attachQuickSearch(
         {
           q: query,
           hasQuery: true,
-          mode: getDefaultSearchMode(config),
+          mode: config.vectorSearch?.enabled ? "quick_hybrid" : "keyword",
           page: 1,
           perPage: hitsPerPage,
           highlightFullFields: "title",
@@ -568,8 +579,10 @@ function attachQuickSearch(
           window.location.href = buildSearchUrl();
         } else if (activeIndex >= 0 && currentHits[activeIndex]) {
           e.preventDefault();
+          searchStatistics.flush();
+          const activeDoc = currentHits[activeIndex].document;
           window.location.href = String(
-            currentHits[activeIndex].document.url ?? "#",
+            activeDoc.url ?? activeDoc.permalink ?? "#",
           );
         }
         break;

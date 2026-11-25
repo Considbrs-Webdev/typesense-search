@@ -2,7 +2,16 @@
 // Shared types
 // ---------------------------------------------------------------------------
 
-export type SearchMode = "keyword" | "hybrid" | "semantic";
+export type VectorSearchStrategy = "keyword" | "parallel" | "blended" | "rescue";
+
+export type SubsiteProfile = "standard" | "tightened" | "keyword_only";
+
+export type QueryExecutionMode =
+  | "keyword"
+  | "hybrid"
+  | "semantic"
+  | "spotlight"
+  | "quick_hybrid";
 
 export interface FacetConfig {
   field: string;
@@ -13,8 +22,19 @@ export interface FacetConfig {
 
 export interface VectorSearchConfig {
   enabled: boolean;
-  defaultMode: SearchMode;
-  showModeSwitcher?: boolean;
+  strategy?: VectorSearchStrategy;
+  alpha?: number;
+  distanceThreshold?: number;
+  k?: number;
+  rerankHybridMatches?: boolean;
+  spotlightMaxHits?: number;
+  spotlightDistanceThreshold?: number;
+  spotlightMinWords?: number;
+  spotlightDedupe?: boolean;
+  rescueMaxKeywordHits?: number;
+  quickAlpha?: number;
+  quickDistanceThreshold?: number;
+  quickK?: number;
 }
 
 export interface MultiSearchCollectionConfig {
@@ -24,6 +44,7 @@ export interface MultiSearchCollectionConfig {
   siteName: string;
   homeUrl: string;
   enableCurations: boolean;
+  subsiteProfile?: SubsiteProfile;
 }
 
 export interface MultiSearchConfig {
@@ -71,6 +92,9 @@ export interface TypesenseI18n {
   paginationPrevious: string;
   paginationNext: string;
   loadingSearch: string;
+  semanticMatchBadge?: string;
+  rescueHeading?: string;
+  rescueZeroHitsHeading?: string;
 }
 
 export interface TypesenseQuickSearchI18n {
@@ -81,6 +105,7 @@ export interface TypesenseQuickSearchI18n {
   closeDialog?: string;
   searchLabel?: string;
   submitSearch?: string;
+  semanticMatchBadge?: string;
 }
 
 declare global {
@@ -98,6 +123,15 @@ export type HitDocument = Record<string, unknown>;
 export interface SearchHit {
   document: HitDocument;
   highlight?: Record<string, HighlightField>;
+  text_match?: number;
+  text_match_info?: {
+    best_field_score?: string;
+    tokens_matched?: number;
+  };
+  vector_distance?: number;
+  hybrid_search_info?: {
+    rank_fusion_score?: number;
+  };
 }
 
 export interface FacetCount {

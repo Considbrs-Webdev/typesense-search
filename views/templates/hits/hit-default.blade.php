@@ -10,6 +10,7 @@
                 <div class="c-group c-group--vertical c-group--gap-1">
                     <div class="c-group c-group--horizontal c-group--align-items-center c-group--gap-1">
                         <span class="c-badge c-badge--primary">{SEARCH_HIT_SUBHEADING}</span>
+                        <span class="ts-semantic-badge" data-js-hide-if-empty>{SEARCH_HIT_MATCH_BADGE}</span>
                         <time class="c-date">{SEARCH_HIT_DATE}</time>
                     </div>
                     <h2 class="c-typography c-card__heading u-margin__y--0 c-typography__variant--h3">

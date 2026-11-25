@@ -2,8 +2,9 @@
 // Template selection and rendering
 // ---------------------------------------------------------------------------
 
-import type { HitDocument, HighlightField, SearchHit } from "./types";
+import type { HitDocument, SearchHit } from "./types";
 import { replacePlaceholders } from "./html";
+import { isSemanticOnlyMatch } from "./search-params";
 
 export function getHitTemplates(container: Element): Map<string, string> {
   const map = new Map<string, string>();
@@ -44,5 +45,9 @@ export function renderHit(
   templates: Map<string, string>,
 ): string {
   const templateHtml = pickTemplate(hit.document, templates);
-  return replacePlaceholders(templateHtml, hit.document, hit.highlight);
+  const doc =
+    hit.document._ts_semantic_only || isSemanticOnlyMatch(hit)
+      ? { ...hit.document, _ts_semantic_only: true }
+      : hit.document;
+  return replacePlaceholders(templateHtml, doc, hit.highlight);
 }

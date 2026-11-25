@@ -2,7 +2,7 @@
 // HTML utilities and placeholder definitions
 // ---------------------------------------------------------------------------
 
-import type { HitDocument, HighlightField } from "./types";
+import type { HitDocument, HighlightField, SearchHit } from "./types";
 
 export type PlaceholderResult = string | { value: string; highlighted: true };
 export type PlaceholderFn = (
@@ -35,6 +35,14 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
     }
     return base;
   },
+  SEARCH_HIT_MATCH_BADGE: (d) =>
+    d._ts_semantic_only
+      ? String(
+          (typeof window !== "undefined" &&
+            window.typesenseI18n?.semanticMatchBadge) ||
+            "Related match",
+        )
+      : "",
   SEARCH_HIT_SITE_NAME: (d) => String(d._ts_site_name ?? ""),
   SEARCH_HIT_EXCERPT: (d, h) => {
     const excerptSnippet = h?.excerpt?.snippet;
@@ -259,4 +267,39 @@ function removeEmptyMarkedElements(html: string): string {
     }
   });
   return container.innerHTML;
+}
+
+/**
+ * Renders a compact Spotlight shortcut card for the Parallel UX strategy.
+ */
+export function renderSpotlightCard(hit: SearchHit): string {
+  const doc = hit.document;
+  const link = escapeAttr(String(PLACEHOLDERS.SEARCH_HIT_LINK(doc)));
+  const rawSubheading = String(PLACEHOLDERS.SEARCH_HIT_SUBHEADING(doc));
+  const subheading = rawSubheading
+    ? escapeHtml(decodeHtmlEntities(rawSubheading))
+    : "";
+
+  const headingOut = PLACEHOLDERS.SEARCH_HIT_HEADING(doc, hit.highlight);
+  const headingHtml =
+    typeof headingOut === "object" && headingOut.highlighted
+      ? headingOut.value
+      : escapeHtml(decodeHtmlEntities(String(headingOut)));
+
+  const excerptOut = PLACEHOLDERS.SEARCH_HIT_EXCERPT(doc, hit.highlight);
+  const excerptHtml =
+    typeof excerptOut === "object" && excerptOut.highlighted
+      ? excerptOut.value
+      : escapeHtml(decodeHtmlEntities(String(excerptOut)));
+
+  return `<article class="ts-spotlight-card">
+    <div class="ts-spotlight-card__meta">
+      ${subheading ? `<span class="ts-spotlight-card__badge">${subheading}</span>` : ""}
+      <span class="ts-spotlight-card__arrow" aria-hidden="true">&rarr;</span>
+    </div>
+    <h3 class="ts-spotlight-card__heading">
+      <a class="ts-spotlight-card__link" href="${link}">${headingHtml}</a>
+    </h3>
+    ${excerptHtml ? `<p class="ts-spotlight-card__excerpt">${excerptHtml}</p>` : ""}
+  </article>`;
 }

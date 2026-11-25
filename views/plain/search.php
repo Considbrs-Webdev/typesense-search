@@ -68,7 +68,34 @@ if (!defined('WPINC')) {
                         <span data-js-search-results-count data-lang-singular="<?php echo esc_attr($lang->resultSingular); ?>"
                             data-lang-plural="<?php echo esc_attr($lang->resultPlural); ?>" hidden></span>
 
+                        <section class="ts-spotlight" data-js-search-spotlight aria-labelledby="ts-spotlight-heading" hidden>
+                            <div class="ts-spotlight__header">
+                                <h2 id="ts-spotlight-heading" class="ts-spotlight__heading">
+                                    <?php echo esc_html($lang->spotlightHeading ?? 'Suggested shortcuts'); ?>
+                                </h2>
+                                <span class="ts-spotlight__badge">
+                                    <?php echo esc_html($lang->spotlightBadge ?? 'Best matches'); ?>
+                                </span>
+                            </div>
+                            <ol class="ts-spotlight__list" data-js-search-spotlight-list role="list"></ol>
+                        </section>
+
                         <ol class="ts-search-results wa-stack" data-js-search-results role="list"></ol>
+
+                        <section class="ts-semantic-rescue" data-js-search-rescue aria-labelledby="ts-rescue-heading" hidden>
+                            <div class="ts-semantic-rescue__header">
+                                <h2 id="ts-rescue-heading" class="ts-semantic-rescue__heading"
+                                    data-js-search-rescue-heading
+                                    data-lang-default="<?php echo esc_attr($lang->rescueHeading ?? 'Related pages'); ?>"
+                                    data-lang-zero="<?php echo esc_attr($lang->rescueZeroHitsHeading ?? 'No exact word matches — showing related pages'); ?>">
+                                    <?php echo esc_html($lang->rescueHeading ?? 'Related pages'); ?>
+                                </h2>
+                                <p class="ts-semantic-rescue__description">
+                                    <?php echo esc_html($lang->rescueDescription ?? 'Pages that match the meaning of your search even if they use different words.'); ?>
+                                </p>
+                            </div>
+                            <ol class="ts-search-results wa-stack" data-js-search-rescue-list role="list"></ol>
+                        </section>
                     </div>
 
                     <div class="wa-stack ts-no-hits-container" data-js-no-hits-container>
@@ -87,26 +114,6 @@ if (!defined('WPINC')) {
                         <button type="button" class="ts-filter-close-btn" data-js-filter-close
                             aria-label="<?php echo esc_attr($lang->closeFilter); ?>">&times;</button>
                     </div>
-
-                    <?php if (!empty($showSearchModeSwitcher)) : ?>
-                        <?php if (($sortDisplay ?? 'radio') === 'dropdown') : ?>
-                            <wa-select size="medium" label="<?php echo esc_attr($lang->searchModeBy ?? 'Search mode'); ?>"
-                                value="<?php echo esc_attr($defaultSearchMode ?? 'hybrid'); ?>" data-js-search-mode>
-                                <wa-option value="hybrid"><?php echo esc_html($lang->searchModeHybrid ?? 'Hybrid (Keyword + AI)'); ?></wa-option>
-                                <wa-option value="keyword"><?php echo esc_html($lang->searchModeKeyword ?? 'Keyword'); ?></wa-option>
-                                <wa-option value="semantic"><?php echo esc_html($lang->searchModeSemantic ?? 'Semantic (AI)'); ?></wa-option>
-                            </wa-select>
-                        <?php else : ?>
-                            <div class="ts-sort-section">
-                                <h3 id="ts-mode-heading" class="ts-sort-heading"><?php echo esc_html($lang->searchModeBy ?? 'Search mode'); ?></h3>
-                                <wa-radio-group value="<?php echo esc_attr($defaultSearchMode ?? 'hybrid'); ?>" data-js-search-mode aria-labelledby="ts-mode-heading">
-                                    <wa-radio value="hybrid"><?php echo esc_html($lang->searchModeHybrid ?? 'Hybrid (Keyword + AI)'); ?></wa-radio>
-                                    <wa-radio value="keyword"><?php echo esc_html($lang->searchModeKeyword ?? 'Keyword'); ?></wa-radio>
-                                    <wa-radio value="semantic"><?php echo esc_html($lang->searchModeSemantic ?? 'Semantic (AI)'); ?></wa-radio>
-                                </wa-radio-group>
-                            </div>
-                        <?php endif; ?>
-                    <?php endif; ?>
 
                     <?php if (($sortDisplay ?? 'radio') === 'dropdown') : ?>
                         <wa-select size="medium" label="<?php echo esc_attr($lang->sortBy); ?>" value="relevance" data-js-sort>

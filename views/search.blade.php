@@ -77,8 +77,40 @@
                                     <span data-js-search-results-count data-lang-singular="{{ $lang->resultSingular }}"
                                         data-lang-plural="{{ $lang->resultPlural }}" hidden></span>
 
+                                    {{-- Top matches spotlight box (Parallel strategy, page 1) --}}
+                                    <section class="ts-spotlight" data-js-search-spotlight
+                                        aria-labelledby="ts-spotlight-heading" hidden>
+                                        <div class="ts-spotlight__header">
+                                            <h2 id="ts-spotlight-heading" class="ts-spotlight__heading">
+                                                {{ $lang->spotlightHeading ?? 'Suggested shortcuts' }}
+                                            </h2>
+                                            <span class="ts-spotlight__badge">
+                                                {{ $lang->spotlightBadge ?? 'Best matches' }}
+                                            </span>
+                                        </div>
+                                        <ol class="ts-spotlight__list" data-js-search-spotlight-list role="list"></ol>
+                                    </section>
+
                                     <ol class="ts-search-results wa-stack" data-js-search-results role="list">
                                     </ol>
+
+                                    {{-- Semantic rescue section (Keyword + Semantic Rescue strategy) --}}
+                                    <section class="ts-semantic-rescue" data-js-search-rescue
+                                        aria-labelledby="ts-rescue-heading" hidden>
+                                        <div class="ts-semantic-rescue__header">
+                                            <h2 id="ts-rescue-heading" class="ts-semantic-rescue__heading"
+                                                data-js-search-rescue-heading
+                                                data-lang-default="{{ $lang->rescueHeading ?? 'Related pages' }}"
+                                                data-lang-zero="{{ $lang->rescueZeroHitsHeading ?? 'No exact word matches — showing related pages' }}">
+                                                {{ $lang->rescueHeading ?? 'Related pages' }}
+                                            </h2>
+                                            <p class="ts-semantic-rescue__description">
+                                                {{ $lang->rescueDescription ?? 'Pages that match the meaning of your search even if they use different words.' }}
+                                            </p>
+                                        </div>
+                                        <ol class="ts-search-results wa-stack" data-js-search-rescue-list role="list">
+                                        </ol>
+                                    </section>
                                 </div>
 
                                 <div class="wa-stack ts-no-hits-container" data-js-no-hits-container>
@@ -100,28 +132,6 @@
                                     <button type="button" class="ts-filter-close-btn" data-js-filter-close
                                         aria-label="{{ $lang->closeFilter }}">&times;</button>
                                 </div>
-
-                                {{-- Search mode switcher (shown only when embedded search is ready and visitor mode switcher is enabled) --}}
-                                @if (!empty($showSearchModeSwitcher))
-                                    @if (($sortDisplay ?? 'radio') === 'dropdown')
-                                        <wa-select size="medium" label="{{ $lang->searchModeBy ?? 'Search mode' }}"
-                                            value="{{ $defaultSearchMode ?? 'hybrid' }}" data-js-search-mode>
-                                            <wa-option value="hybrid">{{ $lang->searchModeHybrid ?? 'Hybrid (Keyword + AI)' }}</wa-option>
-                                            <wa-option value="keyword">{{ $lang->searchModeKeyword ?? 'Keyword' }}</wa-option>
-                                            <wa-option value="semantic">{{ $lang->searchModeSemantic ?? 'Semantic (AI)' }}</wa-option>
-                                        </wa-select>
-                                    @else
-                                        <div class="ts-sort-section">
-                                            <h3 id="ts-mode-heading" class="ts-sort-heading">{{ $lang->searchModeBy ?? 'Search mode' }}</h3>
-                                            <wa-radio-group value="{{ $defaultSearchMode ?? 'hybrid' }}" data-js-search-mode
-                                                aria-labelledby="ts-mode-heading">
-                                                <wa-radio value="hybrid">{{ $lang->searchModeHybrid ?? 'Hybrid (Keyword + AI)' }}</wa-radio>
-                                                <wa-radio value="keyword">{{ $lang->searchModeKeyword ?? 'Keyword' }}</wa-radio>
-                                                <wa-radio value="semantic">{{ $lang->searchModeSemantic ?? 'Semantic (AI)' }}</wa-radio>
-                                            </wa-radio-group>
-                                        </div>
-                                    @endif
-                                @endif
 
                                 {{-- Sort — style controlled by admin setting (sortDisplay: 'radio'|'dropdown') --}}
                                 @if (($sortDisplay ?? 'radio') === 'dropdown')
