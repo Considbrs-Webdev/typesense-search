@@ -81,6 +81,36 @@ class NetworkSettingsRepository
         return \TypesenseSearch\Typesense\EmbeddingModels::sanitizeModel($saved);
     }
 
+    /**
+     * Raw network map of `source_blog_id => target_blog_id[]` for cross-site multi-search.
+     *
+     * @return array<int, int[]>
+     */
+    public function multiSearchMap(): array
+    {
+        $raw = get_network_option($this->networkId(), self::MULTISEARCH, []);
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($raw as $sourceKey => $targets) {
+            $sourceId = absint($sourceKey);
+            if ($sourceId <= 0 || !is_array($targets)) {
+                continue;
+            }
+            $cleanTargets = array_values(array_unique(array_filter(
+                array_map('absint', $targets),
+                static fn (int $t): bool => $t > 0 && $t !== $sourceId
+            )));
+            if ($cleanTargets !== []) {
+                $normalized[$sourceId] = $cleanTargets;
+            }
+        }
+
+        return $normalized;
+    }
+
     public function identity(): array
     {
         return (new CollectionNameResolver())->identity() + [

@@ -64,8 +64,16 @@ class NetworkSettingsPage
         $network = new NetworkSettingsRepository();
         $networkId = $network->networkId();
         $section = sanitize_key($_POST['section'] ?? '');
-        if (!in_array($section, ['connection', 'sites', 'status'], true)) {
+        if (!in_array($section, ['connection', 'sites', 'status', 'multi-search'], true)) {
             wp_die(esc_html__('Invalid settings section.', 'typesense-search'));
+        }
+        if ($section === 'multi-search') {
+            $enabled = array_map('intval', (array) get_network_option($networkId, NetworkSettingsRepository::ENABLED, []));
+            $rawMap  = wp_unslash($_POST['multisearch'] ?? []); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+            $clean   = \TypesenseSearch\Multisite\MultiSearchResolver::sanitizeMap($rawMap, $enabled);
+            update_network_option($networkId, NetworkSettingsRepository::MULTISEARCH, $clean);
+            wp_safe_redirect(network_admin_url('settings.php?page=' . self::SLUG . '&tab=multi-search&saved=1'));
+            exit;
         }
         if ($section === 'status') {
             try {
@@ -202,7 +210,30 @@ class NetworkSettingsPage
                 // The health endpoint requires no key at all; only an authenticated call actually proves the admin key works.
                 $client->collections->retrieve();
                 (new \TypesenseSearch\Multisite\ProvisioningGateway())->verify($connection, $mapping);
+                $verifiedSchema = \TypesenseSearch\Typesense\SchemaInspector::refreshLiveState(
+                    $client,
+                    $connection['remote'],
+                    (string) ($mapping['collection'] ?? '')
+                );
                 $message = __('Server connection, admin key and site search key are working.', 'typesense-search');
+                $siteSettings = new \TypesenseSearch\Services\SettingsRepository();
+                if ($siteSettings->isVectorSearchEnabled()) {
+                    $compat = \TypesenseSearch\Typesense\SchemaInspector::evaluateCompatibility(
+                        true,
+                        $network->vectorModel(),
+                        $siteSettings->isStemmingEnabled(),
+                        $verifiedSchema
+                    );
+                    if ($compat['ok']) {
+                        $message .= ' ' . sprintf(
+                            /* translators: %s: embedding model name */
+                            __('Embedded search verified (%s).', 'typesense-search'),
+                            $network->vectorModel()
+                        );
+                    } else {
+                        $message .= ' ' . implode(' ', $compat['reasons']);
+                    }
+                }
             } else {
                 throw new \TypesenseSearch\Multisite\SetupException(__('Unknown operation.', 'typesense-search'));
             }
@@ -250,7 +281,7 @@ class NetworkSettingsPage
     public static function tab(mixed $tab): string
     {
         // Old status links now lead to the site checks.
-        return $tab === 'status' ? 'sites' : (in_array($tab, ['connection', 'sites'], true) ? $tab : 'connection');
+        return $tab === 'status' ? 'sites' : (in_array($tab, ['connection', 'sites', 'multi-search'], true) ? $tab : 'connection');
     }
 
     /** Invalidate checks when credentials or the saved mapping change; never expose secrets. */
@@ -333,6 +364,15 @@ class NetworkSettingsPage
         $sites = get_sites(['network_id' => $networkId, 'number' => 0, 'archived' => 0, 'spam' => 0, 'deleted' => 0]);
         $tab = self::tab($_GET['tab'] ?? 'connection');
         $run = SetupDispatcher::pending(is_string($_GET['setup_run'] ?? null) ? $_GET['setup_run'] : '');
+        $supportsUnionSearch = true;
+        $serverVersionChecked = '';
+        if ($tab === 'multi-search' && $connection['remote'] !== '' && $connection['admin_key'] !== '') {
+            $caps = new \TypesenseSearch\Typesense\ServerCapabilities(
+                \TypesenseSearch\Typesense\AdminApi::forConnection($connection['remote'], $connection['admin_key'])
+            );
+            $serverVersionChecked = $caps->getServerVersion();
+            $supportsUnionSearch  = $serverVersionChecked === '' || $caps->supportsUnionSearch();
+        }
         include TYPESENSESEARCH_PATH . 'views/admin/network/settings.php';
     }
 }

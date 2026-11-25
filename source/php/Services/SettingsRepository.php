@@ -197,10 +197,10 @@ class SettingsRepository
     }
 
     /**
-     * True only when embedded search is enabled AND verified live schema state
-     * confirms the active collection has an `embedding` field with the configured model.
+     * True when this site's own collection has a verified `embedding` field
+     * matching the configured model (independent of cross-site multi-search).
      */
-    public function isVectorSearchReady(): bool
+    public function isSiteVectorSearchReady(): bool
     {
         if (!$this->canUseTypesense() || !$this->isVectorSearchEnabled()) {
             return false;
@@ -211,6 +211,35 @@ class SettingsRepository
             $this->getCollectionName(),
             $this->getVectorModel()
         );
+    }
+
+    /**
+     * True when embedded search is ready to run at query time — including
+     * verifying that every active sibling collection in a multi-search group
+     * shares the same verified embedding model.
+     */
+    public function isVectorSearchReady(): bool
+    {
+        if (!$this->isSiteVectorSearchReady()) {
+            return false;
+        }
+
+        $multiSearch = $this->getMultiSearchResolution();
+        if ($multiSearch['enabled'] && !$multiSearch['vector_compatible']) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Resolve cross-site multi-search targets and compatibility for the current site.
+     *
+     * @return array<string, mixed>
+     */
+    public function getMultiSearchResolution(): array
+    {
+        return (new \TypesenseSearch\Multisite\MultiSearchResolver($this->network()))->resolveForCurrentSite();
     }
 
     // ── Search statistics ──────────────────────────────────────────────────

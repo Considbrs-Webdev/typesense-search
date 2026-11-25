@@ -83,22 +83,37 @@ class SchemaRebuildNotice
             $verified
         );
 
-        if ($compat['ok']) {
+        $messages = $compat['ok'] ? [] : $compat['reasons'];
+
+        $isMultiSearchNotice = false;
+        $networkMode         = $this->settings->network()->isNetworkActivated();
+        if ($networkMode && $compat['ok']) {
+            $multiSearch = $this->settings->getMultiSearchResolution();
+            if (!empty($multiSearch['vector_paused_reason'])) {
+                $messages[]          = (string) $multiSearch['vector_paused_reason'];
+                $isMultiSearchNotice = true;
+            }
+        }
+
+        if ($messages === []) {
             return;
         }
 
-        $networkMode = $this->settings->network()->isNetworkActivated();
-        $actionUrl   = $networkMode
-            ? admin_url('admin.php?page=' . OptionKeys::PAGE_SLUG . '&tab=advanced-settings')
-            : admin_url('admin.php?page=' . OptionKeys::PAGE_SLUG . '&tab=status');
-        $actionLabel = $networkMode
-            ? __('Open search settings', 'typesense-search')
-            : __('Check status', 'typesense-search');
+        if ($isMultiSearchNotice && current_user_can('manage_network_options')) {
+            $actionUrl   = network_admin_url('settings.php?page=typesense-network&tab=multi-search');
+            $actionLabel = __('Configure multi-search', 'typesense-search');
+        } elseif ($networkMode) {
+            $actionUrl   = admin_url('admin.php?page=' . OptionKeys::PAGE_SLUG . '&tab=advanced-settings');
+            $actionLabel = __('Open search settings', 'typesense-search');
+        } else {
+            $actionUrl   = admin_url('admin.php?page=' . OptionKeys::PAGE_SLUG . '&tab=status');
+            $actionLabel = __('Check status', 'typesense-search');
+        }
 
         printf(
             '<div class="notice notice-warning"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
             esc_html__('Typesense Search:', 'typesense-search'),
-            esc_html(implode(' ', $compat['reasons'])),
+            esc_html(implode(' ', $messages)),
             esc_url($actionUrl),
             esc_html($actionLabel)
         );

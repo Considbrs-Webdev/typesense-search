@@ -366,5 +366,70 @@ use TypesenseSearch\Admin\Settings;
             </div>
         </div>
         <?php endif; ?>
+
+        <?php if (!empty($networkMode) && is_array($multiSearchResolution ?? null)) : ?>
+        <div class="ts-field">
+            <div class="ts-field__label"><?php esc_html_e('Cross-site multi-search', 'typesense-search'); ?></div>
+            <div class="ts-field__body">
+                <?php if (!empty($multiSearchResolution['enabled'])) :
+                    $siblingNames = array_map(
+                        static fn (array $item): string => (string) $item['site_name'],
+                        array_slice($multiSearchResolution['collections'], 1)
+                    );
+                ?>
+                    <p style="margin-top: 0;">
+                        <strong><?php esc_html_e('Active', 'typesense-search'); ?></strong> &mdash;
+                        <?php echo esc_html(sprintf(
+                            /* translators: %s: comma-separated list of sibling site names */
+                            __('Search on this site also includes results from: %s.', 'typesense-search'),
+                            implode(', ', $siblingNames)
+                        )); ?>
+                    </p>
+                <?php elseif (!empty($multiSearchResolution['configured'])) : ?>
+                    <p style="margin-top: 0;">
+                        <strong><?php esc_html_e('Configured (inactive)', 'typesense-search'); ?></strong> &mdash;
+                        <?php esc_html_e('Cross-site targets are configured, but none are currently active/ready. This site currently searches only its own index.', 'typesense-search'); ?>
+                    </p>
+                <?php else : ?>
+                    <p style="margin-top: 0;">
+                        <?php esc_html_e('Off — this site only searches its own index.', 'typesense-search'); ?>
+                    </p>
+                <?php endif; ?>
+
+                <?php if (!empty($multiSearchResolution['vector_paused_reason'])) : ?>
+                    <div class="notice notice-warning inline" style="margin: 8px 0;">
+                        <p><?php echo esc_html((string) $multiSearchResolution['vector_paused_reason']); ?></p>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($multiSearchResolution['skipped_targets'])) : ?>
+                    <div class="notice notice-warning inline" style="margin: 8px 0;">
+                        <p>
+                            <?php
+                            $skippedItems = array_map(
+                                static fn (array $s): string => sprintf('%s (%s)', $s['site_name'], $s['reason']),
+                                (array) $multiSearchResolution['skipped_targets']
+                            );
+                            echo esc_html(sprintf(
+                                /* translators: %s: list of skipped target sites */
+                                __('Skipped target site(s): %s', 'typesense-search'),
+                                implode('; ', $skippedItems)
+                            ));
+                            ?>
+                        </p>
+                    </div>
+                <?php endif; ?>
+
+                <p class="ts-field__description">
+                    <?php esc_html_e('Cross-site multi-search is managed by the network administrator.', 'typesense-search'); ?>
+                    <?php if (current_user_can('manage_network_options')) : ?>
+                        <a href="<?php echo esc_url(network_admin_url('settings.php?page=typesense-network&tab=multi-search')); ?>">
+                            <?php esc_html_e('Configure in Network settings', 'typesense-search'); ?>
+                        </a>
+                    <?php endif; ?>
+                </p>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>

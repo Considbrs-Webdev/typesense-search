@@ -172,6 +172,9 @@ class SettingsPage
         $vectorModelPresets       = EmbeddingModels::presets();
         $effectiveVectorModel     = $settingsRepo->getVectorModel();
         $networkMode              = $settingsRepo->network()->isNetworkActivated();
+        $multiSearchResolution    = $networkMode && $activeTab === 'advanced-settings'
+            ? $settingsRepo->getMultiSearchResolution()
+            : null;
         $provisioningAvailable    = ProvisioningCredentials::isAvailableFor($settingsRepo->getRemote());
 
         include TYPESENSESEARCH_PATH . 'views/admin/settings-page.php';

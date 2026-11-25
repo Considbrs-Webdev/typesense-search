@@ -72,6 +72,9 @@ class SchemaRebuildNoticeTest extends TestCase
 
     public function test_renders_nothing_when_schema_matches_settings(): void
     {
+        $network = Mockery::mock(NetworkSettingsRepository::class);
+        $network->shouldReceive('isNetworkActivated')->andReturn(false);
+
         $settings = Mockery::mock(SettingsRepository::class);
         $settings->shouldReceive('canUseTypesense')->andReturn(true);
         $settings->shouldReceive('getRemote')->andReturn('https://search.example.com');
@@ -79,6 +82,7 @@ class SchemaRebuildNoticeTest extends TestCase
         $settings->shouldReceive('isVectorSearchEnabled')->andReturn(true);
         $settings->shouldReceive('getVectorModel')->andReturn(EmbeddingModels::DEFAULT_MODEL);
         $settings->shouldReceive('isStemmingEnabled')->andReturn(false);
+        $settings->shouldReceive('network')->andReturn($network);
 
         Functions\when('current_user_can')->justReturn(true);
         Functions\when('get_option')->justReturn([
@@ -94,5 +98,47 @@ class SchemaRebuildNoticeTest extends TestCase
         (new SchemaRebuildNotice($settings))->renderNotice();
 
         self::assertSame('', ob_get_clean());
+    }
+
+    public function test_renders_multisearch_vector_paused_warning_in_network_mode(): void
+    {
+        $network = Mockery::mock(NetworkSettingsRepository::class);
+        $network->shouldReceive('isNetworkActivated')->andReturn(true);
+
+        $settings = Mockery::mock(SettingsRepository::class);
+        $settings->shouldReceive('canUseTypesense')->andReturn(true);
+        $settings->shouldReceive('getRemote')->andReturn('https://search.example.com');
+        $settings->shouldReceive('getCollectionName')->andReturn('main_col');
+        $settings->shouldReceive('isVectorSearchEnabled')->andReturn(true);
+        $settings->shouldReceive('getVectorModel')->andReturn(EmbeddingModels::DEFAULT_MODEL);
+        $settings->shouldReceive('isStemmingEnabled')->andReturn(false);
+        $settings->shouldReceive('network')->andReturn($network);
+        $settings->shouldReceive('getMultiSearchResolution')->andReturn([
+            'enabled'              => true,
+            'vector_compatible'    => false,
+            'vector_paused_reason' => 'Embedded search is temporarily paused on this site because cross-site multi-search includes Tourism Portal.',
+        ]);
+
+        Functions\when('current_user_can')->justReturn(true);
+        Functions\when('get_option')->justReturn([
+            'remote'          => 'https://search.example.com',
+            'collection'      => 'main_col',
+            'has_embedding'   => true,
+            'embedding_model' => EmbeddingModels::DEFAULT_MODEL,
+            'has_stemming'    => false,
+            'verified_at'     => 123,
+        ]);
+        Functions\when('admin_url')->returnArg(1);
+        Functions\when('network_admin_url')->returnArg(1);
+        Functions\when('esc_html__')->returnArg(1);
+        Functions\when('esc_html')->returnArg(1);
+        Functions\when('esc_url')->returnArg(1);
+
+        ob_start();
+        (new SchemaRebuildNotice($settings))->renderNotice();
+        $html = (string) ob_get_clean();
+
+        self::assertStringContainsString('Tourism Portal', $html);
+        self::assertStringContainsString('tab=multi-search', $html);
     }
 }
