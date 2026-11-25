@@ -101,6 +101,28 @@
                                         aria-label="{{ $lang->closeFilter }}">&times;</button>
                                 </div>
 
+                                {{-- Search mode switcher (shown only when embedded search is ready and visitor mode switcher is enabled) --}}
+                                @if (!empty($showSearchModeSwitcher))
+                                    @if (($sortDisplay ?? 'radio') === 'dropdown')
+                                        <wa-select size="medium" label="{{ $lang->searchModeBy ?? 'Search mode' }}"
+                                            value="{{ $defaultSearchMode ?? 'hybrid' }}" data-js-search-mode>
+                                            <wa-option value="hybrid">{{ $lang->searchModeHybrid ?? 'Hybrid (Keyword + AI)' }}</wa-option>
+                                            <wa-option value="keyword">{{ $lang->searchModeKeyword ?? 'Keyword' }}</wa-option>
+                                            <wa-option value="semantic">{{ $lang->searchModeSemantic ?? 'Semantic (AI)' }}</wa-option>
+                                        </wa-select>
+                                    @else
+                                        <div class="ts-sort-section">
+                                            <h3 id="ts-mode-heading" class="ts-sort-heading">{{ $lang->searchModeBy ?? 'Search mode' }}</h3>
+                                            <wa-radio-group value="{{ $defaultSearchMode ?? 'hybrid' }}" data-js-search-mode
+                                                aria-labelledby="ts-mode-heading">
+                                                <wa-radio value="hybrid">{{ $lang->searchModeHybrid ?? 'Hybrid (Keyword + AI)' }}</wa-radio>
+                                                <wa-radio value="keyword">{{ $lang->searchModeKeyword ?? 'Keyword' }}</wa-radio>
+                                                <wa-radio value="semantic">{{ $lang->searchModeSemantic ?? 'Semantic (AI)' }}</wa-radio>
+                                            </wa-radio-group>
+                                        </div>
+                                    @endif
+                                @endif
+
                                 {{-- Sort — style controlled by admin setting (sortDisplay: 'radio'|'dropdown') --}}
                                 @if (($sortDisplay ?? 'radio') === 'dropdown')
                                     <wa-select size="medium" label="{{ $lang->sortBy }}" value="relevance" data-js-sort>

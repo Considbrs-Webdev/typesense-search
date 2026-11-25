@@ -50,6 +50,10 @@ class EnrichSearchTemplate
 			'relevance' => __("Relevance", 'typesense-search'),
 			'dateAsc' => __("Date Ascending", 'typesense-search'),
 			'dateDesc' => __("Date Descending", 'typesense-search'),
+			'searchModeBy' => __('Search mode', 'typesense-search'),
+			'searchModeHybrid' => __('Hybrid (Keyword + AI)', 'typesense-search'),
+			'searchModeKeyword' => __('Keyword', 'typesense-search'),
+			'searchModeSemantic' => __('Semantic (AI)', 'typesense-search'),
 			'filter' => __("Filter", 'typesense-search'),
 			'closeFilter' => __("Close filter", 'typesense-search'),
 			'paginationPrevious' => __('Previous page', 'typesense-search'),
@@ -63,6 +67,11 @@ class EnrichSearchTemplate
 
 		// Sort control style: 'radio' | 'dropdown' — controlled by admin setting
 		$data['sortDisplay'] = $this->settings->getSortDisplay();
+
+		// Embedded search mode switcher — only shown when live schema is verified ready AND visitor switcher is enabled
+		$vectorReady                    = $this->settings->isVectorSearchReady();
+		$data['showSearchModeSwitcher'] = $vectorReady && $this->settings->isVectorModeSwitcherEnabled();
+		$data['defaultSearchMode']      = $vectorReady ? $this->settings->getVectorDefaultMode() : 'keyword';
 
 		// Home URL used by the search form
 		$data['homeUrl'] = $data['homeUrl'] ?? home_url('/');

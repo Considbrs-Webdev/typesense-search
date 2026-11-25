@@ -3,18 +3,17 @@
 // ---------------------------------------------------------------------------
 
 import { Client as TypesenseClient } from "typesense";
-import type { SearchResponse } from "typesense";
 import type {
-  HitDocument,
-  SearchHit,
-  FacetCount,
   FacetData,
   TypesenseSearchConfig,
 } from "./types";
 import type { UrlState } from "./url-state";
 import { renderHit } from "./templates";
 import { renderPagination } from "./pagination";
-import { getQueryByWeights, INFIX, QUERY_BY } from "./search-params";
+import {
+  executeDisjunctiveFacets,
+  executeDocumentSearch,
+} from "./multi-search";
 
 function buildFilterBy(facetFilters: Record<string, string[]>): string {
   return Object.entries(facetFilters)
@@ -31,19 +30,6 @@ function buildSortBy(sort: string): string | undefined {
   if (sort === "dateDesc") return "date:desc";
   if (sort === "dateAsc") return "date:asc";
   return undefined;
-}
-
-function extractFacetCounts(
-  response: SearchResponse<HitDocument>,
-  field: string,
-): FacetCount[] {
-  const facetResult = response.facet_counts?.find(
-    (f) => f.field_name === field,
-  );
-  return (facetResult?.counts ?? []).map((c) => ({
-    value: String(c.value),
-    count: c.count,
-  }));
 }
 
 export function createSearchRunner(
@@ -121,62 +107,45 @@ export async function runSearch(
     const filterBy = buildFilterBy(state.facetFilters);
     const sortBy = buildSortBy(state.sort);
 
-    // Main search promise.
-    const queryByWeights = getQueryByWeights(config);
     const mainSearchPromise = shouldSearch
-      ? (client
-          .collections(config.collection)
-          .documents()
-          .search({
-            q,
-            query_by: QUERY_BY,
-            infix: INFIX,
-            highlight_full_fields: "title,excerpt,content",
-            highlight_affix_num_tokens: config.highlightAffixNumTokens ?? 15,
-            per_page: config.hitsPerPage,
-            page: state.page,
-            ...(queryByWeights ? { query_by_weights: queryByWeights } : {}),
-            ...(filterBy ? { filter_by: filterBy } : {}),
-            ...(sortBy ? { sort_by: sortBy } : {}),
-          }) as Promise<SearchResponse<HitDocument>>)
+      ? executeDocumentSearch(client, config, {
+          q,
+          hasQuery,
+          mode: state.mode,
+          page: state.page,
+          perPage: config.hitsPerPage,
+          filterBy: filterBy || undefined,
+          sortBy,
+          highlightFullFields: "title,excerpt,content",
+        })
       : Promise.resolve(null);
 
-    // For each facet field, run a disjunctive query:
-    // Filter by all OTHER active facets (not this field) so the available
-    // options for this facet are never constrained by its own selection.
-    const facetPromises = facetFields.map((field) => {
-      const otherFilters = Object.fromEntries(
-        Object.entries(state.facetFilters).filter(([k]) => k !== field),
-      );
-      const filterByOthers = buildFilterBy(otherFilters);
-
-      return client
-        .collections(config.collection)
-        .documents()
-        .search({
-          q,
-          query_by: QUERY_BY,
-          ...(queryByWeights ? { query_by_weights: queryByWeights } : {}),
-          per_page: 0,
-          facet_by: field,
-          max_facet_values: 200,
-          ...(filterByOthers ? { filter_by: filterByOthers } : {}),
-        }) as Promise<SearchResponse<HitDocument>>;
+    const facetsPromise = executeDisjunctiveFacets(client, config, {
+      q,
+      hasQuery,
+      mode: state.mode,
+      facetFields,
+      facetFilters: state.facetFilters,
+      buildFilterBy,
     });
 
-    const [response, ...facetResponses] = await Promise.all([
+    const [response, facetData] = await Promise.all([
       mainSearchPromise,
-      ...facetPromises,
+      facetsPromise,
     ]);
 
-    if (requestId !== undefined && getLatestRequestId && requestId !== getLatestRequestId()) {
+    if (
+      requestId !== undefined &&
+      getLatestRequestId &&
+      requestId !== getLatestRequestId()
+    ) {
       return null;
     }
 
     if (shouldSearch && response) {
-      const hits = (response.hits ?? []) as SearchHit[];
+      const hits = response.hits;
       if (hasQuery) {
-        onSearchComplete?.(state.query, response.found ?? 0);
+        onSearchComplete?.(state.query, response.found);
       }
 
       const resultsContainer = resultsEl.closest<HTMLElement>(
@@ -209,8 +178,8 @@ export async function runSearch(
         if (paginationEl) {
           renderPagination(
             paginationEl,
-            response.found ?? 0,
-            response.request_params?.per_page ?? 20,
+            response.found,
+            response.perPage || config.hitsPerPage || 20,
             state.page,
             onPageChange,
           );
@@ -238,12 +207,6 @@ export async function runSearch(
         }
       }
     }
-
-    // Build the result map: field → FacetCount[]
-    const facetData: FacetData = {};
-    facetFields.forEach((field, i) => {
-      facetData[field] = extractFacetCounts(facetResponses[i], field);
-    });
 
     return facetData;
   } catch (err) {

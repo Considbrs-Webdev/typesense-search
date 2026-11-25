@@ -78,6 +78,10 @@ class TypesenseConfig
 		$collection  = $this->settings->getCollectionName();
 		$searchKey   = $this->settings->getSearchKey();
 
+		$defaultMode      = $this->settings->getVectorDefaultMode();
+		$vectorReady      = $this->settings->isVectorSearchReady();
+		$showModeSwitcher = $vectorReady && $this->settings->isVectorModeSwitcherEnabled();
+
 		$config = [
 			'host'                    => esc_url_raw($frontendHost ?: $host),
 			'collection'              => sanitize_text_field($collection),
@@ -90,7 +94,32 @@ class TypesenseConfig
 			'truncator'               => sanitize_text_field($this->settings->getTruncator()),
 			'sortDisplay'             => $this->settings->getSortDisplay(),
 			'webAwesomeLocale'        => self::webAwesomeLocale(),
+			'vectorSearch'            => [
+				'enabled'          => $vectorReady,
+				'defaultMode'      => $vectorReady ? $defaultMode : 'keyword',
+				'showModeSwitcher' => $showModeSwitcher,
+			],
 		];
+
+		if ($this->settings->network()->isNetworkActivated()) {
+			$multiSearch = $this->settings->getMultiSearchResolution();
+			if (!empty($multiSearch['enabled']) && count($multiSearch['collections']) > 1) {
+				$config['multiSearch'] = [
+					'enabled'     => true,
+					'collections' => array_values(array_map(
+						static fn (array $item): array => [
+							'collection'      => sanitize_text_field((string) ($item['collection'] ?? '')),
+							'searchKey'       => sanitize_text_field((string) ($item['search_key'] ?? '')),
+							'siteId'          => (int) ($item['blog_id'] ?? 0),
+							'siteName'        => sanitize_text_field((string) ($item['site_name'] ?? '')),
+							'homeUrl'         => esc_url_raw((string) ($item['home_url'] ?? '')),
+							'enableCurations' => !empty($item['enable_curations']),
+						],
+						$multiSearch['collections']
+					)),
+				];
+			}
+		}
 
 		if ($isSearch) {
 			$config['documentTitle'] = $this->documentTitleConfig();

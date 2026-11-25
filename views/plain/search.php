@@ -88,6 +88,26 @@ if (!defined('WPINC')) {
                             aria-label="<?php echo esc_attr($lang->closeFilter); ?>">&times;</button>
                     </div>
 
+                    <?php if (!empty($showSearchModeSwitcher)) : ?>
+                        <?php if (($sortDisplay ?? 'radio') === 'dropdown') : ?>
+                            <wa-select size="medium" label="<?php echo esc_attr($lang->searchModeBy ?? 'Search mode'); ?>"
+                                value="<?php echo esc_attr($defaultSearchMode ?? 'hybrid'); ?>" data-js-search-mode>
+                                <wa-option value="hybrid"><?php echo esc_html($lang->searchModeHybrid ?? 'Hybrid (Keyword + AI)'); ?></wa-option>
+                                <wa-option value="keyword"><?php echo esc_html($lang->searchModeKeyword ?? 'Keyword'); ?></wa-option>
+                                <wa-option value="semantic"><?php echo esc_html($lang->searchModeSemantic ?? 'Semantic (AI)'); ?></wa-option>
+                            </wa-select>
+                        <?php else : ?>
+                            <div class="ts-sort-section">
+                                <h3 id="ts-mode-heading" class="ts-sort-heading"><?php echo esc_html($lang->searchModeBy ?? 'Search mode'); ?></h3>
+                                <wa-radio-group value="<?php echo esc_attr($defaultSearchMode ?? 'hybrid'); ?>" data-js-search-mode aria-labelledby="ts-mode-heading">
+                                    <wa-radio value="hybrid"><?php echo esc_html($lang->searchModeHybrid ?? 'Hybrid (Keyword + AI)'); ?></wa-radio>
+                                    <wa-radio value="keyword"><?php echo esc_html($lang->searchModeKeyword ?? 'Keyword'); ?></wa-radio>
+                                    <wa-radio value="semantic"><?php echo esc_html($lang->searchModeSemantic ?? 'Semantic (AI)'); ?></wa-radio>
+                                </wa-radio-group>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
                     <?php if (($sortDisplay ?? 'radio') === 'dropdown') : ?>
                         <wa-select size="medium" label="<?php echo esc_attr($lang->sortBy); ?>" value="relevance" data-js-sort>
                             <wa-option value="relevance"><?php echo esc_html($lang->relevance); ?></wa-option>

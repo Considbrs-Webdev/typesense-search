@@ -25,8 +25,17 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
       ' <i class="fa-solid fa-up-right-from-square ts-external-link-icon" aria-hidden="true"></i>';
     return { value: text + icon, highlighted: true };
   },
-  SEARCH_HIT_SUBHEADING: (d) =>
-    String(d.post_type_name ?? d.type_name ?? d.post_date_formatted ?? ""),
+  SEARCH_HIT_SUBHEADING: (d) => {
+    const base = String(
+      d.post_type_name ?? d.type_name ?? d.post_date_formatted ?? "",
+    );
+    if (d._ts_is_sibling_site && d._ts_site_name) {
+      const site = String(d._ts_site_name);
+      return base ? `${site} · ${base}` : site;
+    }
+    return base;
+  },
+  SEARCH_HIT_SITE_NAME: (d) => String(d._ts_site_name ?? ""),
   SEARCH_HIT_EXCERPT: (d, h) => {
     const excerptSnippet = h?.excerpt?.snippet;
     const contentSnippet = h?.content?.snippet;

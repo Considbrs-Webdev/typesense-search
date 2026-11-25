@@ -7,7 +7,12 @@ import "@awesome.me/webawesome/dist/components/radio/radio.js";
 import { createClient } from "./typesense-search/client";
 import { createSearchRunner } from "./typesense-search/search";
 import { getHitTemplates } from "./typesense-search/templates";
-import { getUrlState, updateUrlState } from "./typesense-search/url-state";
+import {
+  getDefaultSearchMode,
+  getUrlState,
+  isValidSearchMode,
+  updateUrlState,
+} from "./typesense-search/url-state";
 import { setupFacets, programmaticUpdates } from "./typesense-search/facets";
 import { loadWebAwesomeLocale } from "./typesense-search/webawesome-locale";
 import { createSearchStatisticsTracker } from "./typesense-search/search-statistics";
@@ -61,6 +66,7 @@ function init(): void {
     "[data-js-search-page-search-input]",
   );
   const sortEl = container.querySelector<HTMLElement>("[data-js-sort]");
+  const modeEl = container.querySelector<HTMLElement>("[data-js-search-mode]");
   const paginationEl = container.querySelector<HTMLElement>(
     "[data-js-search-pagination]",
   );
@@ -188,7 +194,7 @@ function init(): void {
   // ── URL → UI sync ────────────────────────────────────────────────────────
 
   const syncUiFromUrl = (): void => {
-    const { query, sort, facetFilters } = getUrlState();
+    const { query, sort, mode, facetFilters } = getUrlState(config);
 
     (inputEl as any).value = query;
 
@@ -197,6 +203,16 @@ function init(): void {
       requestAnimationFrame(() => {
         (sortEl as any).value = sort || "relevance";
         requestAnimationFrame(() => programmaticUpdates.delete(sortEl));
+      });
+    }
+
+    if (modeEl) {
+      const nextMode = mode || getDefaultSearchMode(config);
+      programmaticUpdates.add(modeEl);
+      requestAnimationFrame(() => {
+        modeEl.setAttribute("value", nextMode);
+        (modeEl as any).value = nextMode;
+        requestAnimationFrame(() => programmaticUpdates.delete(modeEl));
       });
     }
 
@@ -238,6 +254,17 @@ function init(): void {
     sortEl.addEventListener("change", () => {
       if (programmaticUpdates.has(sortEl)) return;
       updateUrlState({ sort: (sortEl as any).value || "relevance", page: 1 });
+    });
+  }
+
+  if (modeEl) {
+    modeEl.addEventListener("change", () => {
+      if (programmaticUpdates.has(modeEl)) return;
+      const rawValue = (modeEl as any).value;
+      const nextMode = isValidSearchMode(rawValue)
+        ? rawValue
+        : getDefaultSearchMode(config);
+      updateUrlState({ mode: nextMode, page: 1 }, {}, config);
     });
   }
 

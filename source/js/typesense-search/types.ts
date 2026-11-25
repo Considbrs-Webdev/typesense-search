@@ -2,11 +2,33 @@
 // Shared types
 // ---------------------------------------------------------------------------
 
+export type SearchMode = "keyword" | "hybrid" | "semantic";
+
 export interface FacetConfig {
   field: string;
   label: string;
   placeholder: string;
   display_as: "dropdown" | "button_group";
+}
+
+export interface VectorSearchConfig {
+  enabled: boolean;
+  defaultMode: SearchMode;
+  showModeSwitcher?: boolean;
+}
+
+export interface MultiSearchCollectionConfig {
+  collection: string;
+  searchKey: string;
+  siteId: number;
+  siteName: string;
+  homeUrl: string;
+  enableCurations: boolean;
+}
+
+export interface MultiSearchConfig {
+  enabled: boolean;
+  collections: MultiSearchCollectionConfig[];
 }
 
 export interface TypesenseSearchConfig {
@@ -20,11 +42,16 @@ export interface TypesenseSearchConfig {
   debounceDelay?: number;
   highlightAffixNumTokens?: number;
   queryByWeights?: string;
+  truncator?: string;
   sortDisplay?: "radio" | "dropdown";
   searchLogging?: SearchStatisticsConfig;
   /** Web Awesome translation module key (e.g. `sv`); omit for English internals. */
   webAwesomeLocale?: string | null;
   documentTitle?: { template: string; empty: string };
+  templateMapping?: Record<string, string>;
+  placeholderMappings?: Record<string, string>;
+  vectorSearch?: VectorSearchConfig;
+  multiSearch?: MultiSearchConfig;
 }
 
 export interface SearchStatisticsConfig {

@@ -28,10 +28,14 @@ export function createClient(
         : 80;
     const path = normalizePath(url.pathname);
 
+    const extendedTimeout = Boolean(
+      cfg.vectorSearch?.enabled || cfg.multiSearch?.enabled,
+    );
+
     return new TypesenseClient({
       nodes: [{ host, port, protocol, path }],
       apiKey: cfg.searchKey,
-      connectionTimeoutSeconds: 5,
+      connectionTimeoutSeconds: extendedTimeout ? 15 : 5,
     });
   } catch (e) {
     console.error("[TypesenseSearch] Invalid host config:", e);
