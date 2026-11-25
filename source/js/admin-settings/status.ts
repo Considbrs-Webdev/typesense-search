@@ -67,15 +67,19 @@ export function init(): void {
             setStatusItem('ts-status-connection', false, msg);
             setStatusItem('ts-status-admin-key',  false, '');
             setStatusItem('ts-status-collection',  false, '');
+            setStatusItem('ts-status-schema',     false, '');
             setStatusItem('ts-status-search-key', false, '');
             if (statusResults) statusResults.hidden = false;
             return;
         }
 
-        const { connection, adminKey, collection, searchKey, collectionCanFix, searchKeyCanFix } = data.data as Record<string, { ok: boolean; message: string }> & { collectionCanFix: boolean; searchKeyCanFix: boolean };
+        const { connection, adminKey, collection, schema, searchKey, collectionCanFix, searchKeyCanFix } = data.data as Record<string, { ok: boolean; message: string }> & { collectionCanFix: boolean; searchKeyCanFix: boolean };
         setStatusItem('ts-status-connection', connection.ok,  connection.message);
         setStatusItem('ts-status-admin-key',  adminKey.ok,    adminKey.message);
         setStatusItem('ts-status-collection',  collection.ok,  collection.message);
+        if (schema) {
+            setStatusItem('ts-status-schema', schema.ok,      schema.message);
+        }
         setStatusItem('ts-status-search-key', searchKey.ok,   searchKey.message);
 
         if (!collection.ok && collectionCanFix && createColWrap) createColWrap.hidden = false;

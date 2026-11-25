@@ -9,6 +9,9 @@ class NetworkSettingsRepository
     public const ADMIN_KEY = 'typesense_network_admin_key';
     public const FRONTEND_HOST = 'typesense_network_frontend_host';
     public const PREFIX = 'typesense_network_prefix';
+    public const VECTOR_MODEL = 'typesense_network_vector_model';
+    public const MULTISEARCH = 'typesense_network_multisearch';
+    public const MULTISEARCH_PROFILES = 'typesense_network_multisearch_profiles';
     public const ENABLED = 'typesense_network_enabled_sites';
     public const STATE = 'typesense_network_state';
     public const LOCK = 'typesense_network_provision_lock';
@@ -61,6 +64,86 @@ class NetworkSettingsRepository
     {
         $prefix = $this->constant('TYPESENSE_NETWORK_PREFIX') ?: (string) get_network_option($this->networkId(), self::PREFIX, '');
         return sanitize_key($prefix);
+    }
+
+    /** Shared embedding model across the network so cross-site vector union queries use one model. */
+    public function vectorModel(): string
+    {
+        $constant = $this->constant('TYPESENSE_VECTOR_MODEL');
+        if ($constant !== '') {
+            return \TypesenseSearch\Typesense\EmbeddingModels::sanitizeModel($constant);
+        }
+        $saved = (string) get_network_option(
+            $this->networkId(),
+            self::VECTOR_MODEL,
+            \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL
+        );
+
+        return \TypesenseSearch\Typesense\EmbeddingModels::sanitizeModel($saved);
+    }
+
+    /**
+     * Raw network map of `source_blog_id => target_blog_id[]` for cross-site multi-search.
+     *
+     * @return array<int, int[]>
+     */
+    public function multiSearchMap(): array
+    {
+        $raw = get_network_option($this->networkId(), self::MULTISEARCH, []);
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($raw as $sourceKey => $targets) {
+            $sourceId = absint($sourceKey);
+            if ($sourceId <= 0 || !is_array($targets)) {
+                continue;
+            }
+            $cleanTargets = array_values(array_unique(array_filter(
+                array_map('absint', $targets),
+                static fn (int $t): bool => $t > 0 && $t !== $sourceId
+            )));
+            if ($cleanTargets !== []) {
+                $normalized[$sourceId] = $cleanTargets;
+            }
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Normalized network map of `source_blog_id => [target_blog_id => subsite_profile]`.
+     *
+     * @return array<int, array<int, string>>
+     */
+    public function multiSearchProfiles(): array
+    {
+        $raw = get_network_option($this->networkId(), self::MULTISEARCH_PROFILES, []);
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($raw as $sourceKey => $targetMap) {
+            $sourceId = absint($sourceKey);
+            if ($sourceId <= 0 || !is_array($targetMap)) {
+                continue;
+            }
+            $clean = [];
+            foreach ($targetMap as $targetKey => $profile) {
+                $targetId = absint($targetKey);
+                if ($targetId <= 0 || $targetId === $sourceId) {
+                    continue;
+                }
+                $clean[$targetId] = \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeSubsiteProfile($profile);
+            }
+            if ($clean !== []) {
+                $normalized[$sourceId] = $clean;
+            }
+        }
+
+        return $normalized;
     }
 
     public function identity(): array

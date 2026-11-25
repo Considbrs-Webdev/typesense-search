@@ -5,7 +5,8 @@
 import { createClient } from "./typesense-search/client";
 import type { TypesenseSearchConfig, SearchHit } from "./typesense-search/types";
 import { loadWebAwesomeLocale } from "./typesense-search/webawesome-locale";
-import { getQueryByWeights, INFIX, QUERY_BY } from "./typesense-search/search-params";
+import { executeDocumentSearch } from "./typesense-search/multi-search";
+import { isSemanticOnlyMatch } from "./typesense-search/search-params";
 import { createSearchStatisticsTracker } from "./typesense-search/search-statistics";
 import { decodeHtmlEntities, escapeHtmlPreservingMarks } from "./typesense-search/html";
 
@@ -216,8 +217,16 @@ function attachQuickSearch(
   function buildItem(hit: SearchHit, hitIndex: number): HTMLAnchorElement {
     const doc = hit.document;
     const title = String(doc.title ?? "");
-    const typeName = String(doc.type_name ?? "");
-    const url = String(doc.url ?? "#");
+    const rawTypeName = String(doc.type_name ?? doc.post_type_name ?? "");
+    const siblingSiteName = doc._ts_is_sibling_site
+      ? String(doc._ts_site_name ?? "")
+      : "";
+    const typeName = siblingSiteName
+      ? rawTypeName
+        ? `${siblingSiteName} · ${rawTypeName}`
+        : siblingSiteName
+      : rawTypeName;
+    const url = String(doc.url ?? doc.permalink ?? "#");
 
     const item = document.createElement("a");
     item.className = ITEM_CLASS;
@@ -242,7 +251,18 @@ function attachQuickSearch(
     typeEl.textContent = typeName;
 
     item.appendChild(nameEl);
-    item.appendChild(typeEl);
+
+    if (isSemanticOnlyMatch(hit)) {
+      const matchBadgeEl = document.createElement("span");
+      matchBadgeEl.className = "ts-qs-item__match-badge";
+      matchBadgeEl.textContent =
+        window.typesenseQuickSearchI18n?.semanticMatchBadge ?? "Related";
+      item.appendChild(matchBadgeEl);
+    }
+
+    if (typeName) {
+      item.appendChild(typeEl);
+    }
 
     item.addEventListener("mouseenter", () => setActive(hitIndex));
     item.addEventListener("click", (e) => {
@@ -481,21 +501,22 @@ function attachQuickSearch(
     }
     const requestId = ++latestRequestId;
     try {
-      const queryByWeights = getQueryByWeights(config);
-      const response = await (client as NonNullable<typeof client>)
-        .collections(config.collection)
-        .documents()
-        .search({
+      const response = await executeDocumentSearch(
+        client as NonNullable<typeof client>,
+        config,
+        {
           q: query,
-          query_by: QUERY_BY,
-          infix: INFIX,
-          ...(queryByWeights ? { query_by_weights: queryByWeights } : {}),
-          per_page: hitsPerPage,
-        });
+          hasQuery: true,
+          mode: config.vectorSearch?.enabled ? "quick_hybrid" : "keyword",
+          page: 1,
+          perPage: hitsPerPage,
+          highlightFullFields: "title",
+        },
+      );
       if (requestId !== latestRequestId) return;
-      currentHits = (response.hits as SearchHit[]) ?? [];
+      currentHits = response.hits;
       lastSearchedQuery = query;
-      searchStatistics.track(query, response.found ?? 0, "quick");
+      searchStatistics.track(query, response.found, "quick");
       render(currentHits);
     } catch (e) {
       console.error("[TypesenseQuickSearch]", e);
@@ -558,8 +579,10 @@ function attachQuickSearch(
           window.location.href = buildSearchUrl();
         } else if (activeIndex >= 0 && currentHits[activeIndex]) {
           e.preventDefault();
+          searchStatistics.flush();
+          const activeDoc = currentHits[activeIndex].document;
           window.location.href = String(
-            currentHits[activeIndex].document.url ?? "#",
+            activeDoc.url ?? activeDoc.permalink ?? "#",
           );
         }
         break;

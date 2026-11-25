@@ -123,6 +123,7 @@ class ConnectionActions
             'connection'        => ['ok' => false, 'message' => ''],
             'adminKey'          => ['ok' => false, 'message' => ''],
             'collection'        => ['ok' => false, 'message' => ''],
+            'schema'            => ['ok' => false, 'message' => ''],
             'searchKey'         => ['ok' => false, 'message' => ''],
             'collectionCanFix'  => false,
             'searchKeyCanFix'   => false,
@@ -179,29 +180,93 @@ class ConnectionActions
             }
         }
 
-        // ── 3. Collection existence ──────────────────────────────────────────
+        // ── 3. Collection existence & schema compatibility ───────────────────
 
         if (!$result['adminKey']['ok']) {
             $result['collection']['message'] = __('Cannot check — admin key is not valid.', 'typesense-search');
+            $result['schema']['message']     = __('Cannot check — admin key is not valid.', 'typesense-search');
         } elseif (empty($collectionName)) {
             $result['collection']['message'] = __('No collection name configured.', 'typesense-search');
+            $result['schema']['message']     = __('Cannot check — no collection name configured.', 'typesense-search');
         } else {
             try {
                 $adminClient = ClientFactory::build($remote, $adminKey, 5);
-                if (Collection::exists($adminClient, $collectionName)) {
+                $verifiedState = \TypesenseSearch\Typesense\SchemaInspector::refreshLiveState(
+                    $adminClient,
+                    $remote,
+                    $collectionName
+                );
+
+                if ($verifiedState !== null) {
                     $result['collection']['ok']      = true;
                     $result['collection']['message'] = sprintf(
                         /* translators: %s: collection name */
                         __('Collection "%s" exists.', 'typesense-search'),
                         $collectionName
                     );
+
+                    $capabilities  = new \TypesenseSearch\Typesense\ServerCapabilities(
+                        \TypesenseSearch\Typesense\AdminApi::forConnection($remote, $adminKey)
+                    );
+                    $vectorEnabled = $this->settings->isVectorSearchEnabled();
+                    $vectorModel   = $this->settings->getVectorModel();
+
+                    if ($vectorEnabled && !$capabilities->supportsAutoEmbedding()) {
+                        $result['schema']['ok']      = false;
+                        $result['schema']['message'] = __(
+                            'Embedded search is enabled, but the Typesense server version does not support auto-embedding (requires v27.0+).',
+                            'typesense-search'
+                        );
+                    } else {
+                        $compat = \TypesenseSearch\Typesense\SchemaInspector::evaluateCompatibility(
+                            $vectorEnabled,
+                            $vectorModel,
+                            $this->settings->isStemmingEnabled() && $capabilities->supportsStemming(),
+                            $verifiedState
+                        );
+
+                        if (!$compat['ok']) {
+                            $result['schema']['ok']      = false;
+                            $result['schema']['message'] = implode(' ', $compat['reasons']);
+                        } elseif ($vectorEnabled) {
+                            try {
+                                $adminClient->collections[$collectionName]->documents->search([
+                                    'q'              => 'test',
+                                    'query_by'       => 'title,embedding',
+                                    'vector_query'   => 'embedding:([], alpha: 0.3, k: 1)',
+                                    'exclude_fields' => 'embedding',
+                                    'per_page'       => 0,
+                                ]);
+                                $result['schema']['ok']      = true;
+                                $result['schema']['message'] = sprintf(
+                                    /* translators: %s: embedding model name */
+                                    __('Schema verified — embedded search is active with model "%s".', 'typesense-search'),
+                                    $vectorModel
+                                );
+                            } catch (\Exception $embedErr) {
+                                $result['schema']['ok']      = false;
+                                $result['schema']['message'] = sprintf(
+                                    /* translators: %s: error message */
+                                    __('Collection has an embedding field, but test vector query failed: %s', 'typesense-search'),
+                                    $embedErr->getMessage()
+                                );
+                            }
+                        } elseif ($compat['status'] === 'stale_embedding') {
+                            $result['schema']['ok']      = true;
+                            $result['schema']['message'] = $compat['reasons'][0];
+                        } else {
+                            $result['schema']['ok']      = true;
+                            $result['schema']['message'] = __('Collection schema matches active settings.', 'typesense-search');
+                        }
+                    }
                 } else {
                     $result['collection']['message'] = sprintf(
                         /* translators: %s: collection name */
                         __('Collection "%s" does not exist.', 'typesense-search'),
                         $collectionName
                     );
-                    $result['collectionCanFix'] = true;
+                    $result['schema']['message']    = __('Cannot check — collection does not exist yet.', 'typesense-search');
+                    $result['collectionCanFix']     = true;
                 }
             } catch (\Exception $e) {
                 $result['collection']['message'] = sprintf(
@@ -209,6 +274,7 @@ class ConnectionActions
                     __('Collection check failed: %s', 'typesense-search'),
                     $e->getMessage()
                 );
+                $result['schema']['message'] = __('Schema check could not complete.', 'typesense-search');
             }
         }
 

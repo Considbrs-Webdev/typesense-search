@@ -350,7 +350,46 @@ class NetworkSettingsPageTest extends TestCase
     {
         self::assertSame('sites', NetworkSettingsPage::tab('sites'));
         self::assertSame('sites', NetworkSettingsPage::tab('status'));
+        self::assertSame('multi-search', NetworkSettingsPage::tab('multi-search'));
         self::assertSame('connection', NetworkSettingsPage::tab('https://elsewhere.test'));
         self::assertSame('connection', NetworkSettingsPage::tab(['status']));
+    }
+
+    public function test_saving_multi_search_sanitizes_against_enabled_sites_and_redirects(): void
+    {
+        Functions\when('current_user_can')->justReturn(true);
+        Functions\when('is_multisite')->justReturn(true);
+        Functions\when('get_current_blog_id')->justReturn(1);
+        Functions\when('get_site')->justReturn((object) ['network_id' => 1]);
+        Functions\when('get_network_option')->alias(static function ($id, $name, $default = false) {
+            if ($name === 'active_sitewide_plugins') {
+                return ['typesense-search/typesense-search.php' => 1];
+            }
+            if ($name === NetworkSettingsRepository::ENABLED) {
+                return [1, 2, 3];
+            }
+            return $default;
+        });
+        Functions\when('check_admin_referer')->justReturn(true);
+        Functions\when('wp_unslash')->returnArg(1);
+        Functions\expect('update_network_option')
+            ->once()
+            ->with(1, NetworkSettingsRepository::MULTISEARCH, [1 => [2, 3]]);
+        Functions\when('network_admin_url')->returnArg(1);
+        Functions\expect('wp_safe_redirect')
+            ->once()
+            ->with('settings.php?page=typesense-network&tab=multi-search&saved=1')
+            ->andThrow(new \LogicException('redirect'));
+
+        $_POST = [
+            'section'     => 'multi-search',
+            'multisearch' => [
+                '1' => ['1', '2', '3', '99'], // 1 is self, 99 is not enabled
+                '9' => ['2'],                 // 9 is not enabled
+            ],
+        ];
+
+        $this->expectExceptionMessage('redirect');
+        $this->page->save();
     }
 }

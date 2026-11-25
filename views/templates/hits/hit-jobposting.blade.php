@@ -11,6 +11,7 @@
                     {{-- Metadata row: type, separator dot, published date --}}
                     <div class="c-group c-group--horizontal c-group--align-items-center c-group--gap-1">
                         <span class="c-badge c-badge--primary">{SEARCH_HIT_SUBHEADING}</span>
+                        <span class="ts-semantic-badge" data-js-hide-if-empty>{SEARCH_HIT_MATCH_BADGE}</span>
                         <span class="c-typography c-typography__variant--meta">
                             <time class="c-date">{SEARCH_HIT_DATE}</time>
                         </span>

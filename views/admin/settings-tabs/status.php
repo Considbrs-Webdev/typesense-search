@@ -56,6 +56,15 @@ if ((new \TypesenseSearch\Multisite\NetworkSettingsRepository())->isNetworkActiv
                     </div>
                 </li>
 
+                <!-- Schema & features -->
+                <li class="ts-status-item" id="ts-status-schema">
+                    <span class="ts-status-item__icon" aria-hidden="true"></span>
+                    <div class="ts-status-item__body">
+                        <strong class="ts-status-item__label"><?php esc_html_e('Collection schema &amp; features', 'typesense-search'); ?></strong>
+                        <span class="ts-status-item__message"></span>
+                    </div>
+                </li>
+
                 <!-- Admin key -->
                 <li class="ts-status-item" id="ts-status-admin-key">
                     <span class="ts-status-item__icon" aria-hidden="true"></span>

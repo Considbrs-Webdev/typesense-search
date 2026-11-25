@@ -78,6 +78,10 @@ class TypesenseConfig
 		$collection  = $this->settings->getCollectionName();
 		$searchKey   = $this->settings->getSearchKey();
 
+		$vectorReady    = $this->settings->isVectorSearchReady();
+		$vectorStrategy = $this->settings->getVectorStrategy();
+		$vectorParams   = $this->settings->getVectorResolvedParams();
+
 		$config = [
 			'host'                    => esc_url_raw($frontendHost ?: $host),
 			'collection'              => sanitize_text_field($collection),
@@ -90,7 +94,46 @@ class TypesenseConfig
 			'truncator'               => sanitize_text_field($this->settings->getTruncator()),
 			'sortDisplay'             => $this->settings->getSortDisplay(),
 			'webAwesomeLocale'        => self::webAwesomeLocale(),
+			'vectorSearch'            => [
+				'enabled'                    => $vectorReady,
+				'strategy'                   => $vectorReady ? $vectorStrategy : 'keyword',
+				'alpha'                      => $vectorParams['alpha'],
+				'distanceThreshold'          => $vectorParams['distance_threshold'],
+				'k'                          => $vectorParams['k'],
+				'rerankHybridMatches'        => $vectorParams['rerank_hybrid_matches'],
+				'spotlightMaxHits'           => $vectorParams['spotlight_max_hits'],
+				'spotlightDistanceThreshold' => $vectorParams['spotlight_distance_threshold'],
+				'spotlightMinWords'          => $vectorParams['spotlight_min_words'],
+				'spotlightDedupe'            => $vectorParams['spotlight_dedupe'],
+				'rescueMaxKeywordHits'       => $vectorParams['rescue_max_keyword_hits'],
+				'quickAlpha'                 => $vectorParams['quick_alpha'],
+				'quickDistanceThreshold'     => $vectorParams['quick_distance_threshold'],
+				'quickK'                     => $vectorParams['quick_k'],
+			],
 		];
+
+		if ($this->settings->network()->isNetworkActivated()) {
+			$multiSearch = $this->settings->getMultiSearchResolution();
+			if (!empty($multiSearch['enabled']) && count($multiSearch['collections']) > 1) {
+				$config['multiSearch'] = [
+					'enabled'     => true,
+					'collections' => array_values(array_map(
+						static fn (array $item): array => [
+							'collection'      => sanitize_text_field((string) ($item['collection'] ?? '')),
+							'searchKey'       => sanitize_text_field((string) ($item['search_key'] ?? '')),
+							'siteId'          => (int) ($item['blog_id'] ?? 0),
+							'siteName'        => sanitize_text_field((string) ($item['site_name'] ?? '')),
+							'homeUrl'         => esc_url_raw((string) ($item['home_url'] ?? '')),
+							'enableCurations' => !empty($item['enable_curations']),
+							'subsiteProfile'  => \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeSubsiteProfile(
+								$item['subsite_profile'] ?? \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_SUBSITE_PROFILE
+							),
+						],
+						$multiSearch['collections']
+					)),
+				];
+			}
+		}
 
 		if ($isSearch) {
 			$config['documentTitle'] = $this->documentTitleConfig();

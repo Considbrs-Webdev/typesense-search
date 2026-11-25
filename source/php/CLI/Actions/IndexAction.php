@@ -405,6 +405,7 @@ class IndexAction
             ));
         } else {
             if (!$isDryRun) {
+                $this->refreshVerifiedSchemaState();
                 IndexingLog::endRun([
                     'indexed' => $totalIndexed,
                     'skipped' => $totalSkipped,
@@ -562,5 +563,22 @@ class IndexAction
     private function freeMemory(): void
     {
         wp_cache_flush_runtime();
+    }
+
+    private function refreshVerifiedSchemaState(): void
+    {
+        try {
+            $settings = new \TypesenseSearch\Services\SettingsRepository();
+            $client   = \TypesenseSearch\Typesense\ClientFactory::fromSettings($settings, 5);
+            if ($client !== null) {
+                \TypesenseSearch\Typesense\SchemaInspector::refreshLiveState(
+                    $client,
+                    $settings->getRemote(),
+                    $settings->getCollectionName()
+                );
+            }
+        } catch (\Throwable $e) {
+            // Non-fatal: indexing succeeded even if schema refresh failed.
+        }
     }
 }

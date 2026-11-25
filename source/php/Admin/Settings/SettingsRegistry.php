@@ -123,6 +123,40 @@ class SettingsRegistry
             'default'           => 0,
         ]);
 
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_ENABLED, [
+            'type'              => 'integer',
+            'sanitize_callback' => [$this, 'sanitizeVectorEnabled'],
+            'default'           => 0,
+        ]);
+
+        if (!$networkMode) {
+            register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_MODEL, [
+                'type'              => 'string',
+                'sanitize_callback' => [$this, 'sanitizeVectorModel'],
+                'default'           => \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL,
+            ]);
+        }
+
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_STRATEGY, [
+            'type'              => 'string',
+            'sanitize_callback' => [$this, 'sanitizeVectorStrategy'],
+            'default'           => \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_STRATEGY,
+        ]);
+
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_RANKING_PROFILE, [
+            'type'              => 'string',
+            'sanitize_callback' => [$this, 'sanitizeVectorRankingProfile'],
+            'default'           => \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_PROFILE,
+        ]);
+
+        register_setting(OptionKeys::OPTION_GROUP_ADVANCED_SETTINGS, OptionKeys::OPTION_VECTOR_CUSTOM_PARAMS, [
+            'type'              => 'array',
+            'sanitize_callback' => [$this, 'sanitizeVectorCustomParams'],
+            'default'           => \TypesenseSearch\Typesense\VectorSearchPresets::presetParams(
+                \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_PROFILE
+            ),
+        ]);
+
         foreach ([
             OptionKeys::OPTION_SEARCH_LOGGING_ENABLED,
             OptionKeys::OPTION_SEARCH_LOGGING_DASHBOARD_WIDGETS,

@@ -31,12 +31,22 @@ $provisioningAvailable = ProvisioningCredentials::isAvailableFor($connection['re
 .typesense-network-site-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .typesense-network-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 16px 0 0; }
 .typesense-network-actions form { display: contents; }
+.typesense-network-target-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; padding: 8px 10px; margin: 0 0 6px; border: 1px solid #e5e7eb; border-radius: 4px; background: #fff; transition: opacity 0.15s, background-color 0.15s; }
+.typesense-network-target-row.is-unchecked { background: #fafafa; }
+.typesense-network-target-row.is-unchecked .typesense-network-target-profile { opacity: 0.55; }
+.typesense-network-target-label { flex: 1 1 280px; min-width: 0; }
+.typesense-network-target-profile { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; font-size: 12px; color: #50575e; }
+.typesense-network-target-profile select { font-size: 12px; min-height: 30px; height: 30px; padding: 0 24px 0 8px; border-color: #c3c4c7; border-radius: 3px; }
 </style>
 <div class="wrap typesense-network ts-settings">
 <div class="typesense-network-heading"><h1><?php esc_html_e('Typesense Search — Network settings', 'typesense-search'); ?></h1><span class="typesense-network-environment"><?php echo esc_html(sprintf(/* translators: %s: WordPress environment type, e.g. production */ __('Environment: %s', 'typesense-search'), wp_get_environment_type())); ?></span></div>
 <p class="ts-settings__subtitle"><?php esc_html_e('Connect the network to a shared Typesense server, then choose which sites get their own index.', 'typesense-search'); ?></p>
 <nav class="nav-tab-wrapper ts-settings__tabs">
-<?php foreach (['connection' => __('Connection', 'typesense-search'), 'sites' => __('Sites', 'typesense-search')] as $slug => $label) : ?>
+<?php foreach ([
+    'connection'   => __('Connection', 'typesense-search'),
+    'sites'        => __('Sites', 'typesense-search'),
+    'multi-search' => __('Multi-search', 'typesense-search'),
+] as $slug => $label) : ?>
 <a class="nav-tab <?php echo $tab === $slug ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(network_admin_url('settings.php?page=typesense-network&tab=' . $slug)); ?>"><?php echo esc_html($label); ?></a>
 <?php endforeach; ?>
 </nav>
@@ -136,12 +146,274 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
     </div>
 </div>
 
+<?php
+$vectorModelLocked  = $network->constant('TYPESENSE_VECTOR_MODEL') !== '';
+$networkVectorModel = $network->vectorModel();
+$vectorPresets      = \TypesenseSearch\Typesense\EmbeddingModels::presets();
+$isPresetVector     = array_key_exists($networkVectorModel, $vectorPresets);
+?>
+<div class="ts-settings__card">
+    <div class="ts-settings__card-header">
+        <h2><?php esc_html_e('Embedded search model', 'typesense-search'); ?></h2>
+        <p><?php esc_html_e('Shared embedding model used whenever individual sites enable embedded (vector/hybrid) search. Keeping one model across the network guarantees cross-site multi-search compatibility and avoids loading duplicate models into Typesense memory.', 'typesense-search'); ?></p>
+    </div>
+    <div class="ts-settings__fields">
+        <div class="ts-field">
+            <label for="network-vector-model-choice" class="ts-field__label"><?php esc_html_e('Embedding model', 'typesense-search'); ?></label>
+            <div class="ts-field__body">
+                <?php if ($vectorModelLocked) : ?>
+                    <input class="regular-text ts-field__input ts-field__input--env-locked" type="text" id="network-vector-model-choice" value="<?php echo esc_attr($networkVectorModel); ?>" disabled>
+                    <p class="ts-field__env-notice"><span aria-hidden="true">🔒</span> <?php esc_html_e('Set via TYPESENSE_VECTOR_MODEL constant — read only.', 'typesense-search'); ?></p>
+                <?php else : ?>
+                    <select id="network-vector-model-choice" name="vector_model_choice" class="ts-field__input">
+                        <?php foreach ($vectorPresets as $slug => $label) : ?>
+                            <option value="<?php echo esc_attr($slug); ?>" <?php selected($isPresetVector ? $networkVectorModel : '', $slug); ?>>
+                                <?php echo esc_html($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                        <option value="<?php echo esc_attr(\TypesenseSearch\Typesense\EmbeddingModels::CUSTOM_CHOICE); ?>" <?php selected(false, $isPresetVector); ?>>
+                            <?php esc_html_e('Custom model…', 'typesense-search'); ?>
+                        </option>
+                    </select>
+                    <input
+                        class="regular-text ts-field__input"
+                        type="text"
+                        id="network-vector-model-custom"
+                        name="vector_model_custom"
+                        placeholder="ts/paraphrase-multilingual-mpnet-base-v2"
+                        value="<?php echo esc_attr($isPresetVector ? '' : $networkVectorModel); ?>"
+                        <?php echo $isPresetVector ? 'hidden' : ''; ?>
+                    >
+                    <p class="ts-field__description"><?php esc_html_e('Sites opt in to embedded search on their own Advanced settings page. Changing this model requires running "wp typesense rebuild" on each opted-in site.', 'typesense-search'); ?></p>
+                    <script>
+                    (function () {
+                        var select = document.getElementById('network-vector-model-choice');
+                        var custom = document.getElementById('network-vector-model-custom');
+                        if (!select || !custom) return;
+                        select.addEventListener('change', function () {
+                            custom.hidden = select.value !== '<?php echo esc_js(\TypesenseSearch\Typesense\EmbeddingModels::CUSTOM_CHOICE); ?>';
+                        });
+                    })();
+                    </script>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
 </form>
 <div class="typesense-network-actions">
 <button type="submit" form="typesense-network-connection" class="button button-primary"><?php esc_html_e('Save changes', 'typesense-search'); ?></button>
 <form method="post" action="<?php echo esc_url(network_admin_url('edit.php?action=typesense_network_save')); ?>">
 <?php wp_nonce_field('typesense_network_save'); ?><input type="hidden" name="section" value="status"><button class="button"><?php esc_html_e('Check shared connection', 'typesense-search'); ?></button></form>
 </div>
+
+<?php elseif ($tab === 'multi-search') :
+    $resolver            = new \TypesenseSearch\Multisite\MultiSearchResolver($network);
+    $multiSearchMap      = $network->multiSearchMap();
+    $multiSearchProfiles = $network->multiSearchProfiles();
+    $subsiteProfiles     = \TypesenseSearch\Typesense\VectorSearchPresets::subsiteProfiles();
+    $vectorModel         = $network->vectorModel();
+    $enabledSites   = array_values(array_filter(
+        $sites,
+        static fn ($s): bool => in_array((int) $s->blog_id, $selected, true)
+    ));
+    $siteMeta = [];
+    foreach ($enabledSites as $enabledSite) {
+        $sid        = (int) $enabledSite->blog_id;
+        $statusRow  = $this->siteStatus($sid, true, $network);
+        $blogName   = trim((string) get_blog_option($sid, 'blogname', ''));
+        $homeUrl    = (string) get_home_url($sid);
+        $vecEnabled = (bool) get_blog_option($sid, \TypesenseSearch\Admin\Settings\OptionKeys::OPTION_VECTOR_ENABLED, 0);
+        $vecReady   = $vecEnabled && $statusRow['ready'] && \TypesenseSearch\Typesense\SchemaInspector::isEmbeddingReady(
+            $connection['remote'],
+            $statusRow['collection'],
+            $vectorModel,
+            $sid
+        );
+        $siteMeta[$sid] = [
+            'id'             => $sid,
+            'name'           => $blogName !== '' ? $blogName : $homeUrl,
+            'home'           => $homeUrl,
+            'ready'          => $statusRow['ready'],
+            'collection'     => $statusRow['collection'],
+            'vector_enabled' => $vecEnabled,
+            'vector_ready'   => $vecReady,
+        ];
+    }
+?>
+<?php if (isset($supportsUnionSearch) && !$supportsUnionSearch) : ?>
+<div class="notice notice-error inline">
+    <p><?php echo esc_html(sprintf(
+        /* translators: %s: detected Typesense server version */
+        __('Cross-site union multi-search requires Typesense v30.0 or newer (detected v%s). Upgrade Typesense before enabling multi-search.', 'typesense-search'),
+        $serverVersionChecked ?? ''
+    )); ?></p>
+</div>
+<?php endif; ?>
+
+<div class="ts-settings__card">
+    <div class="ts-settings__card-header">
+        <h2><?php esc_html_e('Cross-site multi-search', 'typesense-search'); ?></h2>
+        <p><?php esc_html_e('Choose which other enabled network sites each site searches alongside its own index, and pick a relevance profile for each included site.', 'typesense-search'); ?></p>
+        <div class="ts-settings__notice ts-settings__notice--info">
+            <p><strong><?php esc_html_e('Subsite relevance profiles (when embedded search is active):', 'typesense-search'); ?></strong></p>
+            <ol>
+                <?php foreach ($subsiteProfiles as $profileInfo) : ?>
+                    <li>
+                        <strong><?php echo esc_html($profileInfo['label']); ?>:</strong>
+                        <?php echo esc_html($profileInfo['description']); ?>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        </div>
+    </div>
+
+    <?php if (count($enabledSites) < 2) : ?>
+        <div class="ts-settings__fields">
+            <p class="description">
+                <?php esc_html_e('Enable and set up at least two sites on the Sites tab to configure cross-site multi-search.', 'typesense-search'); ?>
+            </p>
+        </div>
+    <?php else : ?>
+        <form id="typesense-multisearch" method="post" action="<?php echo esc_url(network_admin_url('edit.php?action=typesense_network_save')); ?>">
+            <?php wp_nonce_field('typesense_network_save'); ?>
+            <input type="hidden" name="section" value="multi-search">
+            <div class="ts-settings__fields">
+                <?php foreach ($siteMeta as $sourceId => $sourceInfo) :
+                    $configuredTargets  = $multiSearchMap[$sourceId] ?? [];
+                    $configuredProfiles = $multiSearchProfiles[$sourceId] ?? [];
+                    $resolution         = $resolver->resolveForSite($sourceId);
+                ?>
+                <div class="ts-field">
+                    <div class="ts-field__label">
+                        <strong><?php echo esc_html($sourceInfo['name']); ?></strong>
+                        <p class="description" style="margin: 4px 0 0; font-weight: 400;">
+                            <?php echo esc_html($sourceInfo['home']); ?><br>
+                            <?php if (!$sourceInfo['ready']) : ?>
+                                <span class="typesense-network-state"><span aria-hidden="true" class="typesense-network-status typesense-network-status--pending"></span><?php esc_html_e('Waiting for site setup', 'typesense-search'); ?></span>
+                            <?php elseif ($sourceInfo['vector_enabled'] && $sourceInfo['vector_ready']) : ?>
+                                <span class="typesense-network-state"><span aria-hidden="true" class="typesense-network-status typesense-network-status--active"></span><?php esc_html_e('Embedded search ready', 'typesense-search'); ?></span>
+                            <?php elseif ($sourceInfo['vector_enabled']) : ?>
+                                <span class="typesense-network-state"><span aria-hidden="true" class="typesense-network-status typesense-network-status--pending"></span><?php esc_html_e('Embedded search: rebuild required', 'typesense-search'); ?></span>
+                            <?php else : ?>
+                                <span class="typesense-network-state"><span aria-hidden="true" class="typesense-network-status typesense-network-status--active"></span><?php esc_html_e('Keyword search ready', 'typesense-search'); ?></span>
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                    <div class="ts-field__body">
+                        <fieldset <?php disabled(!$sourceInfo['ready']); ?>>
+                            <legend class="screen-reader-text">
+                                <?php echo esc_html(sprintf(/* translators: %s: source site name */ __('Additional sites searched from %s', 'typesense-search'), $sourceInfo['name'])); ?>
+                            </legend>
+                            <?php foreach ($siteMeta as $targetId => $targetInfo) :
+                                if ($targetId === $sourceId) {
+                                    continue;
+                                }
+                                $isChecked       = in_array($targetId, $configuredTargets, true);
+                                $disableChoice   = !$targetInfo['ready'] && !$isChecked;
+                                $selectedProfile = \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeSubsiteProfile(
+                                    $configuredProfiles[$targetId] ?? \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_SUBSITE_PROFILE
+                                );
+                                $profileSelectId = sprintf('ts-ms-profile-%d-%d', (int) $sourceId, (int) $targetId);
+                            ?>
+                            <div class="typesense-network-target-row<?php echo $isChecked ? '' : ' is-unchecked'; ?>">
+                                <label class="typesense-network-target-label">
+                                    <input
+                                        type="checkbox"
+                                        class="typesense-network-target-checkbox"
+                                        name="multisearch[<?php echo (int) $sourceId; ?>][]"
+                                        value="<?php echo (int) $targetId; ?>"
+                                        <?php checked($isChecked); ?>
+                                        <?php disabled($disableChoice); ?>
+                                    >
+                                    <strong><?php echo esc_html($targetInfo['name']); ?></strong>
+                                    <span class="description">(<?php echo esc_html($targetInfo['home']); ?>)</span>
+                                    <?php if (!$targetInfo['ready']) : ?>
+                                        &mdash; <em><?php esc_html_e('Not set up yet (skipped until setup completes)', 'typesense-search'); ?></em>
+                                    <?php elseif ($targetInfo['vector_enabled'] && $targetInfo['vector_ready']) : ?>
+                                        &mdash; <span class="description"><?php esc_html_e('Embedded index ready', 'typesense-search'); ?></span>
+                                    <?php elseif ($targetInfo['vector_enabled']) : ?>
+                                        &mdash; <em><?php esc_html_e('Embedded index needs rebuild', 'typesense-search'); ?></em>
+                                    <?php else : ?>
+                                        &mdash; <span class="description"><?php esc_html_e('Keyword index only', 'typesense-search'); ?></span>
+                                    <?php endif; ?>
+                                </label>
+                                <div class="typesense-network-target-profile">
+                                    <label for="<?php echo esc_attr($profileSelectId); ?>">
+                                        <?php esc_html_e('Profile:', 'typesense-search'); ?>
+                                    </label>
+                                    <select
+                                        id="<?php echo esc_attr($profileSelectId); ?>"
+                                        name="multisearch_profiles[<?php echo (int) $sourceId; ?>][<?php echo (int) $targetId; ?>]"
+                                        <?php disabled($disableChoice); ?>
+                                    >
+                                        <?php foreach ($subsiteProfiles as $profileSlug => $profileMeta) : ?>
+                                            <option value="<?php echo esc_attr($profileSlug); ?>" <?php selected($profileSlug, $selectedProfile); ?>>
+                                                <?php echo esc_html($profileMeta['short_label']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </fieldset>
+
+                        <?php if ($resolution['enabled']) : ?>
+                            <p class="ts-field__description">
+                                <?php echo esc_html(sprintf(
+                                    /* translators: %d: total number of collections searched */
+                                    __('Active: searches %d collections (this site + selected ready sibling sites).', 'typesense-search'),
+                                    count($resolution['collections'])
+                                )); ?>
+                            </p>
+                        <?php endif; ?>
+
+                        <?php if (!empty($resolution['vector_paused_reason'])) : ?>
+                            <div class="notice notice-warning inline" style="margin: 8px 0 0;">
+                                <p><?php echo esc_html($resolution['vector_paused_reason']); ?></p>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($resolution['skipped_targets'])) : ?>
+                            <div class="notice notice-warning inline" style="margin: 8px 0 0;">
+                                <p>
+                                    <?php
+                                    $skippedSummaries = array_map(
+                                        static fn (array $s): string => sprintf('%s (%s)', $s['site_name'], $s['reason']),
+                                        $resolution['skipped_targets']
+                                    );
+                                    echo esc_html(sprintf(
+                                        /* translators: %s: skipped target site list */
+                                        __('Currently skipped target site(s): %s', 'typesense-search'),
+                                        implode('; ', $skippedSummaries)
+                                    ));
+                                    ?>
+                                </p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </form>
+    <?php endif; ?>
+</div>
+<?php if (count($enabledSites) >= 2) : ?>
+<p class="typesense-network-actions">
+    <button type="submit" form="typesense-multisearch" class="button button-primary"><?php esc_html_e('Save multi-search settings', 'typesense-search'); ?></button>
+</p>
+<script>
+(function () {
+    document.querySelectorAll('.typesense-network-target-checkbox').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+            var row = cb.closest('.typesense-network-target-row');
+            if (row) row.classList.toggle('is-unchecked', !cb.checked);
+        });
+    });
+})();
+</script>
+<?php endif; ?>
 
 <?php else : ?>
 <div class="ts-settings__card">
@@ -160,7 +432,7 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 <td><span class="typesense-network-state"><span aria-hidden="true" class="typesense-network-status typesense-network-status--<?php echo esc_attr($row['tone']); ?>"></span><strong><?php echo esc_html($row['label']); ?></strong></span>
 <?php if ($row['detail'] !== '') : ?><p class="description"><?php echo esc_html($row['detail']); ?></p><?php endif; ?>
 <?php if ($row['check']) : ?>
-<p><?php echo esc_html(sprintf(/* translators: %s: date and time of the last check */ __('Last check: %s', 'typesense-search'), wp_date(get_option('date_format') . ' ' . get_option('time_format'), $row['check']['time']))); ?><br><?php echo esc_html(!empty($row['check']['success']) ? __('Server connection, admin key and site search key are working.', 'typesense-search') : __($row['check']['message'], 'typesense-search')); ?></p>
+<p><?php echo esc_html(sprintf(/* translators: %s: date and time of the last check */ __('Last check: %s', 'typesense-search'), wp_date(get_option('date_format') . ' ' . get_option('time_format'), $row['check']['time']))); ?><br><?php echo esc_html(!empty($row['check']['success']) ? (!empty($row['check']['message']) ? (string) $row['check']['message'] : __('Server connection, admin key and site search key are working.', 'typesense-search')) : __($row['check']['message'], 'typesense-search')); ?></p>
 <?php elseif ($row['ready']) : ?><p class="description"><?php esc_html_e('Server and index have not been checked for this configuration.', 'typesense-search'); ?></p><?php endif; ?>
 
 <?php if ($row['retry'] || $row['ready']) : ?>
@@ -173,7 +445,7 @@ if (is_array($notice)) : delete_site_transient('typesense_network_notice_' . get
 </form>
 <?php endif; ?>
 </td>
-<td><?php if ($row['collection'] !== '') : ?><code><?php echo esc_html($row['collection']); ?></code><p class="description"><?php echo esc_html(!empty($row['check']['success']) ? __('Index access verified at the last check.', 'typesense-search') : __('Saved index name. Existence has not been verified by a current status check.', 'typesense-search')); ?></p><?php else : ?>&ndash;<?php endif; ?>
+<td><?php if ($row['collection'] !== '') : ?><code><?php echo esc_html($row['collection']); ?></code><p class="description"><?php echo esc_html((!empty($row['check']['success']) || !empty($row['check']['index_verified'])) ? __('Index access verified at the last check.', 'typesense-search') : __('Saved index name. Existence has not been verified by a current status check.', 'typesense-search')); ?></p><?php else : ?>&ndash;<?php endif; ?>
 <?php if ($isSelected) : ?>
 <details><summary><?php esc_html_e('Indexing with WP-CLI', 'typesense-search'); ?></summary>
 <p><?php esc_html_e('Use the same command for the first indexing run and later reindexing. Indexing results do not control activation; an empty or partially filled index can return incomplete results.', 'typesense-search'); ?></p>

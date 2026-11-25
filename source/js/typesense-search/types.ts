@@ -2,11 +2,54 @@
 // Shared types
 // ---------------------------------------------------------------------------
 
+export type VectorSearchStrategy = "keyword" | "parallel" | "blended" | "rescue";
+
+export type SubsiteProfile = "standard" | "tightened" | "keyword_only";
+
+export type QueryExecutionMode =
+  | "keyword"
+  | "hybrid"
+  | "semantic"
+  | "spotlight"
+  | "quick_hybrid";
+
 export interface FacetConfig {
   field: string;
   label: string;
   placeholder: string;
   display_as: "dropdown" | "button_group";
+}
+
+export interface VectorSearchConfig {
+  enabled: boolean;
+  strategy?: VectorSearchStrategy;
+  alpha?: number;
+  distanceThreshold?: number;
+  k?: number;
+  rerankHybridMatches?: boolean;
+  spotlightMaxHits?: number;
+  spotlightDistanceThreshold?: number;
+  spotlightMinWords?: number;
+  spotlightDedupe?: boolean;
+  rescueMaxKeywordHits?: number;
+  quickAlpha?: number;
+  quickDistanceThreshold?: number;
+  quickK?: number;
+}
+
+export interface MultiSearchCollectionConfig {
+  collection: string;
+  searchKey: string;
+  siteId: number;
+  siteName: string;
+  homeUrl: string;
+  enableCurations: boolean;
+  subsiteProfile?: SubsiteProfile;
+}
+
+export interface MultiSearchConfig {
+  enabled: boolean;
+  collections: MultiSearchCollectionConfig[];
 }
 
 export interface TypesenseSearchConfig {
@@ -20,11 +63,16 @@ export interface TypesenseSearchConfig {
   debounceDelay?: number;
   highlightAffixNumTokens?: number;
   queryByWeights?: string;
+  truncator?: string;
   sortDisplay?: "radio" | "dropdown";
   searchLogging?: SearchStatisticsConfig;
   /** Web Awesome translation module key (e.g. `sv`); omit for English internals. */
   webAwesomeLocale?: string | null;
   documentTitle?: { template: string; empty: string };
+  templateMapping?: Record<string, string>;
+  placeholderMappings?: Record<string, string>;
+  vectorSearch?: VectorSearchConfig;
+  multiSearch?: MultiSearchConfig;
 }
 
 export interface SearchStatisticsConfig {
@@ -44,6 +92,9 @@ export interface TypesenseI18n {
   paginationPrevious: string;
   paginationNext: string;
   loadingSearch: string;
+  semanticMatchBadge?: string;
+  rescueHeading?: string;
+  rescueZeroHitsHeading?: string;
 }
 
 export interface TypesenseQuickSearchI18n {
@@ -54,6 +105,7 @@ export interface TypesenseQuickSearchI18n {
   closeDialog?: string;
   searchLabel?: string;
   submitSearch?: string;
+  semanticMatchBadge?: string;
 }
 
 declare global {
@@ -71,6 +123,15 @@ export type HitDocument = Record<string, unknown>;
 export interface SearchHit {
   document: HitDocument;
   highlight?: Record<string, HighlightField>;
+  text_match?: number;
+  text_match_info?: {
+    best_field_score?: string;
+    tokens_matched?: number;
+  };
+  vector_distance?: number;
+  hybrid_search_info?: {
+    rank_fusion_score?: number;
+  };
 }
 
 export interface FacetCount {

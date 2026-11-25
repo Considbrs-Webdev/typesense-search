@@ -68,7 +68,34 @@ if (!defined('WPINC')) {
                         <span data-js-search-results-count data-lang-singular="<?php echo esc_attr($lang->resultSingular); ?>"
                             data-lang-plural="<?php echo esc_attr($lang->resultPlural); ?>" hidden></span>
 
+                        <section class="ts-spotlight" data-js-search-spotlight aria-labelledby="ts-spotlight-heading" hidden>
+                            <div class="ts-spotlight__header">
+                                <h2 id="ts-spotlight-heading" class="ts-spotlight__heading">
+                                    <?php echo esc_html($lang->spotlightHeading ?? 'Suggested shortcuts'); ?>
+                                </h2>
+                                <span class="ts-spotlight__badge">
+                                    <?php echo esc_html($lang->spotlightBadge ?? 'Best matches'); ?>
+                                </span>
+                            </div>
+                            <ol class="ts-spotlight__list" data-js-search-spotlight-list role="list"></ol>
+                        </section>
+
                         <ol class="ts-search-results wa-stack" data-js-search-results role="list"></ol>
+
+                        <section class="ts-semantic-rescue" data-js-search-rescue aria-labelledby="ts-rescue-heading" hidden>
+                            <div class="ts-semantic-rescue__header">
+                                <h2 id="ts-rescue-heading" class="ts-semantic-rescue__heading"
+                                    data-js-search-rescue-heading
+                                    data-lang-default="<?php echo esc_attr($lang->rescueHeading ?? 'Related pages'); ?>"
+                                    data-lang-zero="<?php echo esc_attr($lang->rescueZeroHitsHeading ?? 'No exact word matches — showing related pages'); ?>">
+                                    <?php echo esc_html($lang->rescueHeading ?? 'Related pages'); ?>
+                                </h2>
+                                <p class="ts-semantic-rescue__description">
+                                    <?php echo esc_html($lang->rescueDescription ?? 'Pages that match the meaning of your search even if they use different words.'); ?>
+                                </p>
+                            </div>
+                            <ol class="ts-search-results wa-stack" data-js-search-rescue-list role="list"></ol>
+                        </section>
                     </div>
 
                     <div class="wa-stack ts-no-hits-container" data-js-no-hits-container>

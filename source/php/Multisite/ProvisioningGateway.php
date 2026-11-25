@@ -4,7 +4,7 @@ namespace TypesenseSearch\Multisite;
 
 use Typesense\Exceptions\ObjectNotFound;
 use TypesenseSearch\Services\SettingsRepository;
-use TypesenseSearch\Typesense\{AdminApi, ApiKey, ClientFactory, Collection, ProvisioningClientFactory, ServerCapabilities};
+use TypesenseSearch\Typesense\{AdminApi, ApiKey, ClientFactory, Collection, ProvisioningClientFactory, SchemaInspector, ServerCapabilities};
 
 /** Typesense operations used by provisioning; replaceable in failure-path tests. */
 class ProvisioningGateway
@@ -31,13 +31,16 @@ class ProvisioningGateway
     public function create(array $connection, string $name): void
     {
         $settings = new SettingsRepository();
-        $schema = Collection::getSchema($name, $settings, new ServerCapabilities(new AdminApi($settings)));
+        $capabilities = new ServerCapabilities(AdminApi::forConnection($connection['remote'], $connection['admin_key']));
+        $schema = Collection::getSchema($name, $settings, $capabilities);
         // Those sets do not exist on a fresh server yet. Activation sync creates
         // them and attaches them before the candidate becomes the active index.
         unset($schema['synonym_sets'], $schema['curation_sets']);
         $schema['name'] = $name;
         $schema['metadata']['typesense_search_owner'] = (new NetworkSettingsRepository())->mapping()['owner'];
-        ClientFactory::build($connection['remote'], $connection['admin_key'])->collections->create($schema);
+        $timeout = $settings->isVectorSearchEnabled() ? 120 : 5;
+        $created = ClientFactory::build($connection['remote'], $connection['admin_key'], $timeout)->collections->create($schema);
+        SchemaInspector::recordFromSchema($connection['remote'], is_array($created) ? $created : $schema);
     }
 
     /**
@@ -133,6 +136,7 @@ class ProvisioningGateway
         } catch (ObjectNotFound $e) {
             // Already removed is the intended result.
         }
+        SchemaInspector::clearState();
     }
 
     public function verify(array $connection, array $mapping): void

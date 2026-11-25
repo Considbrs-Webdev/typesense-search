@@ -90,6 +90,7 @@ class SiteProvisioner
             delete_option(SetupDispatcher::JOB);
             delete_option(SetupDispatcher::STATUS);
             delete_option(\TypesenseSearch\Admin\NetworkSettingsPage::CHECK);
+            \TypesenseSearch\Typesense\SchemaInspector::clearState();
         });
     }
 

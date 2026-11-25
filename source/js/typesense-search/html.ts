@@ -2,7 +2,7 @@
 // HTML utilities and placeholder definitions
 // ---------------------------------------------------------------------------
 
-import type { HitDocument, HighlightField } from "./types";
+import type { HitDocument, HighlightField, SearchHit } from "./types";
 
 export type PlaceholderResult = string | { value: string; highlighted: true };
 export type PlaceholderFn = (
@@ -25,8 +25,25 @@ export const PLACEHOLDERS: Record<string, PlaceholderFn> = {
       ' <i class="fa-solid fa-up-right-from-square ts-external-link-icon" aria-hidden="true"></i>';
     return { value: text + icon, highlighted: true };
   },
-  SEARCH_HIT_SUBHEADING: (d) =>
-    String(d.post_type_name ?? d.type_name ?? d.post_date_formatted ?? ""),
+  SEARCH_HIT_SUBHEADING: (d) => {
+    const base = String(
+      d.post_type_name ?? d.type_name ?? d.post_date_formatted ?? "",
+    );
+    if (d._ts_is_sibling_site && d._ts_site_name) {
+      const site = String(d._ts_site_name);
+      return base ? `${site} · ${base}` : site;
+    }
+    return base;
+  },
+  SEARCH_HIT_MATCH_BADGE: (d) =>
+    d._ts_semantic_only
+      ? String(
+          (typeof window !== "undefined" &&
+            window.typesenseI18n?.semanticMatchBadge) ||
+            "Related match",
+        )
+      : "",
+  SEARCH_HIT_SITE_NAME: (d) => String(d._ts_site_name ?? ""),
   SEARCH_HIT_EXCERPT: (d, h) => {
     const excerptSnippet = h?.excerpt?.snippet;
     const contentSnippet = h?.content?.snippet;
@@ -250,4 +267,43 @@ function removeEmptyMarkedElements(html: string): string {
     }
   });
   return container.innerHTML;
+}
+
+/**
+ * Renders a compact Spotlight shortcut card for the Parallel UX strategy.
+ */
+export function renderSpotlightCard(hit: SearchHit): string {
+  const doc = hit.document;
+  const link = escapeAttr(String(PLACEHOLDERS.SEARCH_HIT_LINK(doc)));
+  const rawSubheading = String(PLACEHOLDERS.SEARCH_HIT_SUBHEADING(doc));
+  const subheading = rawSubheading
+    ? escapeHtml(decodeHtmlEntities(rawSubheading))
+    : "";
+
+  const headingOut = PLACEHOLDERS.SEARCH_HIT_HEADING(doc, hit.highlight);
+  const headingHtml =
+    typeof headingOut === "object" && headingOut.highlighted
+      ? headingOut.value
+      : escapeHtml(decodeHtmlEntities(String(headingOut)));
+
+  const excerptOut = PLACEHOLDERS.SEARCH_HIT_EXCERPT(doc, hit.highlight);
+  const excerptHtml =
+    typeof excerptOut === "object" && excerptOut.highlighted
+      ? excerptOut.value
+      : escapeHtml(decodeHtmlEntities(String(excerptOut)));
+
+  const rawPath = String(doc.path ?? "").trim();
+  const pathHtml = rawPath ? escapeHtml(decodeHtmlEntities(rawPath)) : "";
+
+  return `<article class="ts-spotlight-card">
+    <div class="ts-spotlight-card__meta">
+      ${subheading ? `<span class="ts-spotlight-card__badge">${subheading}</span>` : ""}
+      <span class="ts-spotlight-card__arrow" aria-hidden="true">&rarr;</span>
+    </div>
+    <h3 class="ts-spotlight-card__heading">
+      <a class="ts-spotlight-card__link" href="${link}">${headingHtml}</a>
+    </h3>
+    ${excerptHtml ? `<p class="ts-spotlight-card__excerpt">${excerptHtml}</p>` : ""}
+    ${pathHtml ? `<span class="ts-spotlight-card__path">${pathHtml}</span>` : ""}
+  </article>`;
 }

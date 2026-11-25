@@ -11,6 +11,7 @@ if (!defined('WPINC')) {
     <article class="ts-search-hit-card ts-plain-card">
         <div class="ts-plain-card__meta">
             <span class="ts-plain-card__badge">{SEARCH_HIT_SUBHEADING}</span>
+            <span class="ts-semantic-badge" data-js-hide-if-empty>{SEARCH_HIT_MATCH_BADGE}</span>
             <time class="ts-plain-card__date">{SEARCH_HIT_DATE}</time>
         </div>
         <h2 class="ts-plain-card__heading">

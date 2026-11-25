@@ -172,6 +172,19 @@
     }
   }
 
+  &__match-badge {
+    flex: 0 0 auto;
+    font-size: var(--ts-qs-type-size, 0.7rem);
+    font-weight: 500;
+    color: var(--ts-qs-match-badge-color, #4b5563);
+    white-space: nowrap;
+    padding: 1px 7px;
+    border: 1px solid var(--ts-qs-match-badge-border, rgba(0, 0, 0, 0.16));
+    background: var(--ts-qs-match-badge-bg, transparent);
+    border-radius: var(--ts-qs-type-radius, 99px);
+    line-height: 1.5;
+  }
+
   &__type {
     flex: 0 0 auto;
     font-size: var(--ts-qs-type-size, 0.72rem);

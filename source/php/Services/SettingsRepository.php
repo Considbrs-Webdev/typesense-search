@@ -167,6 +167,133 @@ class SettingsRepository
         return (bool) get_option(Settings::OPTION_STEMMING_ENABLED, 0);
     }
 
+    public function isVectorSearchEnabled(): bool
+    {
+        return (bool) get_option(Settings::OPTION_VECTOR_ENABLED, 0);
+    }
+
+    public function getVectorModel(): string
+    {
+        $network = $this->network();
+        if ($network->isNetworkActivated()) {
+            return $network->vectorModel();
+        }
+
+        return \TypesenseSearch\Typesense\EmbeddingModels::sanitizeModel(
+            get_option(Settings::OPTION_VECTOR_MODEL, \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL)
+        );
+    }
+
+    public function getVectorStrategy(): string
+    {
+        return \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeStrategy(
+            get_option(Settings::OPTION_VECTOR_STRATEGY, \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_STRATEGY)
+        );
+    }
+
+    public function getVectorRankingProfile(): string
+    {
+        return \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeProfile(
+            get_option(Settings::OPTION_VECTOR_RANKING_PROFILE, \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_PROFILE)
+        );
+    }
+
+    /**
+     * @return array{
+     *     alpha: float,
+     *     distance_threshold: float,
+     *     k: int,
+     *     rerank_hybrid_matches: bool,
+     *     spotlight_max_hits: int,
+     *     spotlight_distance_threshold: float,
+     *     spotlight_min_words: int,
+     *     spotlight_dedupe: bool,
+     *     rescue_max_keyword_hits: int
+     * }
+     */
+    public function getVectorCustomParams(): array
+    {
+        return \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeCustomParams(
+            get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, []),
+            $this->getVectorModel()
+        );
+    }
+
+    /**
+     * Effective ranking and UX threshold parameters for the active profile.
+     *
+     * @return array{
+     *     alpha: float,
+     *     distance_threshold: float,
+     *     k: int,
+     *     rerank_hybrid_matches: bool,
+     *     spotlight_max_hits: int,
+     *     spotlight_distance_threshold: float,
+     *     spotlight_min_words: int,
+     *     spotlight_dedupe: bool,
+     *     rescue_max_keyword_hits: int,
+     *     quick_alpha: float,
+     *     quick_distance_threshold: float,
+     *     quick_k: int
+     * }
+     */
+    public function getVectorResolvedParams(): array
+    {
+        return \TypesenseSearch\Typesense\VectorSearchPresets::resolveParams(
+            $this->getVectorRankingProfile(),
+            get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, []),
+            $this->getVectorModel()
+        );
+    }
+
+    /**
+     * True when this site's own collection has a verified `embedding` field
+     * matching the configured model (independent of cross-site multi-search).
+     */
+    public function isSiteVectorSearchReady(): bool
+    {
+        if (!$this->canUseTypesense() || !$this->isVectorSearchEnabled()) {
+            return false;
+        }
+
+        return \TypesenseSearch\Typesense\SchemaInspector::isEmbeddingReady(
+            $this->getRemote(),
+            $this->getCollectionName(),
+            $this->getVectorModel(),
+            null,
+            $this->getAdminKey()
+        );
+    }
+
+    /**
+     * True when embedded search is ready to run at query time — including
+     * verifying that every active sibling collection in a multi-search group
+     * shares the same verified embedding model.
+     */
+    public function isVectorSearchReady(): bool
+    {
+        if (!$this->isSiteVectorSearchReady()) {
+            return false;
+        }
+
+        $multiSearch = $this->getMultiSearchResolution();
+        if ($multiSearch['enabled'] && !$multiSearch['vector_compatible']) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Resolve cross-site multi-search targets and compatibility for the current site.
+     *
+     * @return array<string, mixed>
+     */
+    public function getMultiSearchResolution(): array
+    {
+        return (new \TypesenseSearch\Multisite\MultiSearchResolver($this->network()))->resolveForCurrentSite();
+    }
+
     // ── Search statistics ──────────────────────────────────────────────────
 
     public function isSearchLoggingEnabled(): bool

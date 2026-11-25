@@ -32,6 +32,11 @@ class OptionKeys
     public const OPTION_SORT_DISPLAY           = 'typesense_search_sort_display';
     public const OPTION_QUERY_BY_WEIGHTS       = 'typesense_search_query_by_weights';
     public const OPTION_STEMMING_ENABLED       = 'typesense_search_stemming_enabled';
+    public const OPTION_VECTOR_ENABLED         = 'typesense_search_vector_enabled';
+    public const OPTION_VECTOR_MODEL           = 'typesense_search_vector_model';
+    public const OPTION_VECTOR_STRATEGY        = 'typesense_search_vector_strategy';
+    public const OPTION_VECTOR_RANKING_PROFILE = 'typesense_search_vector_ranking_profile';
+    public const OPTION_VECTOR_CUSTOM_PARAMS   = 'typesense_search_vector_custom_params';
     public const OPTION_PINNED_RESULTS_ENABLED = 'typesense_search_pinned_results_enabled';
     public const OPTION_SYNONYMS_ENABLED       = 'typesense_search_synonyms_enabled';
     public const OPTION_EXTERNAL_PAGES_ENABLED = 'typesense_search_external_pages_enabled';

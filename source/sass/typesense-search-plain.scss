@@ -39,6 +39,10 @@
     color: var(--ts-badge-color, Canvas);
   }
 
+  .ts-semantic-badge {
+    border-radius: 999px;
+  }
+
   &__heading {
     margin: 0;
     font-size: 1.25em;

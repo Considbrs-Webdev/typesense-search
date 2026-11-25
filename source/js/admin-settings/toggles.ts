@@ -95,4 +95,58 @@ export function init(): void {
     const requireConsent      = document.getElementById('ts-search-statistics-require-consent') as HTMLInputElement | null;
     const consentIntegration  = document.getElementById('ts-search-statistics-consent-integration');
     requireConsent?.addEventListener('change', function () { if (consentIntegration) consentIntegration.hidden = !this.checked; });
+
+    // ── Embedded search settings visibility & model selector ──────────────────
+
+    const vectorToggle         = document.getElementById('ts-vector-enabled') as HTMLInputElement | null;
+    const vectorSettingsFields = document.getElementById('ts-vector-settings-fields');
+    vectorToggle?.addEventListener('change', function () { if (vectorSettingsFields) vectorSettingsFields.hidden = !this.checked; });
+
+    const vectorModelMode   = document.getElementById('ts-vector-model-mode') as HTMLSelectElement | null;
+    const vectorModelHidden = document.getElementById('ts-vector-model') as HTMLInputElement | null;
+    const vectorModelCustom = document.getElementById('ts-vector-model-custom') as HTMLInputElement | null;
+    const defaultVectorModel = 'ts/paraphrase-multilingual-mpnet-base-v2';
+
+    if (vectorModelMode && vectorModelHidden && vectorModelCustom) {
+        function updateVectorModel(): void {
+            if (vectorModelMode!.value === '__custom__') {
+                vectorModelCustom!.hidden = false;
+                vectorModelHidden!.value  = vectorModelCustom!.value.trim() || vectorModelHidden!.value || defaultVectorModel;
+            } else {
+                vectorModelCustom!.hidden = true;
+                vectorModelHidden!.value  = vectorModelMode!.value || defaultVectorModel;
+            }
+        }
+        vectorModelMode.addEventListener('change', updateVectorModel);
+        vectorModelCustom.addEventListener('input', () => {
+            vectorModelHidden!.value = vectorModelCustom!.value.trim() || defaultVectorModel;
+        });
+        updateVectorModel();
+    }
+
+    // ── Embedded search preset cards & custom parameters ─────────────────────
+
+    const customParamsPanel = document.getElementById('ts-vector-custom-params');
+    const profileInputs     = document.querySelectorAll<HTMLInputElement>('[data-js-vector-ranking-profile]');
+    const strategyInputs    = document.querySelectorAll<HTMLInputElement>('[data-js-vector-strategy]');
+    const strategyOnlyRows  = document.querySelectorAll<HTMLElement>('[data-vector-strategy-only]');
+
+    function syncCustomParamsVisibility(): void {
+        if (!customParamsPanel || profileInputs.length === 0) return;
+        const selectedProfile = Array.from(profileInputs).find((el) => el.checked)?.value ?? 'balanced';
+        customParamsPanel.hidden = selectedProfile !== 'custom';
+    }
+
+    function syncStrategySpecificCustomRows(): void {
+        if (strategyOnlyRows.length === 0 || strategyInputs.length === 0) return;
+        const selectedStrategy = Array.from(strategyInputs).find((el) => el.checked)?.value ?? 'blended';
+        strategyOnlyRows.forEach((row) => {
+            row.hidden = row.dataset.vectorStrategyOnly !== selectedStrategy;
+        });
+    }
+
+    profileInputs.forEach((input) => input.addEventListener('change', syncCustomParamsVisibility));
+    strategyInputs.forEach((input) => input.addEventListener('change', syncStrategySpecificCustomRows));
+    syncCustomParamsVisibility();
+    syncStrategySpecificCustomRows();
 }

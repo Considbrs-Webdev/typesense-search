@@ -50,6 +50,7 @@ class ConstantsLoader
         'TYPESENSE_COLLECTION'    => Settings::OPTION_INDEX_NAME,
         'TYPESENSE_ADMIN_KEY'     => Settings::OPTION_ADMIN_KEY,
         'TYPESENSE_SEARCH_KEY'    => Settings::OPTION_SEARCH_KEY,
+        'TYPESENSE_VECTOR_MODEL'  => Settings::OPTION_VECTOR_MODEL,
     ];
 
     public function __construct()

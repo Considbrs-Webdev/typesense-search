@@ -92,7 +92,7 @@ class ClientFactory
      * Prefer this over fromOptions() in code that already has a SettingsRepository
      * injected, so option reads stay centralised.
      */
-    public static function fromSettings(SettingsRepository $settings): ?Client
+    public static function fromSettings(SettingsRepository $settings, ?int $timeout = null): ?Client
     {
         $remote   = $settings->getRemote();
         $adminKey = $settings->getAdminKey();
@@ -101,7 +101,9 @@ class ClientFactory
             return null;
         }
 
-        return self::build($remote, $adminKey);
+        $effectiveTimeout = $timeout ?? ($settings->isVectorSearchEnabled() ? 120 : 5);
+
+        return self::build($remote, $adminKey, $effectiveTimeout);
     }
 
     /**
@@ -115,7 +117,7 @@ class ClientFactory
      */
     public static function isReady(): bool
     {
-        $client = self::fromOptions();
+        $client = self::fromSettings(new SettingsRepository(), 5);
 
         if ($client === null) {
             return false;
@@ -151,7 +153,7 @@ class ClientFactory
             return $cache;
         }
 
-        $client = self::fromOptions();
+        $client = self::fromSettings($settings, 5);
 
         if ($client === null) {
             return $results[$key] = false;
