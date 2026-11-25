@@ -145,4 +145,40 @@ class ServerCapabilitiesTest extends TestCase
 
         self::assertFalse((new ServerCapabilities($adminApi))->supportsStemming());
     }
+
+    // ── supportsAutoEmbedding ─────────────────────────────────────────────────
+
+    public function test_supports_auto_embedding_returns_true_for_version_at_minimum(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class)->shouldReceive('contextKey')->andReturn('test')->byDefault()->getMock();
+        $adminApi->shouldReceive('getServerVersion')->andReturn('27.0.0');
+
+        self::assertTrue((new ServerCapabilities($adminApi))->supportsAutoEmbedding());
+    }
+
+    public function test_supports_auto_embedding_returns_false_for_older_version(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class)->shouldReceive('contextKey')->andReturn('test')->byDefault()->getMock();
+        $adminApi->shouldReceive('getServerVersion')->andReturn('26.9.0');
+
+        self::assertFalse((new ServerCapabilities($adminApi))->supportsAutoEmbedding());
+    }
+
+    // ── supportsUnionSearch ───────────────────────────────────────────────────
+
+    public function test_supports_union_search_returns_true_for_version_30_or_newer(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class)->shouldReceive('contextKey')->andReturn('test')->byDefault()->getMock();
+        $adminApi->shouldReceive('getServerVersion')->andReturn('30.0.0');
+
+        self::assertTrue((new ServerCapabilities($adminApi))->supportsUnionSearch());
+    }
+
+    public function test_supports_union_search_returns_false_below_version_30(): void
+    {
+        $adminApi = Mockery::mock(AdminApi::class)->shouldReceive('contextKey')->andReturn('test')->byDefault()->getMock();
+        $adminApi->shouldReceive('getServerVersion')->andReturn('29.0.0');
+
+        self::assertFalse((new ServerCapabilities($adminApi))->supportsUnionSearch());
+    }
 }

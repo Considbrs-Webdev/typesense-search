@@ -12,13 +12,31 @@ use TypesenseSearch\Services\SettingsRepository;
  */
 class AdminApi
 {
-    public function __construct(private SettingsRepository $settings)
+    public function __construct(
+        private SettingsRepository $settings,
+        private ?string $remoteOverride = null,
+        private ?string $adminKeyOverride = null,
+    ) {
+    }
+
+    public static function forConnection(string $remote, string $adminKey): self
     {
+        return new self(new SettingsRepository(), $remote, $adminKey);
+    }
+
+    private function resolveRemote(): string
+    {
+        return $this->remoteOverride ?? (string) $this->settings->getRemote();
+    }
+
+    private function resolveAdminKey(): string
+    {
+        return $this->adminKeyOverride ?? $this->settings->getAdminKey();
     }
 
     public function contextKey(): string
     {
-        return hash('sha256', $this->settings->getRemote() . '|' . $this->settings->getAdminKey());
+        return hash('sha256', $this->resolveRemote() . '|' . $this->resolveAdminKey());
     }
 
     /**
@@ -26,12 +44,12 @@ class AdminApi
      */
     public function getServerVersion(): string
     {
-        $remote = (string) $this->settings->getRemote();
+        $remote = $this->resolveRemote();
         if ($remote === '') {
             return '';
         }
 
-        $adminKey = $this->settings->getAdminKey();
+        $adminKey = $this->resolveAdminKey();
         $endpoint = trailingslashit($remote) . 'debug';
         $headers  = [];
         if ($adminKey !== '') {
@@ -75,16 +93,18 @@ class AdminApi
      */
     public function request(string $method, string $url, ?array $body = null): array
     {
-        $network = new \TypesenseSearch\Multisite\NetworkSettingsRepository();
-        if ($network->isNetworkActivated() && !$network->canUse()) {
-            return ['ok' => false, 'message' => 'Typesense is disabled for this site.', 'body' => ''];
+        if ($this->remoteOverride === null) {
+            $network = new \TypesenseSearch\Multisite\NetworkSettingsRepository();
+            if ($network->isNetworkActivated() && !$network->canUse()) {
+                return ['ok' => false, 'message' => 'Typesense is disabled for this site.', 'body' => ''];
+            }
         }
         $args = [
             'method'  => $method,
             'timeout' => 10,
             'headers' => [
                 'Content-Type'        => 'application/json',
-                'X-TYPESENSE-API-KEY' => $this->settings->getAdminKey(),
+                'X-TYPESENSE-API-KEY' => $this->resolveAdminKey(),
             ],
         ];
 

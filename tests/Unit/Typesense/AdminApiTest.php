@@ -117,4 +117,23 @@ class AdminApiTest extends TestCase
         self::assertTrue($result['ok']);
         self::assertSame('{"ok":true}', $result['body']);
     }
+
+    public function test_for_connection_uses_explicit_remote_and_admin_key(): void
+    {
+        Functions\expect('trailingslashit')->andReturnUsing(fn(string $s): string => rtrim($s, '/') . '/');
+        Functions\expect('wp_remote_get')
+            ->once()
+            ->with(
+                'https://network.example.com/debug',
+                Mockery::on(static fn (array $args): bool => ($args['headers']['X-TYPESENSE-API-KEY'] ?? '') === 'net-secret')
+            )
+            ->andReturn(['fake-response']);
+        Functions\expect('is_wp_error')->andReturn(false);
+        Functions\expect('wp_remote_retrieve_response_code')->andReturn(200);
+        Functions\expect('wp_remote_retrieve_body')->andReturn('{"version":"30.2.0"}');
+
+        $api = AdminApi::forConnection('https://network.example.com', 'net-secret');
+
+        self::assertSame('30.2.0', $api->getServerVersion());
+    }
 }

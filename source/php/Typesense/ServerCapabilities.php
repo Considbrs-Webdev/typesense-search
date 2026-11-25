@@ -9,7 +9,9 @@ class ServerCapabilities
 {
     private const MIN_CURATION_SETS_VERSION = '30.0.0';
     private const MIN_SYNONYM_SETS_VERSION = '30.0.0';
+    private const MIN_UNION_SEARCH_VERSION = '30.0.0';
     private const MIN_STEMMING_VERSION = '27.0.0';
+    private const MIN_AUTO_EMBEDDING_VERSION = '27.0.0';
 
     private ?string $cached = null;
     private ?string $context = null;
@@ -37,6 +39,20 @@ class ServerCapabilities
         $version = $this->getServerVersion();
 
         return $version !== '' && version_compare($version, self::MIN_STEMMING_VERSION, '>=');
+    }
+
+    public function supportsAutoEmbedding(): bool
+    {
+        $version = $this->getServerVersion();
+
+        return $version !== '' && version_compare($version, self::MIN_AUTO_EMBEDDING_VERSION, '>=');
+    }
+
+    public function supportsUnionSearch(): bool
+    {
+        $version = $this->getServerVersion();
+
+        return $version !== '' && version_compare($version, self::MIN_UNION_SEARCH_VERSION, '>=');
     }
 
     /**
