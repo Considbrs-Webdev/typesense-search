@@ -292,6 +292,9 @@ export function renderSpotlightCard(hit: SearchHit): string {
       ? excerptOut.value
       : escapeHtml(decodeHtmlEntities(String(excerptOut)));
 
+  const rawPath = String(doc.path ?? "").trim();
+  const pathHtml = rawPath ? escapeHtml(decodeHtmlEntities(rawPath)) : "";
+
   return `<article class="ts-spotlight-card">
     <div class="ts-spotlight-card__meta">
       ${subheading ? `<span class="ts-spotlight-card__badge">${subheading}</span>` : ""}
@@ -301,5 +304,6 @@ export function renderSpotlightCard(hit: SearchHit): string {
       <a class="ts-spotlight-card__link" href="${link}">${headingHtml}</a>
     </h3>
     ${excerptHtml ? `<p class="ts-spotlight-card__excerpt">${excerptHtml}</p>` : ""}
+    ${pathHtml ? `<span class="ts-spotlight-card__path">${pathHtml}</span>` : ""}
   </article>`;
 }

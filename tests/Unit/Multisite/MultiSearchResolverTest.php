@@ -250,4 +250,29 @@ class MultiSearchResolverTest extends TestCase
         self::assertFalse($blendedResolution['vector_compatible']);
         self::assertStringContainsString('Tourism Portal', $blendedResolution['vector_paused_reason']);
     }
+
+    public function test_sibling_with_verified_live_embedding_is_compatible_even_if_local_ui_toggle_unset(): void
+    {
+        $this->networkOptions[NetworkSettingsRepository::MULTISEARCH] = [1 => [2]];
+        $this->markVectorReady(1, 'col_b1');
+
+        // Site 2 already has embeddings in its Typesense collection, even though its own
+        // local search page toggle (`typesense_vector_enabled`) was not saved yet.
+        $this->blogOptions[2][OptionKeys::OPTION_VECTOR_ENABLED]        = 0;
+        $this->blogOptions[2][SchemaInspector::OPTION_SCHEMA_STATE] = [
+            'remote'          => 'https://search.example.se',
+            'collection'      => 'col_b2',
+            'has_embedding'   => true,
+            'embedding_model' => EmbeddingModels::DEFAULT_MODEL,
+            'has_stemming'    => false,
+            'verified_at'     => 1000,
+        ];
+
+        $settings   = new SettingsRepository();
+        $resolution = $settings->getMultiSearchResolution();
+
+        self::assertTrue($resolution['enabled']);
+        self::assertTrue($resolution['vector_compatible']);
+        self::assertTrue($settings->isVectorSearchReady());
+    }
 }

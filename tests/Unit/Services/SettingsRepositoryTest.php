@@ -130,7 +130,7 @@ class SettingsRepositoryTest extends TestCase
 
         self::assertSame('rescue', $this->repository->getVectorStrategy());
         self::assertSame('strict', $this->repository->getVectorRankingProfile());
-        self::assertSame(0.20, $this->repository->getVectorResolvedParams()['alpha']);
+        self::assertSame(0.40, $this->repository->getVectorResolvedParams()['alpha']);
 
         $options[Settings::OPTION_VECTOR_RANKING_PROFILE] = 'custom';
         self::assertSame(0.85, $this->repository->getVectorResolvedParams()['alpha']);

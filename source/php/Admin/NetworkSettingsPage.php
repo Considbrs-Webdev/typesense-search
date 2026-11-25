@@ -75,6 +75,34 @@ class NetworkSettingsPage
             $profiles    = \TypesenseSearch\Multisite\MultiSearchResolver::sanitizeProfiles($rawProfiles, $clean);
             update_network_option($networkId, NetworkSettingsRepository::MULTISEARCH, $clean);
             update_network_option($networkId, NetworkSettingsRepository::MULTISEARCH_PROFILES, $profiles);
+
+            // Best-effort schema state refresh for participating sites whose collections
+            // were created before schema state tracking so multi-search readiness is immediate.
+            $connection = $network->connection();
+            if ($connection['remote'] !== '' && $connection['admin_key'] !== '') {
+                $participatingIds = [];
+                foreach ($clean as $srcId => $tgtIds) {
+                    $participatingIds[$srcId] = $srcId;
+                    foreach ($tgtIds as $tgtId) {
+                        $participatingIds[$tgtId] = $tgtId;
+                    }
+                }
+                if ($participatingIds !== []) {
+                    try {
+                        $client = ClientFactory::build($connection['remote'], $connection['admin_key'], 4);
+                        foreach ($participatingIds as $blogId) {
+                            $state      = (array) get_blog_option($blogId, NetworkSettingsRepository::STATE, []);
+                            $collection = (string) ($state['active']['collection'] ?? '');
+                            if ($collection !== '' && \TypesenseSearch\Typesense\SchemaInspector::getVerifiedState($connection['remote'], $collection, $blogId) === null) {
+                                \TypesenseSearch\Typesense\SchemaInspector::refreshLiveState($client, $connection['remote'], $collection, $blogId);
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        // Non-fatal: runtime lazy verification will retry when needed.
+                    }
+                }
+            }
+
             wp_safe_redirect(network_admin_url('settings.php?page=' . self::SLUG . '&tab=multi-search&saved=1'));
             exit;
         }

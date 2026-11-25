@@ -139,7 +139,7 @@ export function init(): void {
 
     function syncStrategySpecificCustomRows(): void {
         if (strategyOnlyRows.length === 0 || strategyInputs.length === 0) return;
-        const selectedStrategy = Array.from(strategyInputs).find((el) => el.checked)?.value ?? 'parallel';
+        const selectedStrategy = Array.from(strategyInputs).find((el) => el.checked)?.value ?? 'blended';
         strategyOnlyRows.forEach((row) => {
             row.hidden = row.dataset.vectorStrategyOnly !== selectedStrategy;
         });

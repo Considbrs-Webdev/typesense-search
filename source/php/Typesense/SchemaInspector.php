@@ -15,6 +15,9 @@ class SchemaInspector
 
     private const SEARCHABLE_TEXT_FIELDS = ['title', 'content', 'excerpt', 'extra_terms'];
 
+    /** @var array<string, bool> Per-request guard so unverified collections are probed at most once. */
+    private static array $probedInRequest = [];
+
     /**
      * Extract normalized feature metadata from a Typesense collection schema array.
      *
@@ -197,23 +200,74 @@ class SchemaInspector
     /**
      * True only when verified live state confirms the collection has an `embedding`
      * field configured with `$expectedModel`.
+     *
+     * When `$adminKey` is supplied in a live WordPress runtime (`WPINC` defined)
+     * and no cached schema state exists yet (for example on collections indexed
+     * prior to schema state tracking), performs a one-time live schema check and
+     * persists the result so future requests never repeat the probe.
      */
     public static function isEmbeddingReady(
         string $remote,
         string $collectionName,
         string $expectedModel,
-        ?int $blogId = null
+        ?int $blogId = null,
+        ?string $adminKey = null
     ): bool {
-        if ($expectedModel === '') {
+        if ($expectedModel === '' || $remote === '' || $collectionName === '') {
             return false;
         }
 
         $state = self::getVerifiedState($remote, $collectionName, $blogId);
+        if ($state === null && $adminKey !== null && $adminKey !== '' && defined('WPINC')) {
+            $state = self::lazyVerifyLiveState($remote, $adminKey, $collectionName, $blogId);
+        }
+
         if ($state === null) {
             return false;
         }
 
         return $state['has_embedding'] && $state['embedding_model'] === $expectedModel;
+    }
+
+    /**
+     * Best-effort one-time live schema verification for unverified collections,
+     * throttled by a 60-second transient if the server or collection is unreachable.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function lazyVerifyLiveState(
+        string $remote,
+        string $adminKey,
+        string $collectionName,
+        ?int $blogId = null,
+        ?callable $clientBuilder = null
+    ): ?array {
+        $probeKey = md5(rtrim($remote, '/') . '|' . $collectionName . '|' . (string) ($blogId ?? 0));
+        if (isset(self::$probedInRequest[$probeKey])) {
+            return null;
+        }
+        self::$probedInRequest[$probeKey] = true;
+
+        $transientKey = 'ts_schema_probe_' . substr($probeKey, 0, 24);
+        if (function_exists('get_site_transient') && get_site_transient($transientKey) === 'skip') {
+            return null;
+        }
+
+        try {
+            $client = $clientBuilder !== null
+                ? $clientBuilder($remote, $adminKey)
+                : ClientFactory::build($remote, $adminKey, 3);
+            $verified = self::refreshLiveState($client, $remote, $collectionName, $blogId);
+            if ($verified === null && function_exists('set_site_transient')) {
+                set_site_transient($transientKey, 'skip', 60);
+            }
+            return $verified;
+        } catch (\Throwable $e) {
+            if (function_exists('set_site_transient')) {
+                set_site_transient($transientKey, 'skip', 60);
+            }
+            return null;
+        }
     }
 
     /**

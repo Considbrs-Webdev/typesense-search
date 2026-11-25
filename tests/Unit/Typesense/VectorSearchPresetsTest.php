@@ -12,7 +12,7 @@ class VectorSearchPresetsTest extends TestCase
     public function test_strategies_and_profiles_expose_labels_and_descriptions(): void
     {
         $strategies = VectorSearchPresets::strategies();
-        self::assertSame(['parallel', 'blended', 'rescue'], array_keys($strategies));
+        self::assertSame(['blended', 'parallel', 'rescue'], array_keys($strategies));
         foreach ($strategies as $entry) {
             self::assertNotEmpty($entry['label']);
             self::assertNotEmpty($entry['description']);
@@ -36,10 +36,10 @@ class VectorSearchPresetsTest extends TestCase
 
     public function test_sanitizes_strategy_profile_and_subsite_profile(): void
     {
-        self::assertSame('blended', VectorSearchPresets::sanitizeStrategy('blended'));
+        self::assertSame('parallel', VectorSearchPresets::sanitizeStrategy('parallel'));
         self::assertSame('rescue', VectorSearchPresets::sanitizeStrategy('rescue'));
-        self::assertSame('parallel', VectorSearchPresets::sanitizeStrategy('invalid'));
-        self::assertSame('parallel', VectorSearchPresets::sanitizeStrategy(null));
+        self::assertSame('blended', VectorSearchPresets::sanitizeStrategy('invalid'));
+        self::assertSame('blended', VectorSearchPresets::sanitizeStrategy(null));
 
         self::assertSame('strict', VectorSearchPresets::sanitizeProfile('strict'));
         self::assertSame('custom', VectorSearchPresets::sanitizeProfile('custom'));
@@ -65,11 +65,11 @@ class VectorSearchPresetsTest extends TestCase
         ]);
 
         self::assertSame(0.95, $clamped['alpha']);
-        self::assertSame(0.15, $clamped['distance_threshold']);
+        self::assertSame(0.10, $clamped['distance_threshold']);
         self::assertSame(250, $clamped['k']);
         self::assertFalse($clamped['rerank_hybrid_matches']);
         self::assertSame(5, $clamped['spotlight_max_hits']);
-        self::assertSame(0.90, $clamped['spotlight_distance_threshold']);
+        self::assertSame(1.00, $clamped['spotlight_distance_threshold']);
         self::assertSame(1, $clamped['spotlight_min_words']);
         self::assertFalse($clamped['spotlight_dedupe']);
         self::assertSame(0, $clamped['rescue_max_keyword_hits']);
@@ -80,25 +80,41 @@ class VectorSearchPresetsTest extends TestCase
         );
     }
 
-    public function test_resolve_params_uses_named_preset_or_custom_and_derives_quick_search_bounds(): void
+    public function test_resolve_params_calibrates_mpnet_vs_e5_and_disables_auxiliary_rerank_by_default(): void
     {
-        $strict = VectorSearchPresets::resolveParams('strict', ['alpha' => 0.90]);
-        self::assertSame(0.20, $strict['alpha']);
-        self::assertSame(0.45, $strict['distance_threshold']);
-        self::assertSame(50, $strict['k']);
-        self::assertSame(0.20, $strict['quick_alpha']);
-        self::assertSame(0.39, $strict['quick_distance_threshold']);
-        self::assertSame(30, $strict['quick_k']);
+        $balancedMpnet = VectorSearchPresets::resolveParams('balanced', [], 'ts/paraphrase-multilingual-mpnet-base-v2');
+        self::assertSame(0.58, $balancedMpnet['alpha']);
+        self::assertSame(0.75, $balancedMpnet['distance_threshold']);
+        self::assertFalse($balancedMpnet['rerank_hybrid_matches']);
+        self::assertSame(0.68, $balancedMpnet['spotlight_distance_threshold']);
+        self::assertSame(1, $balancedMpnet['spotlight_min_words']);
+        self::assertSame(0.58, $balancedMpnet['quick_alpha']);
+        self::assertSame(0.68, $balancedMpnet['quick_distance_threshold']);
+
+        $balancedE5 = VectorSearchPresets::resolveParams('balanced', [], 'ts/multilingual-e5-small');
+        self::assertSame(0.58, $balancedE5['alpha']);
+        self::assertSame(0.25, $balancedE5['distance_threshold']);
+        self::assertSame(0.22, $balancedE5['spotlight_distance_threshold']);
+        self::assertSame(0.22, $balancedE5['quick_distance_threshold']);
+
+        $strict = VectorSearchPresets::resolveParams('strict', ['alpha' => 0.90], 'ts/paraphrase-multilingual-mpnet-base-v2');
+        self::assertSame(0.40, $strict['alpha']);
+        self::assertSame(0.62, $strict['distance_threshold']);
+        self::assertSame(60, $strict['k']);
+        self::assertFalse($strict['rerank_hybrid_matches']);
+        self::assertSame(0.40, $strict['quick_alpha']);
+        self::assertSame(0.56, $strict['quick_distance_threshold']);
+        self::assertSame(40, $strict['quick_k']);
 
         $custom = VectorSearchPresets::resolveParams('custom', [
             'alpha'                        => 0.65,
             'distance_threshold'           => 0.50,
             'k'                            => 20,
-            'spotlight_distance_threshold' => 0.40,
+            'spotlight_distance_threshold' => 0.44,
         ]);
         self::assertSame(0.65, $custom['alpha']);
-        self::assertSame(0.25, $custom['quick_alpha']);
-        self::assertSame(0.43, $custom['quick_distance_threshold']);
+        self::assertSame(0.58, $custom['quick_alpha']);
+        self::assertSame(0.44, $custom['quick_distance_threshold']);
         self::assertSame(20, $custom['quick_k']);
     }
 }

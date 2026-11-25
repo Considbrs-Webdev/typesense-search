@@ -228,13 +228,14 @@ use TypesenseSearch\Admin\Settings;
             $vectorRankingProfile = \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeProfile(
                 get_option(Settings::OPTION_VECTOR_RANKING_PROFILE, \TypesenseSearch\Typesense\VectorSearchPresets::DEFAULT_PROFILE)
             );
+            $currentModel         = $effectiveVectorModel ?? \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL;
             $vectorCustomParams   = \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeCustomParams(
-                get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, [])
+                get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, []),
+                $currentModel
             );
             $strategyChoices      = \TypesenseSearch\Typesense\VectorSearchPresets::strategies();
             $profileChoices       = \TypesenseSearch\Typesense\VectorSearchPresets::rankingProfiles();
             $presets              = $vectorModelPresets ?? \TypesenseSearch\Typesense\EmbeddingModels::presets();
-            $currentModel         = $effectiveVectorModel ?? \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL;
             $isNetworkMode        = !empty($networkMode);
             $modelConstantLocked  = \TypesenseSearch\ConstantsLoader::isDefinedAsConstant(Settings::OPTION_VECTOR_MODEL);
             $isPresetModel        = array_key_exists($currentModel, $presets);
@@ -399,7 +400,7 @@ use TypesenseSearch\Admin\Settings;
                                     step="0.05"
                                 />
                                 <p class="ts-field__description">
-                                    <?php esc_html_e('0.05 = almost purely exact words; 0.30 = balanced (70% words, 30% meaning); 0.80 = strongly meaning-driven.', 'typesense-search'); ?>
+                                    <?php esc_html_e('0.05 = almost purely exact words; 0.58 = balanced (strong semantic answers surface above noisy single-word matches while exact hits stay prioritized); 0.80 = strongly meaning-driven.', 'typesense-search'); ?>
                                 </p>
                             </div>
 
@@ -413,12 +414,12 @@ use TypesenseSearch\Admin\Settings;
                                     name="<?php echo esc_attr(Settings::OPTION_VECTOR_CUSTOM_PARAMS); ?>[distance_threshold]"
                                     value="<?php echo esc_attr((string) $vectorCustomParams['distance_threshold']); ?>"
                                     class="small-text ts-field__input"
-                                    min="0.15"
+                                    min="0.10"
                                     max="1.20"
-                                    step="0.05"
+                                    step="0.02"
                                 />
                                 <p class="ts-field__description">
-                                    <?php esc_html_e('Cosine distance cutoff (0 = identical, 2 = unrelated). Lower values such as 0.42–0.48 block loosely related pages.', 'typesense-search'); ?>
+                                    <?php esc_html_e('Cosine distance cutoff (0 = identical, 2 = unrelated). Typical range is 0.62–0.82 for MPNet/MiniLM models and 0.20–0.28 for E5 models.', 'typesense-search'); ?>
                                 </p>
                             </div>
 
@@ -462,7 +463,7 @@ use TypesenseSearch\Admin\Settings;
                                     </span>
                                 </label>
                                 <p class="ts-field__description">
-                                    <?php esc_html_e('Computes both keyword and semantic scores for every candidate so combined matches rank accurately.', 'typesense-search'); ?>
+                                    <?php esc_html_e('Leave off (recommended). Enabling Typesense auxiliary re-ranking can boost verbose pages that share common function words over concise topic matches.', 'typesense-search'); ?>
                                 </p>
                             </div>
 
@@ -503,9 +504,9 @@ use TypesenseSearch\Admin\Settings;
                                     name="<?php echo esc_attr(Settings::OPTION_VECTOR_CUSTOM_PARAMS); ?>[spotlight_distance_threshold]"
                                     value="<?php echo esc_attr((string) $vectorCustomParams['spotlight_distance_threshold']); ?>"
                                     class="small-text ts-field__input"
-                                    min="0.15"
-                                    max="0.90"
-                                    step="0.05"
+                                    min="0.10"
+                                    max="1.00"
+                                    step="0.02"
                                 />
                                 <p class="ts-field__description">
                                     <?php esc_html_e('Tighter distance cutoff so the Top matches box stays hidden unless high-confidence shortcuts exist.', 'typesense-search'); ?>

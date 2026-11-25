@@ -214,7 +214,8 @@ class SettingsRepository
     public function getVectorCustomParams(): array
     {
         return \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeCustomParams(
-            get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, [])
+            get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, []),
+            $this->getVectorModel()
         );
     }
 
@@ -240,7 +241,8 @@ class SettingsRepository
     {
         return \TypesenseSearch\Typesense\VectorSearchPresets::resolveParams(
             $this->getVectorRankingProfile(),
-            get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, [])
+            get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, []),
+            $this->getVectorModel()
         );
     }
 
@@ -257,7 +259,9 @@ class SettingsRepository
         return \TypesenseSearch\Typesense\SchemaInspector::isEmbeddingReady(
             $this->getRemote(),
             $this->getCollectionName(),
-            $this->getVectorModel()
+            $this->getVectorModel(),
+            null,
+            $this->getAdminKey()
         );
     }
 

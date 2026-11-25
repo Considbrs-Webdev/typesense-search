@@ -295,19 +295,21 @@ class MultiSearchResolver
                     continue;
                 }
 
-                if (!$sibling['vector_enabled']) {
-                    $incompatibleLabels[] = sprintf(
-                        /* translators: %s: sibling site name */
-                        __('%s (embedded search disabled)', 'typesense-search'),
-                        $sibling['site_name']
-                    );
-                } elseif (!$sibling['vector_ready']) {
-                    $incompatibleLabels[] = sprintf(
-                        /* translators: %s: sibling site name */
-                        __('%s (rebuild required for model "%s")', 'typesense-search'),
-                        $sibling['site_name'],
-                        $vectorModel
-                    );
+                if (!$sibling['vector_ready']) {
+                    if (!$sibling['vector_enabled']) {
+                        $incompatibleLabels[] = sprintf(
+                            /* translators: %s: sibling site name */
+                            __('%s (embedded search disabled)', 'typesense-search'),
+                            $sibling['site_name']
+                        );
+                    } else {
+                        $incompatibleLabels[] = sprintf(
+                            /* translators: 1: sibling site name, 2: embedding model */
+                            __('%1$s (rebuild required for model "%2$s")', 'typesense-search'),
+                            $sibling['site_name'],
+                            $vectorModel
+                        );
+                    }
                 }
             }
 
@@ -396,14 +398,21 @@ class MultiSearchResolver
             return ['entry' => null, 'reason' => __('Site index setup is incomplete or out of date.', 'typesense-search')];
         }
 
-        $collection    = (string) $mapping['collection'];
-        $vectorEnabled = (bool) get_blog_option($blogId, OptionKeys::OPTION_VECTOR_ENABLED, 0);
-        $vectorReady   = $vectorEnabled && SchemaInspector::isEmbeddingReady(
+        $collection          = (string) $mapping['collection'];
+        $vectorEnabled       = (bool) get_blog_option($blogId, OptionKeys::OPTION_VECTOR_ENABLED, 0);
+        $hasMatchingEmbedding = SchemaInspector::isEmbeddingReady(
             $connection['remote'],
             $collection,
             $vectorModel,
-            $blogId
+            $blogId,
+            $connection['admin_key']
         );
+        // The source site must explicitly opt into embedded search on its search page;
+        // a sibling target collection is compatible whenever its live Typesense schema
+        // already stores embeddings for the shared network model.
+        $vectorReady = $enableCurations
+            ? ($vectorEnabled && $hasMatchingEmbedding)
+            : $hasMatchingEmbedding;
 
         return [
             'entry' => [

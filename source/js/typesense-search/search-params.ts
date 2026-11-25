@@ -32,23 +32,33 @@ export function getActiveStrategy(
     return raw;
   }
 
-  return "parallel";
+  return "blended";
 }
 
 export interface ModeSearchParams {
   query_by: string;
   infix?: string;
   query_by_weights?: string;
+  text_match_type?: string;
+  drop_tokens_mode?: string;
   vector_query?: string;
   rerank_hybrid_matches?: boolean;
   exclude_fields: string;
 }
 
-function buildLexicalParams(baseWeights?: string): ModeSearchParams {
+const DROP_TOKENS_BOTH_SIDES = "both_sides:12";
+
+function buildLexicalParams(
+  baseWeights?: string,
+  hasQuery = false,
+): ModeSearchParams {
   return {
     query_by: QUERY_BY,
     infix: INFIX,
-    ...(baseWeights ? { query_by_weights: baseWeights } : {}),
+    ...(baseWeights
+      ? { query_by_weights: baseWeights, text_match_type: "max_weight" }
+      : {}),
+    ...(hasQuery ? { drop_tokens_mode: DROP_TOKENS_BOTH_SIDES } : {}),
     exclude_fields: EXCLUDE_FIELDS,
   };
 }
@@ -73,28 +83,28 @@ export function buildModeSearchParams(
   const vectorCfg = config.vectorSearch;
 
   if (!hasQuery || !vectorCfg?.enabled || mode === "keyword") {
-    return buildLexicalParams(baseWeights);
+    return buildLexicalParams(baseWeights, hasQuery);
   }
 
   if (mode === "quick_hybrid" && queryLength < 3) {
-    return buildLexicalParams(baseWeights);
+    return buildLexicalParams(baseWeights, true);
   }
 
   if (mode === "spotlight" || mode === "semantic") {
     const baseThreshold =
       mode === "spotlight"
-        ? (vectorCfg.spotlightDistanceThreshold ?? 0.45)
-        : (vectorCfg.distanceThreshold ?? 0.6);
+        ? (vectorCfg.spotlightDistanceThreshold ?? 0.68)
+        : (vectorCfg.distanceThreshold ?? 0.75);
     const baseK =
       mode === "spotlight"
-        ? Math.max(15, (vectorCfg.spotlightMaxHits ?? 3) * 4)
-        : Math.min(vectorCfg.k ?? 100, 30);
+        ? Math.max(20, (vectorCfg.spotlightMaxHits ?? 3) * 5)
+        : Math.min(vectorCfg.k ?? 100, 40);
 
     let threshold = baseThreshold;
     let k = baseK;
 
     if (subsiteProfile === "tightened") {
-      threshold = Math.min(baseThreshold, mode === "spotlight" ? 0.35 : 0.4);
+      threshold = Number((baseThreshold * 0.85).toFixed(2));
       k = Math.min(baseK, 15);
     } else if (subsiteProfile === "keyword_only") {
       threshold = 0;
@@ -110,18 +120,21 @@ export function buildModeSearchParams(
 
   const isQuick = mode === "quick_hybrid";
   let alpha = isQuick
-    ? (vectorCfg.quickAlpha ?? 0.25)
-    : (vectorCfg.alpha ?? 0.3);
+    ? (vectorCfg.quickAlpha ?? 0.58)
+    : (vectorCfg.alpha ?? 0.58);
   let distanceThreshold = isQuick
-    ? (vectorCfg.quickDistanceThreshold ?? 0.48)
-    : (vectorCfg.distanceThreshold ?? 0.6);
-  let k = isQuick ? (vectorCfg.quickK ?? 30) : (vectorCfg.k ?? 100);
-  const rerank = vectorCfg.rerankHybridMatches !== false;
+    ? (vectorCfg.quickDistanceThreshold ?? 0.68)
+    : (vectorCfg.distanceThreshold ?? 0.75);
+  let k = isQuick ? (vectorCfg.quickK ?? 40) : (vectorCfg.k ?? 100);
+  const rerank = vectorCfg.rerankHybridMatches === true;
 
   if (subsiteProfile === "tightened") {
-    alpha = Math.min(alpha, 0.15);
-    distanceThreshold = Math.min(distanceThreshold, isQuick ? 0.38 : 0.42);
-    k = Math.min(k, isQuick ? 20 : 25);
+    // Keep `alpha` equal to the primary leg so genuine #1 semantic matches on a
+    // sibling subsite (e.g. foretag.eslov.se) tie on rank_fusion_score and win
+    // via `_vector_distance: asc`, while tighter `distance_threshold` and `k`
+    // filter out loosely related subsite pages before fusion.
+    distanceThreshold = Number((distanceThreshold * 0.85).toFixed(2));
+    k = Math.min(k, isQuick ? 15 : 20);
   } else if (subsiteProfile === "keyword_only") {
     // Keep identical _rank_fusion sort signature across Typesense union legs
     // while giving 0% vector weight and 0 semantic-only candidates.
@@ -133,7 +146,13 @@ export function buildModeSearchParams(
   return {
     query_by: HYBRID_QUERY_BY,
     infix: HYBRID_INFIX,
-    ...(baseWeights ? { query_by_weights: `${baseWeights},1` } : {}),
+    ...(baseWeights
+      ? {
+          query_by_weights: `${baseWeights},1`,
+          text_match_type: "max_weight",
+        }
+      : {}),
+    drop_tokens_mode: DROP_TOKENS_BOTH_SIDES,
     vector_query: `embedding:([], alpha: ${alpha}, distance_threshold: ${distanceThreshold}, k: ${k})`,
     ...(rerank ? { rerank_hybrid_matches: true } : {}),
     exclude_fields: EXCLUDE_FIELDS,

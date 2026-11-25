@@ -132,4 +132,59 @@ class SchemaInspectorTest extends TestCase
         self::assertTrue($ok['ok']);
         self::assertSame('ok', $ok['status']);
     }
+
+    public function test_lazy_verify_live_state_persists_existing_collection_schema_once(): void
+    {
+        $saved   = null;
+        $calls   = 0;
+        Functions\when('update_option')->alias(static function (string $key, mixed $val) use (&$saved): bool {
+            $saved = $val;
+            return true;
+        });
+        Functions\when('get_option')->alias(static function () use (&$saved): mixed {
+            return $saved;
+        });
+        Functions\when('get_site_transient')->justReturn(false);
+        Functions\when('set_site_transient')->justReturn(true);
+
+        $collectionEndpoint = \Mockery::mock(\Typesense\Collection::class);
+        $collectionEndpoint->shouldReceive('retrieve')->once()->andReturn([
+            'name'   => 'eslov_pilot_col',
+            'fields' => [
+                [
+                    'name'  => 'embedding',
+                    'type'  => 'float[]',
+                    'embed' => [
+                        'from'         => ['title', 'excerpt', 'content', 'extra_terms'],
+                        'model_config' => ['model_name' => EmbeddingModels::DEFAULT_MODEL],
+                    ],
+                ],
+            ],
+        ]);
+
+        $collections = \Mockery::mock(\Typesense\Collections::class);
+        $collections->shouldReceive('offsetGet')->with('eslov_pilot_col')->andReturn($collectionEndpoint);
+
+        $client              = \Mockery::mock(\Typesense\Client::class);
+        $client->collections = $collections;
+
+        $builder = static function () use ($client, &$calls): \Typesense\Client {
+            $calls++;
+            return $client;
+        };
+
+        $verified = SchemaInspector::lazyVerifyLiveState(
+            'https://search.eslov.se',
+            'admin-key',
+            'eslov_pilot_col',
+            null,
+            $builder
+        );
+
+        self::assertIsArray($verified);
+        self::assertTrue($verified['has_embedding']);
+        self::assertSame(EmbeddingModels::DEFAULT_MODEL, $verified['embedding_model']);
+        self::assertSame(1, $calls);
+        self::assertTrue(SchemaInspector::isEmbeddingReady('https://search.eslov.se', 'eslov_pilot_col', EmbeddingModels::DEFAULT_MODEL));
+    }
 }

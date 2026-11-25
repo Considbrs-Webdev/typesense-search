@@ -169,8 +169,8 @@ class SettingsSanitizersTest extends TestCase
 
     public function test_sanitize_vector_strategy_and_profile_and_custom_params(): void
     {
-        self::assertSame('blended', $this->settings->sanitizeVectorStrategy('blended'));
-        self::assertSame('parallel', $this->settings->sanitizeVectorStrategy('unknown'));
+        self::assertSame('parallel', $this->settings->sanitizeVectorStrategy('parallel'));
+        self::assertSame('blended', $this->settings->sanitizeVectorStrategy('unknown'));
 
         self::assertSame('strict', $this->settings->sanitizeVectorRankingProfile('strict'));
         self::assertSame('balanced', $this->settings->sanitizeVectorRankingProfile('unknown'));

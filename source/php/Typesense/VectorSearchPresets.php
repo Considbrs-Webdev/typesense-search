@@ -13,12 +13,12 @@ class VectorSearchPresets
     public const STRATEGY_RESCUE   = 'rescue';
 
     public const STRATEGIES = [
-        self::STRATEGY_PARALLEL,
         self::STRATEGY_BLENDED,
+        self::STRATEGY_PARALLEL,
         self::STRATEGY_RESCUE,
     ];
 
-    public const DEFAULT_STRATEGY = self::STRATEGY_PARALLEL;
+    public const DEFAULT_STRATEGY = self::STRATEGY_BLENDED;
 
     public const PROFILE_BALANCED  = 'balanced';
     public const PROFILE_STRICT    = 'strict';
@@ -54,17 +54,17 @@ class VectorSearchPresets
     public static function strategies(): array
     {
         return [
-            self::STRATEGY_PARALLEL => [
-                'label'       => __('Top matches box + keyword results (Recommended)', 'typesense-search'),
+            self::STRATEGY_BLENDED => [
+                'label'       => __('Blended hybrid list (Recommended)', 'typesense-search'),
                 'description' => __(
-                    'Displays up to 3 high-confidence AI shortcuts in a compact box above Page 1 for multi-word searches, while keeping predictable keyword search, highlights, and facet counts underneath.',
+                    'Combines keyword and semantic meaning into one unified result list so the best answer ranks right at the top. Pure meaning matches display a subtle "Related match" badge.',
                     'typesense-search'
                 ),
             ],
-            self::STRATEGY_BLENDED => [
-                'label'       => __('Blended hybrid list', 'typesense-search'),
+            self::STRATEGY_PARALLEL => [
+                'label'       => __('Top matches box + keyword results', 'typesense-search'),
                 'description' => __(
-                    'Combines keyword and semantic matches into one unified result list. Exact word matches stay first, while meaning-only matches show a subtle "Related match" badge.',
+                    'Displays up to 3 high-confidence AI shortcuts in a compact box above Page 1, while keeping exact keyword results and highlights underneath.',
                     'typesense-search'
                 ),
             ],
@@ -174,7 +174,22 @@ class VectorSearchPresets
     }
 
     /**
-     * Built-in parameter values for a named preset profile.
+     * Contrastive E5 models (`ts/multilingual-e5-*`) compress cosine distances into
+     * a narrow `[0.08, 0.30]` cone, whereas symmetric encoders such as MPNet and MiniLM
+     * span `[0.15, 1.00]`.
+     */
+    public static function isNarrowConeModel(string $model): bool
+    {
+        return str_contains(strtolower(trim($model)), 'e5');
+    }
+
+    /**
+     * Built-in parameter values for a named preset profile, calibrated to the
+     * active embedding model family.
+     *
+     * Note: `rerank_hybrid_matches` defaults to `false` across built-in presets
+     * because Typesense's auxiliary re-ranker runs an un-intersected OR across
+     * query function words and breaks 0-keyword synonym ties by `seq_id`.
      *
      * @return array{
      *     alpha: float,
@@ -188,39 +203,41 @@ class VectorSearchPresets
      *     rescue_max_keyword_hits: int
      * }
      */
-    public static function presetParams(string $profile): array
+    public static function presetParams(string $profile, string $model = ''): array
     {
+        $narrowCone = self::isNarrowConeModel($model);
+
         return match ($profile) {
             self::PROFILE_STRICT => [
-                'alpha'                        => 0.20,
-                'distance_threshold'           => 0.45,
-                'k'                            => 50,
-                'rerank_hybrid_matches'        => true,
+                'alpha'                        => 0.40,
+                'distance_threshold'           => $narrowCone ? 0.20 : 0.62,
+                'k'                            => 60,
+                'rerank_hybrid_matches'        => false,
                 'spotlight_max_hits'           => 2,
-                'spotlight_distance_threshold' => 0.36,
+                'spotlight_distance_threshold' => $narrowCone ? 0.18 : 0.56,
                 'spotlight_min_words'          => 2,
                 'spotlight_dedupe'             => true,
                 'rescue_max_keyword_hits'      => 0,
             ],
             self::PROFILE_DISCOVERY => [
-                'alpha'                        => 0.50,
-                'distance_threshold'           => 0.72,
+                'alpha'                        => 0.70,
+                'distance_threshold'           => $narrowCone ? 0.28 : 0.82,
                 'k'                            => 150,
-                'rerank_hybrid_matches'        => true,
+                'rerank_hybrid_matches'        => false,
                 'spotlight_max_hits'           => 3,
-                'spotlight_distance_threshold' => 0.52,
-                'spotlight_min_words'          => 2,
+                'spotlight_distance_threshold' => $narrowCone ? 0.25 : 0.75,
+                'spotlight_min_words'          => 1,
                 'spotlight_dedupe'             => true,
-                'rescue_max_keyword_hits'      => 3,
+                'rescue_max_keyword_hits'      => 5,
             ],
             default => [
-                'alpha'                        => 0.30,
-                'distance_threshold'           => 0.60,
+                'alpha'                        => 0.58,
+                'distance_threshold'           => $narrowCone ? 0.25 : 0.75,
                 'k'                            => 100,
-                'rerank_hybrid_matches'        => true,
+                'rerank_hybrid_matches'        => false,
                 'spotlight_max_hits'           => 3,
-                'spotlight_distance_threshold' => 0.45,
-                'spotlight_min_words'          => 2,
+                'spotlight_distance_threshold' => $narrowCone ? 0.22 : 0.68,
+                'spotlight_min_words'          => 1,
                 'spotlight_dedupe'             => true,
                 'rescue_max_keyword_hits'      => 2,
             ],
@@ -242,9 +259,9 @@ class VectorSearchPresets
      *     rescue_max_keyword_hits: int
      * }
      */
-    public static function sanitizeCustomParams(mixed $raw): array
+    public static function sanitizeCustomParams(mixed $raw, string $model = ''): array
     {
-        $defaults = self::presetParams(self::PROFILE_BALANCED);
+        $defaults = self::presetParams(self::PROFILE_BALANCED, $model);
         if (!is_array($raw)) {
             return $defaults;
         }
@@ -254,7 +271,7 @@ class VectorSearchPresets
             : $defaults['alpha'];
 
         $distanceThreshold = isset($raw['distance_threshold']) && is_numeric($raw['distance_threshold'])
-            ? round(min(1.20, max(0.15, (float) $raw['distance_threshold'])), 2)
+            ? round(min(1.20, max(0.10, (float) $raw['distance_threshold'])), 2)
             : $defaults['distance_threshold'];
 
         $k = isset($raw['k']) && is_numeric($raw['k'])
@@ -270,7 +287,7 @@ class VectorSearchPresets
             : $defaults['spotlight_max_hits'];
 
         $spotlightThreshold = isset($raw['spotlight_distance_threshold']) && is_numeric($raw['spotlight_distance_threshold'])
-            ? round(min(0.90, max(0.15, (float) $raw['spotlight_distance_threshold'])), 2)
+            ? round(min(1.00, max(0.10, (float) $raw['spotlight_distance_threshold'])), 2)
             : $defaults['spotlight_distance_threshold'];
 
         $spotlightMinWords = isset($raw['spotlight_min_words']) && is_numeric($raw['spotlight_min_words'])
@@ -300,7 +317,7 @@ class VectorSearchPresets
 
     /**
      * Resolve effective runtime parameters (including derived tight Quick Search bounds)
-     * from the selected profile and optional custom overrides.
+     * from the selected profile, optional custom overrides, and active embedding model.
      *
      * @return array{
      *     alpha: float,
@@ -317,16 +334,16 @@ class VectorSearchPresets
      *     quick_k: int
      * }
      */
-    public static function resolveParams(string $profile, mixed $customParams = []): array
+    public static function resolveParams(string $profile, mixed $customParams = [], string $model = ''): array
     {
         $sanitizedProfile = self::sanitizeProfile($profile);
         $base = $sanitizedProfile === self::PROFILE_CUSTOM
-            ? self::sanitizeCustomParams($customParams)
-            : self::presetParams($sanitizedProfile);
+            ? self::sanitizeCustomParams($customParams, $model)
+            : self::presetParams($sanitizedProfile, $model);
 
-        $quickAlpha     = round(min($base['alpha'], 0.25), 2);
-        $quickThreshold = round(min($base['distance_threshold'], max(0.36, $base['spotlight_distance_threshold'] + 0.03)), 2);
-        $quickK         = min($base['k'], 30);
+        $quickAlpha     = round(min($base['alpha'], 0.58), 2);
+        $quickThreshold = round(min($base['distance_threshold'], $base['spotlight_distance_threshold']), 2);
+        $quickK         = min($base['k'], 40);
 
         return $base + [
             'quick_alpha'              => $quickAlpha,

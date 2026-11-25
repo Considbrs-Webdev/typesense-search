@@ -88,7 +88,7 @@ class TypesenseConfigTest extends TestCase
 
         self::assertFalse($decoded['vectorSearch']['enabled']);
         self::assertSame('keyword', $decoded['vectorSearch']['strategy']);
-        self::assertSame(0.30, $decoded['vectorSearch']['alpha']);
+        self::assertSame(0.58, $decoded['vectorSearch']['alpha']);
         self::assertArrayNotHasKey('multiSearch', $decoded);
     }
 
@@ -112,10 +112,10 @@ class TypesenseConfigTest extends TestCase
 
         self::assertTrue($decoded['vectorSearch']['enabled']);
         self::assertSame('parallel', $decoded['vectorSearch']['strategy']);
-        self::assertSame(0.20, $decoded['vectorSearch']['alpha']);
-        self::assertSame(0.45, $decoded['vectorSearch']['distanceThreshold']);
+        self::assertSame(0.40, $decoded['vectorSearch']['alpha']);
+        self::assertSame(0.62, $decoded['vectorSearch']['distanceThreshold']);
         self::assertSame(2, $decoded['vectorSearch']['spotlightMaxHits']);
-        self::assertSame(0.36, $decoded['vectorSearch']['spotlightDistanceThreshold']);
+        self::assertSame(0.56, $decoded['vectorSearch']['spotlightDistanceThreshold']);
         self::assertArrayNotHasKey('multiSearch', $decoded);
     }
 

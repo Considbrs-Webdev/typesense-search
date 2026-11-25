@@ -31,6 +31,7 @@ class SchemaRebuildNotice
     public function register(): void
     {
         foreach (self::WATCHED_OPTIONS as $option) {
+            add_action('add_option_' . $option, [$this, 'refreshLiveSchema']);
             add_action('update_option_' . $option, [$this, 'refreshLiveSchema']);
         }
 
@@ -76,6 +77,13 @@ class SchemaRebuildNotice
         }
 
         $verified = SchemaInspector::getVerifiedState($remote, $collectionName);
+        if ($verified === null && $this->settings->getAdminKey() !== '' && defined('WPINC')) {
+            $verified = SchemaInspector::lazyVerifyLiveState(
+                $remote,
+                $this->settings->getAdminKey(),
+                $collectionName
+            );
+        }
         $compat   = SchemaInspector::evaluateCompatibility(
             $this->settings->isVectorSearchEnabled(),
             $this->settings->getVectorModel(),
