@@ -131,10 +131,25 @@ export function init(): void {
     const strategyInputs    = document.querySelectorAll<HTMLInputElement>('[data-js-vector-strategy]');
     const strategyOnlyRows  = document.querySelectorAll<HTMLElement>('[data-vector-strategy-only]');
 
+    function syncCustomParamsDisabledState(): void {
+        if (!customParamsPanel) return;
+        const isVectorVisible = !vectorSettingsFields || !vectorSettingsFields.hidden;
+        const isPanelVisible  = !customParamsPanel.hidden && isVectorVisible;
+
+        customParamsPanel
+            .querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('input, select, textarea')
+            .forEach((control) => {
+                const strategyRow  = control.closest<HTMLElement>('[data-vector-strategy-only]');
+                const isRowVisible = !strategyRow || !strategyRow.hidden;
+                control.disabled   = !(isPanelVisible && isRowVisible);
+            });
+    }
+
     function syncCustomParamsVisibility(): void {
         if (!customParamsPanel || profileInputs.length === 0) return;
         const selectedProfile = Array.from(profileInputs).find((el) => el.checked)?.value ?? 'balanced';
         customParamsPanel.hidden = selectedProfile !== 'custom';
+        syncCustomParamsDisabledState();
     }
 
     function syncStrategySpecificCustomRows(): void {
@@ -143,10 +158,13 @@ export function init(): void {
         strategyOnlyRows.forEach((row) => {
             row.hidden = row.dataset.vectorStrategyOnly !== selectedStrategy;
         });
+        syncCustomParamsDisabledState();
     }
 
+    vectorToggle?.addEventListener('change', syncCustomParamsDisabledState);
     profileInputs.forEach((input) => input.addEventListener('change', syncCustomParamsVisibility));
     strategyInputs.forEach((input) => input.addEventListener('change', syncStrategySpecificCustomRows));
     syncCustomParamsVisibility();
     syncStrategySpecificCustomRows();
+    syncCustomParamsDisabledState();
 }

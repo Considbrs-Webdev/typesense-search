@@ -259,9 +259,12 @@ class VectorSearchPresets
      *     rescue_max_keyword_hits: int
      * }
      */
-    public static function sanitizeCustomParams(mixed $raw, string $model = ''): array
-    {
-        $defaults = self::presetParams(self::PROFILE_BALANCED, $model);
+    public static function sanitizeCustomParams(
+        mixed $raw,
+        string $model = '',
+        string $fallbackProfile = self::PROFILE_BALANCED
+    ): array {
+        $defaults = self::presetParams($fallbackProfile, $model);
         if (!is_array($raw)) {
             return $defaults;
         }

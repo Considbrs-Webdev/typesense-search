@@ -215,7 +215,8 @@ class SettingsRepository
     {
         return \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeCustomParams(
             get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, []),
-            $this->getVectorModel()
+            $this->getVectorModel(),
+            $this->getVectorRankingProfile()
         );
     }
 

@@ -169,15 +169,110 @@ class SettingsSanitizersTest extends TestCase
 
     public function test_sanitize_vector_strategy_and_profile_and_custom_params(): void
     {
+        $options = [
+            Settings::OPTION_VECTOR_STRATEGY        => 'rescue',
+            Settings::OPTION_VECTOR_RANKING_PROFILE => 'strict',
+        ];
+        Functions\when('get_option')->alias(static function (string $key, mixed $default = false) use (&$options): mixed {
+            return $options[$key] ?? $default;
+        });
+
         self::assertSame('parallel', $this->settings->sanitizeVectorStrategy('parallel'));
         self::assertSame('blended', $this->settings->sanitizeVectorStrategy('unknown'));
+        self::assertSame('rescue', $this->settings->sanitizeVectorStrategy(null));
 
         self::assertSame('strict', $this->settings->sanitizeVectorRankingProfile('strict'));
         self::assertSame('balanced', $this->settings->sanitizeVectorRankingProfile('unknown'));
+        self::assertSame('strict', $this->settings->sanitizeVectorRankingProfile(null));
 
+        $options[Settings::OPTION_VECTOR_RANKING_PROFILE] = 'balanced';
         $custom = $this->settings->sanitizeVectorCustomParams(['alpha' => '0.45', 'k' => '80']);
         self::assertSame(0.45, $custom['alpha']);
         self::assertSame(80, $custom['k']);
+    }
+
+    public function test_sanitize_vector_custom_params_keeps_active_preset_when_keys_are_absent(): void
+    {
+        $options = [
+            Settings::OPTION_VECTOR_MODEL           => 'ts/paraphrase-multilingual-mpnet-base-v2',
+            Settings::OPTION_VECTOR_RANKING_PROFILE => 'strict',
+        ];
+        Functions\when('get_option')->alias(static function (string $key, mixed $default = false) use (&$options): mixed {
+            return $options[$key] ?? $default;
+        });
+
+        try {
+            $_POST[Settings::OPTION_VECTOR_RANKING_PROFILE] = 'strict';
+            $strictMpnet = $this->settings->sanitizeVectorCustomParams(null);
+            self::assertSame(0.40, $strictMpnet['alpha']);
+            self::assertSame(0.62, $strictMpnet['distance_threshold']);
+            self::assertSame(60, $strictMpnet['k']);
+            self::assertSame(0.56, $strictMpnet['spotlight_distance_threshold']);
+            self::assertSame(0, $strictMpnet['rescue_max_keyword_hits']);
+
+            $_POST[Settings::OPTION_VECTOR_MODEL] = 'ts/multilingual-e5-small';
+            $strictE5 = $this->settings->sanitizeVectorCustomParams(null);
+            self::assertSame(0.40, $strictE5['alpha']);
+            self::assertSame(0.20, $strictE5['distance_threshold']);
+            self::assertSame(0.18, $strictE5['spotlight_distance_threshold']);
+
+            $_POST[Settings::OPTION_VECTOR_RANKING_PROFILE] = 'discovery';
+            unset($_POST[Settings::OPTION_VECTOR_MODEL]);
+            $discovery = $this->settings->sanitizeVectorCustomParams(null);
+            self::assertSame(0.70, $discovery['alpha']);
+            self::assertSame(0.82, $discovery['distance_threshold']);
+            self::assertSame(150, $discovery['k']);
+            self::assertSame(0.75, $discovery['spotlight_distance_threshold']);
+        } finally {
+            unset(
+                $_POST[Settings::OPTION_VECTOR_RANKING_PROFILE],
+                $_POST[Settings::OPTION_VECTOR_MODEL]
+            );
+        }
+    }
+
+    public function test_sanitize_vector_custom_params_preserves_absent_strategy_keys_for_custom_profile(): void
+    {
+        $options = [
+            Settings::OPTION_VECTOR_MODEL           => 'ts/paraphrase-multilingual-mpnet-base-v2',
+            Settings::OPTION_VECTOR_RANKING_PROFILE => 'custom',
+            Settings::OPTION_VECTOR_CUSTOM_PARAMS   => [
+                'alpha'                        => 0.40,
+                'distance_threshold'           => 0.62,
+                'k'                            => 60,
+                'rerank_hybrid_matches'        => false,
+                'spotlight_max_hits'           => 2,
+                'spotlight_distance_threshold' => 0.56,
+                'spotlight_min_words'          => 2,
+                'spotlight_dedupe'             => false,
+                'rescue_max_keyword_hits'      => 0,
+            ],
+        ];
+        Functions\when('get_option')->alias(static function (string $key, mixed $default = false) use (&$options): mixed {
+            return $options[$key] ?? $default;
+        });
+
+        try {
+            $_POST[Settings::OPTION_VECTOR_RANKING_PROFILE] = 'custom';
+            $saved = $this->settings->sanitizeVectorCustomParams([
+                'alpha'                 => '0.58',
+                'distance_threshold'    => '0.75',
+                'k'                     => '100',
+                'rerank_hybrid_matches' => '0',
+            ]);
+
+            self::assertSame(0.58, $saved['alpha']);
+            self::assertSame(0.75, $saved['distance_threshold']);
+            self::assertSame(100, $saved['k']);
+            self::assertFalse($saved['rerank_hybrid_matches']);
+            self::assertSame(2, $saved['spotlight_max_hits']);
+            self::assertSame(0.56, $saved['spotlight_distance_threshold']);
+            self::assertSame(2, $saved['spotlight_min_words']);
+            self::assertFalse($saved['spotlight_dedupe']);
+            self::assertSame(0, $saved['rescue_max_keyword_hits']);
+        } finally {
+            unset($_POST[Settings::OPTION_VECTOR_RANKING_PROFILE]);
+        }
     }
 
     public function test_sanitize_admin_key_keeps_saved_value_when_field_is_left_blank(): void

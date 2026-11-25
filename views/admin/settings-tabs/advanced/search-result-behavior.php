@@ -231,7 +231,8 @@ use TypesenseSearch\Admin\Settings;
             $currentModel         = $effectiveVectorModel ?? \TypesenseSearch\Typesense\EmbeddingModels::DEFAULT_MODEL;
             $vectorCustomParams   = \TypesenseSearch\Typesense\VectorSearchPresets::sanitizeCustomParams(
                 get_option(Settings::OPTION_VECTOR_CUSTOM_PARAMS, []),
-                $currentModel
+                $currentModel,
+                $vectorRankingProfile
             );
             $strategyChoices      = \TypesenseSearch\Typesense\VectorSearchPresets::strategies();
             $profileChoices       = \TypesenseSearch\Typesense\VectorSearchPresets::rankingProfiles();
@@ -239,6 +240,12 @@ use TypesenseSearch\Admin\Settings;
             $isNetworkMode        = !empty($networkMode);
             $modelConstantLocked  = \TypesenseSearch\ConstantsLoader::isDefinedAsConstant(Settings::OPTION_VECTOR_MODEL);
             $isPresetModel        = array_key_exists($currentModel, $presets);
+            $isCustomPanelVisible = (bool) $vectorEnabled
+                && $vectorRankingProfile === \TypesenseSearch\Typesense\VectorSearchPresets::PROFILE_CUSTOM;
+            $isParallelRowVisible = $isCustomPanelVisible
+                && $vectorStrategy === \TypesenseSearch\Typesense\VectorSearchPresets::STRATEGY_PARALLEL;
+            $isRescueRowVisible   = $isCustomPanelVisible
+                && $vectorStrategy === \TypesenseSearch\Typesense\VectorSearchPresets::STRATEGY_RESCUE;
         ?>
         <div class="ts-field">
             <div class="ts-field__label"><?php esc_html_e('Enable embedded search', 'typesense-search'); ?></div>
@@ -397,7 +404,8 @@ use TypesenseSearch\Admin\Settings;
                                     class="small-text ts-field__input"
                                     min="0.05"
                                     max="0.95"
-                                    step="0.05"
+                                    step="0.01"
+                                    <?php echo $isCustomPanelVisible ? '' : 'disabled'; ?>
                                 />
                                 <p class="ts-field__description">
                                     <?php esc_html_e('0.05 = almost purely exact words; 0.58 = balanced (strong semantic answers surface above noisy single-word matches while exact hits stay prioritized); 0.80 = strongly meaning-driven.', 'typesense-search'); ?>
@@ -416,7 +424,8 @@ use TypesenseSearch\Admin\Settings;
                                     class="small-text ts-field__input"
                                     min="0.10"
                                     max="1.20"
-                                    step="0.02"
+                                    step="0.01"
+                                    <?php echo $isCustomPanelVisible ? '' : 'disabled'; ?>
                                 />
                                 <p class="ts-field__description">
                                     <?php esc_html_e('Cosine distance cutoff (0 = identical, 2 = unrelated). Typical range is 0.62–0.82 for MPNet/MiniLM models and 0.20–0.28 for E5 models.', 'typesense-search'); ?>
@@ -436,6 +445,7 @@ use TypesenseSearch\Admin\Settings;
                                     min="10"
                                     max="250"
                                     step="10"
+                                    <?php echo $isCustomPanelVisible ? '' : 'disabled'; ?>
                                 />
                                 <p class="ts-field__description">
                                     <?php esc_html_e('Number of nearest vector neighbors Typesense evaluates before ranking.', 'typesense-search'); ?>
@@ -446,7 +456,12 @@ use TypesenseSearch\Admin\Settings;
                                 <span class="ts-custom-params__label">
                                     <?php esc_html_e('Re-rank all hybrid matches', 'typesense-search'); ?>
                                 </span>
-                                <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_VECTOR_CUSTOM_PARAMS); ?>[rerank_hybrid_matches]" value="0" />
+                                <input
+                                    type="hidden"
+                                    name="<?php echo esc_attr(Settings::OPTION_VECTOR_CUSTOM_PARAMS); ?>[rerank_hybrid_matches]"
+                                    value="0"
+                                    <?php echo $isCustomPanelVisible ? '' : 'disabled'; ?>
+                                />
                                 <label for="ts-vector-rerank" class="ts-toggle">
                                     <input
                                         type="checkbox"
@@ -454,6 +469,7 @@ use TypesenseSearch\Admin\Settings;
                                         name="<?php echo esc_attr(Settings::OPTION_VECTOR_CUSTOM_PARAMS); ?>[rerank_hybrid_matches]"
                                         value="1"
                                         <?php checked(true, !empty($vectorCustomParams['rerank_hybrid_matches'])); ?>
+                                        <?php echo $isCustomPanelVisible ? '' : 'disabled'; ?>
                                         class="ts-toggle__input"
                                     />
                                     <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
@@ -484,6 +500,7 @@ use TypesenseSearch\Admin\Settings;
                                     min="1"
                                     max="5"
                                     step="1"
+                                    <?php echo $isParallelRowVisible ? '' : 'disabled'; ?>
                                 />
                                 <p class="ts-field__description">
                                     <?php esc_html_e('Maximum number of shortcut cards displayed in the Top matches box on Page 1.', 'typesense-search'); ?>
@@ -506,7 +523,8 @@ use TypesenseSearch\Admin\Settings;
                                     class="small-text ts-field__input"
                                     min="0.10"
                                     max="1.00"
-                                    step="0.02"
+                                    step="0.01"
+                                    <?php echo $isParallelRowVisible ? '' : 'disabled'; ?>
                                 />
                                 <p class="ts-field__description">
                                     <?php esc_html_e('Tighter distance cutoff so the Top matches box stays hidden unless high-confidence shortcuts exist.', 'typesense-search'); ?>
@@ -530,6 +548,7 @@ use TypesenseSearch\Admin\Settings;
                                     min="1"
                                     max="6"
                                     step="1"
+                                    <?php echo $isParallelRowVisible ? '' : 'disabled'; ?>
                                 />
                                 <p class="ts-field__description">
                                     <?php esc_html_e('Minimum words before showing the Top matches box (always shown as a rescue if exact keyword hits are 0).', 'typesense-search'); ?>
@@ -544,7 +563,12 @@ use TypesenseSearch\Admin\Settings;
                                 <span class="ts-custom-params__label">
                                     <?php esc_html_e('Top matches box: deduplicate from Page 1', 'typesense-search'); ?>
                                 </span>
-                                <input type="hidden" name="<?php echo esc_attr(Settings::OPTION_VECTOR_CUSTOM_PARAMS); ?>[spotlight_dedupe]" value="0" />
+                                <input
+                                    type="hidden"
+                                    name="<?php echo esc_attr(Settings::OPTION_VECTOR_CUSTOM_PARAMS); ?>[spotlight_dedupe]"
+                                    value="0"
+                                    <?php echo $isParallelRowVisible ? '' : 'disabled'; ?>
+                                />
                                 <label for="ts-vector-spotlight-dedupe" class="ts-toggle">
                                     <input
                                         type="checkbox"
@@ -552,6 +576,7 @@ use TypesenseSearch\Admin\Settings;
                                         name="<?php echo esc_attr(Settings::OPTION_VECTOR_CUSTOM_PARAMS); ?>[spotlight_dedupe]"
                                         value="1"
                                         <?php checked(true, !empty($vectorCustomParams['spotlight_dedupe'])); ?>
+                                        <?php echo $isParallelRowVisible ? '' : 'disabled'; ?>
                                         class="ts-toggle__input"
                                     />
                                     <span class="ts-toggle__track" aria-hidden="true"><span class="ts-toggle__thumb"></span></span>
@@ -582,6 +607,7 @@ use TypesenseSearch\Admin\Settings;
                                     min="0"
                                     max="10"
                                     step="1"
+                                    <?php echo $isRescueRowVisible ? '' : 'disabled'; ?>
                                 />
                                 <p class="ts-field__description">
                                     <?php esc_html_e('Shows the "Related pages" rescue section whenever exact keyword search returns this many hits or fewer (set 0 to trigger only on zero-hit searches).', 'typesense-search'); ?>
